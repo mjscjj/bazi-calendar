@@ -285,12 +285,29 @@ test('埋点批量写入，非法事件名丢弃', async () => {
 
 test('内容文件缺字段时启动失败', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lrl-content-'));
-  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
+  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json', 'day-pillars.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
   assert.doesNotThrow(() => loadContent(dir));
   const cards = JSON.parse(fs.readFileSync(path.join(dir, 'energy-cards.json'), 'utf8'));
   delete cards.cards['癸'];
   fs.writeFileSync(path.join(dir, 'energy-cards.json'), JSON.stringify(cards));
   assert.throws(() => loadContent(dir), /癸/);
+  fs.copyFileSync(new URL('../content/energy-cards.json', import.meta.url), path.join(dir, 'energy-cards.json'));
+  const pl = JSON.parse(fs.readFileSync(path.join(dir, 'day-pillars.json'), 'utf8'));
+  delete pl.pillars['癸亥'];
+  fs.writeFileSync(path.join(dir, 'day-pillars.json'), JSON.stringify(pl));
+  assert.throws(() => loadContent(dir), /癸亥/);
+});
+
+test('能量卡带日柱图鉴：插画、称号和按身强身弱的一句', async () => {
+  const r = await client()('POST', '/api/preview/card', { birth });
+  assert.equal(r.status, 200);
+  const p = r.data.card.pillar;
+  assert.match(p.gz, /^[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]$/);
+  assert.ok(p.name && p.intro && p.line && p.tag);
+  assert.match(p.art, /^art\/pillars\/\d{2}-[a-z]+\.webp$/);
+  const img = await fetch(base + '/' + p.art);
+  assert.equal(img.status, 200);
+  assert.match(img.headers.get('content-type'), /image\/webp/);
 });
 
 test('出生信息：农历、出生城市换算真太阳时、时辰交界', async () => {

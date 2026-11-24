@@ -5,6 +5,7 @@ import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort } fro
 import { S, isDemo } from './state.js';
 import { openDay } from './day.js';
 import { recordHtml, onMoodChange, moodScore, cellStickers } from './mood.js';
+import { cardArt, cardTitle } from './onboard.js';
 
 export function loadToday() {
   S.todayErr = null;
@@ -37,7 +38,7 @@ function noticesHtml() {
   if (t && t.__offline) h += '<div class="notice"><p>现在离线，显示的是上一次打开时的内容。</p></div>';
   if (isDemo()) {
     const p = readLocal('pending'), inv = readLocal('invite');
-    if (p) h += `<div class="notice demo"><p>你的能量卡（${esc(p.card.element)} · ${esc(p.card.image)}型）已经测好了。保存后，每天给你算今天${inv && inv.name ? `；注册后你和${esc(inv.name)}各得 ${inv.days || 7} 天会员` : ''}。</p><a class="btn sm primary" href="#/card">去保存</a></div>`;
+    if (p) h += `<div class="notice demo"><p>你的能量卡（${esc(cardTitle(p.card))}）已经测好了。保存后，每天给你算今天${inv && inv.name ? `；注册后你和${esc(inv.name)}各得 ${inv.days || 7} 天会员` : ''}。</p><a class="btn sm primary" href="#/card">去保存</a></div>`;
     else if (inv && inv.name) h += inviteBanner(inv);
     else h += `<div class="notice demo"><p>这是示例（${esc(t ? t.name : '小满')}）的今天。测测你自己的能量卡，不用注册。</p><a class="btn sm primary" href="#/start">测测我的</a></div>`;
     return h;
@@ -135,8 +136,8 @@ function planHtml(t) {
 // 邀请落地：朋友看到的第一屏
 function inviteBanner(inv) {
   const c = inv.card;
-  return `<div class="invban">${c ? `<span class="sym" aria-hidden="true">${esc(c.symbol)}</span>` : ''}<div><b>${esc(inv.name)} 邀请你测测能量卡</b>`
-    + (c ? `<small>${esc(inv.name)}是「${esc(c.element)} · ${esc(c.image)}型」：${c.traits.map(esc).join('、')}</small>` : '')
+  return `<div class="invban">${c ? cardArt(c) : ''}<div><b>${esc(inv.name)} 邀请你测测能量卡</b>`
+    + (c ? `<small>${esc(inv.name)}是「${esc(cardTitle(c))}」：${c.traits.map(esc).join('、')}</small>` : '')
     + `<small>注册后，你们俩各得 ${inv.days || 7} 天会员</small></div></div><a class="btn primary block" href="#/start">测测我是什么型</a>`;
 }
 

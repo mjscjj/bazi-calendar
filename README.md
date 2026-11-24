@@ -24,7 +24,7 @@ ALIPAY_FAKE=1 ASK_AI=fake COOKIE_SECURE=0 DB_PATH=./data/dev.db PORT=3210 ADMIN_
 
 | 路径 | 内容 |
 |---|---|
-| `content/` | **文案和内容，产品发起人可以直接改**：能量卡（`energy-cards.json`）、今日一句（`daily-line.json`：按档位的行动话 + 为什么）、穿搭色映射（`outfit.json`）、观音灵签 100 签（`lots.json`）、挑日子的事项与黄历宜忌对照（`pick.json`）、问事的八卦和 64 卦、拒答词（`ask.json`）和给 AI 的提示词（`ask-prompt.md`）、追问的提示词（`ask-follow-prompt.md`）、追问次数和回看选项（`ask.json` 的 `follow`）、祈愿的心愿、颜色和节气图案（`amulets.json`）、心情便签的心情词、对应分数和纸色（`moods.json`）。服务启动时检查字段，缺了直接启动失败 |
+| `content/` | **文案和内容，产品发起人可以直接改**：能量卡（`energy-cards.json`）、日柱图鉴（`day-pillars.json`：60 个日柱的称号、介绍和身强身弱各一句，插画在 `public/art/pillars/`，用 Codex 生成的水墨图，换图时文件名对上即可）、今日一句（`daily-line.json`：按档位的行动话 + 为什么）、穿搭色映射（`outfit.json`）、观音灵签 100 签（`lots.json`）、挑日子的事项与黄历宜忌对照（`pick.json`）、问事的八卦和 64 卦、拒答词（`ask.json`）和给 AI 的提示词（`ask-prompt.md`）、追问的提示词（`ask-follow-prompt.md`）、追问次数和回看选项（`ask.json` 的 `follow`）、祈愿的心愿、颜色和节气图案（`amulets.json`）、心情便签的心情词、对应分数和纸色（`moods.json`）。服务启动时检查字段，缺了直接启动失败 |
 | `server/engine.js` | 排盘与流日、时辰打分（规则为假设，可调）、通用黄历 |
 | `server/content.js` | 读取 `content/`，算能量卡、今日一句、穿搭色、每日一签 |
 | `server/solar.js`、`server/cities.json` | 出生城市（392 个，含海外）和真太阳时换算（夏令时、经度时差、均时差），时辰交界判断 |

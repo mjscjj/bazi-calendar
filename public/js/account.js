@@ -3,7 +3,7 @@ import { $, $$, esc, api, toast, openSheet, onClick, dtText, ymdText, price, rea
 import { THEME, THEME_DESC, ADVICE } from './data.js';
 import { S } from './state.js';
 import { footHtml } from './today.js';
-import { birthFields, readBirth, wireBirth, checkBirth } from './onboard.js';
+import { birthFields, readBirth, wireBirth, checkBirth, cardArt, cardTitle } from './onboard.js';
 import { resetCard } from './me.js';
 
 const phead = (title) => `<div class="phead"><button type="button" class="back" data-back aria-label="返回">‹</button><h1>${title}</h1></div>`;
@@ -12,7 +12,7 @@ const phead = (title) => `<div class="phead"><button type="button" class="back" 
 export function pageAuth(r) {
   const reg = r.path === '/register';
   const p = readLocal('pending');
-  const thumb = p ? `<div class="pthumb"><span class="sym">${p.card.symbol}</span><span><b>${esc(p.nickname || '你')}的能量卡 · ${p.card.element} · ${p.card.image}型</b><small>${reg ? '注册后保存，每天给你算今天' : '登录后可以用这份出生信息'}</small></span></div>` : '';
+  const thumb = p ? `<div class="pthumb">${cardArt(p.card)}<span><b>${esc(p.nickname || '你')}的能量卡 · ${esc(cardTitle(p.card))}</b><small>${reg ? '注册后保存，每天给你算今天' : '登录后可以用这份出生信息'}</small></span></div>` : '';
   $('#view').innerHTML = `<div class="auth">${thumb || '<div class="hero2"><b>流日历</b><span>按你的出生信息，告诉你每天适合做什么、几点做。</span></div>'}`
     + `<section class="card"><nav class="seg2"><button type="button" data-go="/login" aria-selected="${!reg}">登录</button><button type="button" data-go="/register" aria-selected="${reg}">注册</button></nav>`
     + '<form class="form" id="authForm" novalidate>'

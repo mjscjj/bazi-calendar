@@ -282,25 +282,32 @@ export function pageWelcome() {
 }
 
 // ---------- 能量卡揭晓 ----------
+// 日柱插画（旧数据没有日柱时退回本命形象的那个字）；能量卡、我的、注册页、邀请横幅共用
+export const cardArt = (c, cls = 'art') => (c.pillar
+  ? `<span class="${cls}"><img src="${esc(c.pillar.art)}" alt="${esc(c.pillar.gz)} · ${esc(c.pillar.name)}" width="600" height="600" decoding="async"></span>`
+  : `<span class="sym" aria-hidden="true">${esc(c.symbol)}</span>`);
+export const cardTitle = (c) => (c.pillar ? `${c.pillar.gz} · ${c.pillar.name}` : `${c.dm || ''}${c.element} · ${c.image}型`);
+const cardSub = (c) => `${c.dm}${c.element} · ${c.image}型 · The ${c.en}`;
 export function cardHtml(c, name) {
   const total = c.force.reduce((a, f) => a + f.pct, 0) || 100;
-  return `<div class="ecard"><small>${name ? esc(name) + ' 的' : '你的'}能量卡</small><div class="sym">${c.symbol}</div>`
-    + `<b class="ttl">${c.dm}${c.element} · ${c.image}型</b><span class="en">The ${c.en}</span>`
+  const p = c.pillar;
+  return `<div class="ecard"><small>${name ? esc(name) + ' 的' : '你的'}能量卡</small>${cardArt(c)}`
+    + `<b class="ttl">${esc(cardTitle(c))}</b><span class="en">${p ? esc(cardSub(c)) : `The ${c.en}`}</span>`
     + `<div class="traits">${c.traits.map((t) => `<span>${t}</span>`).join('')}</div>`
-    + `<p class="intro">${esc(c.intro)}</p><p class="sl">${esc(c.strengthLine)}</p>`
+    + `<p class="intro">${esc(p ? p.intro : c.intro)}</p><p class="sl">${esc(p ? p.line : c.strengthLine)}</p>`
     + `<div class="fbar" aria-label="五行比例">${c.force.map((f, i) => `<i class="w${i}b" style="flex:${f.pct / total}" title="${f.el} ${f.pct}%"></i>`).join('')}</div>`
     + `<div class="flab">${c.force.map((f) => `<span>${f.el} ${f.pct}%</span>`).join('')}</div>`
     + `<div class="lucky2">幸运元素 <b>${c.lucky.join(' · ')}</b></div>`
     + (c.basis ? `<div class="basis">${c.basis.solar ? `按真太阳时 ${c.basis.time} · ${c.basis.zhi}时排盘 · ${esc(c.basis.city)}` : `按北京时间 ${c.basis.time} · ${c.basis.zhi}时排盘（没填出生城市）`}</div>` : '') + '</div>';
 }
 
-// 刚测完时分三张翻开：本命形象 → 性格 → 五行和幸运元素，最后再看完整的卡
+// 刚测完时分三张翻开：日柱插画和称号 → 性格 → 五行和幸运元素，最后再看完整的卡
 function stepHtml(c, name, k) {
   const total = c.force.reduce((a, f) => a + f.pct, 0) || 100;
   const head = `<small>${name ? esc(name) + ' 的' : '你的'}能量卡 · ${k + 1} / 3</small>`;
   const body = [
-    `<div class="sym">${c.symbol}</div><b class="ttl">${c.dm}${c.element} · ${c.image}型</b><span class="en">The ${c.en}</span><p class="intro">${esc(c.intro)}</p>`,
-    `<p class="slead">你是这样的人</p><div class="traits big">${c.traits.map((t) => `<span>${t}</span>`).join('')}</div><p class="sl">${esc(c.strengthLine)}</p>`,
+    `${cardArt(c)}<b class="ttl">${esc(cardTitle(c))}</b><span class="en">${c.pillar ? esc(`${c.dm}${c.element} · ${c.image}型`) : `The ${c.en}`}</span><p class="intro">${esc(c.pillar ? c.pillar.intro : c.intro)}</p>`,
+    `<p class="slead">你是这样的人</p><div class="traits big">${c.traits.map((t) => `<span>${t}</span>`).join('')}</div><p class="sl">${esc(c.pillar ? c.pillar.line : c.strengthLine)}</p>`,
     `<p class="slead">你身上的五种能量</p><div class="fbar" aria-label="五行比例">${c.force.map((f, i) => `<i class="w${i}b" style="flex:${f.pct / total}"></i>`).join('')}</div><div class="flab">${c.force.map((f) => `<span>${f.el} ${f.pct}%</span>`).join('')}</div><div class="lucky2 big">幸运元素 <b>${c.lucky.join(' · ')}</b></div><p class="sl">每天哪股能量当家，决定了这天对你顺不顺。</p>`,
   ][k];
   return `<button type="button" class="ecard step" data-card-next aria-label="翻开下一张">${head}${body}</button>`

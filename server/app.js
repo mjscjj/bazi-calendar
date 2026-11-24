@@ -93,7 +93,7 @@ const str = (v, max, name) => {
   return s;
 };
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
 
 // ---------- 应用 ----------
 export function createApp({ db, alipay, env = process.env, log = console, content, ai }) {
@@ -1036,7 +1036,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const inv = db.get("SELECT * FROM users WHERE invite_code = ? AND status = 'active'", String(params.code).toUpperCase());
     if (!inv) throw new HttpError(404, '邀请链接已失效');
     const card = inv.birth_date ? C.energyCard(chartOf(inv)) : null;
-    return { name: inv.nickname || '你的朋友', days: settings.int('invite_days'), card: card && { symbol: card.symbol, element: card.element, image: card.image, traits: card.traits } };
+    return { name: inv.nickname || '你的朋友', days: settings.int('invite_days'), card: card && { symbol: card.symbol, element: card.element, image: card.image, traits: card.traits, pillar: { gz: card.pillar.gz, name: card.pillar.name, art: card.pillar.art } } };
   });
   route('GET', '/api/me/invite', async ({ req }) => {
     const u = requireUser(req);
@@ -1439,7 +1439,8 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     if (req.headers['if-none-match'] === etag) { res.writeHead(304, { ETag: etag }); res.end(); return true; }
     res.writeHead(200, {
       'Content-Type': MIME[path.extname(file)] || 'application/octet-stream',
-      'Cache-Control': 'no-cache', ETag: etag,
+      // 插画不常换，缓存一天；页面和脚本每次协商，保证总是最新
+      'Cache-Control': p.startsWith('/art/') ? 'public, max-age=86400' : 'no-cache', ETag: etag,
     });
     fs.createReadStream(file).pipe(res);
     return true;

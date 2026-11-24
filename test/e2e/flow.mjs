@@ -31,6 +31,9 @@ await setBirth(page, '1992-06-08', '08:30');
 await page.click('[data-g="男"]');
 await page.click('#bForm button[type=submit]');
 await page.waitForSelector('.ecard.step');
+const artOk = (sel) => page.waitForFunction((s) => { const i = document.querySelector(s); return i && i.complete && i.naturalWidth > 0; }, sel, { timeout: 8000 }).then(() => true, () => false);
+if (!(await artOk('.ecard .art img'))) errors.push('能量卡的日柱插画没加载出来');
+if (!/^[甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥] · .+/.test(await page.textContent('.ecard .ttl'))) errors.push('能量卡标题不是「日柱 · 称号」');
 for (const k of [1, 2, 3]) { await page.waitForTimeout(600); await shot('02-card-step' + k); await page.click('.stepnav [data-card-next]'); }
 await page.waitForSelector('.ecard:not(.step)');
 await shot('02-card-reveal');
@@ -98,9 +101,11 @@ await page.click('[data-cal-yi]'); await page.waitForSelector('.grid.withyi'); a
 step('我的、能量档案、专业模式');
 await page.click('.tabbar a[href="#/me"]');
 await page.waitForSelector('.mecard');
+if (!(await artOk('.mecard .art img'))) errors.push('「我的」入口的插画没加载出来');
 await shot('15-me');
 await page.click('[data-go="/energy"]');
 await page.waitForSelector('.force');
+if (!(await artOk('.pillarc .art img'))) errors.push('能量档案的日柱插画没加载出来');
 await shot('16-energy', true);
 await page.click('.tabbar a[href="#/me"]').catch(() => {});
 await page.goto(base + '/#/me');
@@ -109,6 +114,7 @@ await page.click('#proToggle');
 await page.waitForSelector('#proToggle .switch.on');
 await page.click('[data-go="/energy"]');
 await page.waitForSelector('.pan table');
+if (!/坐.+、/.test(await page.textContent('.pillarc small'))) errors.push('专业模式下日柱没显示命理标注');
 await shot('17-energy-pro', true);
 await page.goto(base + '/#/me'); await page.waitForSelector('#proToggle'); await page.click('#proToggle'); await page.waitForSelector('#proToggle .switch:not(.on)');
 

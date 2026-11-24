@@ -3,6 +3,7 @@ import { $, esc, api, toast, onClick, mdText, IS_STANDALONE, IS_MOBILE, track, c
 import { WX, WXEN, WXC, HIDE, SHORT, gwx, cg, shishen, dishi } from './data.js';
 import { S, isPro } from './state.js';
 import { footHtml, loadToday } from './today.js';
+import { cardArt, cardTitle } from './onboard.js';
 
 let card = null;
 function loadCard() { return api('GET', 'me/card').then((d) => { card = d.card; }, () => { card = null; }); }
@@ -21,7 +22,7 @@ export function pageMe() {
     const nm = S.me.nickname || S.me.username;
     const c = card;
     v.innerHTML = '<div class="mgrid"><div class="mcol">' + (c
-      ? `<button type="button" class="mecard" data-go="/card"><span class="sym">${c.symbol}</span><span class="t"><small>${esc(nm)} 的能量卡</small><b>${c.element} · ${c.image}型</b><span>${c.traits.join(' · ')}</span></span><span class="go">›</span></button>`
+      ? `<button type="button" class="mecard" data-go="/card">${cardArt(c)}<span class="t"><small>${esc(nm)} 的能量卡</small><b>${esc(cardTitle(c))}</b><span>${c.traits.join(' · ')}</span></span><span class="go">›</span></button>`
       : '<div class="sk" style="height:112px"></div>')
       + '<section class="mlist">'
       + row('data-go="/energy"', '能量档案', '五行 · 幸运元素')
@@ -53,7 +54,10 @@ export function pageEnergy() {
     if (!S.today) { v.innerHTML = head + '<div class="sk" style="height:300px"></div>'; return; }
     const C = S.today.chart, x = S.today.day, pro = isPro();
     const tot = C.force.reduce((a, b) => a + b, 0);
-    let h = head + `<section class="card"><h3>五种能量在你身上的比例</h3><div class="force">`;
+    // 日柱图鉴：出生那天的天干地支，最能代表你自己
+    const card = S.today.card, pl = card && card.pillar;
+    let h = head + (pl ? `<section class="card pillarc">${cardArt(card)}<div class="pt"><small>你的日柱${pro ? ` · ${esc(pl.tag)}` : ''}</small><b>${esc(cardTitle(card))}</b><p>${esc(pl.intro)}</p><p class="sl">${esc(pl.line)}</p></div></section>` : '')
+      + `<section class="card"><h3>五种能量在你身上的比例</h3><div class="force">`;
     C.force.forEach((val, i) => {
       const st = C.xi.includes(i) ? 'xi' : C.ji.includes(i) ? 'ji' : '';
       h += `<div class="r"><span class="${WXC[i]}" style="font-weight:700">${WX[i]}${pro ? '' : `<br><span style="font-size:10px;font-weight:400" class="muted">${WXEN[i]}</span>`}</span><span class="bar"><i style="width:${Math.round(val / tot * 100)}%;background:var(--${['wood', 'fire', 'earth', 'metal', 'water'][i]})"></i></span><span class="muted" style="font-variant-numeric:tabular-nums">${Math.round(val / tot * 100)}%</span><button type="button" class="xiset ${st}" data-w="${i}">${st === 'xi' ? (pro ? '喜用' : '幸运') : st === 'ji' ? (pro ? '忌' : '消耗') : '中性'}</button></div>`;

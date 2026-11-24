@@ -1468,3 +1468,23 @@ body.in-ritual{overflow:hidden}
 .tubewrap .fallen b{writing-mode:vertical-rl;font-family:var(--f-display);font-weight:900;font-size:13px;color:#7a2a18;letter-spacing:.1em}
 @keyframes fall{from{transform:translateY(-90px) rotate(0)}to{transform:rotate(58deg)}}
 @media (prefers-reduced-motion: reduce){.jiao.toss .jb,.tubewrap .fallen,.riteinc .sticks i.lit::after{animation:none}}
+/* ================= 日柱图鉴：能量卡的插画 ================= */
+.art{display:block;flex:none;overflow:hidden;background:#F6F1E7;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+.art img{display:block;width:100%;height:100%;object-fit:cover}
+.ecard .art{width:min(78%,280px);aspect-ratio:1;border-radius:20px;margin:8px 0 10px;box-shadow:0 14px 34px -16px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)}
+.ecard.step .art{width:min(86%,320px)}
+.ecard .art + .ttl{font-size:22px;letter-spacing:.06em}
+.mecard .art{width:68px;height:68px;border-radius:14px}
+.pthumb .art{width:56px;height:56px;border-radius:12px}
+.invban .art{width:54px;height:54px;border-radius:12px}
+.pillarc{display:flex;gap:16px;align-items:flex-start}
+.pillarc .art{width:112px;height:112px;border-radius:16px}
+.pillarc .pt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pillarc small{font-size:12px;color:var(--muted)}
+.pillarc b{font-family:var(--f-display);font-size:19px;letter-spacing:.04em}
+.pillarc p{margin:2px 0 0;font-size:14px;line-height:1.7}
+.pillarc .sl{color:var(--muted)}
+@media (min-width:960px){
+  .auth>.pthumb .art{width:min(100%,340px);height:auto;aspect-ratio:1;border-radius:22px}
+  .pillarc .art{width:148px;height:148px}
+}

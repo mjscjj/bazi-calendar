@@ -74,16 +74,26 @@ function chip(ctx, s, cx, y, size) {
 }
 
 const DRAW = {
-  card(ctx, { card: c, name, invite }) {
+  card(ctx, { card: c, name, invite, img }) {
     text(ctx, invite ? `${name || '我'} 邀请你测测能量卡` : `${name ? name + ' 的' : '我的'}能量卡`, W / 2, 230, { size: invite ? 48 : 40, weight: invite ? 700 : 400, color: invite ? P.fg : P.muted });
-    ctx.save(); ctx.shadowColor = glowColor(); ctx.shadowBlur = 90;
-    text(ctx, c.symbol, W / 2, 760, { size: 460, font: SERIF, weight: 900 }); ctx.restore();
-    text(ctx, `${c.dm}${c.element} · ${c.image}型`, W / 2, 940, { size: 84, font: SERIF, weight: 900 });
-    text(ctx, `The ${c.en}`, W / 2, 1010, { size: 46, font: 'Georgia,serif', color: glowText() });
+    if (img && c.pillar) {
+      // 日柱插画：圆角方图，下面是日柱和称号
+      const s = 540, x = (W - s) / 2, y = 300;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 48; ctx.shadowOffsetY = 14;
+      roundRect(ctx, x, y, s, s, 36); ctx.fillStyle = '#F6F1E7'; ctx.fill(); ctx.restore();
+      ctx.save(); roundRect(ctx, x, y, s, s, 36); ctx.clip(); ctx.drawImage(img, x, y, s, s); ctx.restore();
+      text(ctx, `${c.pillar.gz} · ${c.pillar.name}`, W / 2, 950, { size: 72, font: SERIF, weight: 900 });
+      text(ctx, `${c.dm}${c.element} · ${c.image}型`, W / 2, 1022, { size: 42, color: glowText() });
+    } else {
+      ctx.save(); ctx.shadowColor = glowColor(); ctx.shadowBlur = 90;
+      text(ctx, c.symbol, W / 2, 760, { size: 460, font: SERIF, weight: 900 }); ctx.restore();
+      text(ctx, `${c.dm}${c.element} · ${c.image}型`, W / 2, 940, { size: 84, font: SERIF, weight: 900 });
+      text(ctx, `The ${c.en}`, W / 2, 1010, { size: 46, font: 'Georgia,serif', color: glowText() });
+    }
     let total = 0; const ws = c.traits.map((t) => { ctx.font = `600 40px ${SANS}`; const w = ctx.measureText(t).width + 56; total += w + 20; return w; });
     let x = W / 2 - (total - 20) / 2;
     c.traits.forEach((t, i) => { chip(ctx, t, x + ws[i] / 2, 1125, 40); x += ws[i] + 20; });
-    wrap(ctx, c.intro, W / 2, 1250, 860, 64, 2, { size: 44 });
+    wrap(ctx, c.pillar ? c.pillar.intro : c.intro, W / 2, 1250, 860, 64, 2, { size: 44 });
     const bx = 120, bw = W - 240, by = 1420;
     let off = 0; const sum = c.force.reduce((a, f) => a + f.pct, 0) || 100;
     c.force.forEach((f, i) => { const w = (f.pct / sum) * bw; ctx.fillStyle = P.el[i]; ctx.fillRect(bx + off, by, Math.max(0, w - 4), 22); off += w; });
@@ -165,10 +175,17 @@ export function share(kind, data) {
   if (!data) { toast('还没有可以分享的内容'); return; }
   track('share_create', { kind });
   const theme = isDarkNow() ? 'dark' : 'light';
-  const cv = render(kind, data, theme);
-  openSheet('分享' + NAMES[kind], pvHtml(cv.toDataURL('image/png'), kind, theme));
-  lastShare = { cv, kind, name: NAMES[kind], data, theme };
+  // 能量卡和邀请海报要先把日柱插画加载好（能量卡页显示过，一般直接命中缓存）
+  const art = (kind === 'card' || kind === 'invite') && data.card && data.card.pillar ? data.card.pillar.art : null;
+  (art ? artOf(art) : Promise.resolve(null)).then((img) => {
+    const d = img ? { ...data, img } : data;
+    const cv = render(kind, d, theme);
+    openSheet('分享' + NAMES[kind], pvHtml(cv.toDataURL('image/png'), kind, theme));
+    lastShare = { cv, kind, name: NAMES[kind], data: d, theme };
+  });
 }
+const arts = {};
+const artOf = (src) => arts[src] || (arts[src] = new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => { delete arts[src]; ok(null); }; im.src = src; }));
 onClick('[data-share-theme]', (el) => {
   const s = lastShare, theme = el.getAttribute('data-share-theme');
   if (!s || s.theme === theme) return;

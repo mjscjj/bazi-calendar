@@ -2,9 +2,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { GAN, WX } from './engine.js';
+import { GAN, ZHI, WX } from './engine.js';
 
 const DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../content');
+// 日柱插画放在 public/art/pillars/，和文案目录无关（测试会把 content 拷到别处）
+const ART_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../public/art/pillars');
+const JIAZI = Array.from({ length: 60 }, (_, i) => GAN[i % 10] + ZHI[i % 12]);
 const gwx = (g) => Math.floor(GAN.indexOf(g) / 2);
 const TEN = ['正财', '偏财', '正官', '七杀', '正印', '偏印', '比肩', '劫财', '食神', '伤官'];
 
@@ -18,6 +21,14 @@ export function loadContent(dir = DIR) {
     need(c, `能量卡缺少日干 ${g}`);
     for (const k of ['symbol', 'image', 'measure', 'en', 'intro', 'strong', 'weak']) need(typeof c[k] === 'string' && c[k], `能量卡 ${g} 缺少 ${k}`);
     need(Array.isArray(c.traits) && c.traits.length === 3, `能量卡 ${g} 需要三个性格词`);
+  }
+  // 日柱图鉴：60 个日柱各一张插画和一段白话（称号、介绍、身强一句、身弱一句）
+  const pillars = read(dir, 'day-pillars.json').pillars;
+  for (const gz of JIAZI) {
+    const p = pillars?.[gz];
+    need(p, `日柱图鉴缺少 ${gz}`);
+    for (const k of ['name', 'tag', 'intro', 'strong', 'weak', 'art']) need(typeof p[k] === 'string' && p[k], `日柱图鉴 ${gz} 缺少 ${k}`);
+    need(fs.existsSync(path.join(ART_DIR, p.art)), `日柱图鉴 ${gz} 的插画 public/art/pillars/${p.art} 不存在`);
   }
   const line = read(dir, 'daily-line.json');
   for (const t of TEN) need(line.relations?.[t], `今日一句缺少十神 ${t}`);
@@ -80,7 +91,7 @@ export function loadContent(dir = DIR) {
   need(terms.length === 24 && new Set(terms).size === 24, '御守的季节要覆盖 24 个节气');
   for (const [k, x] of Object.entries(amulets.seasons)) need(x.colors?.length === 2 && ['blossom', 'wave', 'leaf', 'snow'].includes(x.motif), `御守季节 ${k} 缺颜色或图案`);
   need(amulets.birthday?.colors?.length === 2 && amulets.birthday.ink, '御守缺少生日款颜色');
-  return { cards, line, outfit, lots, pick, ask, askPrompt, askFollowPrompt, amulets, moods };
+  return { cards, pillars, line, outfit, lots, pick, ask, askPrompt, askFollowPrompt, amulets, moods };
 }
 
 export function makeContent(c) {
@@ -91,11 +102,13 @@ export function makeContent(c) {
   return {
     pick: c.pick, ask: c.ask, askPrompt: c.askPrompt, askFollowPrompt: c.askFollowPrompt, amulets: c.amulets, moods: c.moods,
     pickType: (name) => c.pick.types.find((t) => t.name === name) || null,
-    // 能量卡：本命形象、性格词、五行比例、幸运元素
+    // 能量卡：日柱图鉴（插画、称号、介绍）、本命形象、性格词、五行比例、幸运元素
     energyCard(chart) {
       const card = c.cards[chart.dm];
       const total = chart.force.reduce((a, b) => a + b, 0);
+      const gz = chart.pillars[2], p = c.pillars[gz];
       return {
+        pillar: { gz, name: p.name, tag: p.tag, intro: p.intro, line: chart.strong ? p.strong : p.weak, art: 'art/pillars/' + p.art },
         dm: chart.dm, element: WX[gwx(chart.dm)], symbol: card.symbol, image: card.image, en: card.en,
         traits: card.traits, intro: card.intro, strengthLine: chart.strong ? card.strong : card.weak, strong: chart.strong,
         force: chart.force.map((v, i) => ({ el: WX[i], pct: Math.round((v / total) * 100) })),
