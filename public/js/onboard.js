@@ -282,9 +282,10 @@ export function pageWelcome() {
 }
 
 // ---------- 能量卡揭晓 ----------
-// 日柱插画（旧数据没有日柱时退回本命形象的那个字）；能量卡、我的、注册页、邀请横幅共用
+// 日柱插画（旧数据没有日柱时退回本命形象的那个字）；能量卡、我的、注册页、邀请横幅共用。
+// 旁边总有「日柱 · 称号」的标题，插画只是装饰，alt 留空免得读屏念两遍
 export const cardArt = (c, cls = 'art') => (c.pillar
-  ? `<span class="${cls}"><img src="${esc(c.pillar.art)}" alt="${esc(c.pillar.gz)} · ${esc(c.pillar.name)}" width="600" height="600" decoding="async"></span>`
+  ? `<span class="${cls}"><img src="${esc(c.pillar.art)}" alt="" width="600" height="600" decoding="async"></span>`
   : `<span class="sym" aria-hidden="true">${esc(c.symbol)}</span>`);
 export const cardTitle = (c) => (c.pillar ? `${c.pillar.gz} · ${c.pillar.name}` : `${c.dm || ''}${c.element} · ${c.image}型`);
 const cardSub = (c) => `${c.dm}${c.element} · ${c.image}型 · The ${c.en}`;

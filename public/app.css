@@ -1475,6 +1475,8 @@ body.in-ritual{overflow:hidden}
 .ecard.step .art{width:min(86%,320px)}
 .ecard .art + .ttl{font-size:22px;letter-spacing:.06em}
 .mecard .art{width:68px;height:68px;border-radius:14px}
+.mecard .t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:360px){.mecard{gap:12px;padding:16px}.mecard .art{width:56px;height:56px;border-radius:12px}.mecard b{font-size:17px}}
 .pthumb .art{width:56px;height:56px;border-radius:12px}
 .invban .art{width:54px;height:54px;border-radius:12px}
 .pillarc{display:flex;gap:16px;align-items:flex-start}
