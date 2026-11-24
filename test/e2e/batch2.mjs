@@ -63,6 +63,11 @@ await bp.screenshot({ path: `${out}/b05a-date-wheel.png` });
 await bp.click('#sheet [data-wok]'); await bp.waitForSelector('#sheet', { state: 'detached' });
 check('选好的日期一次写回年月日', (await bp.$eval('input[name=date]', (e) => e.value)) === '1992-06-08' && (await bp.textContent('[data-date-text]')) === '1992年6月8日');
 await bp.click('[data-pick-time]'); await bp.waitForSelector('#sheet .wcol');
+// 滚轮还没停稳就点「确定」：按滚轮此刻的位置取值
+await bp.evaluate(() => { const c = document.querySelectorAll('#sheet .wcol')[0]; c.scrollTop = 7 * 40; c.dispatchEvent(new Event('scroll')); });
+await bp.click('#sheet [data-wok]'); await bp.waitForSelector('#sheet', { state: 'detached' });
+check('滚轮没停稳就点确定，取的是滚轮停的位置', (await bp.$eval('input[name=time]', (e) => e.value)).startsWith('07:'), await bp.$eval('input[name=time]', (e) => e.value));
+await bp.click('[data-pick-time]'); await bp.waitForSelector('#sheet .wcol');
 await wheel(bp, 0, 9); await wheel(bp, 1, 20);
 check('时间滚轮显示时辰', (await bp.textContent('#sheet [data-wlive]')).includes('09:20 · 巳时'), await bp.textContent('#sheet [data-wlive]'));
 await bp.screenshot({ path: `${out}/b05b-time-wheel.png` });

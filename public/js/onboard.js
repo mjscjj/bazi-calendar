@@ -116,6 +116,7 @@ function openDatePicker(f) {
       start();
     }
     if (e.target.closest('[data-wok]')) {
+      if (W) W.flush();
       el.cal.value = cal;
       if (cal === 'solar') el.date.value = `${st.y}-${pad2(st.m)}-${pad2(st.d)}`;
       else { el.ly.value = st.y; el.lm.value = st.m; el.ld.value = st.d; el.leap.value = st.leap ? '1' : '0'; if (lastPv) el.date.value = lastPv.date; }
@@ -132,10 +133,10 @@ function openTimePicker(f) {
   const live = () => { const i = zhiIdx(h, m); $('[data-wlive]', body).textContent = `${pad2(h)}:${pad2(m)} · ${ZHI[i]}时（${zhiRange(i)}）`; };
   const box = $('[data-wbox]', body);
   box.innerHTML = wheelsHtml([{ items: Array.from({ length: 24 }, (_, i) => ({ v: i, label: pad2(i) + ' 时' })), name: '时' }, { items: Array.from({ length: 60 }, (_, i) => ({ v: i, label: pad2(i) + ' 分' })), name: '分' }]);
-  mountWheels(box, [{ index: h }, { index: m }], (c, k) => { if (c === 0) h = k; else m = k; live(); });
+  const TW = mountWheels(box, [{ index: h }, { index: m }], (c, k) => { if (c === 0) h = k; else m = k; live(); });
   live();
   body.addEventListener('click', (e) => {
-    if (e.target.closest('[data-wok]')) { el.time.value = `${pad2(h)}:${pad2(m)}`; el.notime.checked = false; }
+    if (e.target.closest('[data-wok]')) { TW.flush(); el.time.value = `${pad2(h)}:${pad2(m)}`; el.notime.checked = false; }
     else if (e.target.closest('[data-wnotime]')) { el.time.value = ''; el.notime.checked = true; }
     else return;
     dismissSheet();

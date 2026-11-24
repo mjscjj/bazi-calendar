@@ -177,7 +177,7 @@ export function share(kind, data) {
   const theme = isDarkNow() ? 'dark' : 'light';
   // 能量卡和邀请海报要先把日柱插画加载好（能量卡页显示过，一般直接命中缓存）
   const art = (kind === 'card' || kind === 'invite') && data.card && data.card.pillar ? data.card.pillar.art : null;
-  (art ? artOf(art) : Promise.resolve(null)).then((img) => {
+  return (art ? artOf(art) : Promise.resolve(null)).then((img) => {
     const d = img ? { ...data, img } : data;
     const cv = render(kind, d, theme);
     openSheet('分享' + NAMES[kind], pvHtml(cv.toDataURL('image/png'), kind, theme));

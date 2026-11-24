@@ -1490,3 +1490,5 @@ body.in-ritual{overflow:hidden}
   .auth>.pthumb .art{width:min(100%,340px);height:auto;aspect-ratio:1;border-radius:22px}
   .pillarc .art{width:148px;height:148px}
 }
+/* 便签角上的 × 点一下先变成「撕掉」，再点才撕 */
+.stk .x.arm{width:auto;height:24px;top:4px;right:4px;padding:0 9px;border-radius:12px;background:rgba(20,18,24,.82);color:#fff;font-size:12px;font-weight:600;opacity:1}

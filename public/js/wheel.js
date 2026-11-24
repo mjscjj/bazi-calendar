@@ -11,20 +11,16 @@ export function wheelsHtml(cols) {
 
 // cols: [{ items: [{v, label}], index }]；onChange(列号, 选中序号)
 export function mountWheels(root, cols, onChange) {
-  const els = $$('.wcol', root);
+  const els = $$('.wcol', root), timers = [], last = [];
   const mark = (el, k) => el.querySelectorAll('.witem').forEach((it, i) => it.classList.toggle('on', i === k));
   const count = (el) => el.querySelectorAll('.witem').length;
   els.forEach((el, i) => {
     el.scrollTop = cols[i].index * ROW;
     mark(el, cols[i].index);
-    let timer;
+    last[i] = cols[i].index;
     el.addEventListener('scroll', () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        const k = Math.max(0, Math.min(count(el) - 1, Math.round(el.scrollTop / ROW)));
-        mark(el, k);
-        onChange(i, k);
-      }, 90);
+      clearTimeout(timers[i]);
+      timers[i] = setTimeout(() => settle(i), 90);
     }, { passive: true });
     el.addEventListener('click', (e) => {
       const it = e.target.closest('.witem');
@@ -33,7 +29,15 @@ export function mountWheels(root, cols, onChange) {
       el.scrollTo({ top: k * ROW, behavior: 'smooth' });
     });
   });
+  function settle(i) {
+    const el = els[i], k = Math.max(0, Math.min(count(el) - 1, Math.round(el.scrollTop / ROW)));
+    clearTimeout(timers[i]);
+    mark(el, k);
+    if (k !== last[i]) { last[i] = k; onChange(i, k); }
+  }
   return {
+    // 点「确定」前调用：还在滑的滚轮按当前位置算出选中项
+    flush() { els.forEach((_, i) => settle(i)); },
     // 换掉某一列的选项（比如换了月份后天数变了），保持在给定序号
     setItems(i, items, index) {
       const el = els[i];
@@ -41,6 +45,7 @@ export function mountWheels(root, cols, onChange) {
       const k = Math.max(0, Math.min(items.length - 1, index));
       el.scrollTop = k * ROW;
       mark(el, k);
+      last[i] = k;
       return k;
     },
   };

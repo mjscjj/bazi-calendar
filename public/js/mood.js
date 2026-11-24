@@ -124,6 +124,12 @@ document.addEventListener('submit', (e) => {
   }, (err) => { btn.disabled = false; toast(err.message); });
 });
 onClick('[data-unstick]', (el) => {
+  // 便签角上的 × 离便签本身太近，先变成「撕掉」，3 秒内再点一次才撕，防止想看全文时误删
+  if (!el.hasAttribute('data-close-after') && !el.classList.contains('arm')) {
+    el.classList.add('arm'); el.textContent = '撕掉'; el.setAttribute('aria-label', '再点一下撕掉');
+    setTimeout(() => { if (el.isConnected && el.classList.contains('arm')) { el.classList.remove('arm'); el.textContent = '×'; el.setAttribute('aria-label', '撕掉这张'); } }, 3000);
+    return;
+  }
   const id = +el.getAttribute('data-unstick'), day = el.getAttribute('data-unstick-day');
   const card = el.closest('.stk');
   if (card) card.classList.add('peel');

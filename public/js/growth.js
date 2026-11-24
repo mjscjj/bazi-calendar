@@ -43,9 +43,14 @@ export function pageInvite() {
   }, (e) => { v.innerHTML = errHtml(T, e); });
 }
 onClick('[data-inv-copy]', () => { track('invite_copy'); copy(`我在用流日历，按出生信息算每天适合做什么。测测你是什么型：${S.inviteUrl}`, '已复制，发给朋友吧'); });
-onClick('[data-inv-poster]', () => {
+onClick('[data-inv-poster]', (el) => {
+  if (el.disabled) return;
   track('invite_poster');
-  api('GET', 'me/card').then((d) => share('invite', { card: d.card, name: d.nickname || S.me.username, days: S.inviteDays }), (e) => toast(e.message));
+  // 取能量卡、加载插画要一两秒，按钮先给个反馈，免得以为没点上
+  const text = el.textContent;
+  el.disabled = true; el.textContent = '正在生成海报…';
+  api('GET', 'me/card').then((d) => share('invite', { card: d.card, name: d.nickname || S.me.username, days: S.inviteDays }), (e) => toast(e.message))
+    .finally(() => { el.disabled = false; el.textContent = text; });
 });
 
 // ---------- 订阅到手机日历 ----------
