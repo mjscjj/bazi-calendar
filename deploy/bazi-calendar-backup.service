@@ -1,0 +1,7 @@
+[Unit]
+Description=流日历数据库每日备份
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/apps/bazi-calendar
+ExecStart=/usr/local/bin/node --disable-warning=ExperimentalWarning scripts/backup.mjs /root/apps/bazi-calendar/data/app.db /root/backups/bazi-calendar

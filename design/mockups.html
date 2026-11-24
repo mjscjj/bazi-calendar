@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>流日历 · 第二批功能界面稿</title>
+<link rel="stylesheet" href="../public/app.css">
+<style>
+/* 界面稿：用产品现有样式 + 这一批新增组件的提案样式。每个 .frame 是一屏手机（390 宽）。 */
+body{background:#E9E9EE;margin:0;padding:24px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.frame{width:390px;min-height:720px;background:var(--bg);border-radius:28px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.frame.dark{--bg:#111114;--surface:#1A1A1F;--sunk:#24242A;--fg:#EDEBE7;--muted:#9A979F;--line:rgba(255,255,255,.08);color:var(--fg)}
+.fr{padding:0 16px 24px;display:flex;flex-direction:column;gap:14px;flex:1}
+.cap{position:absolute;top:-22px;left:8px;font:600 12px var(--f-body);color:#555}
+.topm{display:flex;align-items:center;gap:10px;padding:12px 0 4px}
+.topm .sp-r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.sheetm{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.18);padding:8px 16px 24px;display:flex;flex-direction:column;gap:12px}
+.scrimm{position:absolute;inset:0;background:rgba(8,10,16,.38)}
+.h1s{font-family:var(--f-display);font-weight:900;font-size:24px;margin:6px 0 0}
+.subm{font-size:13.5px;color:var(--muted);margin:0}
+
+/* 出生信息 2.0 */
+.segs{display:inline-flex;background:var(--sunk);border-radius:999px;padding:3px;gap:2px}
+.segs span{padding:5px 14px;border-radius:999px;font-size:13px;color:var(--muted)}
+.segs span.on{background:var(--surface);color:var(--fg);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.fieldrow{display:flex;justify-content:space-between;align-items:center}
+.inp{font-size:16px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;color:var(--fg)}
+.inp.focus{border-color:var(--fg);box-shadow:0 0 0 3px rgba(21,21,28,.08)}
+.sugg{background:var(--surface);border-radius:12px;box-shadow:var(--ring);overflow:hidden;margin-top:-4px}
+.sugg div{display:flex;justify-content:space-between;padding:10px 12px;font-size:14px;border-top:1px solid var(--line)}
+.sugg div:first-child{border-top:0;background:var(--sunk)}
+.sugg small{color:var(--muted)}
+.solar{display:flex;gap:10px;align-items:flex-start;background:var(--sunk);border-radius:12px;padding:10px 12px;font-size:13px}
+.solar .dot{width:22px;height:22px;border-radius:50%;background:var(--glow-ink);color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.solar b{font-size:15px}
+.solar small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.edge{border-left:3px solid var(--cinnabar);padding:2px 0 2px 10px;font-size:13px;display:flex;flex-direction:column;gap:8px}
+
+/* 挑日子 */
+.types{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.types span{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0;border-radius:14px;background:var(--surface);box-shadow:var(--ring);font-size:12.5px}
+.types span i{font-style:normal;font-family:var(--f-display);font-weight:900;font-size:18px}
+.types span.on{background:var(--fg);color:var(--bg)}
+.pick3{display:flex;flex-direction:column;gap:10px}
+.pc{display:grid;grid-template-columns:62px 1fr;gap:12px;background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:14px}
+.pc .dt{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;background:var(--sunk);padding:8px 0}
+.pc .dt b{font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+.pc .dt small{font-size:11.5px;color:var(--muted);margin-top:3px}
+.pc .bd{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pc .ttl{display:flex;align-items:center;gap:6px;font-weight:700;font-size:15px}
+.pc .rk{font-size:11px;font-weight:700;color:var(--cinnabar);background:color-mix(in srgb,var(--cinnabar) 12%,transparent);border-radius:999px;padding:1px 8px}
+.pc .rs{font-size:13px;color:var(--muted);line-height:1.6}
+.pc .tm{font-size:13px}
+.pc .ac{display:flex;gap:8px;margin-top:6px}
+.pc .ac .btn{padding:7px 14px;font-size:13px;border-radius:10px}
+.excl{font-size:12.5px;color:var(--muted);background:var(--sunk);border-radius:12px;padding:9px 12px}
+.plist{display:flex;flex-direction:column}
+.plist div{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.plist div:first-child{border-top:0}
+.plist .d{text-align:center}
+.plist .d b{display:block;font-size:20px;line-height:1.1}
+.plist .d small{font-size:11px;color:var(--muted)}
+.plist .n{font-size:14.5px;font-weight:600}
+.plist .n small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.plist .cd{font-size:12px;color:var(--muted)}
+
+/* 邀请 */
+.invban{display:flex;gap:12px;align-items:center;border-radius:18px;padding:14px;background:var(--feature-bg);box-shadow:var(--feature-shadow)}
+.invban .sym{font-family:var(--f-display);font-weight:900;font-size:40px;width:54px;text-align:center;text-shadow:var(--symshadow)}
+.invban b{font-size:15px}
+.invban small{display:block;font-size:12.5px;color:var(--muted)}
+.invhero{border-radius:22px;padding:22px;background:var(--feature-bg);box-shadow:var(--feature-shadow);display:flex;flex-direction:column;gap:8px}
+.invhero b{font-family:var(--f-display);font-size:24px;font-weight:900}
+.linkbox{display:flex;align-items:center;gap:8px;background:var(--sunk);border-radius:12px;padding:6px 6px 6px 12px;font-size:13px}
+.linkbox span{flex:1;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}
+.stats3 b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.stats3 small{font-size:12px;color:var(--muted)}
+.ilist div{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
+.ilist div:first-child{border-top:0}
+.ilist em{font-style:normal;font-size:12.5px;color:var(--muted)}
+.ilist em.ok{color:var(--plus);font-weight:600}
+
+/* 日历订阅 */
+.calmock{background:var(--surface);border-radius:18px;box-shadow:var(--ring);overflow:hidden}
+.calmock .hd{padding:10px 14px;font-size:12px;color:var(--muted);background:var(--sunk);display:flex;justify-content:space-between}
+.calmock .ev{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:10px 14px;border-top:1px solid var(--line);align-items:center}
+.calmock .ev .d{font-size:12px;color:var(--muted);text-align:center}
+.calmock .ev .d b{display:block;font-size:18px;color:var(--fg)}
+.calmock .ev .t{border-left:3px solid var(--l4);padding-left:8px;font-size:13.5px}
+.calmock .ev .t small{display:block;color:var(--muted);font-size:12px}
+.calmock .ev .t.k5{border-color:var(--l5)}.calmock .ev .t.k3{border-color:var(--l3)}.calmock .ev .t.k2{border-color:var(--l2)}
+
+/* 自评 */
+.rate{background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.rate .q{display:flex;justify-content:space-between;align-items:baseline}
+.rate .q b{font-size:16px}
+.rate .q small{font-size:12px;color:var(--muted)}
+.rate .faces{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.rate .faces span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;color:var(--muted)}
+.rate .faces i{width:44px;height:44px;border-radius:50%;background:var(--sunk);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:16px;color:var(--fg)}
+.rate .faces span.on i{background:var(--fg);color:var(--bg)}
+.dots30{display:grid;grid-template-columns:repeat(15,1fr);gap:4px}
+.dots30 i{height:22px;border-radius:5px;background:var(--sunk);position:relative}
+.dots30 i.y{background:color-mix(in srgb,var(--plus) 55%,var(--surface))}
+.dots30 i.n{background:color-mix(in srgb,var(--l2) 40%,var(--surface))}
+
+/* 问事 */
+.hexrow{display:flex;justify-content:center;align-items:center;gap:22px;padding:6px 0}
+.hex{display:flex;flex-direction:column-reverse;gap:7px;align-items:center}
+.hex i{display:block;width:78px;height:9px;border-radius:3px;background:var(--fg)}
+.hex i.yin{background:linear-gradient(90deg,var(--fg) 0 42%,transparent 42% 58%,var(--fg) 58%)}
+.hex i.mv{background:var(--cinnabar)}
+.hex i.mv.yin{background:linear-gradient(90deg,var(--cinnabar) 0 42%,transparent 42% 58%,var(--cinnabar) 58%)}
+.hex i.ghost{opacity:.12}
+.hexn{text-align:center;font-size:13px;color:var(--muted)}
+.hexn b{display:block;font-family:var(--f-display);font-size:18px;color:var(--fg);font-weight:900}
+.arrow{font-size:20px;color:var(--muted)}
+.tend{align-self:center;font-weight:700;font-size:13px;border-radius:999px;padding:4px 14px;background:var(--l4bg);color:var(--l4)}
+.aitag{font-size:11px;font-weight:600;color:var(--muted);background:var(--sunk);border-radius:6px;padding:1px 6px;margin-left:6px}
+.reading p{margin:0 0 8px;font-size:14.5px;line-height:1.75}
+.quota{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between}
+.quota b{color:var(--fg)}
+
+/* 御守 */
+.wishes{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.wishes span{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0 10px;border-radius:16px;background:var(--surface);box-shadow:var(--ring);font-size:12.5px}
+.wishes span i{font-style:normal;font-family:var(--f-display);font-weight:900;font-size:22px}
+.wishes span.on{box-shadow:0 0 0 2px var(--fg)}
+.ritual{background:radial-gradient(60% 40% at 50% 38%, rgba(255,154,60,.18), transparent 70%),#0E0D11;color:#EDE7DF}
+.ritual .fr{align-items:center;justify-content:space-between;padding-top:40px}
+.incense{position:relative;width:120px;height:330px}
+.incense .stick{position:absolute;left:58px;bottom:40px;width:4px;height:190px;background:linear-gradient(#8B5A2B,#5A3A1E);border-radius:2px}
+.incense .ember{position:absolute;left:56px;bottom:226px;width:8px;height:8px;border-radius:50%;background:#FF8A3D;box-shadow:0 0 14px 4px rgba(255,138,61,.6)}
+.incense .ash{position:absolute;left:58px;bottom:230px;width:4px;height:40px;background:linear-gradient(#bbb,#777);opacity:.6;border-radius:2px}
+.incense .smoke{position:absolute;left:30px;bottom:240px;width:60px;height:90px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.18),transparent);filter:blur(6px)}
+.incense .bowl{position:absolute;left:10px;bottom:0;width:100px;height:44px;border-radius:0 0 50px 50px;background:linear-gradient(#3A3440,#1F1B24);box-shadow:inset 0 2px 0 rgba(255,255,255,.08)}
+.timer{font-size:44px;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.guide2{font-family:var(--f-display);font-size:18px;opacity:.85}
+.omamori{width:180px;height:270px;position:relative;margin:0 auto}
+.omamori svg{width:100%;height:100%}
+</style>
+</head>
+<body>
+
+<!-- 1 出生信息 2.0 -->
+<div class="frame" id="f-birth"><div class="fr">
+  <div class="topm"><span class="brand"><span class="mk">流</span><b>流日历</b></span><span class="sp-r"><span class="btn sm ghost">登录</span></span></div>
+  <div><h1 class="h1s">测测你的能量卡</h1><p class="subm">填一下出生信息，不用注册</p></div>
+  <section class="card" style="gap:14px">
+    <div class="field"><div class="fieldrow"><span>出生日期</span><span class="segs"><span class="on">公历</span><span>农历</span></span></div><div class="inp">1992 年 6 月 8 日</div></div>
+    <div class="field"><span>出生时间</span><div class="inp">09:20</div></div>
+    <div class="field"><span>出生城市</span><div class="inp focus">广</div>
+      <div class="sugg"><div><span>广州</span><small>广东 · 东经 113.3°</small></div><div><span>广元</span><small>四川 · 东经 105.8°</small></div><div><span>广安</span><small>四川 · 东经 106.6°</small></div><div><span>不确定，按北京时间算</span><small></small></div></div></div>
+    <div class="solar"><span class="dot"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></span><div><b>真太阳时 08:54</b><small>北京时间 09:20 · 广州东经 113.3°，比北京晚 27 分 · 均时差 +1 分</small></div></div>
+    <div class="edge"><span>你出生在<b>辰时</b>和<b>巳时</b>交界附近，两种时辰结果会不一样。不确定的话，可以都看看。</span><span class="segs"><span class="on">按辰时（07–09 点）</span><span>按巳时</span></span></div>
+    <div class="field"><span>性别</span><div class="pills"><button aria-pressed="false">女</button><button aria-pressed="true">男</button></div></div>
+    <button class="btn primary block">看我的能量卡</button>
+  </section>
+</div></div>
+
+<!-- 2 挑日子：填写 -->
+<div class="frame" id="f-pick1"><div class="fr" style="opacity:.35">
+  <div class="topm"><span class="brand"><span class="mk">流</span><b>流日历</b></span></div>
+  <section class="card" style="height:520px"></section>
+</div><div class="scrimm"></div>
+<div class="sheetm"><div class="grab"></div><div class="sh"><b>挑个日子</b><span class="close">✕</span></div>
+  <div class="field"><span>要做什么</span><div class="inp">和客户谈续约</div></div>
+  <div class="field"><span>是哪类事</span><div class="types"><span><i>汇</i>汇报</span><span><i>面</i>面试</span><span><i>谈</i>谈判</span><span class="on"><i>签</i>签约</span><span><i>开</i>开业</span><span><i>搬</i>搬家</span><span><i>行</i>出行</span><span><i>约</i>约会</span><span><i>发</i>发布</span><span><i>休</i>休息</span></div></div>
+  <div class="field"><span>在什么时间范围</span><span class="segs" style="align-self:flex-start"><span>本月</span><span class="on">未来 1 个月</span><span>3 个月</span></span></div>
+  <button class="btn primary block">帮我挑</button>
+</div></div>
+
+<!-- 3 挑日子：结果 -->
+<div class="frame" id="f-pick2"><div class="fr">
+  <div class="topm"><span class="brand"><span class="mk">流</span><b>流日历</b></span></div>
+  <div><h1 class="h1s" style="font-size:21px">为「和客户谈续约」挑了 3 天</h1><p class="subm">未来 1 个月 · 签约类</p></div>
+  <div class="pick3">
+    <div class="pc"><div class="dt"><b>9</b><small>12月 周二</small></div><div class="bd"><div class="ttl">收获日 · 顺利 82 <span class="rk">最合适</span></div><div class="rs">正财日，适合把事情定下来；黄历宜「立券 交易」</div><div class="tm">最好 <b>9–11 点</b></div><div class="ac"><span class="btn primary">定这天</span><span class="btn ghost">看详情</span></div></div></div>
+    <div class="pc"><div class="dt"><b>2</b><small>12月 周二</small></div><div class="bd"><div class="ttl">认可日 · 顺利 76</div><div class="rs">正官日，对方更愿意认可你的条件；黄历宜「立券」</div><div class="tm">最好 <b>15–17 点</b></div><div class="ac"><span class="btn ghost">定这天</span><span class="btn ghost">看详情</span></div></div></div>
+    <div class="pc"><div class="dt"><b>16</b><small>12月 周二</small></div><div class="bd"><div class="ttl">机遇日 · 平稳 68</div><div class="rs">偏财日，人脉活跃，可以顺便谈新合作</div><div class="tm">最好 <b>11–13 点</b></div><div class="ac"><span class="btn ghost">定这天</span><span class="btn ghost">看详情</span></div></div></div>
+  </div>
+  <div class="excl">已经帮你排除了 7 个黄历忌「立券」的日子、2 个月破日和 2 个和你本命相冲的日子。</div>
+</div></div>
+
+<!-- 4 我的计划 -->
+<div class="frame" id="f-plans"><div class="fr">
+  <div class="topm"><span class="brand"><span class="mk">流</span><b>流日历</b></span></div>
+  <section class="card"><div class="sectitle"><h3>我的计划</h3><span class="btn sm primary">＋ 挑个日子</span></div>
+    <div class="plist">
+      <div><span class="d"><b>9</b><small>12月</small></span><span class="n">和客户谈续约<small>周二 · 9–11 点 · 收获日</small></span><span class="cd">还有 15 天</span></div>
+      <div><span class="d"><b>18</b><small>12月</small></span><span class="n">年终述职<small>周四 · 15–17 点 · 认可日</small></span><span class="cd">还有 24 天</span></div>
+      <div><span class="d"><b>3</b><small>1月</small></span><span class="n">搬家<small>周六 · 9–11 点 · 充电日</small></span><span class="cd">还有 40 天</span></div>
+    </div>
+    <p class="note" style="margin:0">定下的日子会出现在月历和那天的「今天」里；订阅了手机日历的，也会同步过去。</p>
+  </section>
+  <section class="card"><h3>本月精选</h3><div class="picks"><div class="pick"><span class="k">汇报·见领导</span><span class="chips"><span class="chip">4日 周三</span><span class="chip">14日 周六</span></span></div><div class="pick"><span class="k">谈钱·谈合作</span><span class="chips"><span class="chip">22日 周日</span></span></div></div></section>
+</div></div>
+
+<!-- 5 邀请：访客落地 -->
+<div class="frame" id="f-invite1"><div class="fr">
+  <div class="topm"><span class="brand"><span class="mk">流</span><b>流日历</b></span><span class="sp-r"><span class="btn sm ghost">登录</span></span></div>
+  <div class="invban"><span class="sym">藤</span><div><b>阿杰 邀请你测测能量卡</b><small>阿杰是「木 · 藤花型」：柔韧、亲和、善于借力</small><small>注册后，你们俩各得 7 天会员</small></div></div>
+  <button class="btn primary block">测测我是什么型</button>
+  <section class="tcard k4" style="opacity:.55"><div class="th"><span class="eyebrow">小满的今天（示例）</span></div><div class="hero3"><div class="theme"><small>今天是你的</small><b>机遇日</b></div><div class="ring" style="--p:85"><b>85</b><small>很顺</small></div></div></section>
+</div></div>
+
+<!-- 6 邀请好友页 -->
+<div class="frame" id="f-invite2"><div class="fr">
+  <div class="phead"><span class="back" style="display:grid;place-items:center">‹</span><h1>邀请好友</h1></div>
+  <div class="invhero"><b>每邀请一位朋友<br>你们各得 7 天会员</b><span class="subm">朋友测完能量卡、第二天再打开一次就生效</span>
+    <div class="linkbox"><span>mindflow.zone/bazi/?i=A7K2Q</span><span class="btn sm primary">复制</span></div>
+    <span class="btn ghost block">生成邀请海报</span></div>
+  <section class="card"><div class="stats3"><div><b>3</b><small>已邀请</small></div><div><b>2</b><small>已生效</small></div><div><b>14</b><small>得到的天数</small></div></div></section>
+  <section class="card"><h3>邀请记录</h3><div class="ilist"><div><span>小满</span><em class="ok">已生效 +7 天</em></div><div><span>阿玲</span><em class="ok">已生效 +7 天</em></div><div><span>Kiki</span><em>等她明天再打开一次</em></div></div></section>
+  <p class="note" style="margin:0;text-align:center">本月还能获得 3 次奖励</p>
+</div></div>
+
+<!-- 7 订阅到手机日历 -->
+<div class="frame" id="f-ics"><div class="fr">
+  <div class="phead"><span class="back" style="display:grid;place-items:center">‹</span><h1>订阅到手机日历</h1></div>
+  <p class="subm" style="font-size:14px">订阅一次，手机自带的日历和日历小组件里，每天都会出现你的这一天。不用打开流日历也能看到。</p>
+  <div class="calmock"><div class="hd"><span>日历 · 预览</span><span>流日历</span></div>
+    <div class="ev"><span class="d">周二<b>24</b></span><span class="t">顺利 · 汇报 · 9–11 点<small>今天是壬水当家，对你这团烛光来说……</small></span></div>
+    <div class="ev"><span class="d">周三<b>25</b></span><span class="t k5">很顺 · 谈事 · 19–21 点<small>宜 出行 纳财 · 忌 造庙</small></span></div>
+    <div class="ev"><span class="d">周四<b>26</b></span><span class="t k3">平稳 · 充电 · 7–9 点<small>和客户谈续约（9–11 点）</small></span></div>
+  </div>
+  <span class="btn primary block">订阅到 iPhone / Mac 日历</span>
+  <span class="btn ghost block">复制订阅链接（安卓、Google 日历）</span>
+  <p class="note" style="margin:0">每天自动更新未来 60 天，你定下的计划也会同步。链接只属于你，<u>重置链接</u>后旧的会失效。</p>
+</div></div>
+
+<!-- 8 每晚自评 -->
+<div class="frame" id="f-rate"><div class="fr">
+  <div class="topm"><span class="brand"><span class="mk">流</span><b>流日历</b></span></div>
+  <div class="rate"><div class="q"><b>今天过得怎么样？</b><small>系统说「顺利 74」</small></div>
+    <div class="faces"><span><i>1</i>很糟</span><span><i>2</i>不太顺</span><span><i>3</i>一般</span><span class="on"><i>4</i>挺顺</span><span><i>5</i>很好</span></div></div>
+  <div class="rate"><div class="q"><b>记下了</b><small>11 月</small></div>
+    <p class="subm" style="color:var(--fg)">这个月你打了 11 天分，有 <b>8 天</b>和系统的判断一致。</p>
+    <div class="dots30"><i class="y"></i><i class="y"></i><i class="n"></i><i class="y"></i><i class="y"></i><i class="y"></i><i></i><i class="y"></i><i class="n"></i><i class="y"></i><i class="y"></i><i class="n"></i><i></i><i></i><i></i></div>
+    <p class="note" style="margin:0">绿色是一致的日子，蓝色是不一致的。只用来帮你观察自己，不代表准不准。</p></div>
+  <p class="note" style="margin:0">傍晚 6 点后出现在今天页；昨天忘了打的，第二天早上补问一次。</p>
+</div></div>
+
+<!-- 9 问事：输入 -->
+<div class="frame" id="f-ask1"><div class="fr">
+  <div class="phead"><span class="back" style="display:grid;place-items:center">‹</span><h1>问一件事</h1></div>
+  <div class="quota"><span>心里有一件具体的事拿不准，就问一卦</span><span>本月免费 <b>1</b> 次</span></div>
+  <section class="card" style="gap:14px">
+    <div class="field"><span>想问什么</span><div class="inp" style="min-height:84px">这周找老板谈加薪合适吗？</div><span class="hint" style="text-align:right">13 / 60</span></div>
+    <div class="field"><span>是哪方面</span><div class="pills"><button aria-pressed="true">事业</button><button aria-pressed="false">财务</button><button aria-pressed="false">感情</button><button aria-pressed="false">出行</button><button aria-pressed="false">其他</button></div></div>
+    <div class="field"><span>怎么起卦</span><span class="segs" style="align-self:flex-start"><span class="on">用此刻起卦</span><span>报三个数</span></span></div>
+    <button class="btn primary block">起卦</button>
+  </section>
+  <p class="note" style="margin:0">梅花易数起卦由规则算出，白话解读由 AI 生成。健康、投资、法律这类问题请找专业人士，这里不解答。</p>
+</div></div>
+
+<!-- 10 问事：起卦中 -->
+<div class="frame" id="f-ask2"><div class="fr" style="justify-content:center;align-items:center;gap:22px">
+  <p class="subm">这周找老板谈加薪合适吗？</p>
+  <div class="hex"><i></i><i class="yin"></i><i></i><i></i><i class="ghost"></i><i class="ghost"></i></div>
+  <div class="hexn"><b>正在起卦……</b>时间起卦 · 11月24日 10:12</div>
+  <p class="note" style="margin:0;text-align:center;max-width:260px">一爻一爻显出来，大约 10 秒。<br>离开页面也没关系，结果会保存在「问事记录」里。</p>
+</div></div>
+
+<!-- 11 问事：结果 -->
+<div class="frame" id="f-ask3"><div class="fr">
+  <div class="phead"><span class="back" style="display:grid;place-items:center">‹</span><h1>问事</h1></div>
+  <p style="margin:0;font-size:15px;font-weight:600">这周找老板谈加薪合适吗？</p>
+  <section class="card" style="gap:10px">
+    <div class="hexrow"><div><div class="hex"><i class="yin"></i><i></i><i></i><i></i><i class="mv"></i><i></i></div><div class="hexn"><b>天风姤</b>本卦</div></div><span class="arrow">→</span><div><div class="hex"><i class="yin"></i><i></i><i></i><i></i><i class="yin"></i><i></i></div><div class="hexn"><b>火风鼎</b>变卦</div></div></div>
+    <span class="tend">先阻后顺</span>
+  </section>
+  <section class="card reading"><h3>解读<span class="aitag">AI 生成</span></h3>
+    <p><b>有阻，这周可以谈，先准备好再开口。</b></p>
+    <p>卦象先阻后顺：开口时可能遇到阻力，谈下去有商量的余地。亥月水旺生木，也给你一些助力。</p>
+    <p>今天先写下三项能用数字说明的工作成果，谈的时候用它们说明你的贡献。</p></section>
+  <section class="card"><h3>如果要谈，这两天更好</h3><div class="chips"><span class="chip pick2">11月26日 周四 · 认可日 · 9–11 点</span><span class="chip pick2">12月2日 周二 · 认可日</span></div><span class="btn ghost block">用这件事去挑日子</span></section>
+</div></div>
+
+<!-- 12 祈愿：选择 -->
+<div class="frame" id="f-wish1"><div class="fr">
+  <div class="phead"><span class="back" style="display:grid;place-items:center">‹</span><h1>本月祈愿</h1></div>
+  <p class="subm" style="font-size:14px">静下来三分钟，许一个心愿，领一枚这个月的御守。</p>
+  <div class="field"><span>心愿</span><div class="wishes"><span><i>学</i>学业</span><span class="on"><i>业</i>事业</span><span><i>安</i>平安</span><span><i>缘</i>姻缘</span><span><i>财</i>财运</span></div></div>
+  <div class="field"><span>方式</span><span class="segs" style="align-self:flex-start"><span class="on">点一炷香</span><span>敲颂钵</span></span></div>
+  <div class="field"><span>时长</span><span class="segs" style="align-self:flex-start"><span>1 分钟</span><span class="on">3 分钟</span><span>5 分钟</span></span></div>
+  <button class="btn primary block">开始</button>
+  <p class="note" style="margin:0">每月一枚基础御守免费；节气款、生日款 ¥3.9。建议戴上耳机。</p>
+</div></div>
+
+<!-- 13 祈愿：仪式 -->
+<div class="frame ritual" id="f-wish2"><div class="fr">
+  <span class="guide2">慢慢吸气……</span>
+  <div class="incense"><span class="smoke"></span><span class="ash"></span><span class="ember"></span><span class="stick"></span><span class="bowl"></span></div>
+  <div style="text-align:center"><div class="timer">2:14</div><span style="font-size:13px;opacity:.6">心愿 · 事业顺利</span></div>
+  <span style="font-size:13px;opacity:.5;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 18px">提前结束</span>
+</div></div>
+
+<!-- 14 御守揭晓 -->
+<div class="frame" id="f-wish3"><div class="fr" style="align-items:stretch">
+  <div style="text-align:center;padding-top:20px"><p class="subm">十一月 · 事业</p><h1 class="h1s">收下你的御守</h1></div>
+  <div class="omamori"><svg viewBox="0 0 180 270" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="om" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E8B57"/><stop offset="1" stop-color="#1F6B42"/></linearGradient></defs>
+    <path d="M90 6 C 110 6 118 18 118 30 L 118 34 L 62 34 L 62 30 C 62 18 70 6 90 6 Z" fill="none" stroke="#C9A35C" stroke-width="3"/>
+    <rect x="20" y="30" width="140" height="232" rx="22" fill="url(#om)"/>
+    <rect x="30" y="40" width="120" height="212" rx="16" fill="none" stroke="#E9D9A8" stroke-width="1.5" opacity=".8"/>
+    <text x="90" y="118" text-anchor="middle" font-family="Songti SC,STSong,serif" font-weight="900" font-size="44" fill="#F6EFDC">事</text>
+    <text x="90" y="170" text-anchor="middle" font-family="Songti SC,STSong,serif" font-weight="900" font-size="44" fill="#F6EFDC">业</text>
+    <text x="90" y="212" text-anchor="middle" font-family="Songti SC,STSong,serif" font-size="13" fill="#E9D9A8">守 · 十一月</text>
+    <text x="90" y="236" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#E9D9A8" opacity=".8">流日历</text></svg></div>
+  <p class="subm" style="text-align:center">用你的幸运色（木）织成。收在「我的 · 御守」里。</p>
+  <div class="reveal" style="padding:0"><div class="acts"><span class="btn ghost">分享</span><span class="btn primary">收下</span></div></div>
+</div></div>
+
+<!-- 15 注销账号 -->
+<div class="frame" id="f-delete"><div class="fr" style="opacity:.35"><div class="topm"><span class="brand"><span class="mk">流</span><b>流日历</b></span></div><section class="card" style="height:400px"></section></div><div class="scrimm"></div>
+<div class="sheetm"><div class="grab"></div><div class="sh"><b>注销账号</b><span class="close">✕</span></div>
+  <p style="margin:0;font-size:14px;line-height:1.7">注销后会<b>立即删除</b>你的出生信息、计划、签、问事记录、御守和反馈，无法恢复。订单只保留金额和时间用于对账，不再和你关联。</p>
+  <p style="margin:0;font-size:13px;color:var(--l5)">还剩 18 天的会员会一起作废，不退款。</p>
+  <div class="field"><span>输入密码确认</span><div class="inp">••••••••</div></div>
+  <span class="btn block" style="background:var(--l5);color:#fff">注销账号</span>
+</div></div>
+
+</body>
+</html>

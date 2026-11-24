@@ -1,0 +1,17 @@
+{
+  "name": "bazi-calendar",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "流日历：个人行动日历（账号、月度会员、反馈、管理后台）",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "engines": { "node": ">=22.13" },
+  "dependencies": {
+    "alipay-sdk": "4.14.0",
+    "lunar-javascript": "1.7.3",
+    "qrcode-generator": "^1.4.4"
+  }
+}

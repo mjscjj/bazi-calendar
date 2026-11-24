@@ -1,0 +1,13 @@
+[Unit]
+Description=流日历 bazi-calendar (mindflow.zone/bazi)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/root/apps/bazi-calendar
+EnvironmentFile=/etc/bazi-calendar.env
+ExecStart=/usr/local/bin/node --disable-warning=ExperimentalWarning server/index.js
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

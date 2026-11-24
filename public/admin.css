@@ -1,0 +1,77 @@
+/* 管理后台：电脑端，左侧导航 + 右侧内容。沿用 app.css 的变量和按钮、表单样式。 */
+body.admin{font-size:13.5px}
+.ad{display:grid;grid-template-columns:208px minmax(0,1fr);min-height:100vh}
+.ad nav{background:var(--surface);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
+.ad nav .brand{padding:4px 8px 16px}
+.ad nav .brand small{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.08em;margin-left:2px}
+.ad nav a{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:9px;color:var(--fg);text-decoration:none;font-size:14px}
+.ad nav a:hover{background:var(--sunk)}
+.ad nav a[aria-current="page"]{background:var(--accent);color:var(--surface);font-weight:700}
+.ad nav .cnt{font-size:11px;font-weight:700;border-radius:999px;padding:0 7px;background:var(--l5);color:#fff}
+.ad nav .bottom{margin-top:auto;display:flex;flex-direction:column;gap:2px}
+.ad main{padding:22px 28px 60px;display:flex;flex-direction:column;gap:16px;min-width:0;max-width:1240px}
+.ad h1{margin:0;font-family:var(--f-display);font-size:22px;font-weight:900;letter-spacing:.04em}
+.bar2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar2 h1{margin-right:auto}
+.bar2 input,.bar2 select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 10px;min-width:0}
+.bar2 input{width:240px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi b{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kpi small{font-size:12px;color:var(--muted)}
+.grp{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.08em;margin:6px 0 -4px}
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:auto}
+.tbl table{border-collapse:collapse;width:100%;font-size:13px}
+.tbl th{text-align:left;font-weight:600;color:var(--muted);font-size:12px;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface);position:sticky;top:0}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.tbl td.nw{white-space:nowrap}
+.tbl .acts{display:flex;gap:6px;flex-wrap:wrap}
+.tag2{display:inline-block;font-size:11.5px;font-weight:700;border-radius:5px;padding:1px 7px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag2.ok{background:color-mix(in srgb,var(--plus) 16%,var(--surface));color:var(--plus)}
+.tag2.warn{background:var(--l4bg);color:var(--l4)}
+.tag2.bad{background:var(--l5bg);color:var(--l5)}
+.tag2.info{background:var(--l2bg);color:var(--l2)}
+.sub2{font-size:12px;color:var(--muted)}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.chart h3{margin:0;font-size:13px;font-weight:600}
+.chart svg{width:100%;height:150px;display:block;overflow:visible}
+.chart .ax{font-size:10px;fill:var(--muted)}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fbs{display:flex;flex-direction:column;gap:12px}
+.fbc{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px}
+.fbc .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.fbc .body{font-size:14px;white-space:pre-wrap;margin:8px 0}
+.fbc textarea{font:inherit;width:100%;min-height:72px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--bg);color:var(--fg);resize:vertical}
+.fbc .side{display:flex;flex-direction:column;gap:8px}
+.fbc .side .acts{display:flex;gap:6px;flex-wrap:wrap}
+.setg{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.setg .full{grid-column:1/-1}
+.setg textarea{min-height:200px;font-size:13.5px}
+.login2{max-width:360px;margin:12vh auto 0;display:flex;flex-direction:column;gap:14px;padding:0 16px}
+.dlg-bg{position:fixed;inset:0;z-index:60;background:rgba(8,10,16,.42);display:grid;place-items:center;animation:fade .15s}
+.dlg{width:min(420px,calc(100vw - 32px));background:var(--surface);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.dlg h2{margin:0;font-size:17px}
+.dlg p{margin:0;color:var(--muted);font-size:13.5px}
+.dlg .row{display:flex;gap:8px;justify-content:flex-end}
+.pwbox{font-family:ui-monospace,Menlo,monospace;font-size:20px;font-weight:700;letter-spacing:.06em;background:var(--sunk);border-radius:10px;padding:10px 12px;text-align:center;user-select:all}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;font-size:12.5px;color:var(--muted)}
+/* 漏斗、功能使用、自评吻合度：横向条 */
+.funnel{display:flex;flex-direction:column;gap:8px}
+.funnel .fr{display:grid;grid-template-columns:96px 1fr 48px 40px;gap:10px;align-items:center;font-size:13px}
+.funnel .fbar2{height:12px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.funnel .fbar2 i{display:block;height:100%;border-radius:6px;background:var(--accent)}
+.funnel b{text-align:right;font-variant-numeric:tabular-nums}
+.funnel small{color:var(--muted);font-size:12px;text-align:right}
+.tbl th.num{text-align:right}
+/* 规则对比 */
+.cmpf{display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) auto;gap:10px;align-items:end}
+.lvbar{display:flex;height:26px;border-radius:8px;overflow:hidden;gap:2px}
+.lvbar i{display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:700;min-width:18px}
+.lvbar .k1{background:var(--l1bg);color:var(--l1)}.lvbar .k2{background:var(--l2bg);color:var(--l2)}.lvbar .k3{background:var(--l3bg);color:var(--l3)}.lvbar .k4{background:var(--l4bg);color:var(--l4)}.lvbar .k5{background:var(--l5bg);color:var(--l5)}
+.tbl tr.big td{background:color-mix(in srgb,var(--l5) 6%,transparent)}
+.whycmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:12px;line-height:1.7;margin-top:6px}
+.whycmp b{display:block;font-size:12px}
+@media (max-width:900px){.cmpf{grid-template-columns:1fr 1fr}}

@@ -1,0 +1,808 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>八字流日历</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&display=swap">
+<style>
+/* 布局：手机单栏，顶部命主条 → 页签（流日历 / 命盘 / 规则）→ 月历网格 → 当日详情 + 十二时辰时间轴 */
+:root{
+  --bg:#F3F4F6; --surface:#FFFFFF; --sunk:#E9EBEF; --line:#D9DCE3;
+  --fg:#1C2230; --muted:#626A7B; --accent:#2B3A67;
+  --l5:#C7362B; --l5bg:#F6D6D1; --l4:#B4602A; --l4bg:#F8E6D6; --l3:#6E7585; --l3bg:#ECEDF1; --l2:#4F6A8C; --l2bg:#DCE5EF; --l1:#3A4152; --l1bg:#C9CED8;
+  --wood:#2F8A4F; --fire:#D23A2C; --earth:#93652F; --metal:#C98A0E; --water:#2768C2;
+  --plus:#2F8A4F; --minus:#C7362B; --glow:#FF9A3C; --ink:#1A1424; --ink2:#2A2038; --cardfg:#F6EFE6; --cardmuted:#BDB1C4;
+  --f-display:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#12151C; --surface:#1B1F29; --sunk:#232836; --line:#313748;
+  --fg:#E7E9EF; --muted:#9AA2B4; --accent:#A9B8EA;
+  --l5:#FF8A7A; --l5bg:#5A2622; --l4:#F0A86E; --l4bg:#4A3322; --l3:#A3A9B8; --l3bg:#262B37; --l2:#94B2D6; --l2bg:#22324A; --l1:#C2C8D6; --l1bg:#151820;
+  --wood:#5CC487; --fire:#FF7B6B; --earth:#D1A06A; --metal:#F0B848; --water:#6FA6F2;
+  --plus:#5CC487; --minus:#FF8A7A; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#12151C; --surface:#1B1F29; --sunk:#232836; --line:#313748;
+  --fg:#E7E9EF; --muted:#9AA2B4; --accent:#A9B8EA;
+  --l5:#FF8A7A; --l5bg:#5A2622; --l4:#F0A86E; --l4bg:#4A3322; --l3:#A3A9B8; --l3bg:#262B37; --l2:#94B2D6; --l2bg:#22324A; --l1:#C2C8D6; --l1bg:#151820;
+  --wood:#5CC487; --fire:#FF7B6B; --earth:#D1A06A; --metal:#F0B848; --water:#6FA6F2;
+  --plus:#5CC487; --minus:#FF8A7A; color-scheme:dark;
+}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.55;}
+.wrap{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px;display:flex;flex-direction:column;gap:14px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.serif{font-family:var(--f-display)}
+.muted{color:var(--muted)}
+.w0{color:var(--wood)}.w1{color:var(--fire)}.w2{color:var(--earth)}.w3{color:var(--metal)}.w4{color:var(--water)}
+
+/* 命主条 */
+.hbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pill-btn[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+body:not(.pro) .pro-only{display:none!important}
+.who{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.who h1{margin:0;font-family:var(--f-display);font-size:22px;font-weight:900;letter-spacing:.04em}
+.who .sub{font-size:12px;color:var(--muted)}
+.pill-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}
+.bazi-strip{display:flex;gap:10px;align-items:flex-end;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.bazi-strip .col{display:flex;flex-direction:column;align-items:center;gap:0;min-width:0}
+.bazi-strip .lab{font-size:11px;color:var(--muted)}
+.bazi-strip .gz{font-family:var(--f-display);font-weight:900;font-size:24px;line-height:1.15}
+.bazi-strip .dmtag{margin-left:auto;text-align:right;font-size:12px;color:var(--muted);line-height:1.5}
+.bazi-strip .dmtag b{color:var(--fg);font-size:14px}
+
+/* 表单 */
+form.birth{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+form.birth label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+form.birth input,form.birth select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;min-width:0;width:100%}
+form.birth .full{grid-column:1/-1}
+form.birth .row{display:flex;gap:8px;justify-content:flex-end}
+.primary{background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:9px 16px;font-weight:700}
+
+/* 页签 */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sunk);border-radius:10px;padding:3px;gap:3px}
+.tabs button{border:0;background:transparent;border-radius:8px;padding:7px 0;font-weight:500;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* 月历 */
+.monthbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.monthbar h2{margin:0;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.monthbar .nav{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:36px;height:32px;font-size:16px}
+.monthinfo{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px}
+.monthinfo b{color:var(--fg);font-weight:500}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.wk{font-size:11px;text-align:center;color:var(--muted);padding-bottom:2px}
+.cell{border:0;border-radius:9px;padding:5px 2px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;min-height:64px;position:relative;font-variant-numeric:tabular-nums}
+.cell .dn{font-size:15px;font-weight:700;line-height:1.1}
+.cell .ln{font-size:10px;color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.cell .ln.jq{color:var(--accent);font-weight:700}
+.cell .gz{font-family:var(--f-display);font-size:12px;font-weight:600;line-height:1.2}
+.cell .ss{font-size:10px;line-height:1.2}
+.cell.pad{visibility:hidden}
+.cell.today::after{content:"";position:absolute;top:4px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.cell.sel{outline:2px solid var(--fg);outline-offset:-2px}
+.lv5{background:var(--l5bg)} .lv5 .ss{color:var(--l5);font-weight:700}
+.lv4{background:var(--l4bg)} .lv4 .ss{color:var(--l4);font-weight:700}
+.lv3{background:var(--l3bg)} .lv3 .ss{color:var(--l3)}
+.lv2{background:var(--l2bg)} .lv2 .ss{color:var(--l2)}
+.lv1{background:var(--l1bg)} .lv1 .ss{color:var(--l1);font-weight:700}
+
+/* 精选 */
+.picks{display:flex;flex-direction:column;gap:8px}
+.pick{display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;align-items:baseline}
+.pick .k{font-size:12px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 10px;font-size:12px;font-variant-numeric:tabular-nums}
+.chip.none{border-style:dashed;color:var(--muted)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.card h3{margin:0;font-size:13px;color:var(--muted);font-weight:500;letter-spacing:.06em}
+
+/* 当日 */
+.dayhead{display:flex;gap:14px;align-items:center}
+.daygz{font-family:var(--f-display);font-weight:900;font-size:40px;line-height:1;display:flex;flex-direction:column;align-items:center}
+.daymeta{display:flex;flex-direction:column;gap:2px;min-width:0}
+.daymeta .t{font-size:16px;font-weight:700}
+.lvpill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-weight:700;font-size:13px;width:fit-content}
+.lvpill.k5{background:var(--l5bg);color:var(--l5)}.lvpill.k4{background:var(--l4bg);color:var(--l4)}.lvpill.k3{background:var(--l3bg);color:var(--l3)}.lvpill.k2{background:var(--l2bg);color:var(--l2)}.lvpill.k1{background:var(--l1bg);color:var(--l1)}
+.headline{font-size:15px;font-weight:500;text-wrap:balance}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dos div{background:var(--sunk);border-radius:10px;padding:10px}
+.dos b{display:block;font-size:12px;margin-bottom:4px}
+.dos ul{margin:0;padding-left:16px}
+.why{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:12.5px}
+.why li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:6px}
+.why .v{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.why .p{color:var(--plus)} .why .n{color:var(--minus)}
+.tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 6px;margin-right:4px;color:var(--muted)}
+details summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+details p{margin:6px 0 0;font-size:12.5px}
+
+/* 时辰 */
+.hours{display:flex;flex-direction:column;gap:2px}
+.hr{display:grid;grid-template-columns:54px 40px 1fr;gap:10px;align-items:center;padding:7px 8px;border-radius:9px}
+.hr.now{background:var(--sunk)}
+.hr .tm{font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted);line-height:1.2}
+.hr .tm b{display:block;color:var(--fg);font-size:13px}
+.hr .hz{font-family:var(--f-display);font-weight:900;font-size:17px;line-height:1.05;text-align:center}
+.hr .bd{min-width:0;display:flex;flex-direction:column;gap:3px}
+.bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px}
+.bar .k5{background:var(--l5)}.bar .k4{background:var(--l4)}.bar .k3{background:var(--l3)}.bar .k2{background:var(--l2)}.bar .k1{background:var(--l1)}
+.hr .tx{font-size:12.5px}
+.hr .tx em{font-style:normal;font-weight:700;margin-right:4px}
+
+/* 命盘表 */
+.pan{overflow-x:auto}
+.pan table{border-collapse:collapse;width:100%;min-width:440px;text-align:center;font-size:12px}
+.pan th{font-weight:500;color:var(--muted);padding:4px 2px;font-size:11.5px}
+.pan td{padding:3px 2px}
+.pan .big{font-family:var(--f-display);font-weight:900;font-size:24px;line-height:1.1}
+.pan .sep{border-left:1px solid var(--line)}
+.pan td.rl{color:var(--muted);text-align:left;white-space:nowrap}
+.pan .hide{font-size:11px;line-height:1.45}
+.force{display:flex;flex-direction:column;gap:6px}
+.force .r{display:grid;grid-template-columns:28px 1fr 44px 52px;gap:8px;align-items:center;font-size:12.5px}
+.force .r .bar{height:8px}
+.xiset{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:2px 0;font-size:12px;width:100%}
+.xiset.xi{background:var(--l5bg);color:var(--l5);border-color:transparent;font-weight:700}
+.xiset.ji{background:var(--l1bg);color:var(--l1);border-color:transparent}
+.note{font-size:12px;color:var(--muted)}
+
+/* 规则 */
+.rules h4{margin:4px 0 0;font-size:14px}
+.rules table{border-collapse:collapse;width:100%;font-size:12.5px}
+.rules td{border-top:1px solid var(--line);padding:5px 4px;vertical-align:top}
+.rules td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rules ol,.rules ul{margin:0;padding-left:18px;font-size:13px;display:flex;flex-direction:column;gap:4px}
+.assume{display:inline-block;font-size:10.5px;background:var(--l4bg);color:var(--l4);border-radius:4px;padding:0 5px;margin-left:4px;font-weight:700;vertical-align:1px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+<style>
+.profile{display:flex;gap:14px;align-items:center;width:100%}
+.profile .glyph{font-family:var(--f-display);font-weight:900;font-size:44px;line-height:1;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--sunk);flex:none}
+.profile .pt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.profile .pt b{font-size:16px}
+.profile .pt .en{font-size:12px;color:var(--muted)}
+.lucky{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.lucky span{font-size:12px;border-radius:999px;padding:1px 9px;background:var(--sunk);font-weight:700}
+.cell .th{font-size:12px;font-weight:700;line-height:1.25}
+.daytheme{font-family:var(--f-display);font-weight:900;font-size:26px;line-height:1.1;min-width:76px;text-align:center;padding:10px 8px;border-radius:12px;background:var(--sunk)}
+.daytheme small{display:block;font-family:var(--f-body);font-size:11px;font-weight:500;color:var(--muted);margin-top:3px}
+.why .tech{display:block;font-size:11px;color:var(--muted)}
+.hr .tm2{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.hr .tm2 small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.hours.simple .hr{grid-template-columns:62px 1fr}
+#themeTable td:first-child{font-weight:700;white-space:nowrap}
+#themeTable td:last-child{text-align:left;white-space:normal}
+</style>
+<style>
+body.pro .pro-hide{display:none!important}
+.weekbox{display:flex;flex-direction:column;gap:8px}
+.weekbox h3{margin:0;font-size:13px;color:var(--muted);font-weight:500;letter-spacing:.06em}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.wd{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;border-top:4px solid var(--l3)}
+.wd .w{font-size:11px;color:var(--muted)}
+.wd .d{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.wd .l{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.wd .a{font-size:13px;font-weight:700;margin-top:2px}
+.wd .lv{font-size:10px;font-weight:700}
+.wd.k5{border-top-color:var(--l5)}.wd.k5 .lv{color:var(--l5)}.wd.k4{border-top-color:var(--l4)}.wd.k4 .lv{color:var(--l4)}.wd.k3 .lv{color:var(--l3)}.wd.k2{border-top-color:var(--l2)}.wd.k2 .lv{color:var(--l2)}.wd.k1{border-top-color:var(--l1)}.wd.k1 .lv{color:var(--l1)}
+.c2{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:4px 2px 0;display:flex;flex-direction:column;align-items:center;gap:0;min-height:66px;position:relative;overflow:hidden;font-variant-numeric:tabular-nums}
+.c2 .dn{font-size:16px;font-weight:700;line-height:1.2}
+.c2 .ln{font-size:10px;color:var(--muted);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.c2 .ln.jq{color:var(--accent);font-weight:700}
+.c2 .ln.fe{color:var(--l5);font-weight:700}
+.c2 .act{margin-top:auto;width:100%;font-size:11px;font-weight:700;line-height:1.7;text-align:center}
+.c2.k5 .act{background:var(--l5);color:var(--surface)}
+.c2.k4 .act{background:var(--l4bg);color:var(--l4)}
+.c2.k3 .act{background:var(--l3bg);color:var(--l3)}
+.c2.k2 .act{background:var(--l2bg);color:var(--l2)}
+.c2.k1 .act{background:var(--l1bg);color:var(--l1)}
+.c2.today .dn{color:var(--surface);background:var(--accent);border-radius:999px;padding:0 6px}
+.c2.sel{outline:2px solid var(--fg);outline-offset:-2px}
+.calrow{display:flex;gap:14px;align-items:center}
+.bigd{font-family:var(--f-display);font-weight:900;font-size:44px;line-height:1;min-width:58px;text-align:center;font-variant-numeric:tabular-nums}
+.mylayer{border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--sunk);border-left:5px solid var(--l3)}
+.mylayer.k5{border-left-color:var(--l5)}.mylayer.k4{border-left-color:var(--l4)}.mylayer.k2{border-left-color:var(--l2)}.mylayer.k1{border-left-color:var(--l1)}
+.mlhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.mltitle{font-family:var(--f-display);font-weight:900;font-size:20px}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.slot{background:var(--surface);border-radius:9px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;font-size:12.5px;min-width:0}
+.slot b{font-size:11px;color:var(--l5)}
+.slot.bad b{color:var(--l2)}
+.slot .tt{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+</style>
+<style>
+.hero{position:relative;width:100%;border-radius:18px;overflow:hidden;color:var(--cardfg);display:flex;gap:14px;align-items:center;padding:18px 18px;
+  background:radial-gradient(90% 120% at 15% 50%, color-mix(in srgb,var(--glow) 40%,transparent) 0%, transparent 60%),linear-gradient(160deg,var(--ink2),var(--ink))}
+.bazi-strip:has(.hero){padding:0;border:0;background:transparent}
+.hsym{font-family:var(--f-display);font-weight:900;font-size:74px;line-height:1;flex:none;width:84px;text-align:center;text-shadow:0 0 22px color-mix(in srgb,var(--glow) 85%,transparent),0 0 50px color-mix(in srgb,var(--glow) 50%,transparent)}
+.htx{display:flex;flex-direction:column;gap:1px;min-width:0}
+.htx .hk{font-size:11px;letter-spacing:.16em;color:var(--cardmuted)}
+.htx b{font-family:var(--f-display);font-size:20px;letter-spacing:.08em}
+.htx .hen{font-family:Georgia,serif;font-style:italic;color:var(--glow);font-size:16px}
+.htx .hl{font-size:12.5px;opacity:.9}
+.htx .hl2{font-size:11.5px;color:var(--cardmuted)}
+.opening{border-radius:14px;padding:14px;background:color-mix(in srgb,var(--glow) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--glow) 35%,var(--line));display:flex;flex-direction:column;gap:8px}
+.opening .ok{font-size:11px;letter-spacing:.14em;color:var(--muted)}
+.opening h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:20px;text-wrap:balance}
+.opening p{margin:0;font-size:13.5px}
+.ogrid{display:flex;flex-direction:column;gap:8px}
+.ogrid div{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.ogrid span{width:100%;font-size:11.5px;color:var(--muted)}
+.dot{width:7px!important;height:7px!important;border-radius:50%!important;display:inline-block}
+.dot.gr{background:#D9A520}.dot.cg{background:var(--l2)}
+.c2 .dots{position:absolute;top:4px;left:4px;display:flex;gap:2px}
+.c2 .ln.spl{color:var(--surface);background:var(--glow);border-radius:4px;padding:0 3px;font-weight:700;color:#1A1424}
+.c2.sp-bd,.c2.sp-me{border-color:var(--glow);box-shadow:inset 0 0 0 1px var(--glow)}
+.c2 .act{white-space:nowrap;overflow:hidden;text-overflow:clip}
+.c2 .act.plan{background:var(--ink);color:var(--glow);font-size:10px;letter-spacing:-.02em}
+.planform{display:grid;grid-template-columns:1fr auto;gap:8px}
+.planform input,.planform select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;min-width:0}
+.planform input{grid-column:1/-1}
+.plan{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.ph{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ptag{font-size:11px;background:var(--sunk);border-radius:4px;padding:0 6px;color:var(--muted)}
+.ptag.ex{background:var(--l4bg);color:var(--l4)}
+.del,.link{margin-left:auto;border:0;background:none;color:var(--muted);font-size:12px;text-decoration:underline;padding:0}
+.link{margin-left:6px}
+.pd{font-size:12.5px}
+.chip.pick2{border-color:var(--glow)}
+.spbar{display:flex;gap:6px;flex-wrap:wrap}
+.sp{font-size:12px;font-weight:700;border-radius:999px;padding:1px 10px;background:var(--sunk)}
+.sp.bd,.sp.me{background:var(--glow);color:#1A1424}.sp.gr{background:#F3E2B0;color:#7A5A00}.sp.cg{background:var(--l2bg);color:var(--l2)}.sp.pl{background:var(--ink);color:var(--glow)}
+</style>
+<div class="wrap">
+  <header class="who">
+    <div>
+      <h1>八字流日历</h1>
+      <div class="sub" id="whoSub"></div>
+    </div>
+    <div class="hbtns"><button class="pill-btn" id="proBtn" type="button" aria-pressed="false">专业模式</button><button class="pill-btn" id="editBtn" type="button" aria-expanded="false">修改生日</button></div>
+  </header>
+
+  <form class="birth" id="birthForm" hidden>
+    <label class="full">称呼（显示在日历上）<input type="text" id="fName" maxlength="12"></label>
+    <label>公历生日<input type="date" id="fDate" required></label>
+    <label>出生时间<input type="time" id="fTime" required></label>
+    <label>性别（影响大运）<select id="fGender"><option>女</option><option>男</option></select></label>
+    <label>查看月份<input type="month" id="fMonth"></label>
+    <div class="full row"><button type="button" class="pill-btn" id="cancelBtn">取消</button><button class="primary" type="submit">重新排盘</button></div>
+  </form>
+
+  <section class="bazi-strip" id="strip" aria-label="我的能量档案"></section>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="t-cal" aria-selected="true" data-tab="cal">日历</button>
+    <button role="tab" id="t-pan" aria-selected="false" data-tab="pan">我的能量</button>
+    <button role="tab" id="t-rule" aria-selected="false" data-tab="rule">怎么算的</button>
+  </nav>
+
+  <main id="v-cal" style="display:flex;flex-direction:column;gap:14px">
+    <section class="weekbox pro-hide"><h3>未来 7 天行动</h3><div class="week" id="week"></div></section>
+    <div class="monthbar">
+      <button class="nav" id="prevM" type="button" aria-label="上个月">‹</button>
+      <h2 id="mTitle"></h2>
+      <button class="nav" id="nextM" type="button" aria-label="下个月">›</button>
+    </div>
+    <div class="monthinfo pro-only" id="mInfo"></div>
+    <section class="opening pro-hide" id="opening"></section>
+    <div class="legend">
+      <span><i style="background:var(--l5bg);outline:1px solid var(--l5)"></i><span data-lv="5">很顺</span></span>
+      <span><i style="background:var(--l4bg)"></i><span data-lv="4">顺利</span></span>
+      <span><i style="background:var(--l3bg)"></i><span data-lv="3">平稳</span></span>
+      <span><i style="background:var(--l2bg)"></i><span data-lv="2">留神</span></span>
+      <span><i style="background:var(--l1bg)"></i><span data-lv="1">低调</span></span>
+      <span class="muted" id="legendNote"></span>
+      <span class="pro-hide"><i class="dot gr"></i>贵人日</span><span class="pro-hide"><i class="dot cg"></i>本命冲</span><span class="pro-hide"><i style="background:var(--glow)"></i>生日·本命日·你的计划</span>
+    </div>
+    <div class="grid" id="grid"></div>
+
+    <section class="card pro-hide">
+      <h3>我的计划</h3>
+      <form class="planform" id="planForm">
+        <input type="text" id="pName" placeholder="比如：和客户谈续约" maxlength="20" aria-label="计划名称">
+        <select id="pType" aria-label="计划类型"><option>汇报</option><option>面试</option><option>谈判</option><option>签约</option><option>约会</option><option>出行</option><option>发布</option><option>搬家</option><option>休息</option></select>
+        <button class="primary" type="submit">帮我挑日子</button>
+      </form>
+      <div id="planList" style="display:flex;flex-direction:column;gap:10px"></div>
+    </section>
+    <section class="card">
+      <h3>本月精选日子</h3>
+      <div class="picks" id="picks"></div>
+    </section>
+
+    <section class="card" id="dayCard"></section>
+    <section class="card">
+      <h3 id="hoursTitle">十二时辰</h3>
+      <div class="hours" id="hours"></div>
+    </section>
+  </main>
+
+  <main id="v-pan" hidden style="flex-direction:column;gap:14px">
+    <section class="card" id="profileCard"></section>
+    <section class="card"><h3>五种能量在你身上的比例</h3><div id="force"></div></section>
+    <section class="card" id="panCard"><h3>完整八字盘（专业）</h3><div class="pan" id="pan"></div></section>
+  </main>
+
+  <main id="v-rule" hidden class="rules" style="flex-direction:column;gap:14px">
+    <section class="card">
+      <h3>一句话说清楚</h3>
+      <p style="margin:0">中国传统认为，世界由五种能量组成：木、火、土、金、水。你出生那一刻的能量组合，就是你的「能量档案」。每一天、每两个小时也都有自己的能量。</p>
+      <ul>
+        <li>当天的能量正好是你缺的、需要的（幸运元素），这一天就更顺。</li>
+        <li>当天的能量和你的本命能量相冲，就容易有波动，适合低调一点。</li>
+        <li>能量和你的关系不同，这一天的「主题」也不同，比如收获日、表达日、充电日，建议也跟着主题走。</li>
+      </ul>
+      <p class="note" style="margin:0">打开右上角「专业模式」可以看到背后的八字术语和完整计算表。</p>
+    </section>
+    <section class="card">
+      <h3>十种「日主题」对照</h3>
+      <table id="themeTable"></table>
+    </section>
+    <section class="card pro-only">
+      <h3>这个日历怎么算（专业）</h3>
+      <ol>
+        <li>按出生时间排出四柱（节气换月，立春换年，子时按 23 点起算）。</li>
+        <li>估算日主强弱：天干每个计 1 分，地支藏干本气 / 中气 / 余气计 1 / 0.5 / 0.3，月令再乘 1.6。日主同类加生我的五行占比 ≥ 50% 视为身强。<span class="assume">假设</span></li>
+        <li>身强喜「我生、我克、克我」（食伤、财、官杀），忌印比；身弱反之。可在「我的能量」页手动改。<span class="assume">假设</span></li>
+        <li>每天从 60 分起，按下表加减，再分五档：≥82 大吉（很顺），69–81 吉（顺利），52–68 平（平稳），41–51 小心（留神），≤40 凶（低调）。<span class="assume">假设</span></li>
+        <li>时辰同理，以当天每个时辰的干支评分，并参考黄历的黄道 / 黑道。</li>
+      </ol>
+    </section>
+    <section class="card pro-only">
+      <h3>流日加减分</h3>
+      <table>
+        <tr><td>日干五行是喜用 / 忌神</td><td>+9 / −9</td></tr>
+        <tr><td>日支本气是喜用 / 忌神</td><td>+8 / −8</td></tr>
+        <tr><td>日支冲原局日支（自身、伴侣宫）</td><td>−15</td></tr>
+        <tr><td>日支与原局日支六合 / 半合</td><td>+8 / +6</td></tr>
+        <tr><td>日支与原局日支相刑 / 相害</td><td>−6 / −5</td></tr>
+        <tr><td>日支冲原局年、月、时支</td><td>−6</td></tr>
+        <tr><td>日支与原局其他支合</td><td>+3</td></tr>
+        <tr><td>日干与日主相合（如丁见壬）</td><td>+5</td></tr>
+        <tr><td>日支逢天乙贵人 / 文昌</td><td>+8 / +4</td></tr>
+        <tr><td>日支冲流年太岁</td><td>−4</td></tr>
+        <tr><td>流月干支喜忌（背景分）</td><td>±2 ~ ±4</td></tr>
+      </table>
+    </section>
+    <section class="card pro-only">
+      <h3>十二时辰加减分</h3>
+      <table>
+        <tr><td>时干喜用 / 忌神</td><td>+10 / −10</td></tr>
+        <tr><td>时支本气喜用 / 忌神</td><td>+8 / −8</td></tr>
+        <tr><td>时支冲当天日支（日破时）</td><td>−12</td></tr>
+        <tr><td>时支冲原局日支</td><td>−10</td></tr>
+        <tr><td>时支与原局日支合</td><td>+6</td></tr>
+        <tr><td>贵人时</td><td>+6</td></tr>
+        <tr><td>黄历黄道 / 黑道</td><td>+4 / −4</td></tr>
+      </table>
+    </section>
+    <section class="card">
+      <h3>还没定、需要你拍板的</h3>
+      <ul>
+        <li>喜用神目前是按强弱粗算的。如果你有老师或测测给出的喜用神，直接在「我的能量」页改，日历会按你的设置重算。</li>
+        <li>是否加入大运对流日的影响（现在只算原局、流年、流月）。</li>
+        <li>建议文案目前偏职场。是否要分「工作 / 感情 / 财务 / 健康」几类分别给建议。</li>
+        <li>卖给海外用户时是否要做完整英文版（现在只在元素和主题后附了英文词）。</li>
+        <li>晚子时（23 点后）算当天还是次日，现在按次日算。</li>
+      </ul>
+      <p class="note">以上为传统命理的娱乐化参考，不构成任何决策依据。</p>
+    </section>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.3/lunar.js"></script>
+<script>
+// ===== 八字吉凶引擎 v0（规则为假设，可调） =====
+var BZ = (function(){
+  var GAN='甲乙丙丁戊己庚辛壬癸', ZHI='子丑寅卯辰巳午未申酉戌亥';
+  var WX=['木','火','土','金','水'];
+  var WXP=['木（Wood）','火（Fire）','土（Earth）','金（Metal）','水（Water）'];
+  var ZHI_WX=[4,2,0,0,2,1,1,2,3,3,2,4];
+  var HIDE={子:'癸',丑:'己癸辛',寅:'甲丙戊',卯:'乙',辰:'戊乙癸',巳:'丙庚戊',午:'丁己',未:'己丁乙',申:'庚壬戊',酉:'辛',戌:'戊辛丁',亥:'壬甲'};
+  var HIDE_W=[1,0.5,0.3];
+  function gwx(g){return Math.floor(GAN.indexOf(g)/2);}
+  function zwx(z){return ZHI_WX[ZHI.indexOf(z)];}
+  // 十神：以日干 dm 看 g
+  function shishen(dm,g){
+    var a=GAN.indexOf(dm),b=GAN.indexOf(g),ea=Math.floor(a/2),eb=Math.floor(b/2),same=(a%2)===(b%2);
+    var r=(eb-ea+5)%5; // 0同 1我生 2我克 3克我 4生我
+    return [['比肩','劫财'],['食神','伤官'],['偏财','正财'],['七杀','正官'],['偏印','正印']][r][same?0:1];
+  }
+  var SHORT={比肩:'比',劫财:'劫',食神:'食',伤官:'伤',偏财:'才',正财:'财',七杀:'杀',正官:'官',偏印:'枭',正印:'印'};
+  function zi(z){return ZHI.indexOf(z);}
+  var LIUHE={'子丑':1,'寅亥':1,'卯戌':1,'辰酉':1,'巳申':1,'午未':1};
+  var SANHE=['申子辰','亥卯未','寅午戌','巳酉丑'];
+  var HAI={'子未':1,'丑午':1,'寅巳':1,'卯辰':1,'申亥':1,'酉戌':1};
+  var XING={'寅巳':1,'巳申':1,'寅申':1,'丑戌':1,'戌未':1,'丑未':1,'子卯':1};
+  function pair(a,b,set){return set[a+b]||set[b+a];}
+  function rel(a,b){ // 地支关系
+    if(Math.abs(zi(a)-zi(b))===6) return '冲';
+    if(pair(a,b,LIUHE)) return '六合';
+    for(var i=0;i<4;i++){ if(a!==b && SANHE[i].indexOf(a)>=0 && SANHE[i].indexOf(b)>=0) return '半合'; }
+    if(pair(a,b,XING) || (a===b && '辰午酉亥'.indexOf(a)>=0)) return '刑';
+    if(pair(a,b,HAI)) return '害';
+    return '';
+  }
+  function ganHe(a,b){return Math.abs(GAN.indexOf(a)-GAN.indexOf(b))===5;}
+  var GUIREN={甲:'丑未',戊:'丑未',庚:'丑未',乙:'子申',己:'子申',丙:'亥酉',丁:'亥酉',辛:'寅午',壬:'卯巳',癸:'卯巳'};
+  var WENCHANG={甲:'巳',乙:'午',丙:'申',丁:'酉',戊:'申',己:'酉',庚:'亥',辛:'子',壬:'寅',癸:'卯'};
+  function taohua(z){var t={申:'酉',子:'酉',辰:'酉',寅:'卯',午:'卯',戌:'卯',巳:'午',酉:'午',丑:'午',亥:'子',卯:'子',未:'子'};return t[z];}
+  function yima(z){var t={申:'寅',子:'寅',辰:'寅',寅:'申',午:'申',戌:'申',巳:'亥',酉:'亥',丑:'亥',亥:'巳',卯:'巳',未:'巳'};return t[z];}
+
+  // 排盘
+  function chart(y,m,d,h,mi,gender){
+    var noTime=(h===null||h===undefined); if(noTime){h=12;mi=0;}
+    var s=Solar.fromYmdHms(y,m,d,h,mi,0), l=s.getLunar(), e=l.getEightChar(); e.setSect(2);
+    var pillars=[e.getYear(),e.getMonth(),e.getDay(),e.getTime()];
+    if(noTime) pillars=pillars.slice(0,3);
+    var dm=pillars[2][0];
+    // 五行力量（假设：天干1，藏干本/中/余 1/0.5/0.3，月令×1.6）
+    var force=[0,0,0,0,0];
+    pillars.forEach(function(p,i){
+      force[gwx(p[0])]+=1;
+      HIDE[p[1]].split('').forEach(function(g,k){force[gwx(g)]+=HIDE_W[k]*(i===1?1.6:1);});
+    });
+    var me=gwx(dm), mother=(me+4)%5;
+    var total=force.reduce(function(a,b){return a+b;},0);
+    var selfPct=(force[me]+force[mother])/total;
+    var strong=selfPct>=0.5;
+    var xi = strong ? [(me+1)%5,(me+2)%5,(me+3)%5] : [me,mother];
+    var ji = strong ? [me,mother] : [(me+1)%5,(me+2)%5,(me+3)%5];
+    var yun=e.getYun(gender==='男'?1:0), dayuns=yun.getDaYun(11);
+    return {noTime:noTime,solar:s,lunar:l,ec:e,pillars:pillars,dm:dm,force:force,selfPct:selfPct,strong:strong,xi:xi,ji:ji,
+      gender:gender,dayuns:dayuns,startAge:yun.getStartYear(),
+      natalZhi:pillars.map(function(p){return p[1];})};
+  }
+  function curDaYun(c,year){var r=null;c.dayuns.forEach(function(d){if(d.getGanZhi()&&year>=d.getStartYear()&&year<=d.getEndYear())r=d;});return r;}
+
+  function wxScore(c,w,amp){ return c.xi.indexOf(w)>=0?amp:(c.ji.indexOf(w)>=0?-amp:0); }
+  var PILLAR_NAME=['年支','月支','日支','时支'];
+
+  // 流日评分
+  function scoreDay(c,y,m,d){
+    var l=Solar.fromYmd(y,m,d).getLunar();
+    var gz=l.getDayInGanZhiExact(), g=gz[0], z=gz[1];
+    var mgz=l.getMonthInGanZhiExact(), ygz=l.getYearInGanZhiExact();
+    var sc=60, why=[];
+    function add(v,t,pl){ if(v){sc+=v; why.push({v:v,t:t,p:pl||t});} }
+    var ssG=shishen(c.dm,g), ssZ=shishen(c.dm,HIDE[z][0]);
+    add(wxScore(c,gwx(g),9), '日干'+g+'（'+WX[gwx(g)]+'）为'+ssG+'，'+(c.xi.indexOf(gwx(g))>=0?'属喜用':'属忌神'), '今天的主能量是'+WXP[gwx(g)]+'，'+(c.xi.indexOf(gwx(g))>=0?'正是你的幸运元素':'对你来说偏消耗'));
+    add(wxScore(c,zwx(z),8), '日支'+z+'（'+WX[zwx(z)]+'）为'+ssZ+'，'+(c.xi.indexOf(zwx(z))>=0?'属喜用':'属忌神'), '今天的底层能量是'+WXP[zwx(z)]+'，'+(c.xi.indexOf(zwx(z))>=0?'也在帮你':'有点拖后腿'));
+    if(ganHe(g,c.dm)) add(5,'日干'+g+'合日主'+c.dm+'：有人缘、易得助力','今天容易遇到合拍的人');
+    c.natalZhi.forEach(function(nz,i){
+      var r=rel(z,nz); if(!r) return;
+      var isDay=i===2;
+      var tbl=isDay?{冲:-15,六合:8,半合:6,刑:-6,害:-5}:{冲:-6,六合:3,半合:3,刑:-3,害:-2};
+      add(tbl[r], z+nz+r+'（原局'+PILLAR_NAME[i]+(isDay?'·自身/伴侣宫':'')+'）', (isDay?{冲:'今天和你的本命能量正面相冲，情绪和亲密关系容易起波动',六合:'今天和你的本命能量特别合拍',半合:'今天和你的本命能量很合拍',刑:'和本命能量有摩擦，说话做事多留余地',害:'容易有小误会，重要的事多确认一遍'}:{冲:'和你出生时的某股能量有轻微冲突',六合:'和你出生时的能量有呼应',半合:'和你出生时的能量有呼应',刑:'有点小摩擦',害:'有点小摩擦'})[r]);
+    });
+    if(Math.abs(zi(z)-zi(ygz[1]))===6) add(-4,'日支'+z+'冲流年太岁'+ygz[1],'和今年的大环境有点逆着来');
+    if(GUIREN[c.dm].indexOf(z)>=0) add(8,'逢天乙贵人（'+z+'）：易遇贵人相助','贵人日：更容易得到别人帮忙');
+    if(WENCHANG[c.dm]===z) add(4,'逢文昌（'+z+'）：利学习、文书','学习和写作的灵感更足');
+    var mAdj=Math.round((wxScore(c,gwx(mgz[0]),2)+wxScore(c,zwx(mgz[1]),2)));
+    if(mAdj) add(mAdj,'流月'+mgz+(mAdj>0?'整体偏顺':'整体偏逆'),mAdj>0?'这个月整体顺风':'这个月整体逆风');
+    var tags=[];
+    if(taohua(c.natalZhi[0])===z||taohua(c.natalZhi[2])===z) tags.push('桃花');
+    if(yima(c.natalZhi[0])===z||yima(c.natalZhi[2])===z) tags.push('驿马');
+    sc=Math.max(15,Math.min(98,sc));
+    return {y:y,m:m,d:d,gz:gz,mgz:mgz,ygz:ygz,ssG:ssG,ssZ:ssZ,score:sc,level:level(sc),why:why,tags:tags,lunar:l,
+      chongDay: rel(z,c.natalZhi[2])==='冲'};
+  }
+  function level(s){
+    if(s>=82) return {k:5,n:'大吉',p:'很顺'};
+    if(s>=69) return {k:4,n:'吉',p:'顺利'};
+    if(s>=52) return {k:3,n:'平',p:'平稳'};
+    if(s>=41) return {k:2,n:'小心',p:'留神'};
+    return {k:1,n:'凶',p:'低调'};
+  }
+  var HOUR_RANGE=['23–01','01–03','03–05','05–07','07–09','09–11','11–13','13–15','15–17','17–19','19–21','21–23'];
+  function scoreHours(c,day){
+    var times=day.lunar.getTimes().slice(0,12);
+    return times.map(function(t,i){
+      var gz=t.getGanZhi(), g=gz[0], z=gz[1], sc=60, why=[];
+      function add(v,s,pl){ if(v){sc+=v; why.push({v:v,t:s,p:pl||s});} }
+      add(wxScore(c,gwx(g),10),'时干'+g+'·'+shishen(c.dm,g),'这个时段的主能量是'+WXP[gwx(g)]+'，'+(c.xi.indexOf(gwx(g))>=0?'对你有帮助':'对你偏消耗'));
+      add(wxScore(c,zwx(z),8),'时支'+z+'·'+shishen(c.dm,HIDE[z][0]),'这个时段的底层能量是'+WXP[zwx(z)]+'，'+(c.xi.indexOf(zwx(z))>=0?'对你有帮助':'对你偏消耗'));
+      if(Math.abs(zi(z)-zi(day.gz[1]))===6) add(-12,z+'冲当日'+day.gz[1]+'（日破时）','这个时段和当天的能量相冲');
+      var r=rel(z,c.natalZhi[2]);
+      if(r==='冲') add(-10,z+'冲原局日支'+c.natalZhi[2],'这个时段和你的本命能量相冲');
+      if(r==='六合'||r==='半合') add(6,z+c.natalZhi[2]+r,'这个时段和你的本命能量合拍');
+      if(GUIREN[c.dm].indexOf(z)>=0) add(6,'贵人时','贵人时段：容易得到帮助');
+      var luck=t.getTianShenLuck(); add(luck==='吉'?4:-4,'黄历'+t.getTianShen()+(luck==='吉'?'（黄道）':'（黑道）'),luck==='吉'?'传统黄历的吉时':'传统黄历的非吉时');
+      sc=Math.max(15,Math.min(98,sc));
+      return {i:i,gz:gz,range:HOUR_RANGE[i],name:z+'时',ss:shishen(c.dm,g),score:sc,level:level(sc),why:why,night:(i<=2)};
+    });
+  }
+  return {WXP:WXP,GAN:GAN,ZHI:ZHI,WX:WX,HIDE:HIDE,gwx:gwx,zwx:zwx,shishen:shishen,SHORT:SHORT,chart:chart,scoreDay:scoreDay,scoreHours:scoreHours,curDaYun:curDaYun,rel:rel};
+})();
+if(typeof module!=='undefined') module.exports=BZ;
+(function(){
+var $=function(id){return document.getElementById(id);};
+var WX=BZ.WX, WXC=['w0','w1','w2','w3','w4'];
+function cg(ch){var i=BZ.GAN.indexOf(ch);return 'w'+(i>=0?Math.floor(i/2):BZ.zwx(ch));}
+function gzHtml(gz){return '<span class="'+cg(gz[0])+'">'+gz[0]+'</span><span class="'+cg(gz[1])+'">'+gz[1]+'</span>';}
+
+var ADVICE={
+  正官:{h:'规矩与认可的一天，适合向上沟通。',do:['向上汇报、面谈领导','办正式手续、提交材料','面试、考试、答辩'],dont:['迟到、越级','违规操作走捷径']},
+  七杀:{h:'压力和挑战偏多，适合集中火力攻坚。',do:['处理棘手难题、截止冲刺','运动释放压力','果断拍板小事'],dont:['与人正面冲突','冒险投资、熬夜']},
+  正印:{h:'得人帮扶，适合学习、写东西、充电。',do:['学习进修、写方案','请教导师、长辈','休息调养'],dont:['一味拖延','事事依赖别人']},
+  偏印:{h:'思考力强但容易多想，适合独处深挖。',do:['独立研究、复盘','冥想、整理思路','做需要专注的活'],dont:['疑神疑鬼、临时变卦','冷落身边人']},
+  比肩:{h:'同伴运旺，适合协作、约朋友。',do:['团队协作、对齐目标','约朋友、运动','自己能做主的事'],dont:['合伙分钱','固执己见']},
+  劫财:{h:'竞争与开销并存，看好钱包和情绪。',do:['竞争性任务','社交破冰'],dont:['借钱给人、冲动消费','大额投资、签担保']},
+  食神:{h:'状态松弛，有创意，适合输出与享受。',do:['创作、写作、做内容','分享、带新人','美食和休闲'],dont:['过度放松误事']},
+  伤官:{h:'表达欲强、点子多，注意说话分寸。',do:['提案、演讲、展示作品','头脑风暴、做创新'],dont:['顶撞上级、口舌是非','草率签合同']},
+  正财:{h:'踏实收获的一天，适合收尾和理财。',do:['整理账目、理财规划','交付、收尾、写周报','按计划执行'],dont:['投机、追高']},
+  偏财:{h:'机会与人脉活跃，适合谈合作谈钱。',do:['谈合作、谈薪谈价','拓展人脉、商务应酬','尝试新渠道'],dont:['赌性投资','过度承诺']}
+};
+var THEME={正官:['认可日','Recognition'],七杀:['挑战日','Challenge'],正印:['充电日','Recharge'],偏印:['深思日','Reflection'],比肩:['伙伴日','Teamwork'],劫财:['守财日','Guard your wallet'],食神:['享受日','Enjoy'],伤官:['表达日','Express'],正财:['收获日','Harvest'],偏财:['机遇日','Opportunity']};
+var THEME_DESC={正官:'规则、上级、名声相关的事更顺',七杀:'压力大但能逼出效率',正印:'适合学习、休养、被照顾',偏印:'适合独处、钻研、想清楚',比肩:'朋友同事给力，适合合作',劫财:'花钱和竞争多，看好钱包',食神:'心情放松，适合创作和享受',伤官:'表达欲强，点子多，注意说话分寸',正财:'踏实付出能看到回报',偏财:'意外机会和人脉活跃'};
+var ARCH={甲:['大树','Oak','正直、有主见、向上生长'],乙:['藤花','Vine','柔韧、亲和、善于借力'],丙:['太阳','Sun','热情、外向、照亮别人'],丁:['烛光','Candle','细腻、专注、温暖身边的人'],戊:['高山','Mountain','稳重、可靠、包容'],己:['田园','Field','务实、会照顾人、有耐心'],庚:['宝剑','Sword','果断、讲义气、行动力强'],辛:['珠宝','Jewel','精致、敏锐、追求品质'],壬:['大海','Ocean','聪明、开阔、爱自由'],癸:['雨露','Rain','直觉强、温柔、善于观察']};
+var ACT={正官:'汇报',七杀:'攻坚',正印:'充电',偏印:'深思',比肩:'协作',劫财:'守财',食神:'创作',伤官:'表达',正财:'收尾',偏财:'谈事'};
+function actOf(x){return x.level.k<=1?'休整':ACT[x.ssG];}
+function fest(x){var s=x.lunar.getSolar();var f=x.lunar.getFestivals().concat(s.getFestivals());return f[0]||'';}
+function lunarLabel(x){var j=x.lunar.getJieQi(),f=fest(x);if(f)return {t:f,c:'fe'};if(j)return {t:j,c:'jq'};return {t:x.lunar.getDay()===1?(x.lunar.getMonthInChinese()+'月'):x.lunar.getDayInChinese(),c:''};}
+var SYM={甲:'树',乙:'藤',丙:'日',丁:'烛',戊:'山',己:'田',庚:'剑',辛:'珠',壬:'海',癸:'雨'};
+var GLOW=['#5FD08A','#FF9A3C','#E2B45A','#F1D9A0','#6FA8FF'];
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var PLAN_TYPES={汇报:{ss:['正官','正印'],tip:'向上沟通'},面试:{ss:['正官','正印'],tip:'被认可'},谈判:{ss:['偏财','正财'],tip:'谈钱谈条件'},签约:{ss:['正财','正官'],tip:'落定'},约会:{ss:['食神','偏财'],tag:'桃花',tip:'人缘'},出行:{ss:['食神','比肩'],tag:'驿马',tip:'出门'},发布:{ss:['伤官','食神'],tip:'表达'},搬家:{ss:['正财','正印'],tip:'安稳'},休息:{ss:['正印','食神'],tip:'充电'}};
+function specials(x){
+  var b=state.birth.date.split('-').map(Number), r=[];
+  if(x.m===b[1]&&x.d===b[2]) r.push({k:'bd',t:'生日'});
+  if(Math.abs(x.lunar.getMonth())===Math.abs(C.lunar.getMonth())&&x.lunar.getDay()===C.lunar.getDay()) r.push({k:'bd',t:'农历生日'});
+  if(x.gz===C.pillars[2]) r.push({k:'me',t:'本命日'});
+  if(x.why.some(function(w){return /贵人日/.test(w.p);})) r.push({k:'gr',t:'贵人日'});
+  if(x.chongDay) r.push({k:'cg',t:'本命冲'});
+  return r;
+}
+function plansFor(y,m,d){return (state.plans||[]).filter(function(p){return p.date===y+'-'+m+'-'+d;});}
+var WXEN=['Wood','Fire','Earth','Metal','Water'];
+function lvName(l){return state.pro?l.n:l.p;}
+function hhmm(i){var a=(i*2+23)%24,b=(i*2+1)%24;return String(a).padStart(2,'0')+':00–'+String(b).padStart(2,'0')+':00';}
+var HOUR_TIP={正官:'适合汇报沟通',七杀:'适合攻坚冲刺',正印:'适合学习、写方案',偏印:'适合独处思考',比肩:'适合协作对齐',劫财:'少花钱、少争执',食神:'适合创作、放松',伤官:'适合表达，慎言',正财:'适合处理钱和收尾',偏财:'适合谈事、见人'};
+
+var state={pro:false,birth:{date:'1990-10-19',time:'10:00',gender:'女',name:'Claire'},plans:null,xiOverride:null,y:0,m:0,sel:null,tab:'cal'};
+try{var sv=JSON.parse(localStorage.getItem('bzcal')||'null'); if(sv&&sv.birth){state.birth=sv.birth;state.xiOverride=sv.xiOverride||null;state.plans=sv.plans||null;}}catch(e){}
+function save(){try{localStorage.setItem('bzcal',JSON.stringify({birth:state.birth,xiOverride:state.xiOverride,plans:state.plans}));}catch(e){}}
+var now=new Date(); state.y=now.getFullYear(); state.m=now.getMonth()+1; state.sel=now.getDate();
+try{var tb=localStorage.getItem('bzcal-tab'); if(tb) state.tab=tb; state.pro=localStorage.getItem('bzcal-pro')==='1';}catch(e){}
+
+var C;
+function build(){
+  var d=state.birth.date.split('-').map(Number), t=state.birth.time.split(':').map(Number);
+  C=BZ.chart(d[0],d[1],d[2],t[0],t[1],state.birth.gender);
+  if(state.xiOverride){C.xi=state.xiOverride.xi.slice();C.ji=state.xiOverride.ji.slice();}
+}
+function renderStrip(){
+  document.body.classList.toggle('pro',state.pro);
+  $('proBtn').setAttribute('aria-pressed',state.pro?'true':'false');
+  var s0=C.solar;
+  $('whoSub').textContent=s0.getYear()+'年'+s0.getMonth()+'月'+s0.getDay()+'日 '+state.birth.time+(state.pro?' · '+C.lunar.getTimeZhi()+'时':'')+' · '+state.birth.gender;
+  if(!state.pro){
+    var a=ARCH[C.dm], w=BZ.gwx(C.dm), nm=state.birth.name||'你';
+    document.documentElement.style.setProperty('--glow',GLOW[w]);
+    $('strip').innerHTML='<div class="hero"><div class="hsym">'+SYM[C.dm]+'</div><div class="htx"><span class="hk">'+(state.birth.name?esc(state.birth.name)+' 的':'你的')+'个人行动日历</span><b>'+WX[w]+' · '+a[0]+'型</b><span class="hen">The '+a[1]+'</span><span class="hl">'+a[2]+'</span><span class="hl2">幸运元素 '+C.xi.map(function(i){return WX[i];}).join(' · ')+'</span></div></div>';
+    $('whoSub').textContent='';
+    return;
+    $('strip').innerHTML='<div class="profile"><div class="glyph '+cg(C.dm)+'">'+WX[w]+'</div><div class="pt"><span class="muted" style="font-size:12px">你的本命能量</span><b>'+WX[w]+' · '+a[0]+'型 <span class="en">'+WXEN[w]+' · '+a[1]+'</span></b><span style="font-size:12.5px">'+a[2]+'</span><div class="lucky"><span class="muted" style="background:none;padding:0;font-weight:500">幸运元素</span>'+C.xi.map(function(i){return '<span class="'+WXC[i]+'">'+WX[i]+' '+WXEN[i]+'</span>';}).join('')+'</div></div></div>';
+    return;
+  }
+  var lab=['年柱','月柱','日柱','时柱'];
+  var h=C.pillars.map(function(p,i){
+    var ss=i===2?(state.birth.gender==='女'?'元女':'元男'):BZ.shishen(C.dm,p[0]);
+    return '<div class="col"><span class="lab">'+lab[i]+'</span><span class="lab">'+ss+'</span><span class="gz">'+p[0].replace(/./,function(c){return '<span class="'+cg(c)+'">'+c+'</span>';})+'</span><span class="gz"><span class="'+cg(p[1])+'">'+p[1]+'</span></span></div>';
+  }).join('');
+  h+='<div class="dmtag">日主 <b class="'+cg(C.dm)+'">'+C.dm+WX[BZ.gwx(C.dm)]+'</b><br>'+(C.strong?'偏强':'偏弱')+' · 喜 '+C.xi.map(function(i){return '<span class="'+WXC[i]+'">'+WX[i]+'</span>';}).join('')+(state.xiOverride?'（自定）':'')+'</div>';
+  $('strip').innerHTML=h;
+}
+function dim(y,m){return new Date(y,m,0).getDate();}
+var monthCache=null;
+function renderMonth(){
+  var y=state.y,m=state.m,n=dim(y,m);
+  $('mTitle').textContent=y+'年'+m+'月';
+  var days=[];for(var d=1;d<=n;d++) days.push(BZ.scoreDay(C,y,m,d));
+  monthCache=days;
+  if(state.sel>n) state.sel=n;
+  // 月信息：流年、流月与节气
+  var jq=[]; days.forEach(function(x){var j=x.lunar.getJieQi(); if(j) jq.push(x.d+'日'+j);});
+  var mgzs=[]; days.forEach(function(x){if(mgzs.indexOf(x.mgz)<0) mgzs.push(x.mgz);});
+  if(!state.pro){
+    var mv=days[Math.min(14,days.length-1)].why.filter(function(w){return /这个月/.test(w.p);})[0];
+    var good=days.filter(function(x){return x.level.k>=4;}).length, low=days.filter(function(x){return x.level.k<=2;}).length;
+    $('mInfo').innerHTML='<span>本月 <b>'+good+'</b> 天顺利、<b>'+low+'</b> 天需要留神'+(mv?'，'+mv.p:'')+'</span><span>换季节点 '+(jq.length?jq.join('、'):'无')+'</span>';
+  } else
+  $('mInfo').innerHTML='<span>流年 <b>'+gzHtml(days[0].ygz)+'</b> '+BZ.shishen(C.dm,days[0].ygz[0])+'</span><span>流月 '+mgzs.map(function(g){return '<b>'+gzHtml(g)+'</b> '+BZ.shishen(C.dm,g[0]);}).join(' → ')+'</span><span>节气 '+jq.join('、')+'</span>';
+  var first=new Date(y,m-1,1).getDay(); first=(first+6)%7;
+  var h=['一','二','三','四','五','六','日'].map(function(w){return '<div class="wk">'+w+'</div>';}).join('');
+  for(var i=0;i<first;i++) h+='<div class="cell pad"></div>';
+  var isThisMonth=(now.getFullYear()===y&&now.getMonth()+1===m);
+  days.forEach(function(x){
+    var j=x.lunar.getJieQi();
+    var ld=x.lunar.getDay()===1?(x.lunar.getMonthInChinese()+'月'):x.lunar.getDayInChinese();
+    var cls='cell lv'+x.level.k+(isThisMonth&&x.d===now.getDate()?' today':'')+(x.d===state.sel?' sel':'');
+    if(state.pro) h+='<button type="button" class="'+cls+'" data-d="'+x.d+'" aria-label="'+m+'月'+x.d+'日 '+x.gz+' '+x.level.n+'"><span class="dn">'+x.d+'</span><span class="ln'+(j?' jq':'')+'">'+(j||ld)+'</span><span class="gz">'+gzHtml(x.gz)+'</span><span class="ss">'+BZ.SHORT[x.ssG]+'·'+x.level.n+'</span></button>';
+    else {var ll=lunarLabel(x);
+      var sp=specials(x), pl=plansFor(y,m,x.d), main=sp.filter(function(z){return z.k==='bd'||z.k==='me';})[0];
+      var dots=sp.filter(function(z){return z.k==='gr'||z.k==='cg';}).map(function(z){return '<i class="dot '+z.k+'"></i>';}).join('');
+      h+='<button type="button" class="c2 k'+x.level.k+(isThisMonth&&x.d===now.getDate()?' today':'')+(x.d===state.sel?' sel':'')+(main?' sp-'+main.k:'')+'" data-d="'+x.d+'" aria-label="'+m+'月'+x.d+'日 农历'+x.lunar.getDayInChinese()+' '+sp.map(function(z){return z.t;}).join(' ')+' 个人：'+actOf(x)+' '+x.level.p+(pl.length?' 计划：'+esc(pl[0].name):'')+'">'+(dots?'<span class="dots">'+dots+'</span>':'')+'<span class="dn">'+x.d+'</span><span class="ln '+(main?'spl':ll.c)+'">'+(main?main.t:ll.t)+'</span>'+(pl.length?'<span class="act plan">'+esc(pl[0].name).slice(0,4)+'</span>':'<span class="act">'+actOf(x)+'</span>')+'</button>';}
+  });
+  $('grid').innerHTML=h;
+  renderPicks(days); renderWeek(); if(!state.pro){renderOpening(days);} renderPlans(days);
+  renderDay();
+}
+function renderOpening(days){
+  var nm=state.birth.name||'', mid=days[Math.min(14,days.length-1)], mg=mid.mgz, ss=BZ.shishen(C.dm,mg[0]);
+  var title=THEME[ss][0].replace('日','月');
+  var good=days.filter(function(x){return x.level.k>=4;}), low=days.filter(function(x){return x.level.k<=2;});
+  var mw=BZ.gwx(mg[0]), helps=C.xi.indexOf(mw)>=0;
+  var cnt={};good.forEach(function(x){var a=actOf(x);cnt[a]=(cnt[a]||0)+1;});
+  var topAct=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a];}).slice(0,2);
+  var best=days.slice().sort(function(a,b){return b.score-a.score;}).slice(0,3).sort(function(a,b){return a.d-b.d;});
+  var sps=[];days.forEach(function(x){specials(x).forEach(function(z){if(z.k!=='gr')sps.push(x.d+'日'+z.t);});});
+  var grs=days.filter(function(x){return specials(x).some(function(z){return z.k==='gr';});}).map(function(x){return x.d+'日';});
+  $('opening').innerHTML='<span class="ok">'+state.m+' 月开篇 · '+THEME[ss][1]+'</span><h2>'+(nm?esc(nm)+'，':'')+'这是你的「'+title+'」</h2>'
+   +'<p>这个月的大环境是'+WX[mw]+'能量，'+(helps?'正好补你所需，整体顺风':'对你偏消耗，节奏放慢一点更好')+'。你有 <b>'+good.length+'</b> 天顺利日，最适合'+topAct.map(function(a){return '「'+a+'」';}).join('和')+'；有 <b>'+low.length+'</b> 天要留神，重要的事尽量别排在那几天。</p>'
+   +'<div class="ogrid"><div><span>本月你的高光日</span>'+best.map(function(x){return '<button type="button" class="chip" data-d="'+x.d+'">'+x.d+'日 '+actOf(x)+'</button>';}).join('')+'</div>'
+   +(grs.length?'<div><span>贵人日 · 适合求助和见人</span><b>'+grs.join('、')+'</b></div>':'')
+   +(sps.length?'<div><span>你的特殊日子</span><b>'+sps.join('、')+'</b></div>':'')+'</div>';
+}
+function recommend(days,type){
+  var pt=PLAN_TYPES[type], isCur=(now.getFullYear()===state.y&&now.getMonth()+1===state.m);
+  return days.filter(function(x){return !(isCur&&x.d<now.getDate())&&!x.chongDay;}).map(function(x){
+    var s=x.score+(pt.ss.indexOf(x.ssG)>=0?15:0)+(pt.tag&&x.tags.indexOf(pt.tag)>=0?8:0);return {x:x,s:s};
+  }).sort(function(a,b){return b.s-a.s;}).slice(0,3).map(function(o){return o.x;}).sort(function(a,b){return a.d-b.d;});
+}
+function renderPlans(days){
+  if(state.plans===null){state.plans=[{id:1,name:'年终述职',type:'汇报',date:null,example:true}];}
+  var list=state.plans.filter(function(p){return !p.date||p.date.indexOf(state.y+'-'+state.m+'-')===0;});
+  $('planList').innerHTML=list.length?list.map(function(p){
+    var rec=recommend(days,p.type);
+    return '<div class="plan"><div class="ph"><b>'+esc(p.name)+'</b><span class="ptag">'+p.type+'</span>'+(p.example?'<span class="ptag ex">示例</span>':'')+'<button type="button" class="del" data-del="'+p.id+'" aria-label="删除计划">删除</button></div>'
+      +(p.date?'<div class="pd">已定在 <b>'+p.date.split('-')[1]+'月'+p.date.split('-')[2]+'日</b>，日历里已标出。<button type="button" class="link" data-unpin="'+p.id+'">改日子</button></div>'
+      :'<div class="pd">为你挑的日子（点一下就定下）：</div><div class="chips">'+(rec.length?rec.map(function(x){return '<button type="button" class="chip pick2" data-pin="'+p.id+'" data-on="'+x.d+'">'+x.d+'日 周'+'日一二三四五六'[new Date(x.y,x.m-1,x.d).getDay()]+' · '+x.level.p+(PLAN_TYPES[p.type].ss.indexOf(x.ssG)>=0?' · '+THEME[x.ssG][0]:'')+'</button>';}).join(''):'<span class="chip none">本月剩下的日子都不太合适，看看下个月</span>')+'</div>');
+  }).join('')+'</div>':'<p class="note" style="margin:0">还没有计划。在上面写下要做的事，日历会帮你挑日子。</p>';
+}
+function renderWeek(){
+  var h='';
+  for(var k=0;k<7;k++){
+    var dt=new Date(now.getFullYear(),now.getMonth(),now.getDate()+k);
+    var x=BZ.scoreDay(C,dt.getFullYear(),dt.getMonth()+1,dt.getDate());
+    var ll=lunarLabel(x);
+    h+='<button type="button" class="wd k'+x.level.k+'" data-go="'+x.y+'-'+x.m+'-'+x.d+'"><span class="w">'+(k===0?'今天':'周'+'日一二三四五六'[dt.getDay()])+'</span><span class="d">'+x.m+'/'+x.d+'</span><span class="l">'+ll.t+'</span><span class="a">'+actOf(x)+'</span><span class="lv">'+lvName(x.level)+'</span></button>';
+  }
+  $('week').innerHTML=h;
+}
+function renderPicks(days){
+  var cats=[
+    {k:'汇报·见领导',f:function(x){return (x.ssG==='正官'||x.ssG==='正印')&&x.level.k>=4;}},
+    {k:'谈钱·谈合作',f:function(x){return (x.ssG==='正财'||x.ssG==='偏财')&&x.level.k>=4;}},
+    {k:'表达·创作',f:function(x){return (x.ssG==='食神'||x.ssG==='伤官')&&x.level.k>=4;}},
+    {k:'整体最顺',f:function(x){return x.level.k===5;}},
+    {k:'适合休息调整',f:function(x){return x.level.k<=1||x.chongDay;}}
+  ];
+  $('picks').innerHTML=cats.map(function(c){
+    var hit=days.filter(c.f);
+    return '<div class="pick"><span class="k">'+c.k+'</span><span class="chips">'+(hit.length?hit.map(function(x){return '<button type="button" class="chip" data-d="'+x.d+'">'+x.d+'日 '+(state.pro?x.gz:'周'+'日一二三四五六'[new Date(x.y,x.m-1,x.d).getDay()])+'</button>';}).join(''):'<span class="chip none">本月没有</span>')+'</span></div>';
+  }).join('');
+}
+function renderDay(){
+  var x=monthCache[state.sel-1], a=ADVICE[x.ssG];
+  var wk='日一二三四五六'[new Date(x.y,x.m-1,x.d).getDay()];
+  var lun=x.lunar;
+  var dos=a.do.slice(), donts=a.dont.slice();
+  if(x.chongDay){donts.unshift(state.pro?'重要决定、搬家签约（日支逢冲）':'做重大决定、搬家、签约');}
+  if(x.tags.indexOf('驿马')>=0) dos.push('出差、出行');
+  if(x.tags.indexOf('桃花')>=0) dos.push('约会、社交');
+  if(x.level.k<=2){dos=dos.slice(0,2);dos.push('早点休息，降低预期');}
+  var hrs=BZ.scoreHours(C,x);
+  var dayHrs=hrs.filter(function(t){return !t.night;});
+  var top=dayHrs.slice().sort(function(a,b){return b.score-a.score;}).slice(0,2);
+  var worst=dayHrs.slice().sort(function(a,b){return a.score-b.score;})[0];
+  var ll=lunarLabel(x), f=fest(x), jq=x.lunar.getJieQi();
+  var h=state.pro?'':'<div class="calrow"><div class="bigd">'+x.d+'</div><div class="daymeta"><span class="t">'+x.y+'年'+x.m+'月'+x.d+'日 星期'+wk+'</span><span class="muted">农历'+lun.getMonthInChinese()+'月'+lun.getDayInChinese()+(jq?' · '+jq:'')+(f?' · '+f:'')+'</span><span class="muted" style="font-size:12px">通用黄历 宜 '+lun.getDayYi().slice(0,4).join(' ')+' ｜ 忌 '+lun.getDayJi().slice(0,3).join(' ')+'</span></div></div>'
+    +(specials(x).length||plansFor(x.y,x.m,x.d).length?'<div class="spbar">'+specials(x).map(function(z){return '<span class="sp '+z.k+'">'+z.t+'</span>';}).join('')+plansFor(x.y,x.m,x.d).map(function(p){return '<span class="sp pl">计划：'+esc(p.name)+'</span>';}).join('')+'</div>':'')
+    +'<div class="mylayer k'+x.level.k+'"><div class="mlhead"><span class="mltitle">'+(state.birth.name?esc(state.birth.name)+'，':'')+'今天'+actOf(x)+'</span><span class="lvpill k'+x.level.k+'">'+x.level.p+' · 能量 '+x.score+'</span></div><span class="muted" style="font-size:12.5px">'+THEME[x.ssG][0]+'（'+THEME[x.ssG][1]+'）：'+THEME_DESC[x.ssG]+'</span>'
+    +'<div class="slots">'+top.map(function(t,i){return '<div class="slot"><b>'+(i===0?'最佳时段':'次佳时段')+'</b><span class="tt">'+hhmm(t.i)+'</span><span>'+HOUR_TIP[t.ss]+'</span></div>';}).join('')
+    +(worst&&worst.level.k<=3?'<div class="slot bad"><b>尽量避开</b><span class="tt">'+hhmm(worst.i)+'</span><span>'+(worst.why.filter(function(w){return w.v<0;}).map(function(w){return w.p;})[0]||'能量偏低')+'</span></div>':'')+'</div></div>';
+  if(state.pro) h+='<div class="dayhead"><div class="daygz">'+gzHtml(x.gz).replace('</span><span','</span><span')+'</div><div class="daymeta"><span class="t">'+x.m+'月'+x.d+'日 周'+wk+'</span><span class="muted" style="font-size:12px">农历'+lun.getMonthInChinese()+'月'+lun.getDayInChinese()+' · '+x.mgz+'月 · '+x.ssG+'日（支藏'+x.ssZ+'）</span><span class="lvpill k'+x.level.k+'">'+x.level.n+' · '+x.score+'分</span></div></div>';
+  h+='<div class="headline">'+(x.chongDay?(state.pro?'日支冲自身，':'今天和你的本命能量相冲，')+'情绪和关系易起波动。':'')+a.h+'</div>';
+  if(x.tags.length) h+='<div>'+x.tags.map(function(t){return '<span class="tag">'+(state.pro?t:{桃花:'人缘旺',驿马:'利出行'}[t])+'</span>';}).join('')+'</div>';
+  h+='<div class="dos"><div><b style="color:var(--l5)">适合</b><ul>'+dos.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ul></div><div><b style="color:var(--l2)">少做</b><ul>'+donts.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ul></div></div>';
+  h+=(state.pro?'<div>':'<details><summary>为什么这么建议</summary><div style="margin-top:6px">')+'<h3 style="margin-bottom:6px'+(state.pro?'':';display:none')+'">为什么是这个结果</h3><ul class="why"><li><span class="v">60</span><span class="muted">'+(state.pro?'基础分':'每天的起点')+'</span></li>'+x.why.map(function(w){return '<li><span class="v '+(w.v>0?'p':'n')+'">'+(w.v>0?'+':'−')+Math.abs(w.v)+'</span><span>'+w.p+(state.pro?'<span class="tech">'+w.t+'</span>':'')+'</span></li>';}).join('')+'</ul></div>'+(state.pro?'':'</details>');
+  if(state.pro) h+='<details><summary>当天通用黄历宜忌（与个人无关）</summary><p><b>宜</b> '+lun.getDayYi().join(' ')+'</p><p><b>忌</b> '+lun.getDayJi().join(' ')+'</p></details>';
+  $('dayCard').innerHTML=h;
+  var isToday=(now.getFullYear()===x.y&&now.getMonth()+1===x.m&&now.getDate()===x.d);
+  var curIdx=Math.floor(((now.getHours()+1)%24)/2);
+  var best=hrs.filter(function(t){return !t.night;}).slice().sort(function(a,b){return b.score-a.score;}).slice(0,2).map(function(t){return t.name;});
+  var bestT=hrs.filter(function(t){return !t.night;}).slice().sort(function(a,b){return b.score-a.score;}).slice(0,2).map(function(t){return hhmm(t.i);});
+  $('hoursTitle').textContent=state.pro?'十二时辰 · '+x.m+'月'+x.d+'日（白天最佳：'+best.join('、')+'）':'今日行动时间表 · '+x.m+'月'+x.d+'日（白天最佳 '+bestT.join('、')+'）';
+  $('hours').classList.toggle('simple',!state.pro);
+  $('hours').innerHTML=hrs.map(function(t){
+    var tip=t.night?'休息为主':HOUR_TIP[t.ss];
+    if(!t.night&&t.level.k<=2) tip='能量偏低，安排例行小事';
+    var bad=t.why.filter(function(w){return w.v<=-10&&/冲/.test(w.t);}).map(function(w){return state.pro?w.t:w.p;})[0];
+    if(!state.pro){var th=THEME[t.ss][0].replace('日','');
+      return '<div class="hr'+(isToday&&t.i===curIdx?' now':'')+'"><span class="tm2">'+hhmm(t.i).replace('–','<small>至 ')+'</small></span><span class="bd"><span class="bar"><i class="k'+t.level.k+'" style="width:'+t.score+'%"></i></span><span class="tx"><em style="color:var(--l'+t.level.k+')">'+t.level.p+'</em>'+th+' · '+tip+(bad?' <span class="muted">（'+bad+'）</span>':'')+'</span></span></div>';}
+    return '<div class="hr'+(isToday&&t.i===curIdx?' now':'')+'"><span class="tm"><b>'+t.name+'</b>'+t.range+'</span><span class="hz">'+gzHtml(t.gz)+'</span><span class="bd"><span class="bar"><i class="k'+t.level.k+'" style="width:'+t.score+'%"></i></span><span class="tx"><em style="color:var(--l'+t.level.k+')">'+t.level.n+'</em>'+t.ss+' · '+tip+(bad?' <span class="muted">（'+bad+'）</span>':'')+'</span></span></div>';
+  }).join('');
+}
+var DISHI_START={甲:11,丙:2,戊:2,庚:5,壬:8,乙:6,丁:9,己:9,辛:0,癸:3};
+var DS=['长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝','胎','养'];
+function dishi(g,z){var s=DISHI_START[g],zi=BZ.ZHI.indexOf(z),yang=BZ.GAN.indexOf(g)%2===0;var k=yang?(zi-s+12)%12:(s-zi+12)%12;return DS[k];}
+function renderPan(){
+  var a0=ARCH[C.dm], w0=BZ.gwx(C.dm);
+  $('profileCard').innerHTML='<h3>你的能量档案</h3><p style="margin:0;font-size:14px">你的本命能量是 <b class="'+cg(C.dm)+'">'+WX[w0]+'（'+WXEN[w0]+'）</b>，形象是「'+a0[0]+'」：'+a0[2]+'。</p><p style="margin:0;font-size:14px">你身上'+WX[w0]+'的能量'+(C.strong?'偏多，需要别的能量来平衡':'偏少，需要同类能量来补充')+'，所以你的幸运元素是 '+C.xi.map(function(i){return '<b class="'+WXC[i]+'">'+WX[i]+'</b>';}).join('、')+'。日历里遇到这些元素当家的日子，会更顺。</p>';
+  var x=monthCache[state.sel-1];
+  var dy=BZ.curDaYun(C,x.y);
+  var cols=[['年柱',C.pillars[0]],['月柱',C.pillars[1]],['日柱',C.pillars[2]],['时柱',C.pillars[3]],['大运',dy?dy.getGanZhi():'—'],['流年',x.ygz],['流月',x.mgz],['流日',x.gz]];
+  function row(name,fn){return '<tr><td class="rl">'+name+'</td>'+cols.map(function(c,i){return '<td'+(i===4?' class="sep"':'')+'>'+(c[1]==='—'?'—':fn(c[1],i))+'</td>';}).join('')+'</tr>';}
+  var h='<table><tr><th></th>'+cols.map(function(c,i){return '<th'+(i===4?' class="sep"':'')+'>'+c[0]+'</th>';}).join('')+'</tr>';
+  h+=row('主星',function(p,i){return i===2?'<span class="muted">日主</span>':BZ.shishen(C.dm,p[0]);});
+  h+=row('天干',function(p){return '<span class="big '+cg(p[0])+'">'+p[0]+'</span>';});
+  h+=row('地支',function(p){return '<span class="big '+cg(p[1])+'">'+p[1]+'</span>';});
+  h+=row('藏干',function(p){return '<div class="hide">'+BZ.HIDE[p[1]].split('').map(function(g){return '<span class="'+cg(g)+'">'+g+BZ.SHORT[BZ.shishen(C.dm,g)]+'</span>';}).join('<br>')+'</div>';});
+  h+=row('地势',function(p){return dishi(C.dm,p[1]);});
+  h+=row('自坐',function(p){return dishi(p[0],p[1]);});
+  h+='</table>';
+  $('pan').innerHTML=h+'<p class="note">流日跟随「流日历」中选中的日期（'+x.m+'月'+x.d+'日）。'+(dy?'当前大运 '+dy.getGanZhi()+'（'+dy.getStartYear()+'–'+dy.getEndYear()+'）。':'')+C.startAge+' 岁起运。</p>';
+  var tot=C.force.reduce(function(a,b){return a+b;},0);
+  var fh='<div class="force">';
+  C.force.forEach(function(v,i){
+    var st=C.xi.indexOf(i)>=0?'xi':(C.ji.indexOf(i)>=0?'ji':'');
+    fh+='<div class="r"><span class="'+WXC[i]+'" style="font-weight:700">'+WX[i]+(state.pro?'':'<br><span style="font-size:10px;font-weight:400" class="muted">'+WXEN[i]+'</span>')+'</span><span class="bar"><i style="width:'+Math.round(v/tot*100)+'%;background:var(--'+['wood','fire','earth','metal','water'][i]+')"></i></span><span class="muted" style="font-variant-numeric:tabular-nums">'+Math.round(v/tot*100)+'%</span><button type="button" class="xiset '+st+'" data-w="'+i+'">'+(st==='xi'?(state.pro?'喜用':'幸运'):st==='ji'?(state.pro?'忌':'消耗'):'中性')+'</button></div>';
+  });
+  fh+='</div><p class="note">'+(state.pro?'日主'+C.dm+WX[BZ.gwx(C.dm)]+'，同类加生扶占 '+Math.round(C.selfPct*100)+'%，判为'+(C.strong?'偏强':'偏弱')+'。点右侧按钮可在「喜用 → 忌 → 中性」之间切换':'如果你从命理师那里知道了自己的幸运元素，可以点右侧按钮在「幸运 → 消耗 → 中性」之间切换')+'，日历会按你的设置重算。'+(state.xiOverride?' <button type="button" class="pill-btn" id="resetXi" style="padding:2px 10px;font-size:12px">恢复自动</button>':'')+'</p>';
+  $('force').innerHTML=fh;
+}
+function setTab(t){
+  state.tab=t; try{localStorage.setItem('bzcal-tab',t);}catch(e){}
+  ['cal','pan','rule'].forEach(function(k){var v=$('v-'+k);v.hidden=k!==t; if(k===t) v.style.display='flex'; $('t-'+k).setAttribute('aria-selected',k===t?'true':'false');});
+  if(t==='pan') renderPan(); $('panCard').hidden=!state.pro;
+}
+function renderThemes(){
+  $('themeTable').innerHTML=['正财','偏财','正官','七杀','正印','偏印','食神','伤官','比肩','劫财'].map(function(k){return '<tr><td>'+THEME[k][0]+'<br><span class="muted" style="font-weight:400;font-size:11px">'+THEME[k][1]+'</span></td><td>'+THEME_DESC[k]+'。'+ADVICE[k].do.slice(0,2).join('、')+'。'+(state.pro?'<span class="tech muted" style="display:block;font-size:11px">专业名：'+k+'</span>':'')+'</td></tr>';}).join('');
+  [].forEach.call(document.querySelectorAll('[data-lv]'),function(e){var k=+e.getAttribute('data-lv');e.textContent=state.pro?['','凶','小心','平','吉','大吉'][k]:['','低调','留神','平稳','顺利','很顺'][k];});
+  $('legendNote').textContent=state.pro?'· 格内：日期 / 农历或节气 / 日柱 / 日干十神':'· 格内：阳历 / 农历·节气·节日 / 你的当日行动';
+}
+function all(){renderThemes();build();renderStrip();renderMonth();$('panCard').hidden=!state.pro;if(state.tab==='pan')renderPan();}
+
+// 事件
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-d]'); if(b){state.sel=+b.getAttribute('data-d');renderMonth();
+    if(b.classList.contains('chip')) $('dayCard').scrollIntoView({behavior:'smooth',block:'start'});return;}
+  var pn=e.target.closest('[data-pin]'); if(pn){var id=+pn.getAttribute('data-pin');state.plans.forEach(function(p){if(p.id===id){p.date=state.y+'-'+state.m+'-'+pn.getAttribute('data-on');}});state.sel=+pn.getAttribute('data-on');save();renderMonth();return;}
+  var up=e.target.closest('[data-unpin]'); if(up){var id2=+up.getAttribute('data-unpin');state.plans.forEach(function(p){if(p.id===id2)p.date=null;});save();renderMonth();return;}
+  var dl=e.target.closest('[data-del]'); if(dl){var id3=+dl.getAttribute('data-del');state.plans=state.plans.filter(function(p){return p.id!==id3;});save();renderMonth();return;}
+  var g=e.target.closest('[data-go]'); if(g){var q=g.getAttribute('data-go').split('-').map(Number);state.y=q[0];state.m=q[1];state.sel=q[2];renderMonth();$('dayCard').scrollIntoView({behavior:'smooth',block:'start'});return;}
+  var t=e.target.closest('[data-tab]'); if(t){setTab(t.getAttribute('data-tab'));return;}
+  var w=e.target.closest('.xiset'); if(w){
+    var i=+w.getAttribute('data-w'), xi=C.xi.slice(), ji=C.ji.slice();
+    if(xi.indexOf(i)>=0){xi.splice(xi.indexOf(i),1);ji.push(i);} else if(ji.indexOf(i)>=0){ji.splice(ji.indexOf(i),1);} else xi.push(i);
+    state.xiOverride={xi:xi,ji:ji}; save(); all(); return;}
+  if(e.target.id==='resetXi'){state.xiOverride=null;save();all();}
+});
+$('prevM').onclick=function(){state.m--; if(state.m<1){state.m=12;state.y--;} state.sel=1; if(state.y===now.getFullYear()&&state.m===now.getMonth()+1) state.sel=now.getDate(); renderMonth();};
+$('nextM').onclick=function(){state.m++; if(state.m>12){state.m=1;state.y++;} state.sel=1; if(state.y===now.getFullYear()&&state.m===now.getMonth()+1) state.sel=now.getDate(); renderMonth();};
+function openForm(open){ $('birthForm').hidden=!open; $('editBtn').setAttribute('aria-expanded',open?'true':'false');
+  if(open){$('fName').value=state.birth.name||'';$('fDate').value=state.birth.date;$('fTime').value=state.birth.time;$('fGender').value=state.birth.gender;$('fMonth').value=state.y+'-'+String(state.m).padStart(2,'0');}}
+$('editBtn').onclick=function(){openForm($('birthForm').hidden);};
+$('cancelBtn').onclick=function(){openForm(false);};
+$('birthForm').addEventListener('submit',function(e){e.preventDefault();
+  var changed=$('fDate').value!==state.birth.date||$('fTime').value!==state.birth.time;
+  state.birth={name:$('fName').value.trim(),date:$('fDate').value,time:$('fTime').value||'12:00',gender:$('fGender').value};
+  if(changed) state.xiOverride=null;
+  if($('fMonth').value){var p=$('fMonth').value.split('-');state.y=+p[0];state.m=+p[1];state.sel=1;}
+  save(); openForm(false); all();});
+
+$('planForm').addEventListener('submit',function(e){e.preventDefault();var n=$('pName').value.trim();if(!n)return;
+  state.plans=(state.plans||[]).concat([{id:Date.now(),name:n,type:$('pType').value,date:null}]);$('pName').value='';save();renderMonth();});
+$('proBtn').onclick=function(){state.pro=!state.pro;try{localStorage.setItem('bzcal-pro',state.pro?'1':'0');}catch(e){}all();};
+all(); setTab(state.tab);
+})();
+</script>
+
+</body></html>

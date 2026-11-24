@@ -1,0 +1,76 @@
+// 邀请好友、订阅到手机日历两个子页，以及朋友点开邀请链接时的落地处理。
+import { $, esc, api, toast, onClick, currentPath, dtText, readLocal, writeLocal, IS_IOS, IS_MOBILE, track } from './core.js';
+import { S } from './state.js';
+import { footHtml } from './today.js';
+import { share } from './share.js';
+
+const phead = (title) => `<div class="phead"><button type="button" class="back" data-back aria-label="返回">‹</button><h1>${title}</h1></div>`;
+const errHtml = (title, e) => phead(title) + `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`;
+export const inviteUrl = (code, from) => `${location.origin}${location.pathname}?i=${code}${from ? '&from=' + from : ''}`;
+function copy(text, ok) {
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast(ok), () => prompt('复制这个链接：', text));
+}
+
+// 朋友点开 ?i=邀请码：记下邀请码和邀请人的形象，去掉地址栏里的参数
+export function catchInvite() {
+  const sp = new URLSearchParams(location.search), code = (sp.get('i') || '').toUpperCase();
+  if (!/^[A-Z0-9]{5}$/.test(code)) return Promise.resolve();
+  sp.delete('i');
+  history.replaceState(history.state, '', location.pathname + (sp.toString() ? '?' + sp : '') + location.hash);
+  if (S.me) return Promise.resolve();
+  track('landing', { from: 'invite' });
+  return api('GET', 'invite/' + code).then((d) => writeLocal('invite', { code, name: d.name, days: d.days, card: d.card, at: Date.now() }), () => {});
+}
+export const pendingInvite = () => { const v = readLocal('invite'); return v && Date.now() - (v.at || 0) < 30 * 86400000 ? v : null; };
+
+// ---------- 邀请好友 ----------
+export function pageInvite() {
+  const v = $('#view'), T = '邀请好友';
+  v.innerHTML = phead(T) + '<div class="sk" style="height:190px"></div><div class="sk" style="height:120px"></div>';
+  api('GET', 'me/invite').then((d) => {
+    if (currentPath() !== '/invite') return;
+    S.inviteCode = d.code;
+    const url = inviteUrl(d.code);
+    const st = (r) => (r.status === 'done' ? `<em class="ok">已生效 +${d.days} 天</em>` : r.status === 'capped' ? '<em>已生效 · 本月奖励已满</em>' : r.status === 'blocked' ? '<em>同一台设备注册，不计奖励</em>' : `<em>${esc(r.need)}</em>`);
+    v.innerHTML = phead(T)
+      + `<section class="invhero"><b>每邀请一位朋友<br>你们各得 ${d.days} 天会员</b><span>朋友测完能量卡、注册，第二天再打开一次就生效。</span>`
+      + `<div class="linkbox"><span>${esc(url.replace(/^https?:\/\//, ''))}</span><button type="button" class="btn sm primary" data-inv-copy>复制</button></div>`
+      + '<button type="button" class="btn ghost block" data-inv-poster>生成邀请海报</button></section>'
+      + `<section class="card"><div class="stats3"><div><b>${d.stats.invited}</b><small>已邀请</small></div><div><b>${d.stats.done}</b><small>已生效</small></div><div><b>${d.stats.days}</b><small>得到的天数</small></div></div></section>`
+      + `<section class="card"><h3>邀请记录</h3>${d.list.length ? `<div class="ilist">${d.list.map((r) => `<div><span>${esc(r.name)}<small>${dtText(r.at)}</small></span>${st(r)}</div>`).join('')}</div>` : '<div class="empty">还没有朋友通过你的链接注册</div>'}</section>`
+      + `<p class="note" style="margin:0;text-align:center">${d.left > 0 ? `本月还能获得 ${d.left} 次奖励` : '本月的邀请奖励已经满了，朋友注册仍然能拿到奖励'}</p>` + footHtml();
+    S.inviteUrl = url;
+  }, (e) => { v.innerHTML = errHtml(T, e); });
+}
+onClick('[data-inv-copy]', () => { track('invite_copy'); copy(`我在用流日历，按出生信息算每天适合做什么。测测你是什么型：${S.inviteUrl}`, '已复制，发给朋友吧'); });
+onClick('[data-inv-poster]', () => {
+  track('invite_poster');
+  api('GET', 'me/card').then((d) => share('invite', { card: d.card, name: d.nickname || S.me.username, days: S.inviteDays }), (e) => toast(e.message));
+});
+
+// ---------- 订阅到手机日历 ----------
+export function pageIcs() {
+  const v = $('#view'), T = '订阅到手机日历';
+  v.innerHTML = phead(T) + '<div class="sk" style="height:220px"></div>';
+  track('ics_open');
+  api('GET', 'me/calendar-feed').then((d) => {
+    if (currentPath() !== '/ics') return;
+    S.feed = d;
+    const wk = (e) => '日一二三四五六'[new Date(e.y, e.m - 1, e.d).getDay()];
+    const android = IS_MOBILE && !IS_IOS;
+    const steps = '<ol class="steps"><li>点上面的「复制订阅链接」。</li><li>在电脑浏览器打开 calendar.google.com，左侧「其他日历」点「＋」，选「通过网址添加」。</li><li>粘贴链接后添加，手机上的 Google 日历会自动同步。有的手机自带日历也支持「订阅日历」，粘贴同一个链接即可。</li></ol>';
+    v.innerHTML = phead(T)
+      + '<p class="lead">订阅一次，手机自带的日历和日历小组件里，每天都会出现你的这一天。不用打开流日历也能看到。</p>'
+      + `<div class="calmock"><div class="hd"><span>日历 · 预览</span><span>流日历</span></div>${d.preview.map((e) => `<div class="ev"><span class="d">周${wk(e)}<b>${e.d}</b></span><span class="t k${e.level}">${esc(e.summary)}<small>${esc(e.desc.split('\n')[0])}</small></span></div>`).join('')}</div>`
+      + (android ? '' : `<a class="btn primary block" href="${esc(d.webcal)}" data-ics-sub>订阅到 iPhone / Mac 日历</a>`)
+      + `<button type="button" class="btn ${android ? 'primary' : 'ghost'} block" data-ics-copy>复制订阅链接（安卓、Google 日历）</button>`
+      + (android ? `<section class="card">${steps}</section>` : `<details class="icsmore"><summary>安卓和 Google 日历怎么加</summary>${steps}</details>`)
+      + `<p class="note" style="margin:0">每天自动更新未来 60 天，你定下的计划也会同步。${d.fetchedAt ? `最近一次同步：${dtText(d.fetchedAt)}。` : ''}链接只属于你，<button type="button" class="tbtn" data-ics-reset>重置链接</button>后旧的会失效。</p>` + footHtml();
+  }, (e) => { v.innerHTML = errHtml(T, e); });
+}
+onClick('[data-ics-sub]', () => track('ics_subscribe', { via: 'webcal' }));
+onClick('[data-ics-copy]', () => { track('ics_subscribe', { via: 'copy' }); copy(S.feed.url, '已复制订阅链接'); });
+onClick('[data-ics-reset]', () => {
+  if (!confirm('重置后，已经订阅的旧链接会失效，需要重新订阅。确定吗？')) return;
+  api('POST', 'me/calendar-feed/reset', {}).then(() => { toast('已重置，请重新订阅'); pageIcs(); }, (e) => toast(e.message));
+});

@@ -1,0 +1,88 @@
+{
+ "_说明": "心情便签。moods：心情词（word 两个字以内，char 是便签上的一个字）和对应的分数 color 是这个心情默认的便签颜色（用户可以换）；score（1–5，用来和系统的判断对照，后台吻合度靠它）；colors：便签颜色，light 是白色主题下的纸色，dark 是深色主题下的；max_per_day：一天最多记几条；note_max：一条最多写几个字；event_color：只记事情、不选心情时默认的便签颜色。key 已经存进数据库，不要改；其他都可以改，改完重启服务生效。",
+ "max_per_day": 6,
+ "moods": [
+  {
+   "key": "happy",
+   "word": "开心",
+   "char": "乐",
+   "score": 5,
+   "color": "apricot"
+  },
+  {
+   "key": "full",
+   "word": "充实",
+   "char": "满",
+   "score": 4,
+   "color": "sage"
+  },
+  {
+   "key": "calm",
+   "word": "平静",
+   "char": "静",
+   "score": 3,
+   "color": "sky"
+  },
+  {
+   "key": "tired",
+   "word": "累",
+   "char": "累",
+   "score": 2,
+   "color": "paper"
+  },
+  {
+   "key": "upset",
+   "word": "烦",
+   "char": "烦",
+   "score": 2,
+   "color": "blush"
+  },
+  {
+   "key": "low",
+   "word": "低落",
+   "char": "沉",
+   "score": 1,
+   "color": "wisteria"
+  }
+ ],
+ "colors": [
+  {
+   "key": "apricot",
+   "name": "杏",
+   "light": "#F6E4C8",
+   "dark": "#4A3C2A"
+  },
+  {
+   "key": "blush",
+   "name": "樱",
+   "light": "#F6DAD5",
+   "dark": "#4C302D"
+  },
+  {
+   "key": "sage",
+   "name": "青",
+   "light": "#DAE9DE",
+   "dark": "#2A3D30"
+  },
+  {
+   "key": "sky",
+   "name": "天",
+   "light": "#D9E5F2",
+   "dark": "#28354B"
+  },
+  {
+   "key": "wisteria",
+   "name": "藤",
+   "light": "#E5DDF0",
+   "dark": "#3A3149"
+  },
+  {
+   "key": "paper",
+   "name": "素",
+   "light": "#EDEBE6",
+   "dark": "#36352F"
+  }
+ ],
+ "note_max": 80,
+ "event_color": "paper"
+}

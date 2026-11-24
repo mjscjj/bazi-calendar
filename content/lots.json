@@ -1,0 +1,1938 @@
+{
+  "source_note": "【来源】逐签抓取并解析了 6 个网站的全部 100 签页面：卜易居 buyiju.com/guanyin/N.html；易安居吉祥网 zhouyi.cc/lingqian/guanyin/；抽签网 51chouqian.com/guanyinlingqian/N.html；Handful of Leaves（HOL）handfulofleaves.life/guan-yin-lot-N-meaning/；华易网 k366.com/guanyin/；Master Sean Chan（MSC）masterseanchan.com/guanyin-oracle/lot-N/。整句平票或胜出读法只有 1 个通行本来源时，另查新加坡吉祥宝聚寺（BW Monastery）官网 bwmonastery.org.sg/guanyinqian/lotN 的签图（人工逐字读图，共 40 签：2、6、14、15、17、19、20、23、28、31、32、34、36、37、38、41、42、53、54、55、59、63、64、65、66、68、69、71、72、74、77、80、83、85、87、88、92、94、96、98）。\n【核对方法】程序解析每个来源的签题、签等和四句签诗，繁体用 OpenCC t2s 转简体，逐句比对：整句按来源数取多数；整句平票（或胜出读法只有 1 个通行本来源支持，如第53签第1句）时加入宝聚寺签图再计票；仍平票时，在读法相近（同句最多差 2 字）的版本间按逐字多数取字（第23签第4句、第38签第3句、第98签第2句）。另有两处人工判定：第31签第2句「饥时吃饭困时卧」（易安居、华易网、MSC）与「饱后喝茶时坐卧」（抽签网、HOL、宝聚寺）3:3，卜易居作「饱后吃茶时坐卧」属后一读法，按读法 4:3 取「饱后喝茶时坐卧」；第85签第1句卜易居该字是缺字图，华易网页面描述里转录的卜易居同文此字是「暗」的繁体异体字，故「暗」（卜易居、HOL、宝聚寺）3 票对「开」（易安居、抽签网）2 票，取「云暗雾罩山前路」。\n【异体与别字】比对前统一了几处同字异写和固定词里的别字，输出也用统一后的写法：坭→泥（第3、7签）；著→着（第44、46、81签，下棋一着、着力）；竞竞→兢兢（第75签，战战兢兢）；无暇→无瑕（第89签）；竣岭→峻岭（第87签）。签题里卜易居的「锺离成道」统一为「钟离成道」。\n【排序】6 个网站和宝聚寺的 1–100 号排序完全一致：同一签号的签诗和签题在各站逐号对应，没有错位，所以直接用这套通行排序。\n【版本说明】卜易居、易安居、抽签网、HOL、宝聚寺用的是同一套通行文本，彼此只有个别字词差异。华易网正文的「版本一」是另一套古本（如第1签作「天开地辟结良缘 日吉时良万事全 若得此签非小可 人行中正帝王宜」），有 100 签与最终文本相差 2 句及以上；它页面描述里另附的「版本二」与卜易居逐字相同，判断为转录，不另计票。MSC 是港式版本，有 80 签相差 2 句及以上，签题也自成一套（25 签的签题与最终取的不同，如第3签作「董卓收貂蝉」、第9签作「赵韩王半部论语定天下」）。华易网和 MSC 也参与逐句计票，但最终取用的每一句都至少有 2 个通行本来源（卜易居、易安居、抽签网、HOL、宝聚寺）逐字一致。另需说明：HOL 的诗文与宝聚寺签图几乎逐字相同，抽签网的文本是在卜易居文本上按其校注改过字，几家并非完全独立。\n【签等】通行本来源（卜易居、易安居、抽签网、HOL、宝聚寺）用「上签／中签／下签」三等，按多数原样保留，结果上签 23、中签 59、下签 18。华易网用上上签、中平签、下下签、大吉签等更细的写法，MSC 另有「兼签」，卜易居有 9 签标「中上签」或「中下签」，均为少数，未采用。通行本内部签等不一致的签：第2签取「下签」（易安居、抽签网、HOL、宝聚寺），卜易居、华易网作「中下签」；第9签取「上签」（卜易居、易安居、MSC），抽签网、HOL作「中签」；第17签取「中签」（易安居、抽签网、HOL、宝聚寺、MSC），卜易居、华易网作「中下签」；第22签取「中签」（卜易居、抽签网、HOL、MSC），易安居作「上签」；第26签取「中签」（易安居、抽签网、HOL、MSC），卜易居作「中下签」；第34签取「中签」（易安居、抽签网、HOL、宝聚寺、MSC），卜易居作「中上签」；第51签取「上签」（易安居、抽签网、HOL、MSC），卜易居作「中上签」；第52签取「中签」（易安居、抽签网、HOL），卜易居作「中下签」；第55签取「中签」（易安居、抽签网、HOL、宝聚寺），卜易居作「中上签」；第59签取「中签」（易安居、抽签网、HOL、宝聚寺），卜易居作「中下签」；第68签取「中签」（易安居、抽签网、HOL、宝聚寺），卜易居作「中上签」。\n【签题不一致】除 MSC 自成一套的签题外，其余来源签题不一致的签：第3签取「董永遇仙」（卜易居、华易网），易安居作「董永葬父」；抽签网作「董永卖身」；第7签取「苏娘走难」（卜易居、抽签网、华易网、MSC），易安居作「秋娘走难」；第8签取「姚能遇仙」（卜易居、抽签网、华易网），易安居、MSC作「裴度还带」；第10签取「庞涓观阵」（卜易居、抽签网、华易网、MSC），易安居作「庞捐观阵」；第11签取「书荐姜维」（卜易居、抽签网、华易网、MSC），易安居作「刘先主入赘东吴」；第17签取「曹操话梅止渴」（卜易居、易安居、华易网），抽签网作「话梅止渴」；第21签取「李旦龙凤配合」（易安居、抽签网、华易网、MSC），卜易居作「李旦龙凤配」；第25签取「姚能受职」（卜易居、华易网），易安居作「姚崇治蝗」；抽签网作「李广机智」；第28签取「包公寻李后」（卜易居、易安居、华易网），抽签网、MSC作「李后寻包公」；第36签取「湘子遇宾」（易安居、抽签网、MSC），卜易居、华易网作「湘子遇宝」；第42签取「目连救母」（易安居、MSC），卜易居作「目莲见母」；抽签网作「目莲救母」；华易网作「有莲见母」；第45签取「仁宗认母」（易安居、抽签网、MSC），卜易居、华易网作「仁宗遇仙」；第65签取「孙膑困庞涓」（卜易居、抽签网、华易网），易安居作「孙膑困庞捐」；第66签取「霸王被困」（卜易居、抽签网、华易网），易安居作「楚霸王阴陵失道」；第67签取「金星试窦儿」（卜易居、华易网、MSC），易安居、抽签网作「金精试窦儿」；第68签取「郭汾阳祝寿」（卜易居、易安居、华易网），抽签网作「汾阳祝寿」；第80签取「智远投军」（卜易居、抽签网、华易网、MSC），易安居作「刘智远投军」；第89签取「大看瑶花」（卜易居、华易网），易安居作「炀帝大看琼花」；抽签网作「智服姜维」；第91签取「三战吕布」（卜易居、抽签网、华易网、MSC），易安居作「三英战吕布」；第97签取「六出祁山」（卜易居、抽签网、华易网），易安居、MSC作「孔明六出祁山」。\n【签诗字句不一致（通行本来源之间）】以下列出每处取舍，华易网古本与 MSC 的不同读法不逐条列出：\n第2签：第1句取「鲸鱼未变守江河」（卜易居、易安居、抽签网、MSC），HOL、宝聚寺作「鲤鱼未变守江河」；第2句取「不可升腾更望高」（卜易居、易安居、抽签网），HOL、宝聚寺作「不可升腾更望闻」\n第3签：第3句取「衔得泥来欲作垒」（卜易居、抽签网、HOL），易安居作「卸得泥来欲作垒」\n第5签：第1句取「一锥草地要求泉」（卜易居、易安居、MSC），抽签网、HOL作「一锥凿地要求泉」；第3句取「无意俄然遇知己」（卜易居、易安居、华易网），抽签网、HOL作「无意偶然遇知己」\n第6签：第1句取「投身岩下雕鸟居」（卜易居（含缺字图）、易安居、HOL、宝聚寺），抽签网作「投身岩下铜鸟居」；第3句取「拾得营谋谁可得」（抽签网、HOL、宝聚寺），卜易居、易安居作「及早营谋谁可得」\n第7签：第2句取「带水拖泥去度山」（卜易居、易安居、抽签网），HOL作「带水拖泥去渡山」\n第9签：第1句取「烦君勿作私心事」（卜易居、易安居、抽签网、MSC），HOL作「烦君勿做私心事」；第4句取「宛如皎月正天中」（卜易居、易安居），抽签网作「宛如皎月正天心」；HOL作「宛如皎月正当空」\n第11签：第3句取「到头竟必成中箭」（卜易居、易安居），抽签网作「到头竟必成鹿箭」；HOL作「到头竟必成鹿剑」\n第13签：第3句取「蒙君赐紫金腰带」（卜易居、易安居、HOL），抽签网作「蒙君赐紫金玉带」\n第14签：第1句取「宛如仙鹤出樊笼」（抽签网、HOL、宝聚寺、华易网、MSC），卜易居、易安居作「宛如仙鹤出凡笼」；第2句取「脱得樊笼路路通」（抽签网、HOL、宝聚寺），卜易居、易安居作「脱得凡笼路路通」；第3句取「南北东西无阻隔」（卜易居、易安居、抽签网），HOL、宝聚寺作「南北东西无阻碍」\n第15签：第1句取「行人怨日气难吞」（抽签网、HOL、宝聚寺），卜易居（含缺字图）、易安居作「行人跘曰气难吞」；第2句取「忽有灾事勿近前」（卜易居、易安居、抽签网），HOL、宝聚寺作「忽有灾事勿近身」；第3句取「巢破林鸟无所宿」（卜易居、易安居、HOL、宝聚寺），抽签网作「鸟破林巢无所宿」\n第17签：第2句取「晨昏只好念阿弥」（卜易居、易安居、华易网、MSC），抽签网、HOL、宝聚寺作「晨昏只好念弥陀」；第4句取「画饼如何止得饥」（抽签网、HOL、宝聚寺），卜易居、易安居作「书饼如何止得饥」\n第19签：第2句取「风波作浪欲何为」（抽签网、HOL、宝聚寺），卜易居、易安居作「风波作波欲何为」；第4句取「等待浪静道此危」（抽签网、HOL、宝聚寺），卜易居、易安居作「等待浪静过此危」\n第20签：第4句取「看看一跳过龙门」（抽签网、HOL、宝聚寺），卜易居、易安居作「看看一跳遇龙门」\n第21签：第2句取「女嫁男婚喜偎然」（卜易居、易安居、抽签网），HOL作「女嫁男婚喜偲然」；第4句取「熊罴入梦乐团圆」（卜易居、易安居、HOL），抽签网作「熏熏入梦喜团圆」\n第22签：第1句取「旱时田里皆枯槁」（卜易居、抽签网、HOL、MSC），易安居作「旱时田里皆枯藁」\n第23签：第2句取「岂虑天门不任君」（抽签网、HOL、宝聚寺），卜易居、易安居作「普开天门不任君」；第4句取「人人皆笑领顶花」（HOL、宝聚寺），卜易居、易安居作「人人皆笑岭顶花」；抽签网作「人人欢笑领顶花」\n第27签：第4句取「如山墙立可安居」（卜易居、易安居、HOL），抽签网作「如山壁立可安居」\n第28签：第1句取「东边月上正婵娟」（易安居、HOL、宝聚寺），卜易居、抽签网作「东边月上正蝉娟」\n第31签：第1句取「清闲无忧静处坐」（抽签网、HOL、宝聚寺），易安居、华易网、MSC作「清闲无事静处坐」；卜易居作「清闲无忧静处侩」；第2句取「饱后喝茶时坐卧」（抽签网、HOL、宝聚寺），易安居、华易网、MSC作「饥时吃饭困时卧」；卜易居作「饱后吃茶时坐卧」；第3句取「放下身心不用忙」（易安居、抽签网、HOL、宝聚寺、华易网、MSC），卜易居作「汝下身心不用忙」；第4句取「必定不招冤与祸」（卜易居、抽签网、HOL、宝聚寺），易安居、华易网、MSC作「必定不遭殃与祸」\n第32签：第1句取「前程杳杳定无疑」（抽签网、HOL、宝聚寺、MSC），卜易居、易安居作「归程杳杳定无疑」\n第34签：第2句取「言必忠良信必从」（卜易居、易安居、HOL、宝聚寺），抽签网作「言必忠良信必聪」；第4句取「光明红日正当空」（抽签网、HOL、宝聚寺），卜易居、易安居作「光明红日正当中」\n第35签：第2句取「道是无穹却有功」（卜易居、易安居、抽签网、MSC），HOL作「道是无穷却有功」\n第36签：第2句取「满地资财尽可求」（抽签网、HOL、宝聚寺），卜易居、易安居作「宝地资财尽可求」；第4句取「自归山洞去来悠」（卜易居、易安居、HOL、宝聚寺），抽签网作「自归山洞去来游」\n第37签：第1句取「欲待身安运泰时」（易安居、抽签网、HOL、宝聚寺），卜易居、MSC作「欲待身安动泰时」；第2句取「风中灯烛不相宜」（卜易居、易安居、抽签网、华易网、MSC），HOL、宝聚寺作「风云灯烛不相宜」；第4句取「庶免光摇静处明」（卜易居、易安居、抽签网、华易网），HOL、宝聚寺作「庶几光摇静处明」\n第38签：第1句取「月照天书静处期」（易安居、抽签网、HOL、宝聚寺、MSC），卜易居作「月照天宅静处期」；第3句取「宽心祈待云霞散」（易安居、抽签网），HOL、宝聚寺作「宽心祈待云雾散」；卜易居作「宽心祈信云霞散」\n第39签：第4句取「曾知枉费己功夫」（卜易居、易安居、HOL），抽签网作「曾知枉费己工夫」\n第40签：第2句取「阴长阳消百事亨」（卜易居、易安居），抽签网作「阴长阳消百事亭」；HOL作「阴长阳消百事停」；第3句取「若是女人宜望用」（易安居、抽签网、HOL），卜易居作「是若女人宜望用」\n第41签：第4句取「更虑他年前样思」（抽签网、HOL、宝聚寺），卜易居、易安居作「更虑他年前样看」\n第42签：第1句取「君皇圣后总为恩」（抽签网、HOL、宝聚寺、MSC），卜易居、易安居作「君皇圣后终为恩」\n第43签：第2句取「自营自养自安然」（卜易居、抽签网、HOL），易安居作「自荣自养自安然」\n第45签：第4句取「宛如正渴遇琼浆」（易安居、抽签网、HOL、华易网），卜易居作「宛如正渴遇瑶浆」\n第46签：第1句取「劝君耐守旧生涯」（易安居、抽签网、HOL、华易网、MSC），卜易居作「勤君耐守旧生涯」；第4句取「枯枝老树再生花」（卜易居、抽签网、HOL），易安居作「枯枝老树共再开」\n第48签：第1句取「鹍鸟秋来化作鹏」（卜易居、HOL），易安居作「鲲鸟秋来化作鹏」；抽签网作「昆鸟秋来化作鹏」；第3句取「翱翔万里云霄去」（卜易居、易安居、抽签网、MSC），HOL作「翻翔万里云霄去」；第4句取「余外诸禽总不能」（易安居、抽签网、HOL），卜易居作「余外诸禽终不能」\n第49签：第4句取「待时兴变自然明」（易安居、抽签网、HOL），卜易居作「待叶兴盛自然明」\n第50签：第2句取「高挂帆蓬自在撑」（卜易居、易安居、抽签网、MSC），HOL作「高挂帆篷自在撑」\n第51签：第2句取「人人愁热闷非常」（卜易居、抽签网、HOL、MSC），易安居作「人人热愁闷非常」；第3句取「天地也解知人意」（卜易居、抽签网、HOL），易安居作「天地也解和人意」；第4句取「薰风拂拂自然凉」（卜易居、易安居、MSC），抽签网、HOL作「熏风拂拂自然凉」\n第52签：第1句取「水中捉月费功夫」（卜易居、易安居、华易网、MSC），抽签网作「水中捞月费功夫」；HOL作「水中捞月费工夫」；第3句取「莫说闲言并乱语」（卜易居、抽签网、HOL），易安居作「莫说间言并乱语」；第4句取「枉劳心力强身孤」（易安居、抽签网、HOL），卜易居作「枉劳心力强身枯」\n第53签：第1句取「失意翻成得意时」（HOL、宝聚寺、华易网、MSC），易安居、抽签网作「失意反成得意时」；卜易居作「失意番成得意时」；第2句取「龙吟虎啸两相宜」（卜易居、易安居、HOL、宝聚寺、华易网、MSC），抽签网作「龙呤虎啸两相宜」\n第54签：第4句取「别寻条路为相扶」（抽签网、HOL、宝聚寺），卜易居作「别寻来路为相扶」；易安居作「别寻修路为相扶」\n第55签：第4句取「饥饭渴饮困时眠」（卜易居、抽签网、HOL、宝聚寺），易安居作「饥饭渴饮因时眠」\n第56签：第2句取「清风明月贵人忙」（易安居、抽签网、HOL），卜易居作「风清明月贵人忙」\n第58签：第4句取「除此其余都不利」（易安居、抽签网、HOL），卜易居作「除是其余都不利」\n第59签：第4句取「得一反成失二人」（抽签网、HOL、宝聚寺），卜易居、易安居作「得一番成失二人」\n第61签：第1句取「日落吟诗月下歌」（卜易居、HOL、MSC），抽签网、华易网作「日上吟诗月下歌」；易安居作「日里吟诗月下歌」；第4句取「唱彩齐唱连理罗」（卜易居、抽签网、HOL），易安居作「喝彩齐唱连理罗」\n第62签：第1句取「晨昏全赖佛扶持」（易安居、抽签网、HOL、华易网），卜易居作「晨昏传籁佛扶持」\n第63签：第1句取「昔然行船失了针」（卜易居、抽签网、HOL、宝聚寺），易安居、华易网、MSC作「昔日行船失了针」\n第64签：第3句取「思量无计翻身出」（易安居、抽签网、HOL、宝聚寺、华易网），卜易居作「思量无计番身出」；第4句取「事到头来惹是非」（易安居、HOL、宝聚寺），卜易居、抽签网作「事到头来惹事非」\n第65签：第3句取「割肉补疮为甚事」（卜易居、抽签网、HOL、宝聚寺），易安居、MSC作「割肉成疮为甚事」\n第66签：第1句取「路险马乏人行急」（抽签网、HOL、宝聚寺），卜易居作「路险马羸人行急」；易安居作「路险马乏人行意」\n第67签：第4句取「文章全具艺光明」（易安居、抽签网、HOL），卜易居作「文章全贝艺光明」\n第68签：第1句取「门庭吉庆喜非常」（易安居、HOL、宝聚寺），卜易居、抽签网作「门廷吉庆喜非常」\n第69签：第2句取「叶落枝枯终不摧」（卜易居、抽签网、HOL、宝聚寺），易安居作「叶落枝枯总不摧」\n第71签：第1句取「认知苍龙下九衢」（抽签网、HOL、宝聚寺），卜易居作「认知仓龙十九卫」；易安居作「谁知苍龙下九衢」；第4句取「欲恐龙马不安居」（易安居、抽签网、HOL、宝聚寺），卜易居作「切恐龙马上安居」\n第72签：第1句取「养蜂须用求他蜜」（易安居、抽签网、HOL、宝聚寺），卜易居、华易网、MSC作「弄蜂须要求他蜜」；第2句取「只怕遭触尾上针」（易安居、抽签网、HOL、宝聚寺），卜易居、MSC作「只怕遭他尾上针」；第3句取「须是眼前有异路」（易安居、抽签网、HOL、宝聚寺），卜易居、MSC作「虽是眼前有异路」；第4句取「暗里深如荆棘林」（易安居、抽签网、HOL、宝聚寺），卜易居、华易网作「暗里深藏荆棘林」\n第73签：第2句取「番身一转离泥中」（卜易居、易安居、抽签网、MSC），HOL作「翻身一转离泥中」\n第74签：第2句取「欲得翻身却不通」（易安居、HOL、宝聚寺），卜易居、抽签网作「欲得番身却不通」；第4句取「此卦诚恐恨无穹」（卜易居、抽签网、宝聚寺），易安居、HOL作「此卦诚恐恨无穷」\n第75签：第1句取「恰如抱虎过高山」（易安居、抽签网、HOL），卜易居作「恰如拖虎过高山」\n第76签：第3句取「不觉一朝头耸出」（卜易居、易安居、抽签网），HOL作「不觉一朝头角出」\n第77签：第2句取「声名云外总虚来」（抽签网、HOL、宝聚寺），卜易居作「声名云外终虚来」；易安居作「声明云外总虚来」\n第78签：第1句取「冷水未烧白沸汤」（卜易居、易安居、HOL），抽签网作「冷水未烧白涕汤」；第3句取「要行天下无他事」（卜易居、抽签网、HOL、华易网、MSC），易安居作「要行天下无难事」；第4句取「为有身中百艺强」（卜易居、抽签网、HOL），易安居作「唯有身中百艺强」\n第79签：第4句取「此知神语莫轻慢」（卜易居、抽签网、HOL），易安居作「岂知神语莫轻慢」\n第80签：第2句取「此知一旦帝王宣」（卜易居、抽签网、HOL、宝聚寺），易安居、华易网、MSC作「岂知一旦帝王宣」\n第81签：第2句取「行客归程去似云」（卜易居、易安居、抽签网、MSC），HOL作「行客归程似云飞」；第4句取「顺风船载宝珍归」（卜易居、易安居、抽签网、MSC），HOL作「顺风船载珍宝归」\n第82签：第4句取「依然生叶长根枝」（卜易居、易安居、抽签网、MSC），HOL作「枝叶生长根依然」\n第83签：第1句取「譬若初三四五缺」（卜易居、抽签网、HOL、宝聚寺），易安居作「譬如初三四五缺」\n第84签：第2句取「切恐吉中变化凶」（卜易居、抽签网、HOL），易安居作「却恐吉中变化凶」\n第85签：第1句取「云暗雾罩山前路」（卜易居（含缺字图）、HOL、宝聚寺），易安居、抽签网作「云开雾罩山前路」\n第87签：第1句取「人行半岭日衔山」（抽签网、HOL、宝聚寺、华易网），卜易居、MSC作「人行半岭日西山」；易安居作「人行半领日衔山」\n第88签：第1句取「木为一虎在当门」（易安居、抽签网、HOL、宝聚寺），卜易居作「林为一虎在当门」\n第90签：第1句取「忽言一信向天飞」（卜易居、抽签网、HOL），易安居作「忽然一信向天飞」\n第92签：第3句取「若是双身谋望事」（卜易居、易安居、抽签网），HOL、宝聚寺作「若是只身谋望事」；第4句取「秀才出去状元回」（卜易居、易安居、抽签网），HOL、宝聚寺作「秀才出去状元游」\n第93签：第3句取「终教一日云开达」（易安居、抽签网、HOL），卜易居作「惊教一日云开远」\n第94签：第2句取「事若差池各是非」（易安居、抽签网、HOL、宝聚寺），卜易居、MSC作「事若差池惹是非」\n第96签：第1句取「巍峨宝塔不寻常」（卜易居、抽签网、HOL、宝聚寺），易安居、华易网、MSC作「巍巍宝塔不寻常」\n第97签：第3句取「累被儿童求收拾」（卜易居、HOL），易安居作「累累河山待收拾」；抽签网作「累被儿竟求牧拾」\n第98签：第2句取「急恐闲愁惹是非」（HOL、宝聚寺），易安居、抽签网作「只恐闲愁惹是非」；卜易居作「急恐忧愁惹是非」；第3句取「如鸟飞入罗网内」（卜易居、抽签网、HOL、宝聚寺），易安居作「如鸟飞入罗网里」；第4句取「脱困能有几多时」（卜易居、抽签网、HOL、宝聚寺），易安居作「相逢能有几多时」\n第100签：第1句取「佛神灵变与君知」（卜易居、HOL、MSC），易安居、抽签网作「佛神灵通与君知」\n【找不到的签】无。100 签每一句都至少有 2 个来源完全一致，poem 均为四句。\n【白话与关键词】plain 和 keyword 由整理者根据签诗原文、易安居的「诗意」「解曰」改写，不是来源原文。",
+  "lots": [
+    {
+      "no": 1,
+      "grade": "上签",
+      "title": "钟离成道",
+      "poem": [
+        "开天辟地作良缘",
+        "吉日良时万物全",
+        "若得此签非小可",
+        "人行忠正帝王宣"
+      ],
+      "plain": "签诗说天地初开、万事俱备，为人正直的人更容易被看见。今天适合把准备好的想法拿出来，踏实做、坦荡说，好机会更愿意找上门。",
+      "keyword": "顺势开局",
+      "sources": [
+        "https://www.buyiju.com/guanyin/1.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/4102.html",
+        "https://www.51chouqian.com/guanyinlingqian/1.html",
+        "https://handfulofleaves.life/guan-yin-lot-1-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-1/"
+      ]
+    },
+    {
+      "no": 2,
+      "grade": "下签",
+      "title": "苏秦不第",
+      "poem": [
+        "鲸鱼未变守江河",
+        "不可升腾更望高",
+        "异日峥嵘身变化",
+        "许君一跃跳龙门"
+      ],
+      "plain": "鲸鱼还没化龙，先守在江河里，不宜急着往高处冲。今天把手头的事做扎实，攒实力比争表现更要紧，转机留给有准备的人。",
+      "keyword": "蓄力待时",
+      "sources": [
+        "https://www.buyiju.com/guanyin/2.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5278.html",
+        "https://www.51chouqian.com/guanyinlingqian/2.html"
+      ]
+    },
+    {
+      "no": 3,
+      "grade": "下签",
+      "title": "董永遇仙",
+      "poem": [
+        "临风冒雨去还乡",
+        "正是其身似燕儿",
+        "衔得泥来欲作垒",
+        "到头垒坏复须泥"
+      ],
+      "plain": "燕子冒雨衔泥筑巢，筑好又塌，辛苦却难见成果。今天别同时铺太多摊子，挑一件最要紧的事做牢，其余的先放一放。",
+      "keyword": "收拢精力",
+      "sources": [
+        "https://www.buyiju.com/guanyin/3.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5300.html",
+        "https://www.51chouqian.com/guanyinlingqian/3.html",
+        "https://handfulofleaves.life/guan-yin-lot-3-meaning/"
+      ]
+    },
+    {
+      "no": 4,
+      "grade": "上签",
+      "title": "玉莲会十朋",
+      "poem": [
+        "千年古镜复重圆",
+        "女再求夫男再婚",
+        "自此门庭重改换",
+        "更添福禄在儿孙"
+      ],
+      "plain": "古镜重圆，分开的人和事重新接上，家里也添新气象。今天适合联系一位久未联络的朋友或旧同事，旧缘里可能藏着新机会。",
+      "keyword": "重续旧缘",
+      "sources": [
+        "https://www.buyiju.com/guanyin/4.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5303.html",
+        "https://www.51chouqian.com/guanyinlingqian/4.html",
+        "https://handfulofleaves.life/guan-yin-lot-4-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-4/"
+      ]
+    },
+    {
+      "no": 5,
+      "grade": "中签",
+      "title": "刘晨遇仙",
+      "poem": [
+        "一锥草地要求泉",
+        "努力求之得最难",
+        "无意俄然遇知己",
+        "相逢携手上青天"
+      ],
+      "plain": "拿锥子在草地上挖泉，费力也难出水，不经意间反而遇到知己。今天别在一条路上硬磕，多和人聊聊，帮手可能出现在意料之外。",
+      "keyword": "借力同行",
+      "sources": [
+        "https://www.buyiju.com/guanyin/5.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5306.html"
+      ]
+    },
+    {
+      "no": 6,
+      "grade": "中签",
+      "title": "仁贵遇主",
+      "poem": [
+        "投身岩下雕鸟居",
+        "须是还他大丈夫",
+        "拾得营谋谁可得",
+        "通行天地此人无"
+      ],
+      "plain": "签诗讲肯屈身低处、担得起事的人，及早谋划终能施展。今天不妨接下别人不愿碰的活，踏实做好，这份担当旁人都看在眼里。",
+      "keyword": "甘于实干",
+      "sources": [
+        "https://www.buyiju.com/guanyin/6.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5318.html",
+        "https://www.51chouqian.com/guanyinlingqian/6.html",
+        "https://handfulofleaves.life/guan-yin-lot-6-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot6"
+      ]
+    },
+    {
+      "no": 7,
+      "grade": "下签",
+      "title": "苏娘走难",
+      "poem": [
+        "奔波阻隔重重险",
+        "带水拖泥去度山",
+        "更望他乡求用事",
+        "千乡万里未回还"
+      ],
+      "plain": "拖泥带水翻山过险，在外奔波却迟迟回不了头。今天不宜贸然换方向或另起炉灶，先守住手上的事，稳住节奏再说。",
+      "keyword": "守住本位",
+      "sources": [
+        "https://www.buyiju.com/guanyin/7.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5319.html",
+        "https://www.51chouqian.com/guanyinlingqian/7.html",
+        "https://handfulofleaves.life/guan-yin-lot-7-meaning/"
+      ]
+    },
+    {
+      "no": 8,
+      "grade": "上签",
+      "title": "姚能遇仙",
+      "poem": [
+        "茂林松柏正兴旺",
+        "雨雪风霜总莫为",
+        "异日忽然成大用",
+        "功名成就栋梁材"
+      ],
+      "plain": "松柏经过雨雪风霜依然茂盛，日后能成栋梁之材。今天遇到压力别急着证明自己，继续打磨专业，你的韧劲正在积累分量。",
+      "keyword": "厚积薄发",
+      "sources": [
+        "https://www.buyiju.com/guanyin/8.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5321.html",
+        "https://www.51chouqian.com/guanyinlingqian/8.html",
+        "https://handfulofleaves.life/guan-yin-lot-8-meaning/"
+      ]
+    },
+    {
+      "no": 9,
+      "grade": "上签",
+      "title": "孔明点将",
+      "poem": [
+        "烦君勿作私心事",
+        "此意偏宜说问公",
+        "一片明心光皎洁",
+        "宛如皎月正天中"
+      ],
+      "plain": "签诗劝人不存私心，心地光明，像明月正挂中天。今天处理分歧时把话摆到明面上，公正坦白地沟通，事情往往更好办。",
+      "keyword": "坦诚公正",
+      "sources": [
+        "https://www.buyiju.com/guanyin/9.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5324.html",
+        "https://www.51chouqian.com/guanyinlingqian/9.html"
+      ]
+    },
+    {
+      "no": 10,
+      "grade": "中签",
+      "title": "庞涓观阵",
+      "poem": [
+        "石藏无价玉和珍",
+        "只管他乡外客寻",
+        "宛如持灯更觅火",
+        "不如收拾枉劳心"
+      ],
+      "plain": "珍宝就藏在自家，却偏到外面去找，像提着灯还去觅火。今天先盘点手头已有的资源和人脉，答案可能就在身边。",
+      "keyword": "向内求",
+      "sources": [
+        "https://www.buyiju.com/guanyin/10.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5325.html",
+        "https://www.51chouqian.com/guanyinlingqian/10.html",
+        "https://handfulofleaves.life/guan-yin-lot-10-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-10/"
+      ]
+    },
+    {
+      "no": 11,
+      "grade": "上签",
+      "title": "书荐姜维",
+      "poem": [
+        "欲求胜事可非常",
+        "争奈亲姻日暂忙",
+        "到头竟必成中箭",
+        "贵人指引贵人乡"
+      ],
+      "plain": "想成好事却被琐事牵绊，绕了些弯路，最后有贵人指路。今天遇到卡点别硬扛，向有经验的前辈请教一句，路会清楚不少。",
+      "keyword": "请教贵人",
+      "sources": [
+        "https://www.buyiju.com/guanyin/11.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5326.html",
+        "https://www.51chouqian.com/guanyinlingqian/11.html",
+        "https://handfulofleaves.life/guan-yin-lot-11-meaning/"
+      ]
+    },
+    {
+      "no": 12,
+      "grade": "上签",
+      "title": "武吉遇师",
+      "poem": [
+        "否去泰来咫尺间",
+        "暂交君子出于山",
+        "若逢虎兔佳音信",
+        "立志忙中事即闲"
+      ],
+      "plain": "否去泰来，转机就在咫尺之间，先难后顺。今天若碰上小挫折，别急着下结论，换个角度处理，局面可能就此转向。",
+      "keyword": "转危为机",
+      "sources": [
+        "https://www.buyiju.com/guanyin/12.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5327.html",
+        "https://www.51chouqian.com/guanyinlingqian/12.html",
+        "https://handfulofleaves.life/guan-yin-lot-12-meaning/"
+      ]
+    },
+    {
+      "no": 13,
+      "grade": "中签",
+      "title": "罗通拜帅",
+      "poem": [
+        "自小生在富贵家",
+        "眼前万物总奢华",
+        "蒙君赐紫金腰带",
+        "四海声名定可夸"
+      ],
+      "plain": "生在富贵之家、受赐金带，讲的是有底子、有机会被赏识。今天适合大方展示你的长处，同时谦和待人，好名声靠细节攒起来。",
+      "keyword": "展现所长",
+      "sources": [
+        "https://www.buyiju.com/guanyin/13.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5328.html",
+        "https://www.51chouqian.com/guanyinlingqian/13.html",
+        "https://handfulofleaves.life/guan-yin-lot-13-meaning/"
+      ]
+    },
+    {
+      "no": 14,
+      "grade": "中签",
+      "title": "子牙弃官",
+      "poem": [
+        "宛如仙鹤出樊笼",
+        "脱得樊笼路路通",
+        "南北东西无阻隔",
+        "任君直上九霄宫"
+      ],
+      "plain": "仙鹤飞出樊笼，从此东南西北路路畅通。今天适合放下一个束缚你的旧习惯或旧任务，腾出手去做真正想做的事。",
+      "keyword": "放下束缚",
+      "sources": [
+        "https://www.51chouqian.com/guanyinlingqian/14.html",
+        "https://handfulofleaves.life/guan-yin-lot-14-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot14"
+      ]
+    },
+    {
+      "no": 15,
+      "grade": "中签",
+      "title": "苏秦得志",
+      "poem": [
+        "行人怨日气难吞",
+        "忽有灾事勿近前",
+        "巢破林鸟无所宿",
+        "可寻深处稳安身"
+      ],
+      "plain": "受了委屈、一口气难咽，像林中鸟儿失了巢。今天先别争辩或冲动行事，找个安静处稳住情绪，等时机合适再把道理讲清。",
+      "keyword": "先稳住",
+      "sources": [
+        "https://www.buyiju.com/guanyin/15.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5330.html",
+        "https://www.51chouqian.com/guanyinlingqian/15.html",
+        "https://handfulofleaves.life/guan-yin-lot-15-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot15"
+      ]
+    },
+    {
+      "no": 16,
+      "grade": "中签",
+      "title": "叶梦熊朝帝",
+      "poem": [
+        "愁眉思虑暂时开",
+        "启出云霄喜自来",
+        "宛如粪土中藏玉",
+        "良工荐举出尘埃"
+      ],
+      "plain": "愁眉暂开，喜事渐来，像泥土里藏着美玉，等良工发掘。今天把作品或成果整理好，主动拿给懂行的人看，被看见需要一个机会。",
+      "keyword": "主动展示",
+      "sources": [
+        "https://www.buyiju.com/guanyin/16.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5331.html",
+        "https://www.51chouqian.com/guanyinlingqian/16.html",
+        "https://handfulofleaves.life/guan-yin-lot-16-meaning/"
+      ]
+    },
+    {
+      "no": 17,
+      "grade": "中签",
+      "title": "曹操话梅止渴",
+      "poem": [
+        "莫听闲言说是非",
+        "晨昏只好念阿弥",
+        "若将狂话为真实",
+        "画饼如何止得饥"
+      ],
+      "plain": "签诗提醒别听闲言，也别把空话当真，画饼充不了饥。今天对听来的消息先求证再行动，把精力放在实打实的事上。",
+      "keyword": "务实求证",
+      "sources": [
+        "https://www.buyiju.com/guanyin/17.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5332.html",
+        "https://www.51chouqian.com/guanyinlingqian/17.html",
+        "https://handfulofleaves.life/guan-yin-lot-17-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot17"
+      ]
+    },
+    {
+      "no": 18,
+      "grade": "上签",
+      "title": "曹国舅为仙",
+      "poem": [
+        "金乌西坠兔东升",
+        "日夜循环至古今",
+        "僧道得知无不利",
+        "士农工商各从心"
+      ],
+      "plain": "日月循环往复，各行各业都能顺心而行。今天按自己的节奏推进计划，该做的认真做好，其余顺其自然就好。",
+      "keyword": "顺势而为",
+      "sources": [
+        "https://www.buyiju.com/guanyin/18.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5333.html",
+        "https://www.51chouqian.com/guanyinlingqian/18.html",
+        "https://handfulofleaves.life/guan-yin-lot-18-meaning/"
+      ]
+    },
+    {
+      "no": 19,
+      "grade": "中签",
+      "title": "子仪封王",
+      "poem": [
+        "急水滩头放船归",
+        "风波作浪欲何为",
+        "若要安然求稳静",
+        "等待浪静道此危"
+      ],
+      "plain": "急流滩头放船，风浪正大，最好等浪静再过险处。今天遇到紧急又复杂的局面，先缓一缓，等信息清楚了再出手。",
+      "keyword": "静待时机",
+      "sources": [
+        "https://www.51chouqian.com/guanyinlingqian/19.html",
+        "https://handfulofleaves.life/guan-yin-lot-19-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot19"
+      ]
+    },
+    {
+      "no": 20,
+      "grade": "中签",
+      "title": "姜太公遇文王",
+      "poem": [
+        "当春久雨喜开晴",
+        "玉兔金乌渐渐明",
+        "旧事消散新事遂",
+        "看看一跳过龙门"
+      ],
+      "plain": "久雨初晴，日月渐明，旧事散去、新事顺遂。今天适合给拖着的旧问题收个尾，然后放开手脚开始新计划。",
+      "keyword": "翻篇向前",
+      "sources": [
+        "https://www.buyiju.com/guanyin/20.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5335.html",
+        "https://www.51chouqian.com/guanyinlingqian/20.html",
+        "https://handfulofleaves.life/guan-yin-lot-20-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot20"
+      ]
+    },
+    {
+      "no": 21,
+      "grade": "上签",
+      "title": "李旦龙凤配合",
+      "poem": [
+        "阴阳道合总由天",
+        "女嫁男婚喜偎然",
+        "但见龙蛇相会合",
+        "熊罴入梦乐团圆"
+      ],
+      "plain": "阴阳相合、男婚女嫁，讲的是缘分到位、双方圆满。今天适合谈合作、敲定约定，也别忘了和身边的人好好吃顿饭。",
+      "keyword": "携手合作",
+      "sources": [
+        "https://www.buyiju.com/guanyin/21.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5339.html",
+        "https://www.51chouqian.com/guanyinlingqian/21.html",
+        "https://handfulofleaves.life/guan-yin-lot-21-meaning/"
+      ]
+    },
+    {
+      "no": 22,
+      "grade": "中签",
+      "title": "六郎逢救",
+      "poem": [
+        "旱时田里皆枯槁",
+        "谢天甘雨落淋淋",
+        "花果草木皆润泽",
+        "始知一雨值千金"
+      ],
+      "plain": "久旱逢甘雨，草木都被滋润，才知一场雨值千金。今天如果正卡在难处，留意别人伸来的援手，也记得适时帮别人一把。",
+      "keyword": "接住援手",
+      "sources": [
+        "https://www.buyiju.com/guanyin/22.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5342.html",
+        "https://www.51chouqian.com/guanyinlingqian/22.html",
+        "https://handfulofleaves.life/guan-yin-lot-22-meaning/"
+      ]
+    },
+    {
+      "no": 23,
+      "grade": "中签",
+      "title": "怀德招亲",
+      "poem": [
+        "欲扳仙桂入蟾宫",
+        "岂虑天门不任君",
+        "忽遇一般音信好",
+        "人人皆笑领顶花"
+      ],
+      "plain": "想攀仙桂入蟾宫，天门并不拒你，好消息会忽然到来。今天不妨大胆投出简历、提交方案或发出邀约，机会常留给敢开口的人。",
+      "keyword": "大胆一试",
+      "sources": [
+        "https://www.51chouqian.com/guanyinlingqian/23.html",
+        "https://handfulofleaves.life/guan-yin-lot-23-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot23"
+      ]
+    },
+    {
+      "no": 24,
+      "grade": "下签",
+      "title": "殷郊遇师",
+      "poem": [
+        "不成理论不成家",
+        "水性痴人似落花",
+        "若问君恩须得力",
+        "到头方见事如麻"
+      ],
+      "plain": "签诗讲道理不清、心思随波逐流，事情乱成一团麻。今天先别做重大决定，少说是非，把自己的事一件件理顺。",
+      "keyword": "理清头绪",
+      "sources": [
+        "https://www.buyiju.com/guanyin/24.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5346.html",
+        "https://www.51chouqian.com/guanyinlingqian/24.html",
+        "https://handfulofleaves.life/guan-yin-lot-24-meaning/"
+      ]
+    },
+    {
+      "no": 25,
+      "grade": "中签",
+      "title": "姚能受职",
+      "poem": [
+        "过了忧危事几重",
+        "从今再立永无空",
+        "宽心自有宽心计",
+        "得遇高人立大功"
+      ],
+      "plain": "熬过几重忧虑，从此重新立足，遇到高人还能成事。今天放宽心，跟靠谱的人多交流，好主意可能就来自一次闲聊。",
+      "keyword": "放宽心",
+      "sources": [
+        "https://www.buyiju.com/guanyin/25.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5349.html",
+        "https://www.51chouqian.com/guanyinlingqian/25.html",
+        "https://handfulofleaves.life/guan-yin-lot-25-meaning/"
+      ]
+    },
+    {
+      "no": 26,
+      "grade": "中签",
+      "title": "钟馗得道",
+      "poem": [
+        "上下传来事转虚",
+        "天边接得一封书",
+        "书中许我功名遂",
+        "直到终时亦是虚"
+      ],
+      "plain": "远方来信许诺功名，到头来却是一场虚。今天对听起来很美的承诺多留个心眼，脚踏实地守好本分更稳妥。",
+      "keyword": "守本分",
+      "sources": [
+        "https://www.buyiju.com/guanyin/26.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5353.html",
+        "https://www.51chouqian.com/guanyinlingqian/26.html",
+        "https://handfulofleaves.life/guan-yin-lot-26-meaning/"
+      ]
+    },
+    {
+      "no": 27,
+      "grade": "中签",
+      "title": "刘基谏主",
+      "poem": [
+        "一谋一用一番书",
+        "虑后思前不敢为",
+        "时到贵人相助力",
+        "如山墙立可安居"
+      ],
+      "plain": "前思后想不敢动手，时机到了自有贵人相助，像靠山而立。今天可以先把方案写下来，请信任的人提提意见，再决定何时推进。",
+      "keyword": "谋定后动",
+      "sources": [
+        "https://www.buyiju.com/guanyin/27.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5357.html",
+        "https://www.51chouqian.com/guanyinlingqian/27.html",
+        "https://handfulofleaves.life/guan-yin-lot-27-meaning/"
+      ]
+    },
+    {
+      "no": 28,
+      "grade": "中签",
+      "title": "包公寻李后",
+      "poem": [
+        "东边月上正婵娟",
+        "顷刻云遮亦暗存",
+        "或有圆时还有缺",
+        "更言非者亦闲言"
+      ],
+      "plain": "月亮刚升起又被云遮住，有圆有缺，闲话不必当真。今天若有误会或流言，先别急着辩解，等云散了，事情自然明白。",
+      "keyword": "耐心等待",
+      "sources": [
+        "https://www.buyiju.com/guanyin/28.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5359.html",
+        "https://www.51chouqian.com/guanyinlingqian/28.html",
+        "https://handfulofleaves.life/guan-yin-lot-28-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot28"
+      ]
+    },
+    {
+      "no": 29,
+      "grade": "中签",
+      "title": "赵子龙救阿斗",
+      "poem": [
+        "宝剑出匣耀光明",
+        "在匣全然不惹尘",
+        "今得贵人携出现",
+        "有威有势众人钦"
+      ],
+      "plain": "宝剑出匣，光芒耀眼，得贵人带出更显威势。今天是展示能力的好时机，可以主动请缨承担重要任务，让大家看到你的锋芒。",
+      "keyword": "亮出实力",
+      "sources": [
+        "https://www.buyiju.com/guanyin/29.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5360.html",
+        "https://www.51chouqian.com/guanyinlingqian/29.html",
+        "https://handfulofleaves.life/guan-yin-lot-29-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-29/"
+      ]
+    },
+    {
+      "no": 30,
+      "grade": "中签",
+      "title": "棋盘大会",
+      "poem": [
+        "劝君切莫向他求",
+        "似鹤飞来暗箭投",
+        "若去采薪蛇在草",
+        "恐遭毒口也忧愁"
+      ],
+      "plain": "签诗劝人别去求人，暗处有冷箭、草里有蛇，宜处处小心。今天少托人办事，说话留三分，关键的事自己把关更安心。",
+      "keyword": "谨言慎行",
+      "sources": [
+        "https://www.buyiju.com/guanyin/30.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5363.html",
+        "https://www.51chouqian.com/guanyinlingqian/30.html",
+        "https://handfulofleaves.life/guan-yin-lot-30-meaning/"
+      ]
+    },
+    {
+      "no": 31,
+      "grade": "中签",
+      "title": "佛印会东坡",
+      "poem": [
+        "清闲无忧静处坐",
+        "饱后喝茶时坐卧",
+        "放下身心不用忙",
+        "必定不招冤与祸"
+      ],
+      "plain": "清闲无忧，饱后喝茶，放下身心便自在安稳。今天不必事事着急，按部就班完成工作，给自己留一段喝茶发呆的时间。",
+      "keyword": "放松身心",
+      "sources": [
+        "https://www.51chouqian.com/guanyinlingqian/31.html",
+        "https://handfulofleaves.life/guan-yin-lot-31-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot31"
+      ]
+    },
+    {
+      "no": 32,
+      "grade": "中签",
+      "title": "刘备求贤",
+      "poem": [
+        "前程杳杳定无疑",
+        "石中藏玉有谁知",
+        "一朝良匠分明剖",
+        "始觉安然碧玉期"
+      ],
+      "plain": "美玉藏在石中无人知晓，要等良匠剖开才见光彩。今天别急于被认可，把能力打磨好，同时找机会让懂行的人看见你。",
+      "keyword": "等待伯乐",
+      "sources": [
+        "https://www.buyiju.com/guanyin/32.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5389.html",
+        "https://www.51chouqian.com/guanyinlingqian/32.html",
+        "https://handfulofleaves.life/guan-yin-lot-32-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot32",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-32/"
+      ]
+    },
+    {
+      "no": 33,
+      "grade": "中签",
+      "title": "咬金聘仁贵",
+      "poem": [
+        "内藏无价宝和珍",
+        "得玉何须外界寻",
+        "不如等待高人识",
+        "宽心犹且更宽心"
+      ],
+      "plain": "珍宝本就在自己身上，何必向外寻找，宽心等识货的人。今天少和别人比较，相信自己的积累，安心做好眼前的事。",
+      "keyword": "相信自己",
+      "sources": [
+        "https://www.buyiju.com/guanyin/33.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5390.html",
+        "https://www.51chouqian.com/guanyinlingqian/33.html",
+        "https://handfulofleaves.life/guan-yin-lot-33-meaning/"
+      ]
+    },
+    {
+      "no": 34,
+      "grade": "中签",
+      "title": "桃园结义",
+      "poem": [
+        "行藏出入礼义恭",
+        "言必忠良信必从",
+        "心不了然且静澈",
+        "光明红日正当空"
+      ],
+      "plain": "进退守礼，言行忠信，心静下来便像红日当空般明朗。今天对同伴说到做到，守信用、讲情义，合作往往更顺畅。",
+      "keyword": "守信重义",
+      "sources": [
+        "https://www.buyiju.com/guanyin/34.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5400.html",
+        "https://www.51chouqian.com/guanyinlingqian/34.html",
+        "https://handfulofleaves.life/guan-yin-lot-34-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot34"
+      ]
+    },
+    {
+      "no": 35,
+      "grade": "中签",
+      "title": "唐僧取经",
+      "poem": [
+        "衣冠重整旧家风",
+        "道是无穹却有功",
+        "扫却当途荆棘刺",
+        "三人约议再和同"
+      ],
+      "plain": "衣冠重整、扫除荆棘，几个人商议后再度齐心。今天适合和团队重新对齐目标，清掉碍事的小问题，一起往前走。",
+      "keyword": "重整出发",
+      "sources": [
+        "https://www.buyiju.com/guanyin/35.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5401.html",
+        "https://www.51chouqian.com/guanyinlingqian/35.html",
+        "https://handfulofleaves.life/guan-yin-lot-35-meaning/"
+      ]
+    },
+    {
+      "no": 36,
+      "grade": "中签",
+      "title": "湘子遇宾",
+      "poem": [
+        "眼前病讼不须忧",
+        "满地资财尽可求",
+        "恰似猿猴金锁脱",
+        "自归山洞去来悠"
+      ],
+      "plain": "眼前的烦心事不必过忧，像猿猴挣脱金锁，自在归山。今天可以先把压着你的一件事处理掉，卸下包袱，人也轻松一些。",
+      "keyword": "卸下包袱",
+      "sources": [
+        "https://www.buyiju.com/guanyin/36.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5403.html",
+        "https://www.51chouqian.com/guanyinlingqian/36.html",
+        "https://handfulofleaves.life/guan-yin-lot-36-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot36"
+      ]
+    },
+    {
+      "no": 37,
+      "grade": "中签",
+      "title": "李靖归山",
+      "poem": [
+        "欲待身安运泰时",
+        "风中灯烛不相宜",
+        "不如收拾深堂坐",
+        "庶免光摇静处明"
+      ],
+      "plain": "风中的灯烛容易摇晃，不如收进深堂，静处反而明亮。今天不宜冒进或太高调，安静做事、守住节奏，比四处奔忙更有收获。",
+      "keyword": "静守",
+      "sources": [
+        "https://www.buyiju.com/guanyin/37.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5404.html",
+        "https://www.51chouqian.com/guanyinlingqian/37.html"
+      ]
+    },
+    {
+      "no": 38,
+      "grade": "下签",
+      "title": "何文秀遇难",
+      "poem": [
+        "月照天书静处期",
+        "忽遭云雾又昏迷",
+        "宽心祈待云霞散",
+        "此时更改好施为"
+      ],
+      "plain": "月照天书本该安静，忽然云雾遮来，一时看不清方向。今天先放宽心，别急着做改变，等云开雾散、情况明朗了再调整。",
+      "keyword": "宜等待",
+      "sources": [
+        "https://www.zhouyi.cc/lingqian/guanyin/5405.html",
+        "https://www.51chouqian.com/guanyinlingqian/38.html",
+        "https://handfulofleaves.life/guan-yin-lot-38-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot38"
+      ]
+    },
+    {
+      "no": 39,
+      "grade": "下签",
+      "title": "姜女寻夫",
+      "poem": [
+        "天边消息实难思",
+        "切莫多心望强求",
+        "若把石头磨作镜",
+        "曾知枉费己功夫"
+      ],
+      "plain": "远方消息难以揣测，把石头磨成镜子只是白费力气。今天别强求暂时得不到的结果，把力气留给自己能掌控的事。",
+      "keyword": "不强求",
+      "sources": [
+        "https://www.buyiju.com/guanyin/39.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5407.html",
+        "https://www.51chouqian.com/guanyinlingqian/39.html",
+        "https://handfulofleaves.life/guan-yin-lot-39-meaning/"
+      ]
+    },
+    {
+      "no": 40,
+      "grade": "中签",
+      "title": "武则天登位",
+      "poem": [
+        "红轮西坠兔东升",
+        "阴长阳消百事亨",
+        "若是女人宜望用",
+        "增添财禄福其心"
+      ],
+      "plain": "红日西沉、月亮东升，讲的是时势正在转换。今天适合顺着变化调整计划，用柔和一点的方式处理问题，事情更容易顺。",
+      "keyword": "以柔应变",
+      "sources": [
+        "https://www.buyiju.com/guanyin/40.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5408.html",
+        "https://www.51chouqian.com/guanyinlingqian/40.html",
+        "https://handfulofleaves.life/guan-yin-lot-40-meaning/"
+      ]
+    },
+    {
+      "no": 41,
+      "grade": "中签",
+      "title": "董卓收吕布",
+      "poem": [
+        "无限好言君记取",
+        "却为认贼将作子",
+        "莫贪眼下有些甜",
+        "更虑他年前样思"
+      ],
+      "plain": "签诗提醒好话要记住，别认贼作子，也别贪眼前一点甜头。今天对条件特别好的邀约多想一步，先看清对方再答应。",
+      "keyword": "看清再定",
+      "sources": [
+        "https://www.buyiju.com/guanyin/41.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5409.html",
+        "https://www.51chouqian.com/guanyinlingqian/41.html",
+        "https://handfulofleaves.life/guan-yin-lot-41-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot41"
+      ]
+    },
+    {
+      "no": 42,
+      "grade": "上签",
+      "title": "目连救母",
+      "poem": [
+        "君皇圣后总为恩",
+        "复待祈禳无损增",
+        "一切有情皆受用",
+        "人间天上得期亨"
+      ],
+      "plain": "天恩普降，一切有情都能受用，人间天上皆通达。今天适合感恩与回馈，给家人打个电话或帮朋友一个忙，心情也会跟着明亮。",
+      "keyword": "感恩回馈",
+      "sources": [
+        "https://www.buyiju.com/guanyin/42.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5410.html",
+        "https://www.51chouqian.com/guanyinlingqian/42.html",
+        "https://handfulofleaves.life/guan-yin-lot-42-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot42",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-42/"
+      ]
+    },
+    {
+      "no": 43,
+      "grade": "上签",
+      "title": "行者得道",
+      "poem": [
+        "天地变通万物全",
+        "自营自养自安然",
+        "生罗万象皆精彩",
+        "事事如心谢圣贤"
+      ],
+      "plain": "天地变通、万物齐全，自己经营、自己养护便能安然。今天适合独立推进一件事，把节奏握在自己手里，尽力就好。",
+      "keyword": "自立自强",
+      "sources": [
+        "https://www.buyiju.com/guanyin/43.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5411.html",
+        "https://www.51chouqian.com/guanyinlingqian/43.html",
+        "https://handfulofleaves.life/guan-yin-lot-43-meaning/"
+      ]
+    },
+    {
+      "no": 44,
+      "grade": "中签",
+      "title": "姜维邓艾斗阵",
+      "poem": [
+        "棋逢敌手着相宜",
+        "黑白盘中未决时",
+        "皆因一着知胜败",
+        "须教自有好推宜"
+      ],
+      "plain": "棋逢对手，黑白胜负未分，往往一步定输赢。今天面对竞争别慌，想清楚关键一步再落子，用心比用力更重要。",
+      "keyword": "谋定一着",
+      "sources": [
+        "https://www.buyiju.com/guanyin/44.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5413.html",
+        "https://www.51chouqian.com/guanyinlingqian/44.html",
+        "https://handfulofleaves.life/guan-yin-lot-44-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-44/"
+      ]
+    },
+    {
+      "no": 45,
+      "grade": "上签",
+      "title": "仁宗认母",
+      "poem": [
+        "温柔自古胜刚强",
+        "积善之门大吉昌",
+        "若是有人占此卦",
+        "宛如正渴遇琼浆"
+      ],
+      "plain": "温柔胜过刚强，积善之家福气绵长，像口渴时遇到甘泉。今天用温和的方式处理分歧，多一点体谅，事情往往更顺。",
+      "keyword": "以柔克刚",
+      "sources": [
+        "https://www.buyiju.com/guanyin/45.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5415.html",
+        "https://www.51chouqian.com/guanyinlingqian/45.html",
+        "https://handfulofleaves.life/guan-yin-lot-45-meaning/"
+      ]
+    },
+    {
+      "no": 46,
+      "grade": "中签",
+      "title": "渭水钓鱼",
+      "poem": [
+        "劝君耐守旧生涯",
+        "把定心肠勿起歹",
+        "直待有人轻着力",
+        "枯枝老树再生花"
+      ],
+      "plain": "劝人安守本业、定下心来，等有人轻轻助力，老树也能再开花。今天别急着转向，把手头的事做好，等一个合适的推手。",
+      "keyword": "安守本业",
+      "sources": [
+        "https://www.buyiju.com/guanyin/46.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5417.html",
+        "https://www.51chouqian.com/guanyinlingqian/46.html",
+        "https://handfulofleaves.life/guan-yin-lot-46-meaning/"
+      ]
+    },
+    {
+      "no": 47,
+      "grade": "上签",
+      "title": "梁灏登科",
+      "poem": [
+        "锦上添花色愈鲜",
+        "运来禄马喜双全",
+        "时人莫恨功名晚",
+        "一举登科四海传"
+      ],
+      "plain": "锦上添花，运势到来，不必怨功名来得晚。今天如果有一直坚持的目标，继续推一把，晚一点到的收获同样亮眼。",
+      "keyword": "坚持到底",
+      "sources": [
+        "https://www.buyiju.com/guanyin/47.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5420.html",
+        "https://www.51chouqian.com/guanyinlingqian/47.html",
+        "https://handfulofleaves.life/guan-yin-lot-47-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-47/"
+      ]
+    },
+    {
+      "no": 48,
+      "grade": "中签",
+      "title": "韩信挂帅",
+      "poem": [
+        "鹍鸟秋来化作鹏",
+        "好游快乐喜飞腾",
+        "翱翔万里云霄去",
+        "余外诸禽总不能"
+      ],
+      "plain": "鹍鸟秋来化作大鹏，翱翔万里，别的鸟都追不上。今天适合挑战更大一点的目标，跳出舒适区，给自己一次升级的机会。",
+      "keyword": "乘势而上",
+      "sources": [
+        "https://www.buyiju.com/guanyin/48.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5422.html",
+        "https://www.51chouqian.com/guanyinlingqian/48.html",
+        "https://handfulofleaves.life/guan-yin-lot-48-meaning/"
+      ]
+    },
+    {
+      "no": 49,
+      "grade": "中签",
+      "title": "王祥求鲤",
+      "poem": [
+        "天寒地冻水成冰",
+        "何须贪吝取功名",
+        "只好守己静处坐",
+        "待时兴变自然明"
+      ],
+      "plain": "天寒地冻，水已成冰，不必贪求功名，静坐等时机。今天不宜强推难办的事，先做好准备，等条件回暖再出手。",
+      "keyword": "静待时机",
+      "sources": [
+        "https://www.buyiju.com/guanyin/49.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5426.html",
+        "https://www.51chouqian.com/guanyinlingqian/49.html",
+        "https://handfulofleaves.life/guan-yin-lot-49-meaning/"
+      ]
+    },
+    {
+      "no": 50,
+      "grade": "中签",
+      "title": "陶朱归五湖",
+      "poem": [
+        "五湖四海任君行",
+        "高挂帆蓬自在撑",
+        "若得顺风随即至",
+        "满船宝贝喜层层"
+      ],
+      "plain": "五湖四海任你行，高挂船帆借顺风，满船都是宝贝。今天适合出门拜访或开拓新圈子，顺着势头走，收获可能一层层来。",
+      "keyword": "顺风而行",
+      "sources": [
+        "https://www.buyiju.com/guanyin/50.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5431.html",
+        "https://www.51chouqian.com/guanyinlingqian/50.html",
+        "https://handfulofleaves.life/guan-yin-lot-50-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-50/"
+      ]
+    },
+    {
+      "no": 51,
+      "grade": "上签",
+      "title": "孔明入川",
+      "poem": [
+        "夏日炎天日最长",
+        "人人愁热闷非常",
+        "天地也解知人意",
+        "薰风拂拂自然凉"
+      ],
+      "plain": "夏日炎热让人烦闷，但天地也懂人意，凉风自然吹来。今天遇到烦躁别硬撑，先给自己降降温，转机常在心静之后。",
+      "keyword": "心静自凉",
+      "sources": [
+        "https://www.buyiju.com/guanyin/51.html",
+        "https://www.51chouqian.com/guanyinlingqian/51.html",
+        "https://handfulofleaves.life/guan-yin-lot-51-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-51/"
+      ]
+    },
+    {
+      "no": 52,
+      "grade": "中签",
+      "title": "太白醉捞明月",
+      "poem": [
+        "水中捉月费功夫",
+        "费尽功夫却又无",
+        "莫说闲言并乱语",
+        "枉劳心力强身孤"
+      ],
+      "plain": "水中捉月，费尽功夫却一场空，闲言乱语只会更累。今天先检查目标是否切实，别在虚的事上耗力，也少参与无谓争论。",
+      "keyword": "务实为先",
+      "sources": [
+        "https://www.buyiju.com/guanyin/52.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5433.html",
+        "https://www.51chouqian.com/guanyinlingqian/52.html",
+        "https://handfulofleaves.life/guan-yin-lot-52-meaning/"
+      ]
+    },
+    {
+      "no": 53,
+      "grade": "中签",
+      "title": "刘备招亲",
+      "poem": [
+        "失意翻成得意时",
+        "龙吟虎啸两相宜",
+        "青天自有通霄路",
+        "许我功名再有期"
+      ],
+      "plain": "失意反成得意时，龙吟虎啸，功名还有再来的日子。今天别被上一次的不顺困住，换个方式再试一次，局面可能翻转。",
+      "keyword": "再试一次",
+      "sources": [
+        "https://www.buyiju.com/guanyin/53.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5434.html",
+        "https://handfulofleaves.life/guan-yin-lot-53-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot53",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-53/"
+      ]
+    },
+    {
+      "no": 54,
+      "grade": "下签",
+      "title": "马超追曹",
+      "poem": [
+        "梦中得宝醒来无",
+        "自谓南山只是锄",
+        "若问婚姻并问病",
+        "别寻条路为相扶"
+      ],
+      "plain": "梦里得宝醒来却空，劳心费力也抓不住。今天别一条路走到黑，试着换个思路或找人搭把手，先稳住再说。",
+      "keyword": "换条路走",
+      "sources": [
+        "https://www.buyiju.com/guanyin/54.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5435.html",
+        "https://www.51chouqian.com/guanyinlingqian/54.html",
+        "https://handfulofleaves.life/guan-yin-lot-54-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot54"
+      ]
+    },
+    {
+      "no": 55,
+      "grade": "中签",
+      "title": "周武王登位",
+      "poem": [
+        "父贤传子子传孙",
+        "衣食丰隆只靠天",
+        "堂上椿萱人快乐",
+        "饥饭渴饮困时眠"
+      ],
+      "plain": "父贤子孝，衣食丰足，饿了吃、困了睡，日子安稳。今天把重心放在家人和生活上，好好吃饭、早点休息，平淡也是福气。",
+      "keyword": "安享平常",
+      "sources": [
+        "https://www.buyiju.com/guanyin/55.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5437.html",
+        "https://www.51chouqian.com/guanyinlingqian/55.html",
+        "https://handfulofleaves.life/guan-yin-lot-55-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot55",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-55/"
+      ]
+    },
+    {
+      "no": 56,
+      "grade": "中签",
+      "title": "禄山谋反",
+      "poem": [
+        "滩小石溪流水响",
+        "清风明月贵人忙",
+        "路须借问何方去",
+        "莫取林中花草香"
+      ],
+      "plain": "溪水潺潺，清风明月中贵人正忙，路要问清再走，别被林中花草迷住。今天先弄清方向再出发，别被眼前的诱惑分心。",
+      "keyword": "问清再走",
+      "sources": [
+        "https://www.buyiju.com/guanyin/56.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5438.html",
+        "https://www.51chouqian.com/guanyinlingqian/56.html",
+        "https://handfulofleaves.life/guan-yin-lot-56-meaning/"
+      ]
+    },
+    {
+      "no": 57,
+      "grade": "中签",
+      "title": "董仲寻亲",
+      "poem": [
+        "说是说非风过耳",
+        "好衣好禄自然丰",
+        "君莫记取当年事",
+        "汝意还如我意同"
+      ],
+      "plain": "是非像风过耳，不必挂心，衣食福禄自然丰足。今天别把旧事放在心上，和人沟通时求同存异，彼此的心意其实相通。",
+      "keyword": "放下旧怨",
+      "sources": [
+        "https://www.buyiju.com/guanyin/57.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5439.html",
+        "https://www.51chouqian.com/guanyinlingqian/57.html",
+        "https://handfulofleaves.life/guan-yin-lot-57-meaning/"
+      ]
+    },
+    {
+      "no": 58,
+      "grade": "中签",
+      "title": "文王问卜",
+      "poem": [
+        "直言说话君须记",
+        "莫在他乡求别艺",
+        "切须守己旧生涯",
+        "除此其余都不利"
+      ],
+      "plain": "签诗直言：别去他乡另学别艺，守住本业最稳妥。今天不宜分心去碰不熟的领域，把自己擅长的事做深做透。",
+      "keyword": "专注本业",
+      "sources": [
+        "https://www.buyiju.com/guanyin/58.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5440.html",
+        "https://www.51chouqian.com/guanyinlingqian/58.html",
+        "https://handfulofleaves.life/guan-yin-lot-58-meaning/"
+      ]
+    },
+    {
+      "no": 59,
+      "grade": "中签",
+      "title": "张良隐山",
+      "poem": [
+        "直上重楼去藏身",
+        "四围荆棘绕为林",
+        "天高君命长和短",
+        "得一反成失二人"
+      ],
+      "plain": "登上高楼藏身，四周荆棘围绕，得一反失二。今天适合低调一点，少出头、少冒险，先把自己的安排顾好。",
+      "keyword": "低调守成",
+      "sources": [
+        "https://www.buyiju.com/guanyin/59.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5441.html",
+        "https://www.51chouqian.com/guanyinlingqian/59.html",
+        "https://handfulofleaves.life/guan-yin-lot-59-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot59"
+      ]
+    },
+    {
+      "no": 60,
+      "grade": "下签",
+      "title": "赤壁鏖兵",
+      "poem": [
+        "抱薪救火大皆燃",
+        "烧遍三千亦复然",
+        "若问荣华并出入",
+        "不如收拾枉劳心"
+      ],
+      "plain": "抱着柴火去救火，火只会越烧越旺。今天遇到冲突别火上浇油，先停下来缓一缓，冷处理往往更好。",
+      "keyword": "先降温",
+      "sources": [
+        "https://www.buyiju.com/guanyin/60.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5443.html",
+        "https://www.51chouqian.com/guanyinlingqian/60.html",
+        "https://handfulofleaves.life/guan-yin-lot-60-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-60/"
+      ]
+    },
+    {
+      "no": 61,
+      "grade": "中签",
+      "title": "苏小妹难夫",
+      "poem": [
+        "日落吟诗月下歌",
+        "逢场作戏笑呵呵",
+        "相逢会遇难藏避",
+        "唱彩齐唱连理罗"
+      ],
+      "plain": "吟诗唱歌、逢场作戏，该相遇的缘分躲也躲不开。今天在社交场合放轻松，真诚应对，可能遇到让你眼前一亮的人。",
+      "keyword": "随缘相会",
+      "sources": [
+        "https://www.buyiju.com/guanyin/61.html",
+        "https://www.51chouqian.com/guanyinlingqian/61.html",
+        "https://handfulofleaves.life/guan-yin-lot-61-meaning/"
+      ]
+    },
+    {
+      "no": 62,
+      "grade": "中签",
+      "title": "唐僧得道",
+      "poem": [
+        "晨昏全赖佛扶持",
+        "须是逢危却不危",
+        "若得贵人相引处",
+        "那时财帛亦相随"
+      ],
+      "plain": "晨昏都有佛力护持，看似危险却不危险，遇贵人财帛相随。今天碰到难题别慌，向信得过的人求助，困难可能比想象中好解。",
+      "keyword": "沉着应对",
+      "sources": [
+        "https://www.buyiju.com/guanyin/62.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5445.html",
+        "https://www.51chouqian.com/guanyinlingqian/62.html",
+        "https://handfulofleaves.life/guan-yin-lot-62-meaning/"
+      ]
+    },
+    {
+      "no": 63,
+      "grade": "中签",
+      "title": "女娲氏炼石",
+      "poem": [
+        "昔然行船失了针",
+        "今朝依旧海中寻",
+        "若然寻得原针在",
+        "也费工夫也费心"
+      ],
+      "plain": "行船时失落了针，又回到海中去找，找得到也费心力。今天想找回旧东西或旧机会，需要耐心，列好步骤慢慢来。",
+      "keyword": "耐心寻回",
+      "sources": [
+        "https://www.buyiju.com/guanyin/63.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5446.html",
+        "https://www.51chouqian.com/guanyinlingqian/63.html",
+        "https://handfulofleaves.life/guan-yin-lot-63-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot63",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-63/"
+      ]
+    },
+    {
+      "no": 64,
+      "grade": "下签",
+      "title": "马前覆水",
+      "poem": [
+        "游鱼却在碧波池",
+        "撞遭罗网四边围",
+        "思量无计翻身出",
+        "事到头来惹是非"
+      ],
+      "plain": "游鱼在碧波中被罗网围住，想翻身一时无计可施。今天先别急着挣脱困局，少惹是非，冷静观察出口在哪里。",
+      "keyword": "冷静观察",
+      "sources": [
+        "https://www.zhouyi.cc/lingqian/guanyin/5447.html",
+        "https://www.51chouqian.com/guanyinlingqian/64.html",
+        "https://handfulofleaves.life/guan-yin-lot-64-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot64"
+      ]
+    },
+    {
+      "no": 65,
+      "grade": "下签",
+      "title": "孙膑困庞涓",
+      "poem": [
+        "眼前欢喜未为欢",
+        "亦不危时亦不安",
+        "割肉补疮为甚事",
+        "不如守旧待时光"
+      ],
+      "plain": "眼前的欢喜未必是真欢喜，割肉补疮，得不偿失。今天别为一时好看做出牺牲长远的决定，守住现状，等更好的时机。",
+      "keyword": "守旧待时",
+      "sources": [
+        "https://www.buyiju.com/guanyin/65.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5448.html",
+        "https://www.51chouqian.com/guanyinlingqian/65.html",
+        "https://handfulofleaves.life/guan-yin-lot-65-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot65"
+      ]
+    },
+    {
+      "no": 66,
+      "grade": "下签",
+      "title": "霸王被困",
+      "poem": [
+        "路险马乏人行急",
+        "失群军卒困相当",
+        "滩高风浪船棹破",
+        "日暮花残天降霜"
+      ],
+      "plain": "路险马乏、风高浪急，日暮花残，处处不太顺。今天先放慢脚步，别硬闯难关，休整一下、准备充足再出发。",
+      "keyword": "休整蓄力",
+      "sources": [
+        "https://www.buyiju.com/guanyin/66.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5449.html",
+        "https://www.51chouqian.com/guanyinlingqian/66.html",
+        "https://handfulofleaves.life/guan-yin-lot-66-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot66"
+      ]
+    },
+    {
+      "no": 67,
+      "grade": "上签",
+      "title": "金星试窦儿",
+      "poem": [
+        "一条金线秤君心",
+        "无减无增无重轻",
+        "为人平生心正直",
+        "文章全具艺光明"
+      ],
+      "plain": "一杆金秤称人心，不增不减，为人正直，才艺自然光明。今天做决定时公平待人、实事求是，正直最能赢得信任。",
+      "keyword": "公正平稳",
+      "sources": [
+        "https://www.buyiju.com/guanyin/67.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5450.html",
+        "https://www.51chouqian.com/guanyinlingqian/67.html",
+        "https://handfulofleaves.life/guan-yin-lot-67-meaning/"
+      ]
+    },
+    {
+      "no": 68,
+      "grade": "中签",
+      "title": "郭汾阳祝寿",
+      "poem": [
+        "门庭吉庆喜非常",
+        "积善之门大吉昌",
+        "婚姻田蚕诸事遂",
+        "病逢妙药即安康"
+      ],
+      "plain": "门庭吉庆，积善之家喜事多，诸事顺遂。今天适合和家人朋友聚一聚，分享好消息，也把好心情传给身边的人。",
+      "keyword": "分享喜悦",
+      "sources": [
+        "https://www.buyiju.com/guanyin/68.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5451.html",
+        "https://www.51chouqian.com/guanyinlingqian/68.html",
+        "https://handfulofleaves.life/guan-yin-lot-68-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot68"
+      ]
+    },
+    {
+      "no": 69,
+      "grade": "中签",
+      "title": "梅开二度",
+      "poem": [
+        "冬来岭上一枝梅",
+        "叶落枝枯终不摧",
+        "但得阳春悄急至",
+        "依然还我作花魁"
+      ],
+      "plain": "冬天岭上一枝梅，叶落枝枯也不折，等春来依旧夺魁。今天若正处低谷，别轻易放弃，耐住这一段寒冬，等春天再开花。",
+      "keyword": "坚韧待春",
+      "sources": [
+        "https://www.buyiju.com/guanyin/69.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5452.html",
+        "https://www.51chouqian.com/guanyinlingqian/69.html",
+        "https://handfulofleaves.life/guan-yin-lot-69-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot69"
+      ]
+    },
+    {
+      "no": 70,
+      "grade": "下签",
+      "title": "李密反唐",
+      "poem": [
+        "朝朝恰似采花蜂",
+        "飞出西南又走东",
+        "春尽花残无觅处",
+        "此心不变旧行踪"
+      ],
+      "plain": "像采花的蜜蜂，东奔西走，春尽花残也找不到花。今天别再到处奔忙，停下来想清楚真正想要什么，把精力集中在一处。",
+      "keyword": "专注一处",
+      "sources": [
+        "https://www.buyiju.com/guanyin/70.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5453.html",
+        "https://www.51chouqian.com/guanyinlingqian/70.html",
+        "https://handfulofleaves.life/guan-yin-lot-70-meaning/"
+      ]
+    },
+    {
+      "no": 71,
+      "grade": "中签",
+      "title": "文君访相如",
+      "poem": [
+        "认知苍龙下九衢",
+        "女子当年嫁二夫",
+        "自是一弓架两箭",
+        "欲恐龙马不安居"
+      ],
+      "plain": "一张弓架两支箭，讲心思两头摇摆、难以安定。今天面对两个选择别都想要，先认真比一比，再选定一个全力以赴。",
+      "keyword": "二选其一",
+      "sources": [
+        "https://www.zhouyi.cc/lingqian/guanyin/5454.html",
+        "https://www.51chouqian.com/guanyinlingqian/71.html",
+        "https://handfulofleaves.life/guan-yin-lot-71-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot71"
+      ]
+    },
+    {
+      "no": 72,
+      "grade": "中签",
+      "title": "王莽求贤",
+      "poem": [
+        "养蜂须用求他蜜",
+        "只怕遭触尾上针",
+        "须是眼前有异路",
+        "暗里深如荆棘林"
+      ],
+      "plain": "想取蜂蜜又怕蜂尾的针，眼前虽有别路，暗处仍有荆棘。今天对看起来很甜的机会多问几句，弄清代价再做决定。",
+      "keyword": "三思而行",
+      "sources": [
+        "https://www.zhouyi.cc/lingqian/guanyin/5455.html",
+        "https://www.51chouqian.com/guanyinlingqian/72.html",
+        "https://handfulofleaves.life/guan-yin-lot-72-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot72"
+      ]
+    },
+    {
+      "no": 73,
+      "grade": "上签",
+      "title": "陈桥兵变",
+      "poem": [
+        "春来雷震百虫鸣",
+        "番身一转离泥中",
+        "始知出入还来往",
+        "一朝变化便成龙"
+      ],
+      "plain": "春雷一响百虫苏醒，翻身离开泥地，一朝化龙。今天适合大胆推动一直想做的改变，时机正在苏醒。",
+      "keyword": "把握时机",
+      "sources": [
+        "https://www.buyiju.com/guanyin/73.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5456.html",
+        "https://www.51chouqian.com/guanyinlingqian/73.html",
+        "https://handfulofleaves.life/guan-yin-lot-73-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-73/"
+      ]
+    },
+    {
+      "no": 74,
+      "grade": "下签",
+      "title": "秦败擒三帅",
+      "poem": [
+        "似鹄飞来自入笼",
+        "欲得翻身却不通",
+        "南北东西都难出",
+        "此卦诚恐恨无穹"
+      ],
+      "plain": "鸟儿自己飞进笼中，想翻身却四面难出。今天不宜冒进或贸然承诺，先停一停，看清处境再找出口。",
+      "keyword": "宜等待",
+      "sources": [
+        "https://www.buyiju.com/guanyin/74.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5457.html",
+        "https://www.51chouqian.com/guanyinlingqian/74.html",
+        "https://handfulofleaves.life/guan-yin-lot-74-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot74"
+      ]
+    },
+    {
+      "no": 75,
+      "grade": "中签",
+      "title": "伍员夜出昭关",
+      "poem": [
+        "恰如抱虎过高山",
+        "战战兢兢胆碎寒",
+        "不觉忽然从好事",
+        "切须保守一身安"
+      ],
+      "plain": "像抱着老虎过高山，战战兢兢，却可能忽然遇上好事。今天面对压力保持谨慎，按部就班稳住自己，转机或许就在下一步。",
+      "keyword": "谨慎前行",
+      "sources": [
+        "https://www.buyiju.com/guanyin/75.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5458.html",
+        "https://www.51chouqian.com/guanyinlingqian/75.html",
+        "https://handfulofleaves.life/guan-yin-lot-75-meaning/"
+      ]
+    },
+    {
+      "no": 76,
+      "grade": "中签",
+      "title": "洪武看牛",
+      "poem": [
+        "鱼龙混杂意相同",
+        "耐守深潭待运通",
+        "不觉一朝头耸出",
+        "禹门一跳过龙宫"
+      ],
+      "plain": "鱼龙混杂之中耐守深潭，等运势通达，一朝跃过龙门。今天在不起眼的位置上也别急躁，沉住气慢慢积累，等机会靠近。",
+      "keyword": "沉潜待时",
+      "sources": [
+        "https://www.buyiju.com/guanyin/76.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5459.html",
+        "https://www.51chouqian.com/guanyinlingqian/76.html",
+        "https://handfulofleaves.life/guan-yin-lot-76-meaning/"
+      ]
+    },
+    {
+      "no": 77,
+      "grade": "中签",
+      "title": "捧璧归赵",
+      "poem": [
+        "梦中说得是多财",
+        "声名云外总虚来",
+        "水远山遥难信实",
+        "贵人指点笑颜开"
+      ],
+      "plain": "梦里说要发大财，名声远在云外，山高水远难以落实。今天少做空想，把计划落到第一步，有人点拨时虚心听一听。",
+      "keyword": "落地一步",
+      "sources": [
+        "https://www.buyiju.com/guanyin/77.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5460.html",
+        "https://www.51chouqian.com/guanyinlingqian/77.html",
+        "https://handfulofleaves.life/guan-yin-lot-77-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot77"
+      ]
+    },
+    {
+      "no": 78,
+      "grade": "上签",
+      "title": "临潼救驾",
+      "poem": [
+        "冷水未烧白沸汤",
+        "不寒不热有温凉",
+        "要行天下无他事",
+        "为有身中百艺强"
+      ],
+      "plain": "冷水还没烧成沸汤，不冷不热刚刚好，身怀百艺走天下也不难。今天适合多学一门手艺或技能，本事在身，走到哪里都踏实。",
+      "keyword": "精进技能",
+      "sources": [
+        "https://www.buyiju.com/guanyin/78.html",
+        "https://www.51chouqian.com/guanyinlingqian/78.html",
+        "https://handfulofleaves.life/guan-yin-lot-78-meaning/"
+      ]
+    },
+    {
+      "no": 79,
+      "grade": "中签",
+      "title": "暗扶倒铜旗",
+      "poem": [
+        "虚空结愿保平安",
+        "保得身安愿不还",
+        "莫忘神圣宜还了",
+        "此知神语莫轻慢"
+      ],
+      "plain": "许愿保平安，平安后却不还愿，签诗提醒别轻慢许诺。今天把答应过别人的事一一兑现，说到做到，心里才踏实。",
+      "keyword": "兑现承诺",
+      "sources": [
+        "https://www.buyiju.com/guanyin/79.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5462.html",
+        "https://www.51chouqian.com/guanyinlingqian/79.html",
+        "https://handfulofleaves.life/guan-yin-lot-79-meaning/"
+      ]
+    },
+    {
+      "no": 80,
+      "grade": "上签",
+      "title": "智远投军",
+      "poem": [
+        "直上仙岩要学仙",
+        "此知一旦帝王宣",
+        "青天日月常明照",
+        "心正声名四海传"
+      ],
+      "plain": "本想上山学仙，却忽然被帝王召见，正直之名传遍四海。今天保持心正行端，机会可能从意想不到的方向来，准备好接住。",
+      "keyword": "心正迎机",
+      "sources": [
+        "https://www.buyiju.com/guanyin/80.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5463.html",
+        "https://www.51chouqian.com/guanyinlingqian/80.html",
+        "https://handfulofleaves.life/guan-yin-lot-80-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot80"
+      ]
+    },
+    {
+      "no": 81,
+      "grade": "上签",
+      "title": "风送滕王阁",
+      "poem": [
+        "梧桐叶落秋将暮",
+        "行客归程去似云",
+        "谢得天公高着力",
+        "顺风船载宝珍归"
+      ],
+      "plain": "秋叶落尽，行客踏上归程，得天公顺风相助满载而归。今天适合收尾和复盘，把做完的事好好总结，展示成果正当时。",
+      "keyword": "顺风收获",
+      "sources": [
+        "https://www.buyiju.com/guanyin/81.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5464.html",
+        "https://www.51chouqian.com/guanyinlingqian/81.html",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-81/"
+      ]
+    },
+    {
+      "no": 82,
+      "grade": "中签",
+      "title": "火烧葫芦谷",
+      "poem": [
+        "炎炎烈火焰连天",
+        "焰里还生一朵莲",
+        "到底得成终不害",
+        "依然生叶长根枝"
+      ],
+      "plain": "烈火连天之中却长出一朵莲花，看似危险终归无碍。今天遇到紧张局面别慌，沉着应对，难处里也能开出好结果。",
+      "keyword": "化险为夷",
+      "sources": [
+        "https://www.buyiju.com/guanyin/82.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5465.html",
+        "https://www.51chouqian.com/guanyinlingqian/82.html",
+        "https://handfulofleaves.life/guan-yin-lot-82-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-82/"
+      ]
+    },
+    {
+      "no": 83,
+      "grade": "中签",
+      "title": "李渊登位",
+      "poem": [
+        "譬若初三四五缺",
+        "半无半有未圆全",
+        "等待十五良宵夜",
+        "到处光明到处圆"
+      ],
+      "plain": "初三到初五的月亮缺而未圆，要等十五才光明圆满。今天的事只进行到一半也别急，按步骤推进，圆满需要时间。",
+      "keyword": "耐心等圆",
+      "sources": [
+        "https://www.buyiju.com/guanyin/83.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5466.html",
+        "https://www.51chouqian.com/guanyinlingqian/83.html",
+        "https://handfulofleaves.life/guan-yin-lot-83-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot83"
+      ]
+    },
+    {
+      "no": 84,
+      "grade": "下签",
+      "title": "庄子试妻",
+      "poem": [
+        "因名丧德如何事",
+        "切恐吉中变化凶",
+        "酒醉不知何处去",
+        "青松影里梦朦胧"
+      ],
+      "plain": "为虚名丢了德行，好事中也可能生变，醉梦中不知身在何处。今天保持清醒，少应酬，重要的事别在冲动时决定。",
+      "keyword": "保持清醒",
+      "sources": [
+        "https://www.buyiju.com/guanyin/84.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5467.html",
+        "https://www.51chouqian.com/guanyinlingqian/84.html",
+        "https://handfulofleaves.life/guan-yin-lot-84-meaning/"
+      ]
+    },
+    {
+      "no": 85,
+      "grade": "中签",
+      "title": "韩文公遇雪",
+      "poem": [
+        "云暗雾罩山前路",
+        "万物圆中月再圆",
+        "若得诗书沉梦醒",
+        "贵人指引步天台"
+      ],
+      "plain": "云雾笼罩山前路，等诗书读通、大梦醒来，自有贵人引路登高。今天前路看不清时，先充实自己、多读多学，也留意身边能为你指路的人。",
+      "keyword": "充实自己",
+      "sources": [
+        "https://www.buyiju.com/guanyin/85.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5468.html",
+        "https://www.51chouqian.com/guanyinlingqian/85.html",
+        "https://handfulofleaves.life/guan-yin-lot-85-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot85"
+      ]
+    },
+    {
+      "no": 86,
+      "grade": "上签",
+      "title": "商辂中三元",
+      "poem": [
+        "春来花发映阳台",
+        "万里车来进宝财",
+        "若得禹门三级浪",
+        "恰如平地一声雷"
+      ],
+      "plain": "春花盛开，财宝进门，跃过禹门三级浪，便如平地一声雷。今天适合冲刺考试、竞聘或关键汇报，全力以赴，放手一搏。",
+      "keyword": "全力冲刺",
+      "sources": [
+        "https://www.buyiju.com/guanyin/86.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5469.html",
+        "https://www.51chouqian.com/guanyinlingqian/86.html",
+        "https://handfulofleaves.life/guan-yin-lot-86-meaning/"
+      ]
+    },
+    {
+      "no": 87,
+      "grade": "中签",
+      "title": "咬金探地穴",
+      "poem": [
+        "人行半岭日衔山",
+        "峻岭崖岩未可安",
+        "仰望上天为护佑",
+        "此身犹在太平间"
+      ],
+      "plain": "夕阳下人走在半山，峻岭崖岩难以安身，但仰望上天仍有护佑。今天处在吃力的阶段，稳住脚步一步步走，你并不孤单。",
+      "keyword": "稳步前行",
+      "sources": [
+        "https://www.buyiju.com/guanyin/87.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5470.html",
+        "https://www.51chouqian.com/guanyinlingqian/87.html",
+        "https://handfulofleaves.life/guan-yin-lot-87-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot87"
+      ]
+    },
+    {
+      "no": 88,
+      "grade": "中签",
+      "title": "庞洪畏包公",
+      "poem": [
+        "木为一虎在当门",
+        "须是有威不害人",
+        "分明说是无防事",
+        "忧恼迟疑恐惊心"
+      ],
+      "plain": "木刻的老虎守在门口，有威势却不伤人，多是虚惊一场。今天遇到让你紧张的人或事，先别自己吓自己，冷静看清再应对。",
+      "keyword": "别自扰",
+      "sources": [
+        "https://www.buyiju.com/guanyin/88.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5471.html",
+        "https://www.51chouqian.com/guanyinlingqian/88.html",
+        "https://handfulofleaves.life/guan-yin-lot-88-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot88"
+      ]
+    },
+    {
+      "no": 89,
+      "grade": "上签",
+      "title": "大看瑶花",
+      "poem": [
+        "出入营谋大吉昌",
+        "似玉无瑕石里藏",
+        "若得贵人来指引",
+        "斯时得宝喜风光"
+      ],
+      "plain": "出入谋事都顺，好比美玉藏在石里，得贵人指点便见宝光。今天适合请人帮你把把关，一句点拨可能让你看见被忽略的价值。",
+      "keyword": "贵人点拨",
+      "sources": [
+        "https://www.buyiju.com/guanyin/89.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5472.html",
+        "https://www.51chouqian.com/guanyinlingqian/89.html",
+        "https://handfulofleaves.life/guan-yin-lot-89-meaning/"
+      ]
+    },
+    {
+      "no": 90,
+      "grade": "上签",
+      "title": "苇佩遇仙",
+      "poem": [
+        "忽言一信向天飞",
+        "泰山宝贝满船归",
+        "若问路途成好事",
+        "前头仍有贵人推"
+      ],
+      "plain": "喜讯飞来，满船宝贝而归，前头还有贵人相推。今天适合推进期待已久的事，主动联系能帮你的人，顺势而行。",
+      "keyword": "乘势推进",
+      "sources": [
+        "https://www.buyiju.com/guanyin/90.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5473.html",
+        "https://www.51chouqian.com/guanyinlingqian/90.html",
+        "https://handfulofleaves.life/guan-yin-lot-90-meaning/"
+      ]
+    },
+    {
+      "no": 91,
+      "grade": "中签",
+      "title": "三战吕布",
+      "poem": [
+        "好展愁眉出众来",
+        "前途改变喜多财",
+        "一条大路如天阔",
+        "凡有施财尽畅怀"
+      ],
+      "plain": "舒展愁眉、前途转好，一条大路宽阔如天。今天适合放下顾虑向前走，大方地分享与付出，心情也会越来越开阔。",
+      "keyword": "大步向前",
+      "sources": [
+        "https://www.buyiju.com/guanyin/91.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5474.html",
+        "https://www.51chouqian.com/guanyinlingqian/91.html",
+        "https://handfulofleaves.life/guan-yin-lot-91-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-91/"
+      ]
+    },
+    {
+      "no": 92,
+      "grade": "上签",
+      "title": "蔡卿报恩",
+      "poem": [
+        "自幼为商任设谋",
+        "财禄盈丰不用求",
+        "若是双身谋望事",
+        "秀才出去状元回"
+      ],
+      "plain": "从小经商善于谋划，财禄丰足，秀才出门状元归来。今天适合规划长期目标，用心经营，你的努力在一点点累积。",
+      "keyword": "用心经营",
+      "sources": [
+        "https://www.buyiju.com/guanyin/92.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5475.html",
+        "https://www.51chouqian.com/guanyinlingqian/92.html"
+      ]
+    },
+    {
+      "no": 93,
+      "grade": "中签",
+      "title": "高君保招亲",
+      "poem": [
+        "鸾凤翔毛雨淋漓",
+        "当时却被雀儿欺",
+        "终教一日云开达",
+        "依旧还君整羽衣"
+      ],
+      "plain": "鸾凤被雨淋湿羽毛，一时被雀儿欺负，云开后依旧整羽高飞。今天受了点委屈别往心里去，先照顾好自己，日后自有舒展之时。",
+      "keyword": "暂忍待晴",
+      "sources": [
+        "https://www.buyiju.com/guanyin/93.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5476.html",
+        "https://www.51chouqian.com/guanyinlingqian/93.html",
+        "https://handfulofleaves.life/guan-yin-lot-93-meaning/"
+      ]
+    },
+    {
+      "no": 94,
+      "grade": "下签",
+      "title": "伯牙访友",
+      "poem": [
+        "君子莫体小人为",
+        "事若差池各是非",
+        "琴鸣须用知音听",
+        "守常安静得依稀"
+      ],
+      "plain": "君子不学小人行径，琴声要知音才听得懂。今天少计较是非，找一位懂你的朋友聊聊，安静守常，心会慢慢定下来。",
+      "keyword": "寻找知音",
+      "sources": [
+        "https://www.buyiju.com/guanyin/94.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5477.html",
+        "https://www.51chouqian.com/guanyinlingqian/94.html",
+        "https://handfulofleaves.life/guan-yin-lot-94-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot94"
+      ]
+    },
+    {
+      "no": 95,
+      "grade": "中签",
+      "title": "曹丕称帝",
+      "poem": [
+        "志气功业在朝朝",
+        "今将酒色不胜饶",
+        "若见金鸡报君语",
+        "钱财福禄与君招"
+      ],
+      "plain": "志向功业在每一天，沉迷享乐便难成事，金鸡报晓时福禄来招。今天收收心，少些娱乐消耗，早起做好最重要的一件事。",
+      "keyword": "收心自律",
+      "sources": [
+        "https://www.buyiju.com/guanyin/95.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5478.html",
+        "https://www.51chouqian.com/guanyinlingqian/95.html",
+        "https://handfulofleaves.life/guan-yin-lot-95-meaning/"
+      ]
+    },
+    {
+      "no": 96,
+      "grade": "上签",
+      "title": "窦燕山积善",
+      "poem": [
+        "巍峨宝塔不寻常",
+        "八面玲珑尽放光",
+        "劝君立志勤顶礼",
+        "作善苍天降福祥"
+      ],
+      "plain": "宝塔巍峨，八面玲珑放光，劝人立志行善，福祥自来。今天适合做一件小善事，帮同事或陌生人一把，好心情会回到你身上。",
+      "keyword": "日行一善",
+      "sources": [
+        "https://www.buyiju.com/guanyin/96.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5479.html",
+        "https://www.51chouqian.com/guanyinlingqian/96.html",
+        "https://handfulofleaves.life/guan-yin-lot-96-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot96",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-96/"
+      ]
+    },
+    {
+      "no": 97,
+      "grade": "中签",
+      "title": "六出祁山",
+      "poem": [
+        "当风点烛空疏影",
+        "恍惚铺成镜里花",
+        "累被儿童求收拾",
+        "怎知只是幻浮槎"
+      ],
+      "plain": "风中点烛、镜里看花，一番忙碌后才知是一场虚浮。今天别为看起来热闹的事费太多心，把精力留给真正有价值的目标。",
+      "keyword": "去虚务实",
+      "sources": [
+        "https://www.buyiju.com/guanyin/97.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5480.html",
+        "https://www.51chouqian.com/guanyinlingqian/97.html",
+        "https://handfulofleaves.life/guan-yin-lot-97-meaning/"
+      ]
+    },
+    {
+      "no": 98,
+      "grade": "下签",
+      "title": "吉平遇难",
+      "poem": [
+        "出入求谋事宜迟",
+        "急恐闲愁惹是非",
+        "如鸟飞入罗网内",
+        "脱困能有几多时"
+      ],
+      "plain": "出入谋事宜慢，怕闲愁惹来是非，像鸟儿误入罗网。今天不宜急着推进新计划，先管好情绪、避开争执，等局面明朗。",
+      "keyword": "放慢脚步",
+      "sources": [
+        "https://www.buyiju.com/guanyin/98.html",
+        "https://www.51chouqian.com/guanyinlingqian/98.html",
+        "https://handfulofleaves.life/guan-yin-lot-98-meaning/",
+        "https://bwmonastery.org.sg/guanyinqian/lot98"
+      ]
+    },
+    {
+      "no": 99,
+      "grade": "下签",
+      "title": "陶三春挂帅",
+      "poem": [
+        "勒马持鞭直过来",
+        "半有忧危半有灾",
+        "恰似遭火焚烧屋",
+        "天降时雨荡成灰"
+      ],
+      "plain": "勒马扬鞭冲过来，半是忧虑半是难关，好在天降时雨。今天先稳住，别硬冲，凡事多备一手，难关过后还有转机。",
+      "keyword": "未雨绸缪",
+      "sources": [
+        "https://www.buyiju.com/guanyin/99.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5482.html",
+        "https://www.51chouqian.com/guanyinlingqian/99.html",
+        "https://handfulofleaves.life/guan-yin-lot-99-meaning/"
+      ]
+    },
+    {
+      "no": 100,
+      "grade": "下签",
+      "title": "三教谈道",
+      "poem": [
+        "佛神灵变与君知",
+        "痴人说事转昏迷",
+        "老人求得灵签去",
+        "不如守旧待时来"
+      ],
+      "plain": "神佛点明给你知，越是心急越糊涂，不如守旧等时机。今天少做大的变动，守好现有的节奏，等时机成熟再行动。",
+      "keyword": "守旧待时",
+      "sources": [
+        "https://www.buyiju.com/guanyin/100.html",
+        "https://www.zhouyi.cc/lingqian/guanyin/5483.html",
+        "https://www.51chouqian.com/guanyinlingqian/100.html",
+        "https://handfulofleaves.life/guan-yin-lot-100-meaning/",
+        "https://www.masterseanchan.com/guanyin-oracle/lot-100/"
+      ]
+    }
+  ]
+}

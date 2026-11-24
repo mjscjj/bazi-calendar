@@ -1,0 +1,9 @@
+[Unit]
+Description=流日历数据库每日 04:30 备份
+
+[Timer]
+OnCalendar=*-*-* 04:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
