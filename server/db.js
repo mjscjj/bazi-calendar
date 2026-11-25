@@ -210,6 +210,7 @@ const COLUMNS = [
   ['asks', 'outcome_note', "TEXT NOT NULL DEFAULT ''"],
   ['asks', 'reviewed_at', 'TEXT'],
   ['ratings', 'src', "TEXT NOT NULL DEFAULT 'score'"],
+  ['users', 'jiazi_done', 'TEXT'],
 ];
 
 export function openDb(file) {

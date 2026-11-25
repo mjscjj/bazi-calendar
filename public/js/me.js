@@ -26,6 +26,7 @@ export function pageMe() {
       : '<div class="sk" style="height:112px"></div>')
       + '<section class="mlist">'
       + row('data-go="/energy"', '能量档案', '五行 · 幸运元素')
+      + row('data-go="/jiazi"', '我的一甲子', S.today && S.today.jiazi ? `已收 ${S.today.jiazi.n} / 60` : '每天收一张画')
       + row('data-go="/member"', '会员与订单', statusText())
       + `<button type="button" class="mrow" id="proToggle" aria-pressed="${isPro()}"><span>专业模式</span><span class="r"><span class="switch${isPro() ? ' on' : ''}"></span></span></button>`
       + `<div class="mrow" role="group" aria-label="外观"><span>外观</span><span class="seg3">${[['light', '白色'], ['dark', '深色'], ['auto', '跟随系统']].map(([k, l]) => `<span role="button" tabindex="0" data-theme-set="${k}" aria-pressed="${getTheme() === k}">${l}</span>`).join('')}</span></div>`

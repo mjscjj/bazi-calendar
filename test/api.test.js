@@ -658,3 +658,34 @@ test('农历月份表：闰月和每月天数（出生日期滚轮用）', async
   assert.equal(lm.data.months.length, 13);
   assert.deepEqual(lm.data.months[2], { m: 2, leap: true, days: 29 });
 });
+
+test('一甲子：每天打开收下当天日柱的画，集满 60 张送一枚特别款御守（只送一次）', async () => {
+  const c = client();
+  await c('POST', '/api/auth/register', { username: 'jiazi', password: '12345678', agree: true, birth });
+  const today = bjDay();
+  let r = await c('GET', '/api/today?date=' + today);
+  assert.equal(r.status, 200);
+  assert.ok(r.data.arts && Object.keys(r.data.arts).length === 60, '今天的数据带 60 张画的对照表');
+  assert.equal(r.data.arts[r.data.day.gz].art.startsWith('art/pillars/'), true);
+  assert.deepEqual(r.data.jiazi, { n: 1, has: true, fresh: true, reward: false });
+  r = await c('GET', '/api/today?date=' + today);
+  assert.equal(r.data.jiazi.fresh, false, '同一天再打开不算新收');
+  // 往前补 59 天的打开记录：连续 60 天正好是一整轮日柱
+  const uid = db.get("SELECT id FROM users WHERE username='jiazi'").id;
+  const base = Date.parse(today + 'T12:00:00Z');
+  for (let k = 1; k < 60; k++) db.run('INSERT INTO usage_days(user_id, day, created_at) VALUES(?,?,?)', uid, new Date(base - k * 86400000).toISOString().slice(0, 10), new Date().toISOString());
+  const credits = db.get('SELECT amulet_credits n FROM users WHERE id = ?', uid).n;
+  r = await c('GET', '/api/today?date=' + today);
+  assert.equal(r.data.jiazi.n, 60);
+  assert.equal(r.data.jiazi.reward, true, '第一次集满送御守');
+  assert.equal(db.get('SELECT amulet_credits n FROM users WHERE id = ?', uid).n, credits + 1);
+  r = await c('GET', '/api/today?date=' + today);
+  assert.equal(r.data.jiazi.reward, false, '只送一次');
+  const j = await c('GET', '/api/jiazi');
+  assert.equal(j.data.list.length, 60);
+  assert.equal(j.data.done, true);
+  assert.ok(j.data.list.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.day)));
+  // 能量卡：出生那天的农历、月相、节气
+  const card = (await client()('POST', '/api/preview/card', { birth: { date: '1992-06-08', time: '08:30', gender: '男' } })).data.card;
+  assert.deepEqual(card.born, { lunar: '五月初八', moon: '上弦月', term: '芒种', days: 3 });
+});

@@ -286,6 +286,20 @@ export function lunarMonths(y) {
   return LunarYear.fromYear(y).getMonthsInYear().map((m) => ({ m: Math.abs(m.getMonth()), leap: m.getMonth() < 0, days: m.getDayCount() }));
 }
 // 公历日期 → 农历（表单回显和预览用）
+// 某天（公历）的日柱，和每天卡片上的一致
+export function dayGz(date) {
+  const [y, m, d] = date.split('-').map(Number);
+  return Solar.fromYmd(y, m, d).getLunar().getDayInGanZhiExact();
+}
+// 出生那天：农历哪天、月亮什么样、上一个节气过了几天
+const MOON = (d) => (d === 1 ? '新月' : d <= 6 ? '蛾眉月' : d <= 9 ? '上弦月' : d <= 13 ? '盈凸月' : d <= 16 ? '满月' : d <= 21 ? '亏凸月' : d <= 24 ? '下弦月' : '残月');
+export function bornDay(date) {
+  const [y, m, d] = date.split('-').map(Number);
+  const l = Solar.fromYmd(y, m, d).getLunar(), jq = l.getPrevJieQi(true), js = jq.getSolar();
+  const days = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(js.getYear(), js.getMonth() - 1, js.getDay())) / 86400000);
+  return { lunar: `${l.getMonthInChinese()}月${l.getDayInChinese()}`, moon: MOON(l.getDay()), term: jq.getName(), days };
+}
+
 export function solarToLunar(date) {
   const [y, m, d] = date.split('-').map(Number);
   const l = Solar.fromYmd(y, m, d).getLunar();

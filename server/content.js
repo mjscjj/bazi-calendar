@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { GAN, ZHI, WX } from './engine.js';
+import { GAN, ZHI, WX, bornDay } from './engine.js';
 
 const DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../content');
 // 日柱插画放在 public/art/pillars/，和文案目录无关（测试会把 content 拷到别处）
@@ -96,11 +96,13 @@ export function loadContent(dir = DIR) {
 
 export function makeContent(c) {
   const pick = (arr, seed) => arr[Math.abs(seed) % arr.length];
+  // 60 张日柱画：每一天也有日柱，今天页和「我的一甲子」按日柱找画
+  const arts = Object.fromEntries(Object.entries(c.pillars).map(([gz, p]) => [gz, { name: p.name, art: 'art/pillars/' + p.art }]));
   const tone = (chart, w) => (chart.xi.includes(w) ? 'xi' : chart.ji.includes(w) ? 'ji' : 'neutral');
   const dayNum = (day) => day.y * 372 + day.m * 31 + day.d;
 
   return {
-    pick: c.pick, ask: c.ask, askPrompt: c.askPrompt, askFollowPrompt: c.askFollowPrompt, amulets: c.amulets, moods: c.moods,
+    arts, pick: c.pick, ask: c.ask, askPrompt: c.askPrompt, askFollowPrompt: c.askFollowPrompt, amulets: c.amulets, moods: c.moods,
     pickType: (name) => c.pick.types.find((t) => t.name === name) || null,
     // 能量卡：日柱图鉴（插画、称号、介绍）、本命形象、性格词、五行比例、幸运元素
     energyCard(chart) {
@@ -109,6 +111,7 @@ export function makeContent(c) {
       const gz = chart.pillars[2], p = c.pillars[gz];
       return {
         pillar: { gz, name: p.name, tag: p.tag, intro: p.intro, line: chart.strong ? p.strong : p.weak, art: 'art/pillars/' + p.art },
+        born: bornDay(chart.birth.date),
         dm: chart.dm, element: WX[gwx(chart.dm)], symbol: card.symbol, image: card.image, en: card.en,
         traits: card.traits, intro: card.intro, strengthLine: chart.strong ? card.strong : card.weak, strong: chart.strong,
         force: chart.force.map((v, i) => ({ el: WX[i], pct: Math.round((v / total) * 100) })),

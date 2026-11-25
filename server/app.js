@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import qrcode from 'qrcode-generator';
-import { chart, calendar, dayOut, almanac, lunarToSolar, solarToLunar, lunarMonths, termOf, ZHI, WX } from './engine.js';
+import { chart, calendar, dayOut, almanac, lunarToSolar, solarToLunar, lunarMonths, termOf, ZHI, WX, dayGz } from './engine.js';
 import { makeSettings } from './settings.js';
 import { loadContent, makeContent } from './content.js';
 import { searchCities, cityByName, resolveBirth } from './solar.js';
@@ -159,8 +159,20 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       memberUntil: until || null,
     };
   }
+  // 记下今天用过（免费次数按天算）；返回是不是今天第一次
   function recordUse(u) {
-    db.run('INSERT OR IGNORE INTO usage_days(user_id, day, created_at) VALUES(?,?,?)', u.id, bjDay(), nowIso());
+    return db.run('INSERT OR IGNORE INTO usage_days(user_id, day, created_at) VALUES(?,?,?)', u.id, bjDay(), nowIso()).changes > 0;
+  }
+  // 一甲子：每天打开就收下当天日柱的那张画，60 张一轮。返回 日柱 → 第一次收下的那天
+  function jiaziOf(u) {
+    const got = new Map();
+    for (const r of db.all('SELECT day FROM usage_days WHERE user_id = ? ORDER BY day', u.id)) { const gz = dayGz(r.day); if (!got.has(gz)) got.set(gz, r.day); }
+    return got;
+  }
+  // 第一次集满 60 张，送一枚特别款御守（只送一次）
+  function jiaziReward(u, n) {
+    if (n < 60 || u.jiazi_done) return false;
+    return db.run('UPDATE users SET jiazi_done = ?, amulet_credits = amulet_credits + 1 WHERE id = ? AND jiazi_done IS NULL', nowIso(), u.id).changes > 0;
   }
   // 会员顺延：没过期从到期日往后加，过期了从现在加
   function addMemberDays(userId, days) {
@@ -415,7 +427,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const day = dayOut(c, y, m, d, true);
     const week = calendar(c, y, m, date).week;
     return {
-      date, almanac: almanac(y, m, d), chart: c, card: C.energyCard(c), day, week,
+      date, almanac: almanac(y, m, d), chart: c, card: C.energyCard(c), day, week, arts: C.arts,
       line: C.dailyLine(c, day), outfit: C.outfit(c, day), strip: weekStrip(c, date), tomorrow: tomorrowOf(c, date), ...extra,
     };
   }
@@ -609,6 +621,12 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const c = chart(validBirth(body.birth));
     return { card: C.energyCard(c), nickname: str(body.nickname, 12, '称呼') };
   });
+  // 我的一甲子：收下了哪些日柱的画，各是哪天收下的
+  route('GET', '/api/jiazi', async ({ req }) => {
+    const u = requireUser(req);
+    const got = jiaziOf(u);
+    return { list: [...got].map(([gz, day]) => ({ gz, day })), n: got.size, done: !!u.jiazi_done, today: dayGz(bjDay()), arts: C.arts };
+  });
   route('GET', '/api/me/card', async ({ req }) => {
     const u = requireUser(req);
     if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
@@ -623,15 +641,17 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const [y, m, d] = date.split('-').map(Number);
     const a = access(u);
     if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), ...priceInfo() });
-    recordUse(u);
+    const fresh = recordUse(u);
     activateInvite(u);
     const drawn = db.get('SELECT lot_no, question FROM draws WHERE user_id = ? AND day = ?', u.id, date);
+    const got = jiaziOf(u), gz = dayGz(date);
     const t = todayFor(birthOf(u), xiOf(u), date, { access: access(db.get('SELECT * FROM users WHERE id = ?', u.id)), name: u.nickname });
     t.plans = plansOf(u, t.chart);
     t.draw = drawn ? { ...C.lot(drawn.lot_no, t.day.level.k), question: drawn.question } : null;
     t.rate = rateInfo(u, t.chart, date);
     t.moods = moodsOn(u, date);
     t.moodKit = moodKit();
+    t.jiazi = { n: got.size, has: got.has(gz), fresh: fresh && got.get(gz) === bjDay(), reward: jiaziReward(u, got.size) };
     t.amulet = { taken: !!db.get("SELECT 1 x FROM amulets WHERE user_id = ? AND month = ? AND style = 'basic'", u.id, date.slice(0, 7)) };
     withMoods(u, t.strip);
     t.news = newsFor(u);

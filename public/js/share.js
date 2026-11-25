@@ -1,4 +1,5 @@
 // 分享图：能量卡、你的今天、每日一签、穿搭色、邀请海报五种竖版图片（1080×1920），底部带二维码。浏览器里用画布绘制。
+// 另有「今日锁屏」：按手机屏幕比例（1170×2532），上面留给锁屏时钟，下面是今天的画和你的主题。
 // 跟随当前的白色 / 深色主题，预览时也能手动换；登录用户的二维码都带着自己的邀请码。
 import { $, esc, openSheet, onClick, toast, track, IS_IOS, isDarkNow } from './core.js';
 import { THEME, hhmm, bestHours, HOUR_TIP } from './data.js';
@@ -142,6 +143,21 @@ const DRAW = {
     wrap(ctx, o.text, W / 2, 1200, 860, 68, 4, { size: 44, color: P.muted });
   },
   invite(ctx, d) { DRAW.card(ctx, { ...d, invite: d.days || 7 }); },
+  wall(ctx, t) {
+    const cw = ctx.canvas.width, ch = ctx.canvas.height, x = t.day, a = t.arts[x.gz];
+    ctx.fillStyle = mode === 'light' ? '#F6F1E7' : '#17151A'; ctx.fillRect(0, 0, cw, ch);
+    const s = 880, ax = (cw - s) / 2, ay = 1000;
+    if (t.img) {
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 18;
+      roundRect(ctx, ax, ay, s, s, 44); ctx.fillStyle = '#F6F1E7'; ctx.fill(); ctx.restore();
+      ctx.save(); roundRect(ctx, ax, ay, s, s, 44); ctx.clip(); ctx.drawImage(t.img, ax, ay, s, s); ctx.restore();
+    }
+    text(ctx, `${x.m}月${x.d}日 · ${x.gz}日 · ${a.name}`, cw / 2, ay + s + 120, { size: 42, color: P.muted });
+    text(ctx, `今天是你的${THEME[x.ssG][0]}`, cw / 2, ay + s + 236, { size: 80, font: SERIF, weight: 900 });
+    const { top } = bestHours(x);
+    if (top[0]) text(ctx, `最好的时段 ${hhmm(top[0].i)}`, cw / 2, ay + s + 330, { size: 46, weight: 600, color: glowText() });
+    text(ctx, '流日历', cw / 2, ch - 170, { size: 34, font: SERIF, color: P.muted });
+  },
   amulet(ctx, { img, a }) {
     text(ctx, `${a.look.monthCn} · ${a.wish}`, W / 2, 250, { size: 44, color: P.muted });
     text(ctx, '我的御守', W / 2, 360, { size: 80, font: SERIF, weight: 900 });
@@ -155,32 +171,35 @@ const DRAW = {
 function render(kind, data, theme) {
   mode = theme; P = THEMES[theme];
   const cv = document.createElement('canvas');
-  cv.width = W; cv.height = H;
+  const wall = kind === 'wall';
+  cv.width = wall ? 1170 : W; cv.height = wall ? 2532 : H;
   const ctx = cv.getContext('2d');
+  if (wall) { DRAW.wall(ctx, data); return cv; }
   base(ctx); DRAW[kind](ctx, data); footer(ctx, kind);
   return cv;
 }
 
-const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守' };
+const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏' };
 function pvHtml(url, kind, theme) {
   return `<div class="sharepv"><span class="segs pvtheme" role="group" aria-label="图片颜色">${[['light', '白色'], ['dark', '深色']].map(([k, l]) => `<button type="button" data-share-theme="${k}" aria-pressed="${k === theme}">${l}</button>`).join('')}</span>`
     + `<img src="${url}" alt="${esc(NAMES[kind])}分享图">${IS_IOS
-      ? '<button type="button" class="btn primary block" data-share-go>分享或保存</button><p class="note" style="margin:0;text-align:center">也可以长按上面的图片，存到相册</p>'
+      ? `<button type="button" class="btn primary block" data-share-go>分享或保存</button><p class="note" style="margin:0;text-align:center">也可以长按上面的图片，存到相册${kind === 'wall' ? '，再在手机设置里设为锁屏' : ''}</p>`
       : `<div class="acts"><a class="btn ghost" href="${url}" download="流日历-${NAMES[kind]}.png" data-share-save>保存图片</a><button type="button" class="btn primary" data-share-go>分享</button></div>`}</div>`;
 }
 // data 不传时从当前页面的数据里取（邀请海报由邀请页传进来）
 export function share(kind, data) {
   data = data || (kind === 'card' ? (S.shareCard || (S.today && { card: S.today.card, name: S.today.name }))
-    : kind === 'today' ? S.today : kind === 'lot' ? S.today && S.today.draw : kind === 'outfit' ? S.today && S.today.outfit : null);
+    : kind === 'today' || kind === 'wall' ? S.today : kind === 'lot' ? S.today && S.today.draw : kind === 'outfit' ? S.today && S.today.outfit : null);
   if (!data) { toast('还没有可以分享的内容'); return; }
   track('share_create', { kind });
   const theme = isDarkNow() ? 'dark' : 'light';
   // 能量卡和邀请海报要先把日柱插画加载好（能量卡页显示过，一般直接命中缓存）
-  const art = (kind === 'card' || kind === 'invite') && data.card && data.card.pillar ? data.card.pillar.art : null;
+  const art = kind === 'wall' ? data.arts && data.arts[data.day.gz] && data.arts[data.day.gz].art
+    : (kind === 'card' || kind === 'invite') && data.card && data.card.pillar ? data.card.pillar.art : null;
   return (art ? artOf(art) : Promise.resolve(null)).then((img) => {
     const d = img ? { ...data, img } : data;
     const cv = render(kind, d, theme);
-    openSheet('分享' + NAMES[kind], pvHtml(cv.toDataURL('image/png'), kind, theme));
+    openSheet(kind === 'wall' ? NAMES.wall : '分享' + NAMES[kind], pvHtml(cv.toDataURL('image/png'), kind, theme));
     lastShare = { cv, kind, name: NAMES[kind], data: d, theme };
   });
 }

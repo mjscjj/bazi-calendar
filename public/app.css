@@ -1492,3 +1492,39 @@ body.in-ritual{overflow:hidden}
 }
 /* 便签角上的 × 点一下先变成「撕掉」，再点才撕 */
 .stk .x.arm{width:auto;height:24px;top:4px;right:4px;padding:0 9px;border-radius:12px;background:rgba(20,18,24,.82);color:#fff;font-size:12px;font-weight:600;opacity:1}
+/* ================= 今天的画、我的一甲子 ================= */
+.dart{position:relative;display:block;width:100%;aspect-ratio:2/1;border:0;padding:0;margin:2px 0 14px;border-radius:16px;overflow:hidden;background:#F6F1E7;box-shadow:0 0 0 1px rgba(0,0,0,.05)}
+.dart>img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 62%}
+.dart .cap{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;align-items:baseline;max-width:calc(100% - 76px);padding:5px 10px;border-radius:10px;background:rgba(246,241,231,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#2B2620;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dart .cap b{font-family:var(--f-display);font-size:13.5px}
+.dart .me{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px rgba(246,241,231,.95),0 4px 12px rgba(0,0,0,.2)}
+.dart .me img{display:block;width:100%;height:100%;object-fit:cover}
+.dart .seal{position:absolute;top:10px;right:10px;width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--cinnabar);color:#fff;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:16px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);transform:rotate(-8deg);opacity:.92}
+.dart .seal.fresh{animation:stampIn .6s .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stampIn{0%{opacity:0;transform:scale(2.2) rotate(-18deg)}60%{opacity:1}100%{opacity:.92;transform:scale(1) rotate(-8deg)}}
+@media (min-width:960px){.dart{aspect-ratio:5/2}}
+.artsheet{display:flex;flex-direction:column;gap:14px}
+.artsheet .big{display:block;width:100%;aspect-ratio:1;border-radius:18px;object-fit:cover;background:#F6F1E7}
+.artme{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:var(--sunk);color:var(--fg);text-decoration:none}
+.artme img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+.artme span{flex:1;display:flex;flex-direction:column;gap:2px}
+.artme small{font-size:12px;color:var(--muted)}
+.artme b{font-family:var(--f-display);font-size:16px}
+.artme i{font-style:normal;color:var(--muted)}
+.artsheet .acts{display:flex;gap:10px}
+.artsheet .acts .btn{flex:1}
+.jzhead{display:flex;flex-direction:column;gap:10px}
+.jzn{display:flex;align-items:baseline;gap:6px}
+.jzn b{font-family:var(--f-display);font-size:40px;font-weight:900;line-height:1}
+.jzn span{color:var(--muted)}
+.jzbar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.jzbar i{display:block;height:100%;border-radius:3px;background:var(--cinnabar)}
+.jzhead p{margin:0;font-size:14px;line-height:1.7;color:var(--muted)}
+.jzgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:14px}
+.jz{position:relative;aspect-ratio:1;border:0;padding:0;border-radius:10px;overflow:hidden;background:var(--sunk);display:grid;place-items:center}
+.jz span{font-family:var(--f-display);font-size:13px;color:var(--muted);opacity:.7}
+.jz img{display:block;width:100%;height:100%;object-fit:cover}
+.jz i{position:absolute;left:3px;bottom:3px;padding:1px 4px;border-radius:4px;background:rgba(246,241,231,.88);color:#2B2620;font-style:normal;font-size:10px}
+.jz.now{box-shadow:0 0 0 2px var(--cinnabar)}
+@media (min-width:960px){.jzgrid{grid-template-columns:repeat(10,1fr);gap:8px}}
+@media (prefers-reduced-motion: reduce){.dart .seal.fresh{animation:none}}

@@ -99,6 +99,17 @@ function greeting() {
   return h < 5 ? '夜深了' : h < 11 ? '早上好' : h < 13 ? '中午好' : h < 18 ? '下午好' : '晚上好';
 }
 const REL = { '-2': '前天', '-1': '昨天', 1: '明天', 2: '后天' };
+// 这一天的画：每一天也有自己的日柱，60 天一轮，大家看到的是同一张；右下角是你自己的那张小画。
+// 今天这张收进了「我的一甲子」时盖一枚「收」字小印，当天第一次打开时印是盖下去的
+function dayArtHtml(t, isToday) {
+  const a = t.arts && t.arts[t.day.gz], me = t.card && t.card.pillar;
+  if (!a) return '';
+  const fresh = isToday && t.jiazi && t.jiazi.fresh && !seen('stamp:' + t.date);
+  if (fresh) setTimeout(() => mark('stamp:' + t.date), 1500);
+  const seal = isToday && t.jiazi && t.jiazi.has ? `<i class="seal${fresh ? ' fresh' : ''}" aria-hidden="true">收</i>` : '';
+  return `<button type="button" class="dart" data-day-art="${t.day.gz}" aria-label="${t.day.gz}日的画：${esc(a.name)}"><img src="${a.art}" alt="" width="600" height="600" decoding="async">`
+    + `<span class="cap"><b>${t.day.gz}日</b>${esc(a.name)}</span>${seal}${me ? `<span class="me"><img src="${me.art}" alt=""></span>` : ''}</button>`;
+}
 function youHtml(t) {
   const x = t.day, isToday = t.date === localToday();
   const { dos, donts } = dosDonts(x, false);
@@ -112,6 +123,7 @@ function youHtml(t) {
   const nav = `<button type="button" class="ic nav" data-day-step="-1" aria-label="前一天">‹</button><button type="button" class="ic nav" data-day-step="1" aria-label="后一天">›</button>`;
   return `<section class="tcard k${x.level.k}" aria-label="${isToday ? '你的今天' : dname}">`
     + `<div class="th"><span class="eyebrow">${who}</span><span class="thr">${isToday ? '<button type="button" class="ic" data-share="today" aria-label="分享你的今天">分享</button>' : '<button type="button" class="ic" data-day-go="today">回到今天</button>'}${nav}</span></div>`
+    + dayArtHtml(t, isToday)
     + `<div class="hero3"><div class="theme"><small>${isToday ? '今天' : REL[diff] || '这天'}是你的</small><b>${THEME[x.ssG][0]}</b></div>`
     + `<div class="ring" style="--p:${x.score}" role="img" aria-label="能量 ${x.score}，${x.level.p}"><b>${x.score}</b><small>${x.level.p}</small></div></div>`
     + `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`
@@ -365,8 +377,21 @@ export function pageToday() {
   renderToday();
   if (!S.today || S.today.date !== localToday() || !!S.today.demo !== isDemo()) {
     S.today = null; S.tsel = null; S.wcache = {}; renderToday();
-    loadToday().then(() => { if (currentPath() !== '/') return; renderToday(); if (S.today) prefetch(); if (S.today && !S.today.demo) track('today_open', { level: S.today.day.level.k }); });
+    loadToday().then(() => {
+      if (currentPath() !== '/') return;
+      renderToday();
+      if (S.today) prefetch();
+      if (S.today && !S.today.demo) { track('today_open', { level: S.today.day.level.k }); jiaziNews(S.today); }
+    });
   }
+}
+
+// 收下今天的画：当天第一次打开时说一句；第一次集满一甲子时说送了什么
+function jiaziNews(t) {
+  const j = t.jiazi;
+  if (!j) return;
+  if (j.reward) { toast('集齐一甲子！送你一次特别款御守，祈愿时可以用'); return; }
+  if (j.fresh && !seen('stamp:' + t.date)) toast(`收下了今天的画「${t.arts[t.day.gz].name}」· 已收 ${j.n} / 60`);
 }
 
 // ---------- 弹层 ----------
@@ -564,6 +589,17 @@ onClick('[data-draw]', () => {
   drawSheet();
 });
 onClick('[data-outfit]', outfitSheet);
+onClick('[data-day-art]', (el) => {
+  const t = S.today, gz = el.getAttribute('data-day-art'), a = t.arts[gz], me = t.card && t.card.pillar, j = t.jiazi;
+  const isToday = gz === t.day.gz;
+  track('day_art_open', { today: isToday });
+  openSheet(`${gz}日 · ${a.name}`, `<div class="artsheet"><img class="big" src="${a.art}" alt="">`
+    + `<p class="note" style="margin:0">每一天也有自己的天干地支，60 天一轮。${gz}日是「${esc(a.name)}」，这一天大家看到的都是这张画。</p>`
+    + (me ? `<a class="artme" href="#/card" data-close-sheet><img src="${me.art}" alt=""><span><small>你的日柱</small><b>${me.gz} · ${esc(me.name)}</b></span><i aria-hidden="true">›</i></a>` : '')
+    + (t.demo ? '<a class="btn primary block" href="#/start" data-close-sheet>测测我的日柱</a>'
+      : `<div class="acts">${isToday ? '<button type="button" class="btn ghost" data-share="wall">存成今天的锁屏</button>' : ''}<a class="btn primary" href="#/jiazi" data-close-sheet>我的一甲子 · ${j ? j.n : 0}/60</a></div>`)
+    + '</div>');
+});
 onClick('[data-today-detail]', () => { const t = S.today, v = dayView() || t; openDay(v.day, t.chart, t.name, t.plans); });
 onClick('[data-a2hs-later]', (el) => { localStorage.setItem('lrl:a2hs-later', String(Date.now())); el.closest('.notice').remove(); });
 
