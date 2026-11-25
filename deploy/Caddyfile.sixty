@@ -1,6 +1,6 @@
 # 加在 mindflow.zone 那一段里、/bazi 的规则前面。只转发美国版用得到的路径，其他都跳回首页
     redir /sixty /sixty/us/ 308
-    @sixty path /sixty/us/* /sixty/art/* /sixty/api/us/* /sixty/api/events /sixty/api/health /sixty/admin /sixty/admin.css /sixty/admin.js /sixty/app.css /sixty/icon.svg /sixty/api/admin/*
+    @sixty path /sixty/us/* /sixty/art/* /sixty/api/* /sixty/admin /sixty/admin.css /sixty/admin.js /sixty/app.css /sixty/icon.svg
     handle @sixty {
         encode gzip
         reverse_proxy 127.0.0.1:3201
