@@ -64,14 +64,14 @@ const vib = (p) => { if (navigator.vibrate) navigator.vibrate(p); };
 let draft = { question: '', category: '', method: 'time', nums: ['', '', ''] };
 let clockTimer = null;
 const clockText = () => { const d = new Date(); return [d.getHours(), d.getMinutes(), d.getSeconds()].map((n) => String(n).padStart(2, '0')).join(':'); };
+// 起卦方式：两段切换。「此刻」把要用的四个数缩成一行（旁边走秒）；「报三个数」选中才展开三个格子
 function methodHtml(q) {
   const ins = (q.moment && q.moment.inputs) || [];
-  return '<div class="akms" role="group" aria-label="起卦方式">'
-    + `<button type="button" class="akm" data-amethod="time" aria-pressed="${draft.method === 'time'}"><span class="akm-t"><i class="aklive"></i>此刻起卦<em id="amClock">${clockText()}</em></span>`
-    + `<span class="akm-n">${ins.map((x) => `<span><b>${x.n}</b><small>${esc(x.label)}</small></span>`).join('')}</span><span class="akm-x">取此刻的年、月、日、时四个数</span></button>`
-    + `<button type="button" class="akm" data-amethod="nums" aria-pressed="${draft.method === 'nums'}"><span class="akm-t">报三个数</span>`
-    + `<span class="akm-n">${[0, 1, 2].map((i) => `<span><b>${esc(draft.nums[i]) || '?'}</b><small>第${'一二三'[i]}个</small></span>`).join('')}</span><span class="akm-x">想着这件事，凭直觉报 1–999</span></button></div>`
-    + `<div class="nums3"${draft.method === 'nums' ? '' : ' hidden'}>${[0, 1, 2].map((i) => `<input name="n${i}" type="number" inputmode="numeric" min="1" max="999" placeholder="${['第一个数', '第二个数', '第三个数'][i]}" value="${esc(draft.nums[i])}" aria-label="第 ${i + 1} 个数">`).join('')}</div>`;
+  return '<div class="akmode"><span class="segs" role="group" aria-label="起卦方式">'
+    + `<button type="button" data-amethod="time" aria-pressed="${draft.method === 'time'}">此刻起卦</button><button type="button" data-amethod="nums" aria-pressed="${draft.method === 'nums'}">报三个数</button></span>`
+    + `<p class="akmline"${draft.method === 'time' ? '' : ' hidden'}><i class="aklive"></i><span class="akm-n">${ins.map((x) => `<b>${x.n}</b>`).join('')}</span><small>${ins.map((x) => esc(x.label)).join(' ')}</small><em id="amClock">${clockText()}</em></p>`
+    + `<p class="akmline"${draft.method === 'nums' ? '' : ' hidden'}><small>想着这件事，凭直觉报三个 1–999 的数</small></p>`
+    + `<div class="nums3"${draft.method === 'nums' ? '' : ' hidden'}>${[0, 1, 2].map((i) => `<input name="n${i}" type="number" inputmode="numeric" min="1" max="999" placeholder="${['第一个数', '第二个数', '第三个数'][i]}" value="${esc(draft.nums[i])}" aria-label="第 ${i + 1} 个数">`).join('')}</div></div>`;
 }
 export function pageAsk() {
   const v = $('#view');
@@ -87,19 +87,22 @@ export function pageAsk() {
     const cost = q.unlimited ? '会员不限次' : q.free ? '本次免费' : q.credits ? '用 1 次' : '先开通会员';
     v.innerHTML = phead('问一件事')
       + '<div class="askwrap">'
-      + `<div class="quota"><span>心里有一件具体的事拿不准，就起一卦看看倾向</span><span>${left}</span></div>`
+      + `<div class="quota"><span>拿不准的事，起一卦看倾向</span><span>${left}</span></div>`
       + '<form class="askpad" id="askForm" novalidate>'
-      + `<label class="askin"><span class="lbl">想问什么</span><textarea name="question" maxlength="60" rows="2" placeholder="比如：这周找老板谈加薪合适吗？">${esc(draft.question)}</textarea><span class="cnt" id="askCount">${draft.question.length} / 60</span></label>`
+      + `<label class="askin"><span class="lbl">想问什么</span><textarea name="question" maxlength="60" rows="2" enterkeyhint="done" placeholder="比如：这周找老板谈加薪合适吗？">${esc(draft.question)}</textarea><span class="cnt" id="askCount">${draft.question.length} / 60</span></label>`
       + `<div class="acats" role="group" aria-label="是哪方面">${q.categories.map((c) => `<button type="button" data-acat-v="${esc(c)}" aria-pressed="${c === draft.category}">${esc(c)}</button>`).join('')}</div>`
       + methodHtml(q)
-      + `<div class="err" id="askErr"></div>`
-      + `<button type="button" class="akhold" data-hold${q.ready ? '' : ' disabled'}><i class="fill"></i><span class="hlbl"><b>${q.ready ? '按住起卦' : '解读服务维护中，稍后再来'}</b>${q.ready ? `<small>${cost}</small>` : ''}</span></button>`
-      + `<p class="holdtip" id="holdTip">${q.ready ? '按住 1 秒，心里想着这件事' : ''}</p></form>`
+      // 底部常驻：手机上固定在屏幕底部，键盘弹起时贴在键盘上方；出错和提示也写在这里，总看得到
+      + `<div class="akbar"><div class="err" id="askErr"></div><p class="holdtip" id="holdTip"></p>`
+      + `<button type="button" class="akhold" data-hold${q.ready ? '' : ' disabled'}><i class="fill"></i><span class="hlbl"><b>${q.ready ? '按住起卦' : '解读服务维护中，稍后再来'}</b>${q.ready ? `<small>${cost} · 按住 1 秒</small>` : ''}</span></button></div></form>`
       + '<p class="note" style="margin:0">卦象和倾向按梅花易数规则算出，每一步都可以在结果页「看推演」里核对；白话解读由 AI 生成，仅供参考。健康、投资、法律这类问题请找专业人士，这里不解答。</p>'
       + '<p style="margin:0;text-align:center"><a class="tbtn" href="#/asks">问事记录 ›</a></p></div>' + footHtml();
     const f = $('#askForm');
     f.elements.question.addEventListener('input', function () { draft.question = this.value; $('#askCount').textContent = this.value.length + ' / 60'; });
-    $$('.nums3 input', f).forEach((el, i) => el.addEventListener('input', () => { draft.nums[i] = el.value; const b = $$('[data-amethod="nums"] .akm-n b')[i]; if (b) b.textContent = el.value || '?'; }));
+    // 问题就一句话：回车＝写完，收起键盘（输入法还在选字时不算）
+    f.elements.question.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); this.blur(); } });
+    $$('.nums3 input', f).forEach((el, i) => el.addEventListener('input', () => { draft.nums[i] = el.value; }));
+    liftBar();
     clockTimer = setInterval(() => { const c = $('#amClock'); if (!c || currentPath() !== '/ask') { clearInterval(clockTimer); return; } c.textContent = clockText(); }, 1000);
   }, (e) => { v.innerHTML = phead('问一件事') + `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`; });
 }
@@ -107,9 +110,18 @@ onClick('[data-acat-v]', (el) => { draft.category = el.getAttribute('data-acat-v
 onClick('[data-amethod]', (el) => {
   draft.method = el.getAttribute('data-amethod');
   $$('[data-amethod]').forEach((b) => b.setAttribute('aria-pressed', b === el ? 'true' : 'false'));
-  $('.nums3').hidden = draft.method !== 'nums';
+  const [tl, nl] = $$('.akmline');
+  tl.hidden = draft.method !== 'time'; nl.hidden = $('.nums3').hidden = draft.method !== 'nums';
   if (draft.method === 'nums') $('.nums3 input').focus();
 });
+// 键盘弹起时，底部的「按住起卦」贴在键盘上方：iOS 和新版安卓的键盘都只缩可视区域，不缩页面
+function liftBar() {
+  const bar = $('.akbar'), vv = window.visualViewport;
+  if (!bar || !vv) return;
+  const off = Math.round(window.innerHeight - vv.height - vv.offsetTop);
+  bar.style.transform = off > 1 ? `translateY(${-off}px)` : '';
+}
+if (window.visualViewport) { visualViewport.addEventListener('resize', liftBar); visualViewport.addEventListener('scroll', liftBar); }
 // 起卦前先检查：问题写具体、报的数在范围里
 function draftOk() {
   const f = $('#askForm'), err = $('#askErr');
@@ -157,8 +169,9 @@ function release() {
   hold = null;
   clearTimeout(t);
   b.classList.remove('holding');
-  if (!fired) { $('b', b).textContent = '按住起卦'; const tip = $('#holdTip'); if (tip) { tip.textContent = '再按久一点，等进度走满'; tip.classList.remove('flash'); void tip.offsetWidth; tip.classList.add('flash'); } }
+  if (!fired) { $('b', b).textContent = '按住起卦'; const tip = $('#holdTip'); if (tip) { tip.textContent = '再按久一点，等进度走满'; tip.classList.remove('flash'); void tip.offsetWidth; tip.classList.add('flash'); clearTimeout(tipTimer); tipTimer = setTimeout(() => { tip.textContent = ''; }, 2600); } }
 }
+let tipTimer = null;
 document.addEventListener('pointerup', release);
 document.addEventListener('pointercancel', release);
 document.addEventListener('contextmenu', (e) => { if (e.target.closest('[data-hold]')) e.preventDefault(); });
@@ -195,10 +208,11 @@ function castHtml(a, tris) {
     + `<p class="cq">${esc(a.question)}</p>`
     + `<div class="cins">${c.inputs.map((x, i) => `<span style="--k:${i}"><b data-to="${x.n}">0</b><small>${esc(x.label)}</small></span>`).join('')}</div>`
     + `<div class="cstage"><svg class="cring" viewBox="-140 -140 280 280" aria-hidden="true"><circle r="120" class="c1"/><circle r="86" class="c2"/><g class="ticks">${ticks}</g><g class="rg">${ring}</g><path class="ptr" d="M0 -136 L-6 -146 L6 -146 Z"/></svg>`
-    + `<div class="cbuild"><div class="hxbox">${hexSvg([1, 1, 1, 1, 1, 1], { cls: 'skel' })}${hexSvg(g.ben.lines, { mv: g.moving })}</div><p class="cname"><b>${esc(g.ben.name)}</b><span>${esc(g.bian.name)}</span></p></div></div>`
-    + `<div class="crows">${row('up', '上卦', c.up, `${esc(T(c.up.r).name)} · ${esc(T(c.up.r).image)}`)}${row('low', '下卦', c.low, `${esc(T(c.low.r).name)} · ${esc(T(c.low.r).image)}`)}${row('mv', '动爻', c.mv, `第 ${c.mv.r} 爻`)}</div>`
+    + `<div class="cbuild"><div class="hxbox">${hexSvg([1, 1, 1, 1, 1, 1], { cls: 'skel' })}${hexSvg(g.ben.lines, { mv: g.moving })}</div><p class="cname"><b>${esc(g.ben.name)}</b><span>${esc(g.bian.name)}</span></p></div>`
+    // 最后一步：八卦环淡出，结论就显示在环的位置上（矮屏也不会被截）
     + `<div class="cend"><div class="crel ${now.dir}"><span class="${wxc(g.ti.wx)}"><i></i>你<small>${esc(g.ti.name)} · ${esc(g.ti.wx)}</small></span><em>${dirTxt} ${esc(now.verb)}</em><span class="${wxc(g.yong.wx)}"><i></i>这件事<small>${esc(g.yong.name)} · ${esc(g.yong.wx)}</small></span></div>`
-    + `<p class="ctend t-${TEND[g.tendency] || 'mid'}"><small>倾向</small><b>${esc(g.tendency)}</b></p><button type="button" class="btn primary" data-cast-skip>看解读</button></div></div>`;
+    + `<p class="ctend t-${TEND[g.tendency] || 'mid'}"><small>倾向</small><b>${esc(g.tendency)}</b></p><button type="button" class="btn primary" data-cast-skip>看解读</button></div></div>`
+    + `<div class="crows">${row('up', '上卦', c.up, `${esc(T(c.up.r).name)} · ${esc(T(c.up.r).image)}`)}${row('low', '下卦', c.low, `${esc(T(c.low.r).name)} · ${esc(T(c.low.r).image)}`)}${row('mv', '动爻', c.mv, `第 ${c.mv.r} 爻`)}</div></div>`;
 }
 // 数字像计数器一样滚到目标值
 function rollTo(el, to, ms = 520) {
@@ -257,19 +271,18 @@ const LV = ['死', '囚', '休', '相', '旺'];
 const monthLv = (state) => { const m = /（(.)）/.exec(state || ''); return m ? LV.indexOf(m[1]) : 2; };
 // 眼下 → 后来的走势：用体用关系的好坏定高低，画一条线
 function trendSvg(g) {
-  const y = (s) => 92 - s * 76, a = y(rel(g.now.rel).s), b = y(rel(g.later.rel).s), m = (a + b) / 2;
+  const y = (s) => 64 - s * 54, a = y(rel(g.now.rel).s), b = y(rel(g.later.rel).s), m = (a + b) / 2;
   const d = `M50 ${a} C 90 ${a}, 110 ${m}, 150 ${m} S 210 ${b}, 250 ${b}`;
-  return `<svg class="trend" viewBox="0 0 300 104" aria-hidden="true"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".22"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>`
+  return `<svg class="trend" viewBox="0 0 300 72" aria-hidden="true"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".22"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>`
     + [0.25, 0.5, 0.75].map((s) => `<line class="gl" x1="30" x2="290" y1="${y(s)}" y2="${y(s)}"/>`).join('')
     + `<text class="ax" x="2" y="${y(0.86)}">顺</text><text class="ax" x="2" y="${y(0.1)}">阻</text>`
-    + `<path class="area" d="${d} L250 100 L50 100 Z"/><path class="curve" d="${d}" pathLength="100"/>`
+    + `<path class="area" d="${d} L250 70 L50 70 Z"/><path class="curve" d="${d}" pathLength="100"/>`
     + `<circle class="pt" cx="50" cy="${a}" r="4.5"/><circle class="pt now" cx="250" cy="${b}" r="4.5"/><circle class="halo" cx="250" cy="${b}" r="4.5"/></svg>`;
 }
 const noteText = (g) => (g.now.rel === g.later.rel ? `眼下和后来都是「${g.now.text}」` : `眼下${g.now.text}，后来${g.later.text}`);
 function guaHtml(a, fresh) {
   const g = a.gua;
   return `<section class="card gx${fresh ? '' : ' go'} t-${TEND[g.tendency] || 'mid'}">`
-    + `<div class="gxhead"><div class="gxt"><small>这件事的倾向</small><b>${esc(g.tendency)}</b></div><p>${esc(noteText(g))}。</p></div>`
     + trendSvg(g)
     + '<div class="gxcols">'
     + `<div><small>眼下 · 本卦</small>${hexSvg(g.ben.lines, { mv: g.moving })}<b>${esc(g.ben.name)}</b><span>${esc(g.now.text)}</span></div>`
@@ -300,11 +313,18 @@ function whyHtml(a) {
     + `<div><dt>体用</dt><dd>动爻在${g.moving <= 3 ? '下' : '上'}卦，所以${g.moving <= 3 ? '上' : '下'}卦${esc(g.ti.name)}是「体」，代表你；另一卦${esc(g.yong.name)}是「用」，代表这件事</dd></div>`
     + '</dl></details></section>';
 }
+// 结论卡（第一屏）：倾向大字、AI 的一句结论、今天可以做；AI 还没写好时是进度
+function heroHtml(a) {
+  const g = a.gua;
+  return `<section class="card reading akhero t-${TEND[g.tendency] || 'mid'}" id="reading">`
+    + `<div class="gxhead"><div class="gxt"><small>这件事的倾向</small><b>${esc(g.tendency)}</b></div><p>${esc(noteText(g))}。</p></div>`
+    + `<div class="rbody">${readingHtml(a)}</div></section>`;
+}
 // 等 AI 写解读的半分钟：按起卦后过了多久，接着走进度
 function readingHtml(a) {
   if (a.status === 'done') {
     const r = a.reading;
-    return `<p class="hl">${esc(r.headline)}</p>${r.body.map((p) => `<p>${esc(p)}</p>`).join('')}<div class="adv"><small>今天可以做</small><p>${esc(r.advice)}</p></div>`;
+    return `<p class="hl">${esc(r.headline)}<span class="aitag">AI 生成</span></p><div class="adv"><small>今天可以做</small><p>${esc(r.advice)}</p></div>`;
   }
   if (a.status === 'failed') return '<p class="muted" style="margin:0">解读这次没写出来，已经退回这次的次数。过一会儿再打开，会自动再写一次。</p>';
   const gone = Math.max(0, (Date.now() - Date.parse(a.createdAt)) / 1000), late = gone > STEP2_S;
@@ -323,6 +343,8 @@ function stepWriting(a) {
     $('.s3', w).className = 's3' + (late ? ' on' : '');
   }, 1000);
 }
+// 解读全文（AI 写的两段），放在走势下面
+const bodyHtml = (a) => (a.status === 'done' ? `<section class="card akbody"><h3>详细解读<span class="aitag">AI 生成</span></h3>${a.reading.body.map((p) => `<p>${esc(p)}</p>`).join('')}</section>` : '');
 function daysHtml(a) {
   if (!a.days.length) return '';
   return `<section class="card adays"><h3>如果要做，接下来两周里这两天更好</h3><div class="dtiles">${a.days.map((p) => `<button type="button" class="dtile pick2" data-ask-day="${p.y}-${p.m}-${p.d}"><b>${p.m}月${p.d}日</b><span>周${WEEK[new Date(p.y, p.m - 1, p.d).getDay()]} · ${THEME[p.ssG][0]}</span>${p.hours[0] != null ? `<small>${hhShort(p.hours[0])}</small>` : ''}</button>`).join('')}</div>`
@@ -330,10 +352,12 @@ function daysHtml(a) {
 }
 function resultHtml(a, fresh) {
   const g = a.gua;
-  return phead('问事') + '<div class="askwrap">'
-    + `<div class="askq"><b>${esc(a.question)}</b><small>${esc(a.category)} · ${g.cast.method === 'time' ? '此刻起卦' : '报数 ' + g.cast.nums.join('、')} · ${esc(g.cast.text)}</small></div>`
+  // 页头：返回键旁边直接是问的事，省掉一行「问事」标题
+  return `<div class="phead akq"><button type="button" class="back" data-back aria-label="返回">‹</button><div class="askq" role="heading" aria-level="1"><b>${esc(a.question)}</b><small>${esc(a.category)} · ${g.cast.method === 'time' ? '此刻起卦' : '报数 ' + g.cast.nums.join('、')} · ${esc(g.cast.text)}</small></div></div>`
+    + '<div class="askwrap">'
+    + heroHtml(a)
     + guaHtml(a, fresh)
-    + `<section class="card reading" id="reading"><h3>解读<span class="aitag">AI 生成</span></h3><div class="rbody">${readingHtml(a)}</div></section>`
+    + `<div id="akBody">${bodyHtml(a)}</div>`
     + `<div id="followBox">${followHtml(a)}</div>`
     + whyHtml(a)
     + daysHtml(a)
@@ -423,8 +447,9 @@ export function pageAskResult(r) {
       if (!here()) return;
       S.ask = d.ask;
       if (d.ask.status === 'pending') { poll(); return; }
-      const box = $('#reading .rbody');
+      const box = $('#reading .rbody'), body = $('#akBody');
       if (box) { box.innerHTML = readingHtml(d.ask); box.classList.add('appear'); }
+      if (body) body.innerHTML = bodyHtml(d.ask);
       const fb = $('#followBox'), rb = $('#reviewBox');
       if (fb) fb.innerHTML = followHtml(d.ask);
       if (rb) rb.innerHTML = reviewHtml(d.ask);

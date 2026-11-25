@@ -33,7 +33,8 @@ check('从签弹层进入问事', !(await p.$('#sheet')));
 await p.fill('#askForm textarea', '这周找老板谈加薪合适吗？');
 await p.click('[data-acat-v="事业"]');
 await p.screenshot({ path: `${out}/a02-ask-form.png`, fullPage: true });
-check('此刻起卦显示要用的四个数', (await p.$$('[data-amethod="time"] .akm-n b')).length === 4);
+check('此刻起卦显示要用的四个数', (await p.$$('.akmline .akm-n b')).length === 4);
+check('手机上「按住起卦」固定在屏幕底部', await p.evaluate(() => { const b = document.querySelector('.akbar'); const r = b.getBoundingClientRect(); return getComputedStyle(b).position === 'fixed' && r.bottom <= innerHeight + 1 && r.bottom >= innerHeight - 2; }));
 // 短按：不起卦，只提示要按住
 const hb = await (await p.$('#askForm [data-hold]')).boundingBox();
 await p.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
@@ -51,6 +52,7 @@ check('推演结束自动收起，结果页走势画出来', await p.isVisible('
 await p.waitForSelector('.reading .hl', { timeout: 15000 });
 await p.waitForTimeout(1600);
 check('解读写好后出现', (await p.textContent('.reading .hl')).length > 4);
+check('结论和今天可以做在第一屏', await p.evaluate(() => { scrollTo(0, 0); return document.querySelector('.reading .adv').getBoundingClientRect().bottom < innerHeight; }));
 await p.screenshot({ path: `${out}/a04-result.png`, fullPage: true });
 check('有两个适合的日子', (await p.$$('.dtile.pick2')).length === 2);
 check('依据里有眼下、后来、时令三行', (await p.$$('.awhy .akw')).length === 3);
