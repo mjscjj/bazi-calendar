@@ -83,6 +83,13 @@ const DRAW = {
       ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 48; ctx.shadowOffsetY = 14;
       roundRect(ctx, x, y, s, s, 36); ctx.fillStyle = '#F6F1E7'; ctx.fill(); ctx.restore();
       ctx.save(); roundRect(ctx, x, y, s, s, 36); ctx.clip(); ctx.drawImage(img, x, y, s, s); ctx.restore();
+      // 右下角的朱砂印：日柱两个字竖排
+      const ss = 66;
+      ctx.save(); ctx.translate(x + s - ss / 2 - 34, y + s - ss / 2 - 30); ctx.rotate(-0.1);
+      ctx.fillStyle = '#C2412D'; roundRect(ctx, -ss / 2, -ss / 2, ss, ss, 10); ctx.fill();
+      text(ctx, c.pillar.gz[0], 0, -5, { size: 27, font: SERIF, weight: 900, color: '#FFF4EC' });
+      text(ctx, c.pillar.gz[1], 0, 25, { size: 27, font: SERIF, weight: 900, color: '#FFF4EC' });
+      ctx.restore();
       text(ctx, `${c.pillar.gz} · ${c.pillar.name}`, W / 2, 950, { size: 72, font: SERIF, weight: 900 });
       text(ctx, `${c.dm}${c.element} · ${c.image}型`, W / 2, 1022, { size: 42, color: glowText() });
     } else {
@@ -94,7 +101,9 @@ const DRAW = {
     let total = 0; const ws = c.traits.map((t) => { ctx.font = `600 40px ${SANS}`; const w = ctx.measureText(t).width + 56; total += w + 20; return w; });
     let x = W / 2 - (total - 20) / 2;
     c.traits.forEach((t, i) => { chip(ctx, t, x + ws[i] / 2, 1125, 40); x += ws[i] + 20; });
-    wrap(ctx, c.pillar ? c.pillar.intro : c.intro, W / 2, 1250, 860, 64, 2, { size: 44 });
+    // 两行时按字数排均匀，免得第二行只剩一两个字
+    const intro = c.pillar ? c.pillar.intro : c.intro, per = Math.ceil(intro.length / Math.ceil(intro.length / 19));
+    wrap(ctx, intro, W / 2, 1250, Math.min(860, per * 44 + 8), 64, 2, { size: 44 });
     const bx = 120, bw = W - 240, by = 1420;
     let off = 0; const sum = c.force.reduce((a, f) => a + f.pct, 0) || 100;
     c.force.forEach((f, i) => { const w = (f.pct / sum) * bw; ctx.fillStyle = P.el[i]; ctx.fillRect(bx + off, by, Math.max(0, w - 4), 22); off += w; });
