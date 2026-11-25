@@ -453,7 +453,7 @@ test('后台数据看板', async () => {
   assert.equal(s.data.ratings.length, 6);
 });
 
-test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、单次付费', async () => {
+test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、会员不限次', async () => {
   const c = client();
   await c('POST', '/api/auth/register', { username: 'asker', password: '12345678', agree: true, birth });
   let q = await c('GET', '/api/asks/quota');
@@ -488,27 +488,29 @@ test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、�
   assert.equal(again.data.repeat, true, '同一件事 24 小时内直接给上次的结果');
   const n = await c('POST', '/api/asks', { question: '下个月去成都出差顺利吗', category: '出行', method: 'nums', nums: [3, 8, 21] });
   assert.equal(n.status, 402);
-  assert.equal(n.data.error, 'need_pay');
+  assert.equal(n.data.error, 'need_member', '体验期送的 1 次用完了，要开通会员');
+  assert.equal((await c('POST', '/api/pay/orders', { product: 'ask' })).status, 400, '问事不再单卖，含在会员里');
 
-  const o = await c('POST', '/api/pay/orders', { product: 'ask' });
-  assert.equal(o.data.order.amountCents, 190);
-  assert.equal(o.data.order.product, 'ask');
-  assert.match(db.get('SELECT subject FROM orders WHERE out_trade_no = ?', o.data.order.outTradeNo).subject, /^MindFlow 问事/);
+  const o = await c('POST', '/api/pay/orders', {});
+  assert.equal(o.data.order.product, 'member');
   paid.add(o.data.order.outTradeNo);
   const s2 = await c('GET', `/api/pay/orders/${o.data.order.outTradeNo}?force=1`);
-  assert.equal(s2.data.credits.ask, 1);
-  assert.equal(s2.data.access.mode, 'free', '买问事不改变会员状态');
+  assert.equal(s2.data.access.mode, 'member');
+  assert.equal((await c('GET', '/api/asks/quota')).data.unlimited, true, '会员问事不限次');
   const n2 = await c('POST', '/api/asks', { question: '下个月去成都出差顺利吗', category: '出行', method: 'nums', nums: [3, 8, 21] });
   assert.equal(n2.status, 200);
+  assert.equal(db.get('SELECT charge FROM asks WHERE id = ?', n2.data.ask.id).charge, 'member');
   assert.deepEqual(n2.data.ask.gua.cast.nums, [3, 8, 21]);
   const k2 = n2.data.ask.gua.cast.calc;
   assert.deepEqual([k2.up.r, k2.low.r, k2.mv.r], [3, 8, 2], '报数：第一个数定上卦，第二个定下卦，三数之和定动爻');
+  const n3 = await c('POST', '/api/asks', { question: '要不要换个城市生活', category: '其他' });
+  assert.equal(n3.status, 200, '会员再问也不另收费');
   q = await c('GET', '/api/asks/quota');
-  assert.equal(q.data.credits, 0);
+  assert.ok(q.data.unlimited && q.data.credits === 0);
   const list = (await c('GET', '/api/asks')).data.list;
-  assert.equal(list.length, 2);
+  assert.equal(list.length, 3);
   assert.ok(list[0].lines.length === 6 && list[0].trend.length === 2, '问事记录带卦象和走势');
-  assert.equal((await c('GET', '/api/membership')).data.orders[0].productName, '问事 1 次');
+  assert.equal((await c('GET', '/api/membership')).data.orders[0].productName, '月度会员');
 });
 
 test('问事：追问最多 2 次、拒答、过期；7 天后回看和今天页提醒', async () => {

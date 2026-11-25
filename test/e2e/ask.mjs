@@ -1,6 +1,6 @@
 // 问事走查：node test/e2e/ask.mjs <baseUrl> <dbPath> <outDir> <adminPassword>
 // 抽签弹层进入 → 写问题 → 短按只提示、按住才起卦 → 全屏推演（取数、除余、八卦环锁定、六爻、动爻翻转、倾向）
-// → 结果页（走势、依据）→ 看推演重放 → 卦签分享 → 解读 → 问事记录 → 再问要付费（模拟付款后自动接着起卦）
+// → 结果页（走势、依据）→ 看推演重放 → 卦签分享 → 解读 → 问事记录 → 体验那 1 次用完再问要开通会员（模拟付款后自动接着起卦，之后问事不限次）
 // → 用这件事去挑日子 → 电脑端今天页侧栏入口 → 后台规则对比。服务端以 ALIPAY_FAKE=1、ASK_AI=fake 启动。
 import { DatabaseSync } from 'node:sqlite';
 import { drawLot, holdToCast } from './helpers.mjs';
@@ -68,7 +68,7 @@ await p.goto(base + '/#/asks'); await p.waitForSelector('.arow');
 check('问事记录每一卦带卦象和走势', !!(await p.$('.arow .hx')) && !!(await p.$('.arow .spark')));
 await p.screenshot({ path: `${out}/a05-asks.png` });
 await p.click('a[href="#/ask"]'); await p.waitForSelector('#askForm');
-check('免费次数用完后按钮显示价格', (await p.textContent('#askForm [data-hold]')).includes('¥1.9'));
+check('体验那 1 次用完后，按钮写着先开通会员，不再单卖问事', (await p.textContent('#askForm [data-hold]')).includes('先开通会员') && !(await p.textContent('#view')).includes('¥1.9'));
 await p.fill('#askForm textarea', '下个月去成都出差顺利吗');
 await p.click('[data-acat-v="出行"]');
 await p.click('[data-amethod="nums"]');
@@ -76,9 +76,10 @@ const nums = await p.$$('.nums3 input');
 for (const [i, v] of ['3', '8', '21'].entries()) await nums[i].fill(v);
 await holdToCast(p, { skip: false });
 await p.waitForSelector('#sheet .pay #openAlipay');
+check('弹出的是开通月度会员', (await p.textContent('#sheet .sh b')).includes('月度会员'));
 await p.screenshot({ path: `${out}/a06-pay-ask.png` });
 const uid = db.prepare('SELECT id FROM users WHERE username = ?').get(user).id;
-const no = db.prepare("SELECT out_trade_no FROM orders WHERE user_id = ? AND product = 'ask' ORDER BY id DESC").get(uid).out_trade_no;
+const no = db.prepare("SELECT out_trade_no FROM orders WHERE user_id = ? AND product = 'member' ORDER BY id DESC").get(uid).out_trade_no;
 await p.request.post(base + '/api/dev/pay/' + no, { headers: { 'Content-Type': 'application/json' }, data: {} });
 await p.waitForSelector('#sheet .pay .ok', { timeout: 10000 });
 await p.screenshot({ path: `${out}/a07-paid.png` });
@@ -86,10 +87,14 @@ await p.waitForSelector('#cast', { timeout: 12000 });
 check('报数起卦的推演用报的三个数', (await p.$$eval('#cast .cins b', (bs) => bs.map((x) => x.getAttribute('data-to')).join(','))) === '3,8,21' && (await p.textContent('#cast [data-row="up"]')).includes('3 ÷ 8 余'));
 await p.click('#cast .ctop [data-cast-skip]'); await p.waitForSelector('#cast', { state: 'detached' });
 check('付完自动接着起卦', (await p.textContent('.askq b')).includes('成都'));
+check('问事没有再扣次数，记的是会员', db.prepare("SELECT charge FROM asks WHERE user_id = ? ORDER BY id DESC").get(uid).charge === 'member');
 await p.waitForSelector('.reading .hl', { timeout: 15000 });
 await p.click('[data-ask-pick]'); await p.waitForSelector('#pickForm', { timeout: 8000 });
 check('用这件事去挑日子时带上事项', (await p.$eval('#pickForm input[name=name]', (e) => e.value)).includes('成都') && await p.isVisible('[data-ptype="出行"][aria-pressed="true"]'));
 await p.screenshot({ path: `${out}/a08-ask-to-pick.png` });
+await p.goto(base + '/#/ask'); await p.waitForSelector('#askForm [data-hold]');
+check('开通会员后问事不限次', (await p.textContent('.quota')).includes('不限次') && (await p.textContent('#askForm [data-hold]')).includes('会员不限次'));
+await p.screenshot({ path: `${out}/a08b-member-ask.png` });
 
 // 电脑端
 const dp = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); watch(dp, 'desktop');

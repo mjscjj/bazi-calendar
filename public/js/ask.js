@@ -1,7 +1,7 @@
 // 问事：写下一件拿不准的事 → 按住起卦 → 全屏把真实的推算演一遍（取数、相加、除余、八卦环锁定、六爻落定、动爻翻转、体用生克）
 // → AI 写白话解读 → 给两个适合去做的日子 → 同一卦里追问 1–2 次（不另收费）→ 7 天后回看那件事后来怎样了。
 // 样子走现代、克制的「推算仪器」风格：细线、等宽数字、一点强调色，不用水墨和印章。
-import { $, $$, esc, api, toast, onClick, currentPath, dtText, price, track, localToday } from './core.js';
+import { $, $$, esc, api, toast, onClick, currentPath, dtText, track, localToday } from './core.js';
 import { THEME, WEEK, WX, hhShort } from './data.js';
 import { S } from './state.js';
 import { footHtml, memberLockHtml } from './today.js';
@@ -80,13 +80,14 @@ export function pageAsk() {
   api('GET', 'asks/quota').then((q) => {
     if (currentPath() !== '/ask') return;
     S.askQuota = q;
-    if (q.mode === 'blocked') { v.innerHTML = phead('问一件事') + memberLockHtml('问事（每月免费 1 次）') + '<p style="margin:0;text-align:center"><a class="tbtn" href="#/asks">看以前的问事记录 ›</a></p>' + footHtml(); return; }
+    if (q.mode === 'blocked') { v.innerHTML = phead('问一件事') + memberLockHtml('问事（会员不限次）') + '<p style="margin:0;text-align:center"><a class="tbtn" href="#/asks">看以前的问事记录 ›</a></p>' + footHtml(); return; }
     if (!draft.category) draft.category = q.categories[0];
-    const left = q.free ? `本月免费 <b>${q.free}</b> 次` : q.credits ? `还有 <b>${q.credits}</b> 次` : `¥${price(q.priceCents)} / 次`;
-    const cost = q.free || q.credits ? (q.free ? '本次免费' : '用 1 次') : `¥${price(q.priceCents)}`;
+    // 会员问事不限次；体验期送 1 次；以前单买的次数没会员时还能用；都没有就先开通会员
+    const left = q.unlimited ? '会员 · 问事不限次' : q.free ? '体验期送 <b>1</b> 次' : q.credits ? `还有 <b>${q.credits}</b> 次` : '开通会员后问事不限次';
+    const cost = q.unlimited ? '会员不限次' : q.free ? '本次免费' : q.credits ? '用 1 次' : '先开通会员';
     v.innerHTML = phead('问一件事')
       + '<div class="askwrap">'
-      + `<div class="quota"><span>心里有一件具体的事拿不准，就起一卦看看倾向</span><span>${q.mode === 'free' && q.free ? '体验期送 <b>1</b> 次' : left}</span></div>`
+      + `<div class="quota"><span>心里有一件具体的事拿不准，就起一卦看看倾向</span><span>${left}</span></div>`
       + '<form class="askpad" id="askForm" novalidate>'
       + `<label class="askin"><span class="lbl">想问什么</span><textarea name="question" maxlength="60" rows="2" placeholder="比如：这周找老板谈加薪合适吗？">${esc(draft.question)}</textarea><span class="cnt" id="askCount">${draft.question.length} / 60</span></label>`
       + `<div class="acats" role="group" aria-label="是哪方面">${q.categories.map((c) => `<button type="button" data-acat-v="${esc(c)}" aria-pressed="${c === draft.category}">${esc(c)}</button>`).join('')}</div>`
@@ -130,7 +131,7 @@ function submitAsk() {
     location.hash = '#/ask/result?id=' + d.ask.id;
   }, (e) => {
     if (btn) { btn.disabled = false; btn.classList.remove('fired'); $('b', btn).textContent = '按住起卦'; }
-    if (e.status === 402 && e.data.error === 'need_pay') { openPay(() => { if (currentPath() === '/ask') submitAsk(); }, { product: 'ask' }); return; }
+    if (e.status === 402 && e.data.error === 'need_member') { openPay(() => { if (currentPath() === '/ask') submitAsk(); }); return; }
     if (e.status === 402) { openPay(() => pageAsk()); return; }
     const err = $('#askErr');
     if (err) err.textContent = e.message;

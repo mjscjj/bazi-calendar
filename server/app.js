@@ -316,11 +316,11 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   const priceInfo = () => ({ priceCents: settings.int('price_cents'), memberDays: settings.int('member_days'), inviteDays: settings.int('invite_days') });
 
   // ----- 订单 -----
-  // 三种商品：月度会员（加天数）、问事 1 次、特别款御守 1 枚（加次数）。支付宝订单名里不出现命理字样
+  // 两种商品：月度会员（加天数）、特别款御守 1 枚（加次数）。支付宝订单名里不出现命理字样
+  // 问事已经包含在会员里，不再单卖；以前下的问事订单付了款照样加次数
   const PRODUCT_NAME = { member: '月度会员', ask: '问事 1 次', amulet: '特别款御守' };
   const CREDIT_COL = { ask: 'ask_credits', amulet: 'amulet_credits' };
   function product(kind) {
-    if (kind === 'ask') return { kind, amountCents: settings.int('ask_price_cents'), days: 0, subject: 'MindFlow 问事 1 次' };
     if (kind === 'amulet') return { kind, amountCents: settings.int('amulet_price_cents'), days: 0, subject: 'MindFlow 特别款御守' };
     return { kind: 'member', amountCents: settings.int('price_cents'), days: settings.int('member_days'), subject: settings.get('order_subject') };
   }
@@ -911,13 +911,11 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
 
   // ----- 问事 -----
   // 起卦和倾向由规则算好并立刻返回；白话解读交给 AI 在后台写，页面轮询。AI 两次都失败就退回次数，稍后再自动重试。
-  const monthStartIso = () => new Date(Date.parse(bjDay().slice(0, 8) + '01T00:00:00+08:00')).toISOString();
+  // 会员问事不限次（只有每天 20 次的防刷）；体验期送 1 次；以前单买的次数没会员时还能用
   function askQuota(u) {
-    const a = access(u);
-    const member = a.mode === 'member';
-    const used = db.get(`SELECT COUNT(*) n FROM asks WHERE user_id = ? AND charge = 'free'${member ? ' AND created_at >= ?' : ''}`, ...(member ? [u.id, monthStartIso()] : [u.id])).n;
-    const allowance = a.mode === 'blocked' ? 0 : member ? settings.int('ask_free_monthly') : 1;
-    return { mode: a.mode, free: Math.max(0, allowance - used), credits: u.ask_credits || 0, priceCents: settings.int('ask_price_cents'), ready: AI.enabled };
+    const a = access(u), member = a.mode === 'member';
+    const used = member ? 0 : db.get("SELECT COUNT(*) n FROM asks WHERE user_id = ? AND charge = 'free'", u.id).n;
+    return { mode: a.mode, unlimited: member, free: a.mode === 'free' ? Math.max(0, 1 - used) : 0, credits: u.ask_credits || 0, ready: AI.enabled };
   }
   const qkeyOf = (q) => q.replace(/[\s\p{P}\p{S}]/gu, '').toLowerCase();
   // 追问和回看：次数、天数、回看选项都在 content/ask.json 的 follow 里
@@ -1096,7 +1094,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (same) return { ask: askDetail(same), repeat: true };
     const q = askQuota(u);
     if (q.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: access(u), ...priceInfo() });
-    if (!q.free && !q.credits) throw new HttpError(402, `本月的免费次数用完了，再问一次 ¥${(q.priceCents / 100).toFixed(1)}`, { error: 'need_pay', product: 'ask', priceCents: q.priceCents });
+    if (!q.unlimited && !q.free && !q.credits) throw new HttpError(402, '体验期送的 1 次用完了，开通会员后问事不限次', { error: 'need_member', access: access(u), ...priceInfo() });
     if (!limit('ask:' + u.id, 20, DAY_MS)) throw new HttpError(429, '今天问得有点多了，明天再来吧');
     const c = chartOf(u), date = bjDay(), [y, m, d] = date.split('-').map(Number);
     const g = nums ? M.byNums(nums, Date.now()) : M.byTime(Date.now());
@@ -1105,9 +1103,9 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     // 接下来两周里最合适的两天，按日期排（问的多是眼前的事）
     const days = cat.pick ? pickDays(c, C.pickType(cat.pick), C.pick.all_ji, date, '2w').picks.slice(0, 2).sort((p, q) => Date.UTC(p.y, p.m - 1, p.d) - Date.UTC(q.y, q.m - 1, q.d)) : [];
     const id = db.tx(() => {
-      let charge = 'free';
-      if (!q.free) {
-        if (!db.run('UPDATE users SET ask_credits = ask_credits - 1 WHERE id = ? AND ask_credits > 0', u.id).changes) throw new HttpError(402, '次数不够了', { error: 'need_pay', product: 'ask', priceCents: q.priceCents });
+      let charge = q.unlimited ? 'member' : 'free';
+      if (!q.unlimited && !q.free) {
+        if (!db.run('UPDATE users SET ask_credits = ask_credits - 1 WHERE id = ? AND ask_credits > 0', u.id).changes) throw new HttpError(402, '体验期送的 1 次用完了，开通会员后问事不限次', { error: 'need_member', access: access(u), ...priceInfo() });
         charge = 'credit';
       }
       return Number(db.run('INSERT INTO asks(user_id, question, qkey, category, gua, days, charge, created_at) VALUES(?,?,?,?,?,?,?,?)',
@@ -1437,6 +1435,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   });
   route('POST', '/api/pay/orders', async ({ req, ip, body }) => {
     const u = requireUser(req);
+    if (body.product === 'ask') throw bad('问事已经包含在会员里，开通会员就能问');
     const P = product(body.product);
     const intl = P.kind === 'member' ? gumroadInfo() : null;
     if (!alipay) { if (intl) return { order: null, intl }; throw new HttpError(503, '支付暂时不可用，请稍后再试'); }
@@ -1747,9 +1746,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     num('price_cents', 1, 100000, '价格（分）');
     num('free_uses', 0, 30, '免费次数');
     num('invite_days', 0, 60, '邀请奖励天数');
-    num('ask_price_cents', 1, 100000, '问事单价（分）');
     if ('engine' in body && ['v1', 'v2'].includes(body.engine) && body.engine !== before.engine) { settings.set('engine', body.engine); changes.push(`打分规则 ${before.engine} → ${body.engine}`); }
-    num('ask_free_monthly', 0, 30, '会员每月免费问事次数');
     num('amulet_price_cents', 1, 100000, '特别款御守单价（分）');
     num('invite_cap', 0, 100, '每月邀请奖励上限');
     for (const [k, name, max] of [['order_subject', '订单名称', 60], ['disclaimer', '娱乐声明', 2000], ['terms', '用户协议', 20000], ['privacy', '隐私政策', 20000]]) {

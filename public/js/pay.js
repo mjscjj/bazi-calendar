@@ -1,11 +1,11 @@
 // 支付弹层：电脑显示二维码，手机浏览器跳支付宝，微信里引导去浏览器。付完自动开通并回到原处。
-// 商品：月度会员（默认）、问事 1 次、特别款御守。会员另有海外付款：去 Gumroad 用外币卡或 PayPal 付（按月/按年自动续费）。
+// 商品：月度会员（默认）、特别款御守（问事已含在会员里，不单卖）。会员另有海外付款：去 Gumroad 用外币卡或 PayPal 付（按月/按年自动续费）。
 import { $, esc, api, toast, openSheet, dismissSheet, onClick, ymdText, price, pad, IS_WECHAT, IS_MOBILE, track } from './core.js';
 import { S } from './state.js';
 
 let timers = [], order = null, intl = null, checking = false, onPaid = null, paidPending = false, opts = {};
-const TITLE = { member: '开通月度会员', ask: '问事 1 次', amulet: '特别款御守' };
-const LINE = { member: (o) => `月度会员 · ${o.days} 天 · 不自动续费`, ask: () => '问事 1 次 · 买了不过期', amulet: () => '特别款御守 1 枚 · 买了不过期' };
+const TITLE = { member: '开通月度会员', amulet: '特别款御守' };
+const LINE = { member: (o) => `月度会员 · ${o.days} 天 · 不自动续费`, amulet: () => '特别款御守 1 枚 · 买了不过期' };
 function stop() { timers.forEach((t) => clearInterval(t)); timers = []; document.removeEventListener('visibilitychange', onVisible); }
 function onVisible() { if (document.visibilityState === 'visible' && order) check(true); }
 
@@ -83,7 +83,7 @@ function check(force, manual) {
       track('pay_success', { product });
       const done = product === 'member'
         ? `<div class="amt" style="font-size:22px">开通成功</div><p class="tip">会员有效期至 ${ymdText(d.access.memberUntil)}</p><button type="button" class="btn primary block" data-close-sheet>开始使用</button>`
-        : `<div class="amt" style="font-size:22px">已到账</div><p class="tip">${product === 'ask' ? '马上接着为你起卦' : '马上为你织这枚特别款御守'}</p><button type="button" class="btn primary block" data-close-sheet>好的</button>`;
+        : `<div class="amt" style="font-size:22px">已到账</div><p class="tip">马上为你织这枚特别款御守</p><button type="button" class="btn primary block" data-close-sheet>好的</button>`;
       if (body) body.innerHTML = `<div class="pay"><div class="ok">✓</div>${done}</div>`;
       setTimeout(() => { if ($('#sheet .pay .ok')) dismissSheet(); }, 3000);
       paidPending = true;

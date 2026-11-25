@@ -55,7 +55,7 @@ test('海外付款：首单开通、去重、续费、退款', async () => {
   assert.equal(o.status, 200);
   assert.equal(o.data.order, null, '没配支付宝时只给海外付款');
   assert.deepEqual(o.data.intl, { monthly: 499, yearly: 2999 });
-  assert.equal((await c('POST', '/api/pay/orders', { product: 'ask' })).status, 503, '问事不走海外付款');
+  assert.equal((await c('POST', '/api/pay/orders', { product: 'ask' })).status, 400, '问事不单卖（含在会员里）');
 
   const g = await c('POST', '/api/pay/gumroad', { plan: 'yearly' });
   assert.equal(g.status, 200);

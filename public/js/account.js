@@ -131,7 +131,7 @@ export function pageMember() {
     else if (a.mode === 'free') card = `<div class="mcard"><small>免费体验中</small><b>还剩 ${a.remaining} 次</b><span>同一天里随便看只算 1 次，共 ${a.freeLimit} 次</span></div>`;
     else card = `<div class="mcard"><small>${a.expired ? '会员已到期' : '免费体验已用完'}</small><b>开通后继续使用</b><span>你的资料和计划都还在</span></div>`;
     const buy = `<section class="card"><div class="price"><b>¥${price(d.priceCents)}</b><span>/ ${d.memberDays} 天</span></div>`
-      + '<ul class="perks"><li>每天的你：今日一句、宜忌、最佳时段</li><li>每日一签和今日幸运色</li><li>整月日历、挑日子（最远 3 个月）、本月精选</li><li>订阅到手机日历，每天出现在日历里</li><li>每月 1 次免费问事（梅花易数 + 白话解读）</li><li>能量档案和专业模式（完整八字盘）</li></ul>'
+      + '<ul class="perks"><li>每天的你：今日一句、宜忌、最佳时段</li><li>每日一签和今日幸运色</li><li>整月日历、挑日子（最远 3 个月）、本月精选</li><li>订阅到手机日历，每天出现在日历里</li><li>问事不限次（梅花易数 + 白话解读）</li><li>能量档案和专业模式（完整八字盘）</li></ul>'
       + `<button type="button" class="btn primary block" data-pay>${a.mode === 'member' ? '续费 ' + d.memberDays + ' 天' : '开通月度会员'}</button>`
       + '<p class="note" style="margin:0">支付宝付款，不自动续费。会员期内续费，有效期顺延。</p></section>';
     const orders = '<section class="card"><h3>订单记录</h3>' + (d.orders.length ? '<div class="olist">' + d.orders.map((o) => {
