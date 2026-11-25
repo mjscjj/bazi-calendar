@@ -163,10 +163,14 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
   function recordUse(u) {
     return db.run('INSERT OR IGNORE INTO usage_days(user_id, day, created_at) VALUES(?,?,?)', u.id, bjDay(), nowIso()).changes > 0;
   }
+  // 记下今天打开过（收画用，和会员、免费次数无关）；返回是不是今天第一次
+  function recordOpen(u) {
+    return db.run('INSERT OR IGNORE INTO open_days(user_id, day, created_at) VALUES(?,?,?)', u.id, bjDay(), nowIso()).changes > 0;
+  }
   // 一甲子：每天打开就收下当天日柱的那张画，60 张一轮。返回 日柱 → 第一次收下的那天
   function jiaziOf(u) {
     const got = new Map();
-    for (const r of db.all('SELECT day FROM usage_days WHERE user_id = ? ORDER BY day', u.id)) { const gz = dayGz(r.day); if (!got.has(gz)) got.set(gz, r.day); }
+    for (const r of db.all('SELECT day FROM open_days WHERE user_id = ? ORDER BY day', u.id)) { const gz = dayGz(r.day); if (!got.has(gz)) got.set(gz, r.day); }
     return got;
   }
   // 第一次集满 60 张，送一枚特别款御守（只送一次）
@@ -636,7 +640,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
   route('GET', '/api/jiazi', async ({ req }) => {
     const u = requireUser(req);
     const got = jiaziOf(u);
-    return { list: [...got].map(([gz, day]) => ({ gz, day })), n: got.size, done: !!u.jiazi_done, today: dayGz(bjDay()), arts: C.arts };
+    return { list: [...got].map(([gz, day]) => ({ gz, day })), n: got.size, done: !!u.jiazi_done, member: access(u).mode !== 'blocked', today: dayGz(bjDay()), arts: C.arts };
   });
   route('GET', '/api/me/card', async ({ req }) => {
     const u = requireUser(req);
@@ -650,19 +654,21 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
     const date = validDay(q.get('date'));
     const [y, m, d] = date.split('-').map(Number);
+    // 收画和会员无关：体验用完、会员到期也照样收下今天的画
+    const fresh = recordOpen(u), got = jiaziOf(u), gz = dayGz(date);
+    const jiazi = { n: got.size, has: got.has(gz), fresh: fresh && got.get(gz) === bjDay(), reward: jiaziReward(u, got.size) };
     const a = access(u);
-    if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), ...priceInfo() });
-    const fresh = recordUse(u);
+    if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), art: { gz, ...C.arts[gz] }, jiazi, ...priceInfo() });
+    recordUse(u);
     activateInvite(u);
     const drawn = db.get('SELECT lot_no, question FROM draws WHERE user_id = ? AND day = ?', u.id, date);
-    const got = jiaziOf(u), gz = dayGz(date);
     const t = todayFor(birthOf(u), xiOf(u), date, { access: access(db.get('SELECT * FROM users WHERE id = ?', u.id)), name: u.nickname });
     t.plans = plansOf(u, t.chart);
     t.draw = drawn ? { ...C.lot(drawn.lot_no, t.day.level.k), question: drawn.question } : null;
     t.rate = rateInfo(u, t.chart, date);
     t.moods = moodsOn(u, date);
     t.moodKit = moodKit();
-    t.jiazi = { n: got.size, has: got.has(gz), fresh: fresh && got.get(gz) === bjDay(), reward: jiaziReward(u, got.size) };
+    t.jiazi = jiazi;
     t.amulet = { taken: !!db.get("SELECT 1 x FROM amulets WHERE user_id = ? AND month = ? AND style = 'basic'", u.id, date.slice(0, 7)) };
     withMoods(u, t.strip);
     t.news = newsFor(u);
@@ -1076,17 +1082,36 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const me = chart(validBirth(body.birth)), you = chartOf(inv);
     return { name: inv.nickname || '你的朋友', pair: C.pair(me.dm, you.dm), best: pairBest(me, you) };
   });
+  // 朋友的画：通过链接连上的人——你邀请的、邀请你的、已经注册后点链接互相配的。双方只看到对方的日干形象和这张画
+  function friendsOf(u) {
+    const rows = db.all(`SELECT invitee_id id, created_at, 'invited' src FROM invites WHERE inviter_id = ?
+      UNION ALL SELECT inviter_id, created_at, 'inviter' FROM invites WHERE invitee_id = ?
+      UNION ALL SELECT CASE WHEN a = ? THEN b ELSE a END, created_at, 'link' FROM friend_links WHERE a = ? OR b = ?`, u.id, u.id, u.id, u.id, u.id);
+    const byId = new Map();
+    for (const r of rows) if (!byId.has(r.id)) byId.set(r.id, r);
+    const mine = u.birth_date ? chartOf(u) : null;
+    return [...byId.values()].map((r) => {
+      const f = db.get("SELECT * FROM users WHERE id = ? AND status = 'active'", r.id);
+      if (!f) return null;
+      const fc = mine && f.birth_date ? chartOf(f) : null;
+      return { name: shownName(f), src: r.src, at: r.created_at, pair: fc ? { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) } : null };
+    }).filter(Boolean).sort((x, y) => (x.at < y.at ? 1 : -1));
+  }
+  route('GET', '/api/friends', async ({ req }) => ({ list: friendsOf(requireUser(req)) }));
+  // 已经注册的人打开朋友的邀请链接：两人连上，互相看到你们俩的画（不算邀请奖励）
+  route('POST', '/api/friends/link', async ({ req, body }) => {
+    const u = requireUser(req);
+    const f = db.get("SELECT * FROM users WHERE invite_code = ? AND status = 'active'", String(body.code || '').toUpperCase());
+    if (!f || f.id === u.id) throw new HttpError(404, '链接已失效');
+    db.run('INSERT OR IGNORE INTO friend_links(a, b, created_at) VALUES(?,?,?)', Math.min(u.id, f.id), Math.max(u.id, f.id), nowIso());
+    const me = u.birth_date ? chartOf(u) : null, fc = f.birth_date ? chartOf(f) : null;
+    return { name: shownName(f), pair: me && fc ? C.pair(me.dm, fc.dm) : null, best: me && fc ? pairBest(me, fc) : null };
+  });
   route('GET', '/api/me/invite', async ({ req }) => {
     const u = requireUser(req);
     const days = settings.int('invite_days'), cap = settings.int('invite_cap');
     const list = db.all('SELECT i.status, i.created_at, i.done_at, i.invitee_id, u.nickname, u.username, (SELECT COUNT(*) FROM usage_days d WHERE d.user_id = u.id) uses, u.birth_date FROM invites i JOIN users u ON u.id = i.invitee_id WHERE i.inviter_id = ? ORDER BY i.id DESC LIMIT 100', u.id);
-    const mine = u.birth_date ? chartOf(u) : null;
-    // 两个人的画：测过能量卡的朋友，和你配一张
-    const pairWith = (r) => {
-      if (!mine || !r.birth_date) return null;
-      const fc = chartOf(db.get('SELECT * FROM users WHERE id = ?', r.invitee_id));
-      return { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) };
-    };
+
     const monthStart = new Date(Date.parse(bjDay().slice(0, 8) + '01T00:00:00+08:00')).toISOString();
     const usedThisMonth = db.get("SELECT COUNT(*) n FROM invites WHERE inviter_id = ? AND status = 'done' AND done_at >= ?", u.id, monthStart).n;
     const done = list.filter((r) => r.status === 'done').length;
@@ -1096,7 +1121,6 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       list: list.map((r) => ({
         name: shownName(r), status: r.status, at: r.done_at || r.created_at,
         need: r.status !== 'pending' ? '' : !r.birth_date ? '等 TA 测完能量卡' : '等 TA 明天再打开一次',
-        pair: pairWith(r),
       })),
     };
   });
@@ -1142,7 +1166,8 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const u = requireUser(req);
     if (!checkPassword(String(body.password || ''), u.pass_hash)) throw bad('密码不对');
     db.tx(() => {
-      for (const t of ['sessions', 'usage_days', 'plans', 'draws', 'feedback', 'ratings', 'events', 'asks', 'ask_follows', 'amulets', 'moods']) db.run(`DELETE FROM ${t} WHERE user_id = ?`, u.id);
+      for (const t of ['sessions', 'usage_days', 'open_days', 'plans', 'draws', 'feedback', 'ratings', 'events', 'asks', 'ask_follows', 'amulets', 'moods']) db.run(`DELETE FROM ${t} WHERE user_id = ?`, u.id);
+      db.run('DELETE FROM friend_links WHERE a = ? OR b = ?', u.id, u.id);
       db.run('DELETE FROM invites WHERE inviter_id = ? OR invitee_id = ?', u.id, u.id);
       db.run("UPDATE orders SET status = 'closed', closed_at = ? WHERE user_id = ? AND status = 'pending'", nowIso(), u.id);
       db.run('UPDATE orders SET user_id = 0, buyer = NULL, notify_raw = NULL, qr_code = NULL WHERE user_id = ?', u.id);

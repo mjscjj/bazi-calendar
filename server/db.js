@@ -29,6 +29,20 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at TEXT NOT NULL,
   expires_at TEXT NOT NULL
 );
+-- 每天打开记一行（收画用，和会员、免费次数无关）
+CREATE TABLE IF NOT EXISTS open_days (
+  user_id INTEGER NOT NULL,
+  day TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (user_id, day)
+);
+-- 朋友：已经注册的人点开对方的链接互相配（a < b，邀请关系在 invites 里）
+CREATE TABLE IF NOT EXISTS friend_links (
+  a INTEGER NOT NULL,
+  b INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (a, b)
+);
 CREATE TABLE IF NOT EXISTS usage_days (
   user_id INTEGER NOT NULL,
   day TEXT NOT NULL,
@@ -223,6 +237,8 @@ export function openDb(file) {
     if (!has) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
   }
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_invite ON users(invite_code); CREATE UNIQUE INDEX IF NOT EXISTS users_cal ON users(cal_token);');
+  // 收画改成按「每天打开」算：以前的打开记录（usage_days）补进来，重复执行不会重复
+  db.exec('INSERT OR IGNORE INTO open_days(user_id, day, created_at) SELECT user_id, day, created_at FROM usage_days;');
   return wrap(db);
 }
 

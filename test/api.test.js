@@ -670,10 +670,10 @@ test('一甲子：每天打开收下当天日柱的画，集满 60 张送一枚�
   assert.deepEqual(r.data.jiazi, { n: 1, has: true, fresh: true, reward: false });
   r = await c('GET', '/api/today?date=' + today);
   assert.equal(r.data.jiazi.fresh, false, '同一天再打开不算新收');
-  // 往前补 59 天的打开记录：连续 60 天正好是一整轮日柱
+  // 往前补 59 天的打开记录（收画按每天打开算）：连续 60 天正好是一整轮日柱
   const uid = db.get("SELECT id FROM users WHERE username='jiazi'").id;
   const base = Date.parse(today + 'T12:00:00Z');
-  for (let k = 1; k < 60; k++) db.run('INSERT INTO usage_days(user_id, day, created_at) VALUES(?,?,?)', uid, new Date(base - k * 86400000).toISOString().slice(0, 10), new Date().toISOString());
+  for (let k = 1; k < 60; k++) db.run('INSERT INTO open_days(user_id, day, created_at) VALUES(?,?,?)', uid, new Date(base - k * 86400000).toISOString().slice(0, 10), new Date().toISOString());
   const credits = db.get('SELECT amulet_credits n FROM users WHERE id = ?', uid).n;
   r = await c('GET', '/api/today?date=' + today);
   assert.equal(r.data.jiazi.n, 60);
@@ -703,12 +703,42 @@ test('两个人的画：被邀请的朋友测完就能看；邀请人在邀请�
   const days = (Date.parse(r.data.best.date) - Date.parse(bjDay())) / 86400000;
   assert.ok(days >= 1 && days <= 14, '一起做事的日子在未来两周里');
   assert.equal((await client()('POST', '/api/pair', { birth: friend, code: 'XXXXX' })).status, 404);
-  // 朋友注册后，邀请人那边看到的是从自己的角度说的同一张画
-  await client()('POST', '/api/auth/register', { username: 'pairee', password: '12345678', agree: true, birth: friend, invite: code });
-  const row = (await a('GET', '/api/me/invite')).data.list[0];
+  // 朋友注册后，两边都在「朋友的画」里看到同一张画，关系从各自的角度说
+  const e = client();
+  await e('POST', '/api/auth/register', { username: 'pairee', password: '12345678', agree: true, birth: friend, invite: code });
+  const row = (await a('GET', '/api/friends')).data.list[0];
+  assert.equal(row.src, 'invited');
   assert.equal(row.pair.name, p.name);
   assert.equal(row.pair.art, p.art);
   assert.equal(row.pair.best.date, r.data.best.date);
   const flip = { 我生: '生我', 生我: '我生', 我克: '克我', 克我: '我克', 合: '合', 同: '同' };
   assert.equal(row.pair.kind, flip[p.kind], '两边的关系方向相反');
+  const back = (await e('GET', '/api/friends')).data.list[0];
+  assert.equal(back.src, 'inviter', '被邀请的朋友也看得到');
+  assert.equal(back.pair.kind, p.kind);
+  // 已经注册的人点开朋友的链接：两人连上，互相看到（不重复、不算邀请）
+  const g = client();
+  await g('POST', '/api/auth/register', { username: 'pairlink', password: '12345678', agree: true, birth: { date: '1985-03-02', time: '14:00', gender: '女' } });
+  const l = await g('POST', '/api/friends/link', { code });
+  assert.equal(l.status, 200);
+  assert.ok(l.data.pair && l.data.best);
+  await g('POST', '/api/friends/link', { code });
+  assert.equal((await g('GET', '/api/friends')).data.list.filter((x) => x.src === 'link').length, 1, '点两次只连一次');
+  assert.equal((await a('GET', '/api/friends')).data.list.length, 2, '邀请人那边多了一位朋友');
+  assert.equal((await a('GET', '/api/me/invite')).data.stats.invited, 1, '点链接连上的不算邀请');
+  const selfCode = (await g('GET', '/api/me/invite')).data.code;
+  assert.equal((await g('POST', '/api/friends/link', { code: selfCode })).status, 404, '不能和自己连');
+});
+
+test('收画和会员无关：免费体验用完也照样收下今天的画', async () => {
+  const c = client();
+  await c('POST', '/api/auth/register', { username: 'freegone', password: '12345678', agree: true, birth });
+  const uid = db.get("SELECT id FROM users WHERE username='freegone'").id;
+  for (const k of [3, 4, 5]) db.run('INSERT INTO usage_days(user_id, day, created_at) VALUES(?,?,?)', uid, new Date(Date.parse(bjDay() + 'T12:00:00Z') - k * 86400000).toISOString().slice(0, 10), new Date().toISOString());
+  const r = await c('GET', '/api/today?date=' + bjDay());
+  assert.equal(r.status, 402, '体验用完，今天页锁住');
+  assert.ok(r.data.art && r.data.art.art.startsWith('art/pillars/'), '锁住的页面也有今天的画');
+  assert.equal(r.data.jiazi.has, true);
+  assert.equal(r.data.jiazi.fresh, true);
+  assert.equal((await c('GET', '/api/jiazi')).data.member, false);
 });

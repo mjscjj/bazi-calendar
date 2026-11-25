@@ -58,9 +58,17 @@ function noticesHtml() {
   return h;
 }
 
+// 体验用完、会员到期：今天页锁住，但今天的画照样收下（收画和会员无关），点画去「我的一甲子」
+function lockArtHtml(L) {
+  if (!L.art) return '';
+  const j = L.jiazi, day = localToday(), fresh = j && j.fresh && !seen('stamp:' + day);
+  if (fresh) setTimeout(() => mark('stamp:' + day), 1500);
+  return `<a class="dart lockart" href="#/jiazi" aria-label="${L.art.gz}日的画：${esc(L.art.name)}，去我的一甲子"><img src="${L.art.art}" alt="" width="600" height="600" decoding="async">`
+    + `<span class="cap"><b>${L.art.gz}日</b>${esc(L.art.name)}</span>${j && j.has ? `<i class="seal${fresh ? ' fresh' : ''}" aria-hidden="true">收</i>` : ''}</a>`;
+}
 function lockHtml(L) {
   const a = L.access || {};
-  return almanacLine(L.almanac) + '<div class="lock2"><div class="pw">'
+  return almanacLine(L.almanac) + lockArtHtml(L) + '<div class="lock2"><div class="pw">'
     + '<span class="lockmark" aria-hidden="true">流</span>'
     + `<h2>${a.expired ? '会员已到期' : '免费体验已用完'}</h2>`
     + `<p>${a.expired ? '续费后，继续看每天的你、好时段、每日一签和挑日子。' : `你已经体验了 ${a.freeLimit} 次。开通会员后，今天、日历、挑日子、每日一签都能继续用。`}</p>`
@@ -382,17 +390,18 @@ export function pageToday() {
       if (currentPath() !== '/') return;
       renderToday();
       if (S.today) prefetch();
-      if (S.today && !S.today.demo) { track('today_open', { level: S.today.day.level.k }); jiaziNews(S.today); }
+      if (S.today && !S.today.demo) { track('today_open', { level: S.today.day.level.k }); jiaziNews(S.today.jiazi, S.today.arts[S.today.day.gz].name, S.today.date, false); }
+      else if (S.todayLocked && S.todayLocked.art) jiaziNews(S.todayLocked.jiazi, S.todayLocked.art.name, localToday(), true);
     });
   }
 }
 
 // 收下今天的画：当天第一次打开时说一句；第一次集满一甲子时说送了什么
-function jiaziNews(t) {
-  const j = t.jiazi;
+function jiaziNews(j, name, date, locked) {
   if (!j) return;
-  if (j.reward) { toast('集齐一甲子！送你一次特别款御守，祈愿时可以用'); return; }
-  if (j.fresh && !seen('stamp:' + t.date) && seen('guide')) toast(`收下了今天的画「${t.arts[t.day.gz].name}」· 已收 ${j.n} / 60`);
+  if (j.reward) { toast(`集齐一甲子！送你一次特别款御守，${locked ? '开通会员后' : ''}祈愿时可以用`); return; }
+  // 新用户的引导、点朋友链接弹出的画还在时不弹，免得压在弹层上（印照样盖）
+  if (j.fresh && !seen('stamp:' + date) && seen('guide') && !S.linking) toast(`收下了今天的画「${name}」· 已收 ${j.n} / 60`);
 }
 
 // ---------- 弹层 ----------

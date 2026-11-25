@@ -17,7 +17,16 @@ export function catchInvite() {
   if (!/^[A-Z0-9]{5}$/.test(code)) return Promise.resolve();
   sp.delete('i');
   history.replaceState(history.state, '', location.pathname + (sp.toString() ? '?' + sp : '') + location.hash);
-  if (S.me) return Promise.resolve();
+  // 已经注册的人打开朋友的链接：两人连上，弹出你们俩的画（不算邀请奖励）
+  if (S.me) {
+    S.linking = true;
+    return api('POST', 'friends/link', { code }).then((d) => {
+      track('friend_link', { pair: !!d.pair });
+      setTimeout(() => openSheet('你们俩的画', d.pair
+        ? pairHtml(d.pair, d.best, d.name, '你们已经连上，在「我的 › 邀请好友」里随时能看。')
+        : `<p style="margin:0;line-height:1.8">你和${esc(d.name)}已经连上。你们俩都测完能量卡后，就能在「我的 › 邀请好友」里看到你们俩的画。</p>`), 400);
+    }, () => {});
+  }
   track('landing', { from: 'invite' });
   return api('GET', 'invite/' + code).then((d) => writeLocal('invite', { code, name: d.name, days: d.days, card: d.card, at: Date.now() }), () => {});
 }
@@ -35,26 +44,37 @@ export function pairHtml(p, best, who, note = '') {
 export function pageInvite() {
   const v = $('#view'), T = '邀请好友';
   v.innerHTML = phead(T) + '<div class="sk" style="height:190px"></div><div class="sk" style="height:120px"></div>';
-  api('GET', 'me/invite').then((d) => {
+  Promise.all([api('GET', 'me/invite'), api('GET', 'friends')]).then(([d, fr]) => {
     if (currentPath() !== '/invite') return;
-    S.inviteCode = d.code; S.invList = d.list;
+    S.inviteCode = d.code; S.friends = fr.list;
     const url = inviteUrl(d.code);
     const st = (r) => (r.status === 'done' ? `<em class="ok">已生效 +${d.days} 天</em>` : r.status === 'capped' ? '<em>已生效 · 本月奖励已满</em>' : r.status === 'blocked' ? '<em>同一台设备注册，不计奖励</em>' : `<em>${esc(r.need)}</em>`);
     v.innerHTML = phead(T)
       + `<section class="invhero"><b>每邀请一位朋友<br>你们各得 ${d.days} 天会员</b><span>朋友测完能量卡、注册，第二天再打开一次就生效。</span>`
       + `<div class="linkbox"><span>${esc(url.replace(/^https?:\/\//, ''))}</span><button type="button" class="btn sm primary" data-inv-copy>复制</button></div>`
       + '<button type="button" class="btn ghost block" data-inv-poster>生成邀请海报</button></section>'
+      + friendsHtml(fr.list)
       + `<section class="card"><div class="stats3"><div><b>${d.stats.invited}</b><small>已邀请</small></div><div><b>${d.stats.done}</b><small>已生效</small></div><div><b>${d.stats.days}</b><small>得到的天数</small></div></div></section>`
-      + `<section class="card"><h3>邀请记录</h3>${d.list.length ? `<div class="ilist">${d.list.map((r, i) => `<div>${r.pair ? `<button type="button" class="pmini" data-pair="${i}" aria-label="看你和 ${esc(r.name)} 的画"><img src="${esc(r.pair.art)}" alt=""></button>` : ''}<span>${esc(r.name)}<small>${dtText(r.at)}</small></span>${st(r)}</div>`).join('')}</div>` : '<div class="empty">还没有朋友通过你的链接注册</div>'}</section>`
+      + `<section class="card"><h3>邀请记录</h3>${d.list.length ? `<div class="ilist">${d.list.map((r) => `<div><span>${esc(r.name)}<small>${dtText(r.at)}</small></span>${st(r)}</div>`).join('')}</div>` : '<div class="empty">还没有朋友通过你的链接注册</div>'}</section>`
       + `<p class="note" style="margin:0;text-align:center">${d.left > 0 ? `本月还能获得 ${d.left} 次奖励` : '本月的邀请奖励已经满了，朋友注册仍然能拿到奖励'}</p>` + footHtml();
     S.inviteUrl = url;
   }, (e) => { v.innerHTML = errHtml(T, e); });
 }
-onClick('[data-pair]', (el) => {
-  const r = S.invList && S.invList[+el.getAttribute('data-pair')];
-  if (!r || !r.pair) return;
-  track('pair_view', { from: 'inviter', kind: r.pair.kind });
-  openSheet('你们俩的画', pairHtml(r.pair, r.pair.best, r.name));
+// 朋友的画：你邀请的、邀请你的、点链接连上的，每人一张你们俩的画
+const SRC = { invited: '你邀请的', inviter: '邀请你的', link: '点链接连上的' };
+function friendsHtml(list) {
+  return '<section class="card"><h3>朋友的画</h3>'
+    + (list.length ? `<div class="frlist">${list.map((x, i) => `<button type="button" class="frrow" data-friend="${i}"${x.pair ? '' : ' disabled'}>`
+      + (x.pair ? `<img src="${esc(x.pair.art)}" alt="">` : '<span class="frnone" aria-hidden="true">画</span>')
+      + `<span><b>${esc(x.name)}</b><small>${SRC[x.src]} · ${x.pair ? esc(x.pair.tag) : '测完能量卡后就有你们俩的画'}</small></span>${x.pair ? '<i aria-hidden="true">›</i>' : ''}</button>`).join('')}</div>`
+      : '<div class="empty">还没有朋友。把下面的链接发给朋友，TA 测完能量卡就会出现在这里。</div>')
+    + '<p class="note" style="margin:0">链接发给新朋友：注册后你们各得会员；发给已经在用流日历的朋友：TA 点开，你们也会在这里看到彼此的画。双方只看到对方的本命形象，看不到生日。</p></section>';
+}
+onClick('[data-friend]', (el) => {
+  const x = S.friends && S.friends[+el.getAttribute('data-friend')];
+  if (!x || !x.pair) return;
+  track('pair_view', { from: 'friends', src: x.src, kind: x.pair.kind });
+  openSheet('你们俩的画', pairHtml(x.pair, x.pair.best, x.name));
 });
 onClick('[data-inv-copy]', () => { track('invite_copy'); copy(`我在用流日历，按出生信息算每天适合做什么。测测你是什么型：${S.inviteUrl}`, '已复制，发给朋友吧'); });
 onClick('[data-inv-poster]', (el) => {

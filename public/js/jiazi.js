@@ -29,7 +29,7 @@ export function pageJiazi() {
     }).join('');
     v.innerHTML = head + `<section class="card jzhead"><div class="jzn"><b>${d.n}</b><span>/ 60</span></div>`
       + `<div class="jzbar" aria-hidden="true"><i style="width:${Math.round((d.n / 60) * 100)}%"></i></div>`
-      + `<p>${d.done ? '已经集满一轮。送你的特别款御守（节气款或生日款），祈愿时可以用。' : '每一天也有自己的天干地支，60 天一轮。每天打开流日历，就收下当天的那张画；集满 60 张，送你一次特别款御守。'}</p></section>`
+      + `<p>${d.done ? `已经集满一轮。送你的一次特别款御守（节气款或生日款），${d.member ? '' : '开通会员后'}祈愿时可以用。` : '每一天也有自己的天干地支，60 天一轮。每天打开流日历，就收下当天的那张画；集满 60 张，送你一次特别款御守。'}</p></section>`
       + `<div class="jzgrid">${cells}</div>` + footHtml();
   }, (e) => { v.innerHTML = head + `<div class="errbox"><p>${esc(e.message)}</p></div>`; });
 }

@@ -126,10 +126,27 @@ await bp.screenshot({ path: `${out}/b10-invite-reward.png` });
 await ap.goto(base + '/#/'); await ap.reload(); await ap.waitForSelector('.tcard');
 check('邀请人也看到', ((await ap.textContent('.notice.good').catch(() => '')) || '').includes('小满加入了'));
 await ap.goto(base + '/#/invite'); await ap.waitForSelector('.ilist');
-await ap.click('.ilist [data-pair]'); await ap.waitForSelector('#sheet .pairc');
-check('邀请记录里点朋友的画，看到你们俩的画', !!(await ap.textContent('#sheet .pairc .ptag')));
+check('朋友的画里有刚邀请的朋友', (await ap.textContent('.frlist')).includes('小满') && (await ap.textContent('.frlist')).includes('你邀请的'));
+await ap.click('.frlist [data-friend]'); await ap.waitForSelector('#sheet .pairc');
+check('点朋友，看到你们俩的画', !!(await ap.textContent('#sheet .pairc .ptag')));
 await ap.waitForTimeout(500); await ap.screenshot({ path: `${out}/b11b-pair-inviter.png` });
 await ap.click('#sheet [data-close-sheet]'); await ap.waitForSelector('#sheet', { state: 'detached' });
+// 已经注册的人打开朋友的链接：两人连上，弹出你们俩的画
+{
+  const lctx = await browser.newContext(iphone); const lp = await lctx.newPage(); watch(lp, 'linker');
+  await lp.goto(base + '/'); await lp.waitForSelector('#dayswipe');
+  await lp.evaluate(async (u) => fetch('api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: 'link12345', agree: true, birth: { date: '1985-03-02', time: '14:00', gender: '女' }, nickname: '老周' }) }), 'lk' + suffix);
+  await lp.evaluate(() => localStorage.setItem('lrl:guide', '1'));
+  await lp.goto(`${base}/?i=${code}#/`); await lp.waitForSelector('#sheet .pairc', { timeout: 8000 });
+  check('已注册的人打开朋友链接，弹出你们俩的画', (await lp.textContent('#sheet .pairc small')).includes('阿杰'));
+  await lp.screenshot({ path: `${out}/b11c-pair-link.png` });
+  await lp.click('#sheet [data-close-sheet]'); await lp.waitForSelector('#sheet', { state: 'detached' });
+  await lp.goto(base + '/#/invite'); await lp.waitForSelector('.frlist');
+  check('点链接连上的朋友出现在自己的朋友的画里', (await lp.textContent('.frlist')).includes('点链接连上的'));
+  await ap.goto(base + '/#/me'); await ap.goto(base + '/#/invite'); await ap.waitForSelector('.frlist');
+  check('对方那边也多了这位朋友', (await ap.textContent('.frlist')).includes('老周'));
+  await lctx.close();
+}
 check('邀请记录显示已生效', (await ap.textContent('.ilist')).includes('已生效'));
 await ap.screenshot({ path: `${out}/b11-invite-done.png`, fullPage: true });
 

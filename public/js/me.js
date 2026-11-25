@@ -34,7 +34,7 @@ export function pageMe() {
       + row('data-go="/asks"', '问事记录', '梅花易数 · 每月免费 1 次')
       + row('data-go="/amulets"', '我的御守', '每月一枚')
       + row('data-go="/lots"', '我的签谱', '抽过的签都在这里')
-      + row('data-go="/invite"', '邀请好友', `你们各得 ${S.inviteDays || 7} 天`)
+      + row('data-go="/invite"', '邀请好友', `朋友的画 · 各得 ${S.inviteDays || 7} 天`)
       + row('data-go="/ics"', '订阅到手机日历', '每天出现在日历里')
       + (IS_STANDALONE() ? '' : IS_MOBILE ? row('data-install', '加到主屏', '像 App 一样打开') : row('data-install', '安装到电脑', '从桌面一点就开'))
       + '</section><section class="mlist">'
