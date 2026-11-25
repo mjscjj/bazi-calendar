@@ -307,6 +307,11 @@ export function solarToLunar(date) {
 }
 
 // 某天所在的节气（最近一个已经到了的节气）
+// 这一天是不是节气，是的话返回节气名
+export function jieqiOn(date) {
+  const [y, m, d] = date.split('-').map(Number);
+  return Solar.fromYmd(y, m, d).getLunar().getJieQi() || '';
+}
 export function termOf(date) {
   const [y, m, d] = date.split('-').map(Number);
   return Solar.fromYmd(y, m, d).getLunar().getPrevJieQi(true).getName();

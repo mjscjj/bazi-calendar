@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import qrcode from 'qrcode-generator';
-import { chart, calendar, dayOut, almanac, lunarToSolar, solarToLunar, lunarMonths, termOf, ZHI, WX, dayGz } from './engine.js';
+import { chart, calendar, dayOut, almanac, lunarToSolar, solarToLunar, lunarMonths, termOf, jieqiOn, ZHI, WX, dayGz } from './engine.js';
 import { makeSettings } from './settings.js';
 import { loadContent, makeContent } from './content.js';
 import { searchCities, cityByName, resolveBirth } from './solar.js';
@@ -435,6 +435,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const week = calendar(c, y, m, date).week;
     return {
       date, almanac: almanac(y, m, d), chart: c, card: C.energyCard(c), day, week, arts: C.arts,
+      term: jieqiOn(date) ? C.termCard(jieqiOn(date), c) : null,
       line: C.dailyLine(c, day), outfit: C.outfit(c, day), strip: weekStrip(c, date), tomorrow: tomorrowOf(c, date), ...extra,
     };
   }
@@ -694,7 +695,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     // 撕日历：每天第一次打开，先撕掉昨天那一页
     const yd = new Date(Date.UTC(y, m - 1, d - 1)), prev = almanac(yd.getUTCFullYear(), yd.getUTCMonth() + 1, yd.getUTCDate());
     const a = access(u);
-    if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), art: { gz, ...C.arts[gz] }, jiazi, prev, ...priceInfo() });
+    if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), art: { gz, ...C.arts[gz] }, jiazi, prev, term: jieqiOn(date) ? C.termCard(jieqiOn(date), chartOf(u)) : null, ...priceInfo() });
     recordUse(u);
     activateInvite(u);
     const drawn = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);

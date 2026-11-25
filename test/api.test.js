@@ -299,7 +299,7 @@ test('埋点批量写入，非法事件名丢弃', async () => {
 
 test('内容文件缺字段时启动失败', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lrl-content-'));
-  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json', 'day-pillars.json', 'pairs.json', 'luck.json', 'jiao.json', 'lot-topics.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
+  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json', 'day-pillars.json', 'pairs.json', 'luck.json', 'jiao.json', 'lot-topics.json', 'terms.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
   assert.doesNotThrow(() => loadContent(dir));
   const cards = JSON.parse(fs.readFileSync(path.join(dir, 'energy-cards.json'), 'utf8'));
   delete cards.cards['癸'];
@@ -908,4 +908,18 @@ test('月度回顾：这个月打开了几天、收了哪些画、心情、最�
   // 注册之前的月份、以后的月份都回到这个月
   assert.equal((await c('GET', '/api/recap?month=2000-01')).data.month, month);
   assert.equal((await c('GET', '/api/recap?month=2999-01')).data.month, month);
+});
+
+test('节气：节气那天有一张节气卡，按五行说对你意味着什么', async () => {
+  const { makeContent } = await import('../server/content.js');
+  const { chart, jieqiOn } = await import('../server/engine.js');
+  const C = makeContent(loadContent());
+  assert.equal(jieqiOn('2026-12-07'), '大雪');
+  assert.equal(jieqiOn('2026-11-25'), '');
+  const c = chart({ date: '1990-10-19', time: '10:00', gender: '女' });
+  const t = C.termCard('大雪', c);
+  assert.equal(t.element, '水');
+  assert.ok(t.line && t.mine.startsWith('大雪起，水当令'));
+  assert.equal(t.kind, c.xi.includes(4) ? 'xi' : c.ji.includes(4) ? 'ji' : 'neutral');
+  assert.equal((await fetch(base + '/' + t.art)).status, 200);
 });

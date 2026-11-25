@@ -305,6 +305,21 @@ check('注销后回到示例页', !db.prepare('SELECT 1 FROM users WHERE id = ?'
   await tp.click('[data-recap-share]'); await tp.waitForSelector('#sheet .sharepv img');
   check('月度回顾能生成分享图', (await tp.textContent('#sheet .sh b')).includes('月度回顾'));
   await tctx.close();
+  // 节气卡：服务端只在真正的节气那天给，这里把今天的数据改成大雪那天来看（关掉离线缓存，好拦请求）
+  const sctx = await browser.newContext({ ...iphone, serviceWorkers: 'block' }); const sp = await sctx.newPage(); watch(sp, 'term');
+  await sp.goto(base + '/'); await sp.waitForSelector('#dayswipe');
+  await sp.evaluate(async (u) => fetch('api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: 'tear12345' }) }), 'tr' + suffix);
+  await sp.evaluate(() => localStorage.setItem('lrl:guide', '1'));
+  await sp.route('**/api/today?*', async (route) => {
+    const r = await route.fetch(), j = await r.json();
+    j.term = { name: '大雪', element: '水', line: '大雪封山，天地安静。', art: 'art/terms/21-daxue.webp', mine: '大雪起，水当令。', kind: 'xi' };
+    await route.fulfill({ response: r, json: j });
+  });
+  await sp.goto(base + '/?r=3#/'); await sp.waitForSelector('.termc img');
+  check('节气那天今天页最上面有节气卡', (await sp.textContent('.termc b')) === '大雪');
+  await sp.click('[data-term]'); await sp.click('#sheet [data-share="term"]'); await sp.waitForSelector('#sheet .sharepv img');
+  check('节气卡能存成海报', (await sp.textContent('#sheet .sh b')).includes('节气海报'));
+  await sctx.close();
 }
 
 console.log(results.join('\n'));

@@ -153,6 +153,20 @@ const DRAW = {
     wrap(ctx, o.text, W / 2, 1200, 860, 68, 4, { size: 44, color: P.muted });
   },
   invite(ctx, d) { DRAW.card(ctx, { ...d, invite: d.days || 7 }); },
+  // 节气海报：日期、节气的画、节气名、这个节气的意思、对你意味着什么
+  term(ctx, x) {
+    const now = new Date();
+    text(ctx, `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · 今日节气`, W / 2, 200, { size: 38, color: P.muted });
+    if (x.img) {
+      const s = 800, ax = (W - s) / 2, ay = 250;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 48; ctx.shadowOffsetY = 14;
+      roundRect(ctx, ax, ay, s, s, 36); ctx.fillStyle = '#F6F1E7'; ctx.fill(); ctx.restore();
+      ctx.save(); roundRect(ctx, ax, ay, s, s, 36); ctx.clip(); ctx.drawImage(x.img, ax, ay, s, s); ctx.restore();
+    }
+    text(ctx, x.name, W / 2, 1200, { size: 128, font: SERIF, weight: 900 });
+    const y2 = wrap(ctx, x.line, W / 2, 1290, evenW(x.line, 40, 860), 58, 2, { size: 40 });
+    wrap(ctx, x.mine, W / 2, y2 + 24, evenW(x.mine, 34, 860), 50, 3, { size: 34, color: glowText() });
+  },
   // 月度回顾：标题、六个数、这个月收的画（最多 9 张）、最顺的一天、最好的签、最常的心情
   recap(ctx, d) {
     const MCN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
@@ -254,8 +268,8 @@ function render(kind, data, theme) {
   return cv;
 }
 
-const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾' };
-const SLUG = { card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper', recap: 'recap' };
+const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾', term: '节气海报' };
+const SLUG = { card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper', recap: 'recap', term: 'solar-term' };
 // 分享图用 JPG：手机相册、微信都当照片处理（PNG 动辄两三兆，常被当成一个文件）
 const jpg = (cv) => cv.toDataURL('image/jpeg', 0.92);
 // 网页没法直接写进相册：手机上最可靠的是长按图片「保存图片 / 添加到照片」，所以放在最前面说；
@@ -272,12 +286,12 @@ function pvHtml(url, kind, theme) {
 // data 不传时从当前页面的数据里取（邀请海报由邀请页传进来）
 export function share(kind, data) {
   data = data || (kind === 'card' ? (S.shareCard || (S.today && { card: S.today.card, name: S.today.name }))
-    : kind === 'today' || kind === 'wall' ? S.today : kind === 'lot' ? S.today && S.today.draw : kind === 'outfit' ? S.today && S.today.outfit : null);
+    : kind === 'today' || kind === 'wall' ? S.today : kind === 'term' ? (S.today || S.todayLocked) && (S.today || S.todayLocked).term : kind === 'lot' ? S.today && S.today.draw : kind === 'outfit' ? S.today && S.today.outfit : null);
   if (!data) { toast('还没有可以分享的内容'); return; }
   track('share_create', { kind });
   const theme = isDarkNow() ? 'dark' : 'light';
   // 能量卡和邀请海报要先把日柱插画加载好（能量卡页显示过，一般直接命中缓存）
-  const art = kind === 'wall' || kind === 'today' ? data.arts && data.arts[data.day.gz] && data.arts[data.day.gz].art
+  const art = kind === 'term' ? data.art : kind === 'wall' || kind === 'today' ? data.arts && data.arts[data.day.gz] && data.arts[data.day.gz].art
     : (kind === 'card' || kind === 'invite') && data.card && data.card.pillar ? data.card.pillar.art : null;
   // 月度回顾要先把这个月收的画（最多 9 张）都加载好
   const many = kind === 'recap' ? Promise.all((data.arts || []).slice(0, 9).map((a) => artOf(a.art))) : Promise.resolve(null);

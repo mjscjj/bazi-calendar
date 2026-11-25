@@ -68,6 +68,21 @@ function noticesHtml() {
   return h;
 }
 
+// 节气那天：今天页最上面一张节气卡，点开看大图和这个节气对你意味着什么，可以存成海报
+function termHtml(t) {
+  const x = t && t.term;
+  if (!x) return '';
+  return `<button type="button" class="termc" data-term><img src="${esc(x.art)}" alt="" width="600" height="600" decoding="async">`
+    + `<span><small>今日节气</small><b>${esc(x.name)}</b><span>${esc(x.line)}</span></span><i aria-hidden="true">›</i></button>`;
+}
+onClick('[data-term]', () => {
+  const t = S.today || S.todayLocked, x = t && t.term;
+  if (!x) return;
+  track('term_open', { name: x.name });
+  openSheet(`今日${x.name}`, `<div class="artsheet termsheet"><img class="big" src="${esc(x.art)}" alt=""><b class="tn">${esc(x.name)}</b>`
+    + `<p>${esc(x.line)}</p><p class="mine">${esc(x.mine)}</p>`
+    + `<button type="button" class="btn primary block" data-share="term">存成节气海报</button></div>`);
+});
 // 体验用完、会员到期：今天页锁住，但今天的画照样收下（收画和会员无关），点画去「我的一甲子」
 function lockArtHtml(L) {
   if (!L.art) return '';
@@ -78,7 +93,7 @@ function lockArtHtml(L) {
 }
 function lockHtml(L) {
   const a = L.access || {};
-  return almanacLine(L.almanac) + lockArtHtml(L) + '<div class="lock2"><div class="pw">'
+  return almanacLine(L.almanac) + termHtml(L) + lockArtHtml(L) + '<div class="lock2"><div class="pw">'
     + '<span class="lockmark" aria-hidden="true">流</span>'
     + `<h2>${a.expired ? '会员已到期' : '免费体验已用完'}</h2>`
     + `<p>${a.expired ? '续费后，继续看每天的你、好时段、每日一签和挑日子。' : `你已经体验了 ${a.freeLimit} 次。开通会员后，今天、日历、挑日子、每日一签都能继续用。`}</p>`
@@ -352,7 +367,7 @@ export function renderToday() {
   else {
     const e = selDate() === S.today.date ? { date: S.today.date, moods: S.today.moods } : entryOf(selDate());
     // 手机上一列：本周、卡片、四张小卡、记录此刻、明天寄语；电脑上右栏放小卡、记录此刻、明天寄语
-    h += `<div class="dgrid"><div class="dmain">${planHtml(S.today)}${stripHtml()}${dayCardHtml(slide)}</div>`
+    h += `<div class="dgrid"><div class="dmain">${termHtml(S.today)}${planHtml(S.today)}${stripHtml()}${dayCardHtml(slide)}</div>`
       + `<aside class="dside">${minisHtml(S.today)}${recordHtml(e, S.today.moodKit)}${tomorrowHtml(S.today)}</aside></div>`;
     slide = '';
   }
