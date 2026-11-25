@@ -956,24 +956,75 @@ test('美国版（/us/）：页面能打开；英文内容和插画齐全；网�
 
 test('美国版计算接口：排盘（出生地按真太阳时、填了性别才给大运）、一段日子的每日详解、挑日子；不存任何东西', async () => {
   const c = client();
+  const plus = 'a'.repeat(48);
+  db.run("INSERT INTO us_orders(ref, token, plan, status, paid_until, created_at) VALUES('SXTtest', ?, 'yearly', 'paid', ?, ?)", plus, new Date(Date.now() + 864e7).toISOString(), new Date().toISOString());
   const birth = { date: '1992-03-14', time: '08:30', lng: -74.006, tz: 'America/New_York' };
-  const ch = (await c('POST', '/api/us/chart', { birth })).data;
+  const ch = (await c('POST', '/api/us/chart', { birth, plus })).data;
   assert.deepEqual(ch.pillars, ['壬申', '癸卯', '己丑', '戊辰']);
   assert.equal(ch.solar.time, '08:25');
   assert.equal(ch.luck, null);
-  assert.equal((await c('POST', '/api/us/chart', { birth: { ...birth, sex: 'f' } })).data.luck.cycles.length, 8);
+  assert.equal((await c('POST', '/api/us/chart', { birth: { ...birth, sex: 'f' }, plus })).data.luck.cycles.length, 8);
   assert.equal((await c('POST', '/api/us/chart', { birth: { date: '1992-13-14' } })).status, 400);
   assert.equal((await c('POST', '/api/us/chart', { birth: { ...birth, tz: 'Mars/Base' } })).status, 400);
-  const { days } = (await c('POST', '/api/us/days', { birth: { date: '1992-03-14' }, from: '2026-11-25', n: 31, hours: 1 })).data;
+  const { days } = (await c('POST', '/api/us/days', { birth: { date: '1992-03-14' }, from: '2026-11-25', n: 31, hours: 1, plus })).data;
   assert.equal(days.length, 31);
   assert.equal(days[0].gz, '癸卯');
   assert.ok(days.every((d) => d.k >= 1 && d.k <= 5 && d.hours.length === 12 && d.best.length === 2));
-  assert.equal((await c('POST', '/api/us/days', { birth: { date: '1992-03-14' }, from: '2026-11-01', n: 400 })).data.days.length, 42);
+  assert.equal((await c('POST', '/api/us/days', { birth: { date: '1992-03-14' }, from: '2026-11-01', n: 400, plus })).data.days.length, 42);
   const us = JSON.parse(fs.readFileSync(new URL('../public/us/content.json', import.meta.url)));
   for (const t of Object.keys(us.picks)) {
-    const r = (await c('POST', '/api/us/pick', { birth: { date: '1992-03-14' }, type: t, today: '2026-11-25', range: '1m' })).data;
+    const r = (await c('POST', '/api/us/pick', { birth: { date: '1992-03-14' }, type: t, today: '2026-11-25', range: '1m', plus })).data;
     assert.ok(r.picks.length > 0 && r.picks.every((p) => p.date > '2026-11-25' && us.themes[p.ssG]), t);
   }
-  assert.equal((await c('POST', '/api/us/pick', { birth: { date: '1992-03-14' }, type: 'nope', today: '2026-11-25' })).status, 400);
+  assert.equal((await c('POST', '/api/us/pick', { birth: { date: '1992-03-14' }, type: 'nope', today: '2026-11-25', plus })).status, 400);
   for (const k of ['正官', '七杀', '正印', '偏印', '比肩', '劫财', '食神', '伤官', '正财', '偏财']) assert.ok(us.themes[k]?.do.length === 2, k);
+});
+
+test('美国版 Sixty Plus：下单拿 token → Gumroad Ping 首单开通 → 付费内容解锁；续费按订阅延长；license key 换设备找回；退款收回', async () => {
+  const { createHmac } = await import('node:crypto');
+  const pdb = openDb(':memory:');
+  const env = { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ASK_AI: 'fake', GUMROAD_PRODUCT_ID: 'prod1', GUMROAD_PRODUCT_URL: 'https://x.gumroad.com/l/mindflow', GUMROAD_PING_SECRET: 'sek' };
+  const srv = createServer({ db: pdb, alipay: null, env, log: { info() {}, error() {}, warn() {} } });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const B = `http://127.0.0.1:${srv.address().port}/bazi`;
+  const post = async (p, body) => { const r = await fetch(B + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return { status: r.status, data: await r.json() }; };
+  const ping = async (fields, secret = 'sek') => {
+    const body = new URLSearchParams({ product_id: 'prod1', resource_name: 'sale', ...fields }).toString(), t = Math.floor(Date.now() / 1000);
+    const sig = createHmac('sha256', secret).update(t + '.').update(body).digest('hex');
+    const r = await fetch(B + '/api/us/pay/ping', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Gumroad-Signature': `t=${t},v1=${sig}` }, body });
+    await new Promise((res) => setTimeout(res, 30));
+    return r.status;
+  };
+  try {
+    const birth = { date: '1992-03-14', sex: 'f' };
+    assert.equal((await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25' })).status, 402);
+    assert.equal((await post('/api/us/days', { birth, from: '2026-12-01', n: 31 })).status, 402);
+    const free = await post('/api/us/chart', { birth });
+    assert.equal(free.data.plus, false); assert.equal(free.data.force, undefined); assert.ok(free.data.xi.length);
+    const st = await post('/api/us/pay/start', { plan: 'yearly' });
+    assert.ok(st.data.ref.startsWith('SXT') && /^[a-f0-9]{48}$/.test(st.data.token));
+    assert.ok(st.data.url.includes('ref=' + st.data.ref) && st.data.url.includes('recurrence=yearly'));
+    const status = async (t) => (await fetch(`${B}/api/us/pay/status?token=${t}`)).json();
+    assert.equal((await status(st.data.token)).pending, true);
+    assert.equal(await ping({ sale_id: 's1', 'url_params[ref]': st.data.ref }, 'wrong'), 400);
+    assert.equal(await ping({ sale_id: 's1', 'url_params[ref]': st.data.ref, recurrence: 'yearly', subscription_id: 'sub1', email: 'a@b.co', license_key: 'abcd1234-efgh5678-ijkl9012' }), 200);
+    const s1 = await status(st.data.token);
+    assert.equal(s1.plus, true); assert.equal(s1.plan, 'yearly'); assert.ok(s1.until > new Date(Date.now() + 360 * 864e5).toISOString());
+    const plus = st.data.token;
+    assert.equal((await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25', plus })).status, 200);
+    assert.equal((await post('/api/us/days', { birth, from: '2026-12-01', n: 31, plus })).data.days.length, 31);
+    assert.ok((await post('/api/us/chart', { birth, plus })).data.luck.cycles.length);
+    // 同一笔再来一次不重复处理；续费延长同一张订单
+    pdb.run("UPDATE us_orders SET paid_until = ? WHERE token = ?", new Date(Date.now() + 864e5).toISOString(), plus);
+    await ping({ sale_id: 's2', recurrence: 'yearly', subscription_id: 'sub1' });
+    assert.ok((await status(plus)).until > new Date(Date.now() + 360 * 864e5).toISOString());
+    assert.equal(pdb.all('SELECT * FROM us_orders').length, 1);
+    // 换设备
+    assert.equal((await post('/api/us/pay/restore', { key: 'nope-nope-nope-nope' })).status, 404);
+    assert.equal((await post('/api/us/pay/restore', { key: ' ABCD1234-EFGH5678-IJKL9012 ' })).data.token, plus);
+    // 退款收回
+    await ping({ sale_id: 's2', resource_name: 'refund' });
+    assert.equal((await status(plus)).plus, false);
+    assert.equal((await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25', plus })).status, 402);
+  } finally { srv.close(); }
 });

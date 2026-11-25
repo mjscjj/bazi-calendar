@@ -811,7 +811,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     db.run('INSERT OR IGNORE INTO us_waitlist(email, sign, ref, created_at) VALUES(?,?,?,?)', email, sign, ref, nowIso());
     return { ok: true };
   });
-  registerUs({ route, limit, bad, HttpError, content: C });
+  registerUs({ route, limit, bad, HttpError, content: C, db, env, log });
 
   // 计划
   // 挑日子：给一件事在一段时间里挑 3 个合适的日子
@@ -1733,7 +1733,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
         if (req.method !== 'GET' && req.method !== 'HEAD') {
           rawBody = await readBody(req);
           const ct = String(req.headers['content-type'] || '');
-          if (p === '/api/pay/notify') { /* 支付宝表单 */ } else {
+          if (p === '/api/pay/notify' || p === '/api/us/pay/ping') { /* 支付宝、Gumroad 的表单通知 */ } else {
             if (!ct.includes('application/json')) throw new HttpError(415, '请求格式不对');
             try { body = rawBody ? JSON.parse(rawBody) : {}; } catch { throw bad('请求格式不对'); }
             if (!body || typeof body !== 'object') body = {};

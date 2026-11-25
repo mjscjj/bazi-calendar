@@ -256,3 +256,15 @@ body.has-tabs .tabs { display: flex; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition: none !important; }
   .strip .track { animation: none; }
 }
+
+/* ---------- Sixty Plus ---------- */
+.cal.locked button:not(.open) { pointer-events: none; color: var(--ink-3); }
+.cal.locked button:not(.open) i { background: var(--line); }
+.perks { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 9px; }
+.perks li { display: grid; grid-template-columns: 20px 1fr; gap: 8px; font-size: 15px; }
+.perks li::before { content: '✓'; color: var(--wood); font-weight: 700; }
+.plans { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.plans button { text-align: left; border: 1.5px solid var(--line); background: var(--card); border-radius: 16px; padding: 14px; cursor: pointer; display: grid; gap: 4px; }
+.plans button[aria-checked=true] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.plans b { font-size: 15px; } .plans span { font: 400 22px/1.1 var(--serif); } .plans em { font-style: normal; font-size: 12px; color: var(--wood); font-weight: 600; }
+.linkbtn { display: block; margin: 10px auto 0; background: none; border: 0; color: var(--ink-2); text-decoration: underline; font-size: 14px; cursor: pointer; padding: 8px; }

@@ -78,10 +78,11 @@ const api = {
   cache: new Map(),
   clear() { this.cache.clear(); },
   async post(path, body) {
+    body = { ...body, plus: plusToken() };
     const key = path + JSON.stringify(body);
     if (!this.cache.has(key)) {
       this.cache.set(key, fetch('../api/us/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-        .then(async (r) => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.message || 'Something went wrong.'); return d; })
+        .then(async (r) => { const d = await r.json().catch(() => ({})); if (!r.ok) throw Object.assign(new Error(d.message || 'Something went wrong.'), { code: d.error }); return d; })
         .catch((e) => { this.cache.delete(key); throw e; }));
     }
     return this.cache.get(key);
@@ -90,6 +91,76 @@ const api = {
 const birthOf = (m) => m.birth;
 const getChart = (m) => api.post('chart', { birth: birthOf(m) });
 const getDays = (m, from, n, hours) => api.post('days', { birth: birthOf(m), from, n, hours: hours ? 1 : 0 });
+
+// ---------- Sixty Plus ----------
+const plusToken = () => store.get('plus')?.token || undefined;
+let PLUS = { plus: false, prices: null };
+async function loadPlus() {
+  const t = plusToken();
+  try { PLUS = await fetch('../api/us/pay/status' + (t ? `?token=${t}` : '')).then((r) => r.json()); } catch { PLUS = { plus: false, prices: null }; }
+  if (!PLUS.plus && t && !PLUS.pending) store.del('plus'); // ended or never paid
+  return PLUS;
+}
+const money = (c) => `$${(c / 100).toFixed(2)}`;
+const PERKS = ['Your full calendar — every day, every month', 'Best-day finder for interviews, dates, launches and more', 'Your elements, what fuels you and your 10-year cycles', 'New features first'];
+function lockCard(title, line) {
+  const pr = PLUS.prices;
+  return `<div class="card lock"><span class="chip el" style="--el:#16151A;--el-tint:#EFEDE7"><span class="dot" style="background:#E0573E"></span>Sixty Plus</span>
+    <h3 class="h2" style="font-size:26px;margin-top:12px">${title}</h3><p class="muted" style="margin:6px 0 16px">${line}</p>
+    <button class="btn block" data-paywall>Unlock Sixty Plus</button>${pr ? `<p class="hint" style="text-align:center">From ${money(Math.round(pr.yearly / 12))}/month, billed yearly</p>` : ''}</div>`;
+}
+document.addEventListener('click', (e) => { if (e.target.closest('[data-paywall]')) { e.preventDefault(); openPaywall(e.target.closest('[data-paywall]').dataset.paywall || ''); } });
+function openPaywall(from) {
+  const pr = PLUS.prices;
+  track('us_paywall', { from });
+  if (!pr) { toast('Payments are not available right now.'); return; }
+  const save = Math.round((1 - pr.yearly / (pr.monthly * 12)) * 100);
+  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Sixty Plus</h2><p class="muted" style="margin:0 0 14px">Plan your days, not just today.</p>
+    <ul class="perks">${PERKS.map((x) => `<li>${x}</li>`).join('')}</ul>
+    <div class="plans" role="radiogroup">
+      <button role="radio" aria-checked="true" data-plan="yearly"><b>Yearly</b><span>${money(pr.yearly)} / year</span><em>${money(Math.round(pr.yearly / 12))}/mo · Save ${save}%</em></button>
+      <button role="radio" aria-checked="false" data-plan="monthly"><b>Monthly</b><span>${money(pr.monthly)} / month</span><em>Cancel anytime</em></button>
+    </div>
+    <button class="btn block" id="goPay" style="margin-top:14px">Continue to checkout</button>
+    <p class="hint" style="text-align:center">Secure checkout by Gumroad. Renews automatically; cancel anytime from your receipt email.</p>
+    <button class="linkbtn" id="toRestore">Already have Plus? Restore it</button>`);
+  let plan = 'yearly';
+  $$('[data-plan]').forEach((b) => b.addEventListener('click', () => { plan = b.dataset.plan; $$('[data-plan]').forEach((x) => x.setAttribute('aria-checked', String(x === b))); }));
+  $('#toRestore').addEventListener('click', restoreSheet);
+  $('#goPay').addEventListener('click', async () => {
+    const btn = $('#goPay'); btn.disabled = true; btn.textContent = 'Opening checkout…';
+    const tab = window.open('', '_blank');
+    try {
+      const r = await fetch('../api/us/pay/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) }).then(async (x) => { const d = await x.json(); if (!x.ok) throw new Error(d.message); return d; });
+      store.set('plus', { token: r.token, ref: r.ref }); track('us_checkout', { plan, from });
+      if (tab) tab.location.href = r.url; else location.href = r.url;
+      waitSheet();
+    } catch (x) { tab?.close(); btn.disabled = false; btn.textContent = 'Continue to checkout'; toast(x.message || 'Could not open checkout.'); }
+  });
+}
+let waitTimer = null;
+function waitSheet() {
+  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Finish in the Gumroad tab</h2>
+    <p class="muted" style="margin:0">Once your payment goes through, Sixty Plus unlocks here automatically.</p>
+    <div class="skeleton" style="height:6px;margin:22px 0"></div><button class="btn ghost block" id="checkPay">I've paid — check now</button>`);
+  const check = async () => { await loadPlus(); if (PLUS.plus) { clearInterval(waitTimer); track('us_plus', { plan: PLUS.plan }); closeSheet(); api.clear(); toast('Welcome to Sixty Plus'); render(); } };
+  clearInterval(waitTimer); let n = 0;
+  waitTimer = setInterval(() => { if (++n > 200 || $('#sheet').hidden) return clearInterval(waitTimer); if (!document.hidden) check(); }, 3000);
+  $('#checkPay').addEventListener('click', check);
+}
+function restoreSheet() {
+  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Restore Sixty Plus</h2>
+    <p class="muted" style="margin:0 0 14px">Paste the license key from your Gumroad receipt email.</p>
+    <form id="restoreForm"><div class="row"><input class="input" name="key" autocomplete="off" autocapitalize="characters" placeholder="XXXXXXXX-XXXXXXXX-…" required><button class="btn" type="submit">Restore</button></div><p class="err"></p></form>`);
+  $('#restoreForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); const f = e.target, err = f.querySelector('.err');
+    try {
+      const r = await fetch('../api/us/pay/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: f.key.value }) }).then(async (x) => { const d = await x.json(); if (!x.ok) throw new Error(d.message); return d; });
+      store.set('plus', { token: r.token }); await loadPlus(); api.clear(); track('us_restore'); closeSheet(); toast('Sixty Plus restored'); render();
+    } catch (x) { err.textContent = x.message; }
+  });
+}
+addEventListener('visibilitychange', () => { if (!document.hidden && store.get('plus') && !PLUS.plus) loadPlus().then(() => { if (PLUS.plus) { api.clear(); render(); } }); });
 
 // ---------- analytics ----------
 const anon = () => { let a = store.get('anon'); if (!a) { a = Math.random().toString(36).slice(2) + Date.now().toString(36); store.set('anon', a); } return a; };
@@ -248,14 +319,21 @@ async function pageCalendar(q) {
     <div class="cal">${WEEK.map((w) => `<span class="wd">${w[0]}</span>`).join('')}${'<span class="blank"></span>'.repeat(lead)}
       ${Array.from({ length: n }, (_, i) => { const d = `${calMonth}-${String(i + 1).padStart(2, '0')}`; return `<button data-d="${d}" class="${d === today ? 'today' : d < today ? 'past' : ''}"><span>${i + 1}</span><i></i></button>`; }).join('')}</div>
     <div class="legend">${[5, 4, 3, 2, 1].map((k) => `<span class="lv${k}"><i></i>${C.levels[k].word}</span>`).join('')}</div>
-    <div class="sec"><a class="btn block" href="#/pick">Find your best day for…</a></div>
+    <div class="sec">${PLUS.plus ? '<a class="btn block" href="#/pick">Find your best day for…</a>' : lockCard('See every day ahead', 'Your whole month at a glance — tap any day for its full reading.')}</div>
   </div>`;
+  if (!PLUS.plus) $('.cal').classList.add('locked');
   $$('[data-mv]').forEach((b) => b.addEventListener('click', () => {
     const t = new Date(y, mo - 1 + +b.dataset.mv, 1); calMonth = iso(t).slice(0, 7);
     if (location.hash.includes('?')) history.replaceState(null, '', '#/calendar');
     pageCalendar(new URLSearchParams());
   }));
   $$('.cal button').forEach((b) => b.addEventListener('click', () => openDay(b.dataset.d)));
+  if (!PLUS.plus) {
+    // free: today and tomorrow only
+    try { const { days } = await getDays(m, today, 2, false); for (const d of days) { const b = $(`.cal button[data-d="${d.date}"]`); if (b) b.classList.add('lv' + d.k, 'open'); } } catch {}
+    if (q.get('d')) openDay(q.get('d'));
+    return;
+  }
   try {
     const { days } = await getDays(m, first, n, false);
     for (const d of days) { const b = $(`.cal button[data-d="${d.date}"]`); if (b) b.classList.add('lv' + d.k), b.setAttribute('aria-label', `${fmt(d.date)}: ${C.levels[d.k].word}`); }
@@ -268,7 +346,7 @@ async function openDay(d) {
   try {
     const [chart, { days }] = await Promise.all([getChart(m), getDays(m, d, 1, true)]);
     $('#sheetDay') && ($('#sheetDay').innerHTML = dayDetailHtml(days[0], chart, d === localDay() ? 'Today' : 'The day'));
-  } catch (e) { $('#sheetDay') && ($('#sheetDay').innerHTML = failed(e.message)); }
+  } catch (e) { $('#sheetDay') && ($('#sheetDay').innerHTML = e.code === 'plus' ? lockCard('Read any day', 'Sixty Plus opens the full reading for every day in your calendar.') : failed(e.message)); }
 }
 
 let pickState = { type: null, range: '1m' };
@@ -296,7 +374,7 @@ function pagePick() {
           <p class="muted" style="margin:4px 0 0;font-size:15px">${C.levels[p.k].word} · ${C.themes[p.ssG].title}</p>
           <div class="hours">${p.hours.map((h) => `<span class="chip good">${hourRange(h)}</span>`).join('')}</div></div></div>`; }).join('')
         + `<p class="hint">We looked at ${r.days} days and set aside the ones that clash with this kind of plan.</p>`;
-    } catch (e) { out.innerHTML = failed(e.message); }
+    } catch (e) { out.innerHTML = e.code === 'plus' ? lockCard('Your best days, picked for you', 'We check every day ahead against your sign and suggest the best three — with the best hours.') : failed(e.message); }
   };
   $$('[data-t]').forEach((b) => b.addEventListener('click', () => { pickState.type = b.dataset.t; $$('[data-t]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); run(); }));
   $$('[data-r]').forEach((b) => b.addEventListener('click', () => { pickState.range = b.dataset.r; $$('[data-r]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); run(); }));
@@ -334,6 +412,8 @@ async function pageMe() {
   view.innerHTML = `<div class="page" style="${elStyle(elOf(p))}">
     <a class="card daymini" href="#/sign/${p.slug}" style="grid-template-columns:72px 1fr auto"><img src="${art(p)}" alt="" style="width:72px;height:72px">
       <div><p class="label">Your sign</p><b style="font:400 26px/1.1 var(--serif)">${signName(p)}</b><p class="small" style="margin:2px 0 0">${esc(p.name)}</p></div><span class="go">›</span></a>
+    <div class="sec">${PLUS.plus ? `<div class="card"><span class="chip el" style="--el:#16151A;--el-tint:#EFEDE7"><span class="dot" style="background:#E0573E"></span>Sixty Plus</span>
+      <p style="margin:10px 0 0">Active until ${fmt(PLUS.until.slice(0, 10), 'long')} · ${PLUS.plan === 'yearly' ? 'Yearly' : 'Monthly'}</p><p class="hint">Manage or cancel any time from your Gumroad receipt email.</p></div>` : ''}</div>
     <div id="chartBody">${loading(120)}</div>
     <div class="sec"><p class="label">Birth details</p>
       <form class="card" id="birthEdit">
@@ -381,18 +461,18 @@ async function pageMe() {
   try {
     const ch = await getChart(m);
     if (!$('#chartBody')) return;
-    const total = ch.force.reduce((a, x) => a + x, 0) || 1, year = new Date().getFullYear(), by = +b.date.slice(0, 4);
+    const total = (ch.force || []).reduce((a, x) => a + x, 0) || 1, year = new Date().getFullYear(), by = +b.date.slice(0, 4);
     const names = ['Year', 'Month', 'Day', 'Hour'];
     const cell = (gz, i) => { const g = GAN.indexOf(gz[0]), z = ZHI.indexOf(gz[1]); return `<div class="pillar${i === 2 ? ' day' : ''}"><p class="label">${names[i]}</p><b>${EL[g >> 1]} ${ZHI_ANIMAL[z]}</b><span>${g % 2 ? 'Yin' : 'Yang'}</span><div class="cjk">${gz}</div></div>`; };
     $('#chartBody').innerHTML = `
       <div class="sec"><p class="label">Your four pillars</p><div class="pillars">${ch.pillars.map(cell).join('')}${ch.pillars.length < 4 ? `<div class="pillar"><p class="label">Hour</p><b>?</b><span>Add time</span></div>` : ''}</div>
         <p class="hint">Year, month, day and hour of your birth each have a sign. The day is you; the others shape how you show up.${ch.solar ? ` Calculated at local solar time (${ch.solar.time}).` : ''}</p></div>
-      <div class="sec"><p class="label">Your elements</p><div class="card"><div class="bars">${EL.map((e, i) => `<div class="bar"><span>${e}</span><span class="t"><i style="width:${Math.round(ch.force[i] / total * 100)}%;background:${C.elements[e].color}"></i></span><b>${Math.round(ch.force[i] / total * 100)}%</b></div>`).join('')}</div>
+      ${!ch.force ? `<div class="sec">${lockCard('Your elements and life cycles', 'See your five-element balance, what fuels you and the ten-year cycles of your life.')}</div>` : `<div class="sec"><p class="label">Your elements</p><div class="card"><div class="bars">${EL.map((e, i) => `<div class="bar"><span>${e}</span><span class="t"><i style="width:${Math.round(ch.force[i] / total * 100)}%;background:${C.elements[e].color}"></i></span><b>${Math.round(ch.force[i] / total * 100)}%</b></div>`).join('')}</div>
         <p class="hint" style="margin-top:14px">${ch.strong ? `You run strong: ${ch.selfPct}% of your chart backs your own element. You do best when you spend that energy — create, earn, take on structure.` : `You run gentle: ${ch.selfPct}% of your chart backs your own element. You do best with support — rest, learning and people who have your back.`}</p></div></div>
       <div class="sec"><p class="label">What fuels you</p><div class="stack-gap">${ch.xi.map((i) => { const e = C.elements[EL[i]]; return `<div class="card fuel"><i style="background:${e.color}"></i><div><h3 class="h3">${EL[i]}</h3><p>${e.fuels}</p><div class="swatches">${e.lucky.map(([n, h]) => `<span class="sw"><i style="background:${h}"></i>${n}</span>`).join('')}</div></div></div>`; }).join('')}</div></div>
       <div class="sec"><p class="label">Your 10-year cycles</p>${ch.luck ? `<div class="timeline">${ch.luck.cycles.map((c) => { const cp = byGz(c.gz); return `<div class="cycle${year >= c.from && year <= c.to ? ' now' : ''}"><b>Age ${c.from - by}–${c.to - by}</b><span>${signName(cp)} · ${esc(cp.name)}<span class="small"> · ${c.from}–${c.to}</span></span></div>`; }).join('')}</div>
         <p class="hint">Every ten years the backdrop of your life shifts to a new sign. The highlighted one is now.</p>`
-        : `<div class="card"><p class="muted" style="margin:0">Add your sex at birth below to see the ten-year cycles of your life. (The traditional calculation runs them in different directions.)</p></div>`}</div>`;
+        : `<div class="card"><p class="muted" style="margin:0">Add your sex at birth below to see the ten-year cycles of your life. (The traditional calculation runs them in different directions.)</p></div>`}</div>`}`;
   } catch (e) { $('#chartBody') && ($('#chartBody').innerHTML = failed(e.message)); }
 }
 // rough longitude for a time zone when the birth city isn't in the list: its standard offset × 15°
@@ -592,5 +672,5 @@ function render() {
 }
 addEventListener('hashchange', render);
 
-fetch('content.json').then((r) => r.json()).then((c) => { C = c; render(); })
+Promise.all([fetch('content.json').then((r) => r.json()), loadPlus()]).then(([c]) => { C = c; render(); })
   .catch((e) => { console.error(e); view.innerHTML = '<div class="page"><p class="intro">Sixty could not load. Please refresh.</p></div>'; });
