@@ -6,5 +6,5 @@
         reverse_proxy 127.0.0.1:3201
     }
     handle /sixty/* {
-        redir /sixty/us/ 308
+        redir * /sixty/us/ 308
     }
