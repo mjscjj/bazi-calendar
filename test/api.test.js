@@ -237,7 +237,7 @@ test('访客看能量卡、注册时带上出生信息', async () => {
   assert.equal(card.data.card.symbol, '烛');
 });
 
-test('今天页：大家的今天、今日一句、穿搭、签当天固定', async () => {
+test('今天页：大家的今天、今日一句、幸运色、签当天固定', async () => {
   const c = client();
   await c('POST', '/api/auth/register', { username: 'erin_1', password: 'erinpass1', agree: true, birth });
   const today = bjDay();
@@ -453,12 +453,13 @@ test('后台数据看板', async () => {
   assert.equal(s.data.ratings.length, 6);
 });
 
-test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、单次付费', async () => {
+test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、会员不限次', async () => {
   const c = client();
   await c('POST', '/api/auth/register', { username: 'asker', password: '12345678', agree: true, birth });
   let q = await c('GET', '/api/asks/quota');
   assert.equal(q.data.free, 1);
   assert.equal(q.data.ready, true);
+  assert.equal(q.data.moment.inputs.length, 4, '写问题时就显示此刻要用的年、月、日、时四个数');
   const refused = await c('POST', '/api/asks', { question: '我这个手术能成功吗', category: '其他' });
   assert.equal(refused.status, 400);
   assert.equal(refused.data.error, 'refused');
@@ -468,6 +469,15 @@ test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、�
   assert.equal(r.status, 200);
   const g = r.data.ask.gua;
   assert.ok(g.ben.name && g.bian.name && g.hu.name && ['顺', '先阻后顺', '宜缓', '有阻'].includes(g.tendency));
+  // 推演演的就是实际算的：年+月+日除 8 余数定上卦，再加时定下卦和动爻（余 0 当除数）
+  const k = g.cast.calc, [y, m, d, h] = k.inputs.map((x) => x.n), md = (n, by) => (n % by) || by;
+  assert.deepEqual([k.up.sum, k.low.sum, k.mv.sum], [y + m + d, y + m + d + h, y + m + d + h]);
+  assert.deepEqual([k.up.r, k.low.r, k.mv.r], [md(y + m + d, 8), md(y + m + d + h, 8), md(y + m + d + h, 6)]);
+  assert.equal(g.moving, k.mv.r);
+  const detail = await c('GET', '/api/asks/' + r.data.ask.id);
+  assert.deepEqual(detail.data.trigrams.map((t) => t.name).join(''), '乾兑离震巽坎艮坤', '八卦环按先天数排');
+  assert.equal(detail.data.trigrams[k.up.r - 1].name, g.ben.up);
+  assert.equal(detail.data.trigrams[k.low.r - 1].name, g.ben.low);
   assert.equal(r.data.ask.days.length, 2, '事业类给两个适合的日子');
   let a;
   for (let i = 0; i < 30; i++) { a = (await c('GET', '/api/asks/' + r.data.ask.id)).data.ask; if (a.status !== 'pending') break; await new Promise((x) => setTimeout(x, 100)); }
@@ -478,23 +488,29 @@ test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、�
   assert.equal(again.data.repeat, true, '同一件事 24 小时内直接给上次的结果');
   const n = await c('POST', '/api/asks', { question: '下个月去成都出差顺利吗', category: '出行', method: 'nums', nums: [3, 8, 21] });
   assert.equal(n.status, 402);
-  assert.equal(n.data.error, 'need_pay');
+  assert.equal(n.data.error, 'need_member', '体验期送的 1 次用完了，要开通会员');
+  assert.equal((await c('POST', '/api/pay/orders', { product: 'ask' })).status, 400, '问事不再单卖，含在会员里');
 
-  const o = await c('POST', '/api/pay/orders', { product: 'ask' });
-  assert.equal(o.data.order.amountCents, 190);
-  assert.equal(o.data.order.product, 'ask');
-  assert.match(db.get('SELECT subject FROM orders WHERE out_trade_no = ?', o.data.order.outTradeNo).subject, /^MindFlow 问事/);
+  const o = await c('POST', '/api/pay/orders', {});
+  assert.equal(o.data.order.product, 'member');
   paid.add(o.data.order.outTradeNo);
   const s2 = await c('GET', `/api/pay/orders/${o.data.order.outTradeNo}?force=1`);
-  assert.equal(s2.data.credits.ask, 1);
-  assert.equal(s2.data.access.mode, 'free', '买问事不改变会员状态');
+  assert.equal(s2.data.access.mode, 'member');
+  assert.equal((await c('GET', '/api/asks/quota')).data.unlimited, true, '会员问事不限次');
   const n2 = await c('POST', '/api/asks', { question: '下个月去成都出差顺利吗', category: '出行', method: 'nums', nums: [3, 8, 21] });
   assert.equal(n2.status, 200);
+  assert.equal(db.get('SELECT charge FROM asks WHERE id = ?', n2.data.ask.id).charge, 'member');
   assert.deepEqual(n2.data.ask.gua.cast.nums, [3, 8, 21]);
+  const k2 = n2.data.ask.gua.cast.calc;
+  assert.deepEqual([k2.up.r, k2.low.r, k2.mv.r], [3, 8, 2], '报数：第一个数定上卦，第二个定下卦，三数之和定动爻');
+  const n3 = await c('POST', '/api/asks', { question: '要不要换个城市生活', category: '其他' });
+  assert.equal(n3.status, 200, '会员再问也不另收费');
   q = await c('GET', '/api/asks/quota');
-  assert.equal(q.data.credits, 0);
-  assert.equal((await c('GET', '/api/asks')).data.list.length, 2);
-  assert.equal((await c('GET', '/api/membership')).data.orders[0].productName, '问事 1 次');
+  assert.ok(q.data.unlimited && q.data.credits === 0);
+  const list = (await c('GET', '/api/asks')).data.list;
+  assert.equal(list.length, 3);
+  assert.ok(list[0].lines.length === 6 && list[0].trend.length === 2, '问事记录带卦象和走势');
+  assert.equal((await c('GET', '/api/membership')).data.orders[0].productName, '月度会员');
 });
 
 test('问事：追问最多 2 次、拒答、过期；7 天后回看和今天页提醒', async () => {
@@ -617,6 +633,10 @@ test('今天页：本周 7 天、明天寄语、翻到别的周', async () => {
   assert.equal(t.strip.days.length, 7);
   assert.ok(t.strip.days.every((x) => x.luck.length === 2 && x.luck.every((k) => /^#[0-9A-F]{6}$/i.test(k.hex))), '本周每天带幸运色，卡片按它配色');
   assert.deepEqual(t.strip.days.find((x) => x.date === t.date).luck, t.outfit.colors);
+  // 幸运色每天换：每个五行 6 个颜色，每天取两个，相邻两天不会是同一组
+  const pairs = t.strip.days.map((x) => x.luck.map((k) => k.name).join('·'));
+  assert.ok(pairs.every((p, i) => i === 0 || p !== pairs[i - 1]), '相邻两天的幸运色不重样：' + pairs.join(' / '));
+  assert.ok(t.strip.days.every((x) => x.luck[0].name !== x.luck[1].name), '一天的两个颜色不相同');
   assert.equal(new Date(t.strip.start + 'T12:00:00Z').getUTCDay(), 1, '从周一开始');
   const me = t.strip.days.find((x) => x.date === day);
   assert.ok(me && me.line.head && me.almanac.yi);

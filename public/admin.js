@@ -77,7 +77,7 @@ function pageOverview() {
     shell('<div class="bar2"><h1>概览</h1><span class="sub2">北京时间 · 实时</span></div>'
       + '<div class="grp">今天</div><div class="kpis">' + kpi('新注册', t.signups) + kpi('活跃用户', t.active) + kpi('新付费订单', t.paid) + kpi('收入', yuan(t.revenueCents)) + '</div>'
       + '<div class="grp">近 30 天</div><div class="kpis">' + kpi('新注册', m.signups) + kpi('活跃用户', m.active) + kpi('付费订单', m.paid) + kpi('收入', yuan(m.revenueCents)) + '</div>'
-      + '<div class="grp">累计</div><div class="kpis">' + kpi('用户', a.users) + kpi('付费用户', a.payingUsers, '付费转化 ' + (a.conversion * 100).toFixed(1) + '%') + kpi('有效会员', a.activeMembers) + kpi('累计收入', yuan(a.revenueCents), '待处理反馈 ' + a.openFeedback + ' 条') + '</div>'
+      + '<div class="grp">累计</div><div class="kpis">' + kpi('用户', a.users) + kpi('付费用户', a.payingUsers, '付费转化 ' + (a.conversion * 100).toFixed(1) + '%') + kpi('有效会员', a.activeMembers) + kpi('累计收入', yuan(a.revenueCents), '海外 $' + ((a.revenueUsdCents || 0) / 100).toFixed(2) + ' · 待处理反馈 ' + a.openFeedback + ' 条') + '</div>'
       + '<div class="charts">' + barChart('每日新注册', d.series, 'signups', function (v) { return Math.round(v); }) + barChart('每日活跃用户', d.series, 'active', function (v) { return Math.round(v); }) + barChart('每日收入（元）', d.series, 'revenueCents', function (v) { return (v / 100).toFixed(v % 100 ? 1 : 0); }) + '</div>'
       + '<div id="stats"><div class="sk" style="height:260px"></div></div>');
     return api('GET', 'admin/stats').then(function (st) { var el = $('#stats'); if (el) el.innerHTML = statsHtml(st); });
@@ -143,12 +143,12 @@ function pageOrders() {
   api('GET', 'admin/orders?status=' + st + '&q=' + encodeURIComponent(q)).then(function (d) {
     var rows = d.list.map(function (o) {
       var s = OST[o.status] || [o.status, ''];
-      return '<tr><td class="nw"><b>' + esc(o.out_trade_no) + '</b><div class="sub2">' + (o.trade_no ? '支付宝 ' + esc(o.trade_no) : '—') + '</div></td><td>' + esc(o.username) + (o.buyer ? '<div class="sub2">付款人 ' + esc(o.buyer) + '</div>' : '') + '</td>'
-        + '<td class="num">' + yuan(o.amount_cents) + '<div class="sub2">' + ({ ask: '问事 ' + o.qty + ' 次', amulet: '特别款御守 ' + o.qty + ' 枚' }[o.product] || o.days + ' 天会员') + '</div></td><td><span class="tag2 ' + s[1] + '">' + s[0] + '</span></td>'
+      return '<tr><td class="nw"><b>' + esc(o.out_trade_no) + '</b><div class="sub2">' + (o.trade_no ? (o.provider === 'gumroad' ? 'Gumroad ' : '支付宝 ') + esc(o.trade_no) : (o.provider === 'gumroad' ? 'Gumroad 待付款' : '—')) + '</div></td><td>' + esc(o.username) + (o.buyer ? '<div class="sub2">付款人 ' + esc(o.buyer) + '</div>' : '') + '</td>'
+        + '<td class="num">' + (o.currency === 'USD' ? '$' + (o.amount_cents / 100).toFixed(2) : yuan(o.amount_cents)) + '<div class="sub2">' + ({ ask: '问事 ' + o.qty + ' 次', amulet: '特别款御守 ' + o.qty + ' 枚' }[o.product] || o.days + ' 天会员') + '</div></td><td><span class="tag2 ' + s[1] + '">' + s[0] + '</span></td>'
         + '<td class="nw">' + dt(o.created_at) + '<div class="sub2">' + (o.paid_at ? '付款 ' + dt(o.paid_at) : o.refunded_at ? '退款 ' + dt(o.refunded_at) : o.closed_at ? '关闭 ' + dt(o.closed_at) : '') + '</div></td>'
-        + '<td><div class="acts">' + (o.status !== 'paid' && o.status !== 'refunded' ? '<button class="btn sm ghost" data-query="' + esc(o.out_trade_no) + '">向支付宝查单</button>' : '') + (o.status === 'paid' ? '<button class="btn sm ghost" data-refund="' + esc(o.out_trade_no) + '">登记退款</button>' : '') + '</div></td></tr>';
+        + '<td><div class="acts">' + (o.status !== 'paid' && o.status !== 'refunded' && o.provider !== 'gumroad' ? '<button class="btn sm ghost" data-query="' + esc(o.out_trade_no) + '">向支付宝查单</button>' : '') + (o.status === 'paid' ? '<button class="btn sm ghost" data-refund="' + esc(o.out_trade_no) + '">登记退款</button>' : '') + '</div></td></tr>';
     }).join('');
-    shell(bar + '<div class="tbl"><table><tr><th>订单号</th><th>用户</th><th style="text-align:right">金额</th><th>状态</th><th>时间</th><th>操作</th></tr>' + (rows || '<tr><td colspan="6" class="sub2" style="text-align:center;padding:30px">没有订单</td></tr>') + '</table></div><p class="sub2" style="margin:0">退款请先在支付宝商家后台操作，再在这里登记，系统会扣回对应的会员天数。</p>');
+    shell(bar + '<div class="tbl"><table><tr><th>订单号</th><th>用户</th><th style="text-align:right">金额</th><th>状态</th><th>时间</th><th>操作</th></tr>' + (rows || '<tr><td colspan="6" class="sub2" style="text-align:center;padding:30px">没有订单</td></tr>') + '</table></div><p class="sub2" style="margin:0">支付宝订单退款请先在支付宝商家后台操作，再在这里登记，系统会扣回对应的会员天数。Gumroad 订单在 Gumroad 后台退款，会自动扣回。</p>');
   });
 }
 
@@ -183,8 +183,6 @@ function pageSettings() {
     shell('<div class="bar2"><h1>设置</h1><button class="btn primary" form="sf">保存设置</button></div><form id="sf" class="setg">'
       + '<label class="field"><span>月度会员价格（元）</span><input name="price" type="number" step="0.01" min="0.01" value="' + (s.price_cents / 100).toFixed(2) + '"><span class="hint">只影响之后新下的订单</span></label>'
       + '<label class="field"><span>免费体验次数</span><input name="free_uses" type="number" min="0" max="30" value="' + esc(s.free_uses) + '"><span class="hint">按使用日计，同一天只算 1 次</span></label>'
-      + '<label class="field"><span>问事单价（元）</span><input name="ask_price" type="number" step="0.01" min="0.01" value="' + (s.ask_price_cents / 100).toFixed(2) + '"><span class="hint">免费次数用完后，每问一次的价格</span></label>'
-      + '<label class="field"><span>会员每月免费问事次数</span><input name="ask_free_monthly" type="number" min="0" max="30" value="' + esc(s.ask_free_monthly) + '"><span class="hint">体验期固定送 1 次</span></label>'
       + '<label class="field"><span>特别款御守单价（元）</span><input name="amulet_price" type="number" step="0.01" min="0.01" value="' + (s.amulet_price_cents / 100).toFixed(2) + '"><span class="hint">节气款、生日款</span></label>'
       + '<label class="field"><span>打分规则</span><select name="engine"><option value="v1"' + (s.engine === 'v1' ? ' selected' : '') + '>v1（现在线上用的）</option><option value="v2"' + (s.engine === 'v2' ? ' selected' : '') + '>v2（加大运流年、冲克分喜忌）</option></select><span class="hint">会改变所有人每天的分数。先在「规则对比」里看过、发起人点头后再切，最好在月初切</span></label>'
       + '<label class="field"><span>邀请奖励天数</span><input name="invite_days" type="number" min="0" max="60" value="' + esc(s.invite_days) + '"><span class="hint">邀请人和被邀请人各得的会员天数</span></label>'
@@ -197,7 +195,7 @@ function pageSettings() {
     $('#sf').onsubmit = function (e) {
       e.preventDefault(); var f = e.target;
       if (f.engine.value !== s.engine && !confirm('切换打分规则会改变所有人每天的分数和档位，确定现在切换吗？')) return;
-      api('PUT', 'admin/settings', { price_cents: Math.round(parseFloat(f.price.value) * 100), free_uses: +f.free_uses.value, ask_price_cents: Math.round(parseFloat(f.ask_price.value) * 100), ask_free_monthly: +f.ask_free_monthly.value, amulet_price_cents: Math.round(parseFloat(f.amulet_price.value) * 100), engine: f.engine.value, invite_days: +f.invite_days.value, invite_cap: +f.invite_cap.value, order_subject: f.order_subject.value, disclaimer: f.disclaimer.value, terms: f.terms.value, privacy: f.privacy.value })
+      api('PUT', 'admin/settings', { price_cents: Math.round(parseFloat(f.price.value) * 100), free_uses: +f.free_uses.value, amulet_price_cents: Math.round(parseFloat(f.amulet_price.value) * 100), engine: f.engine.value, invite_days: +f.invite_days.value, invite_cap: +f.invite_cap.value, order_subject: f.order_subject.value, disclaimer: f.disclaimer.value, terms: f.terms.value, privacy: f.privacy.value })
         .then(function () { $('#serr').textContent = ''; toast('已保存'); }, function (er) { $('#serr').textContent = er.message; });
     };
   });

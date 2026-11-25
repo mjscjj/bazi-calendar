@@ -1,6 +1,6 @@
 // 线上冒烟：node test/e2e/prod-smoke.mjs <baseUrl> <outDir> <username>
 // 测能量卡 → 注册 → 今天 → 抽签 → 电脑端真实下单拿到支付宝二维码 → 手机端看跳转按钮。不付款；测完由运维删除该账号。
-import { setBirth } from './helpers.mjs';
+import { setBirth, drawLot } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, out, username] = process.argv.slice(2);
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
@@ -30,16 +30,10 @@ await m.waitForSelector('.tcard');
 await m.waitForSelector('#sheet .guide');
 await m.click('#sheet [data-close-sheet]');
 await m.click('[data-draw]');
-await m.waitForSelector('#drawForm'); await m.click('#drawForm button[type=submit]');
-await m.waitForSelector('#sheet [data-toss]', { timeout: 8000 }); await m.screenshot({ path: `${out}/p3-drawn.png` });
 // 线上掷筊是真随机：解签、换个问题、今天没求成都算走通
-for (let i = 0; i < 3; i++) {
-  await m.click('#sheet [data-toss]');
-  await m.waitForSelector('#sheet [data-jiao-read], #sheet [data-toss]:not([disabled]), #sheet .jdone', { timeout: 8000 });
-  if (await m.$('#sheet [data-jiao-read]')) { await m.click('#sheet [data-jiao-read]'); await m.waitForSelector('#sheet .lot', { timeout: 8000 }); break; }
-  if (await m.$('#sheet .jdone')) break;
-}
-console.log('lot:', (await m.$('#sheet .lot')) ? '解签' : '没求成（掷筊结果随机）');
+const got = await drawLot(m, '', { real: true });
+console.log('lot:', got ? '解签' : '没求成（掷筊结果随机）');
+if (got) await m.waitForTimeout(4500);
 await m.screenshot({ path: `${out}/p3-lot.png` });
 await m.click('#sheet [data-close-sheet]');
 await m.screenshot({ path: `${out}/p4-today.png` });

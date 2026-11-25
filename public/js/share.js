@@ -1,8 +1,8 @@
-// 分享图：能量卡、你的今天、每日一签、穿搭色、邀请海报五种竖版图片（1080×1920），底部带二维码。浏览器里用画布绘制。
+// 分享图：能量卡、你的今天、每日一签、幸运色、邀请海报、问事卦签等竖版图片（1080×1920），底部带二维码。浏览器里用画布绘制。
 // 另有「今日锁屏」：按手机屏幕比例（1170×2532），上面留给锁屏时钟，下面是今天的画和你的主题。
 // 跟随当前的白色 / 深色主题，预览时也能手动换；登录用户的二维码都带着自己的邀请码。
 import { $, esc, openSheet, onClick, toast, track, IS_MOBILE, IS_WECHAT, isDarkNow } from './core.js';
-import { THEME, hhmm, bestHours, HOUR_TIP } from './data.js';
+import { THEME, hhmm, hhShort, bestHours, HOUR_TIP } from './data.js';
 import { S } from './state.js';
 
 const W = 1080, H = 1920;
@@ -142,10 +142,10 @@ const DRAW = {
     text(ctx, `今天的关键词 · ${d.keyword}`, W / 2, 1520, { size: 46, weight: 700, color: glowText() });
   },
   outfit(ctx, o) {
-    text(ctx, '今日穿搭色', W / 2, 260, { size: 72, font: SERIF, weight: 900 });
+    text(ctx, '今日幸运色', W / 2, 260, { size: 72, font: SERIF, weight: 900 });
     o.colors.forEach((c, i) => {
       const cx = W / 2 + (i ? 210 : -210);
-      ctx.fillStyle = c.hex; ctx.beginPath(); ctx.arc(cx, 640, 190, 0, Math.PI * 2); ctx.fill();
+      bead(ctx, c.hex, cx, 640, 190);
       ctx.strokeStyle = P.ring; ctx.lineWidth = 4; ctx.stroke();
       text(ctx, c.name, cx, 900, { size: 56, weight: 700 });
     });
@@ -154,6 +154,42 @@ const DRAW = {
   },
   invite(ctx, d) { DRAW.card(ctx, { ...d, invite: d.days || 7 }); },
   // 节气海报：日期、节气的画、节气名、这个节气的意思、对你意味着什么
+  // 卦签：倾向、眼下 → 后来的走势、三个卦、解读的一句结论、两个好日子。问的事多半是私事，默认不放，预览里可以打开
+  gua(ctx, { a, withQ }) {
+    const g = a.gua, tc = TEND_C[g.tendency] ? cssVar(TEND_C[g.tendency], P.fg) : P.fg;
+    text(ctx, '问事 · 卦签', 80, 180, { size: 34, weight: 600, color: P.muted, align: 'left' });
+    text(ctx, g.cast.text, W - 80, 180, { size: 30, color: P.muted, align: 'right' });
+    if (withQ) wrap(ctx, `「${a.question}」`, 80, 290, W - 160, 68, 2, { size: 50, weight: 700, align: 'left' });
+    else text(ctx, `关于一件「${a.category}」上的事`, 80, 290, { size: 46, weight: 700, align: 'left' });
+    text(ctx, '这件事的倾向', 80, 480, { size: 34, color: P.muted, align: 'left' });
+    text(ctx, g.tendency, 72, 650, { size: g.tendency.length > 2 ? 120 : 170, weight: 900, color: tc, align: 'left' });
+    // 走势：眼下 → 后来
+    const RS = { 用生体: 0.9, 比和: 0.72, 体克用: 0.58, 体生用: 0.34, 用克体: 0.16 };
+    const cx0 = 600, cx1 = 1000, cyT = 450, cyB = 660, yy = (k) => cyB - (RS[k] || 0.5) * (cyB - cyT);
+    const ya = yy(g.now.rel), yb = yy(g.later.rel), ym = (ya + yb) / 2, xm = (cx0 + cx1) / 2;
+    ctx.strokeStyle = P.line; ctx.lineWidth = 2;
+    for (const k of [0.25, 0.5, 0.75]) { ctx.beginPath(); ctx.moveTo(cx0 - 30, cyB - k * (cyB - cyT)); ctx.lineTo(cx1 + 20, cyB - k * (cyB - cyT)); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(cx0, ya); ctx.bezierCurveTo(cx0 + 80, ya, xm - 80, ym, xm, ym); ctx.bezierCurveTo(xm + 80, ym, cx1 - 80, yb, cx1, yb);
+    ctx.strokeStyle = tc; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.stroke();
+    for (const [x, y] of [[cx0, ya], [cx1, yb]]) { ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fillStyle = tc; ctx.fill(); }
+    text(ctx, '眼下', cx0, cyB + 50, { size: 28, color: P.muted }); text(ctx, '后来', cx1, cyB + 50, { size: 28, color: P.muted });
+    // 三个卦：眼下（本卦）、过程（互卦）、后来（变卦）
+    ctx.fillStyle = P.box; roundRect(ctx, 80, 780, W - 160, 330, 30); ctx.fill();
+    [['眼下 · 本卦', g.ben, g.moving], ['过程 · 互卦', g.hu, 0], ['后来 · 变卦', g.bian, g.moving]].forEach(([lb, h, mv], i) => {
+      const cx = 80 + (W - 160) * (i * 2 + 1) / 6;
+      text(ctx, lb, cx, 840, { size: 28, color: P.muted });
+      hexDraw(ctx, h.lines, cx - 70, 870, 140, mv, P.fg, glowText());
+      text(ctx, h.name, cx, 1070, { size: 40, weight: 700 });
+    });
+    const head = a.status === 'done' && a.reading ? a.reading.headline : g.ben.gist;
+    wrap(ctx, head, W / 2, 1220, evenW(head, 54, 900), 74, 2, { size: 54, weight: 800 });
+    if (a.days && a.days.length) {
+      const ds = a.days.map((p) => `${p.m}月${p.d}日 周${'日一二三四五六'[new Date(p.y, p.m - 1, p.d).getDay()]}`).join('  ·  ');
+      ctx.fillStyle = P.box; roundRect(ctx, 80, 1400, W - 160, 130, 26); ctx.fill();
+      text(ctx, '如果要做，这两天更好', W / 2, 1452, { size: 30, color: P.muted });
+      text(ctx, ds, W / 2, 1504, { size: 40, weight: 700 });
+    }
+  },
   term(ctx, x) {
     const now = new Date();
     text(ctx, `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · 今日节气`, W / 2, 200, { size: 38, color: P.muted });
@@ -223,11 +259,28 @@ const DRAW = {
 // 折成几行时按字数排均匀，免得最后一行只剩一两个字或一个标点
 const evenW = (str, size, maxW) => { const per = Math.ceil(str.length / Math.ceil((str.length * size) / maxW)); return Math.min(maxW, per * size + size * 0.6); };
 // 画按封面方式裁进一个框（取画面偏下的主体，和今天卡片里一样）
+// 一卦六根线（从下往上）：阳爻一整根，阴爻断成两截；动爻用强调色
+function hexDraw(ctx, lines, x, y, w, mv, color, mvColor) {
+  const h = w * 0.1, gap = w * 0.07;
+  lines.forEach((v, i) => {
+    const yy = y + (5 - i) * (h + gap);
+    ctx.fillStyle = i + 1 === mv ? mvColor : color;
+    if (v) { roundRect(ctx, x, yy, w, h, h * 0.25); ctx.fill(); } else { roundRect(ctx, x, yy, w * 0.43, h, h * 0.25); ctx.fill(); roundRect(ctx, x + w * 0.57, yy, w * 0.43, h, h * 0.25); ctx.fill(); }
+  });
+}
+const TEND_C = { 顺: '--plus', 先阻后顺: '--l4', 宜缓: '--l3', 有阻: '--l2' };
 function drawCover(ctx, img, x, y, w, h, py = 0.62) {
   const sw = img.naturalWidth, sh = img.naturalHeight, r = Math.max(w / sw, h / sh), cw = w / r, ch = h / r;
   ctx.drawImage(img, (sw - cw) / 2, (sh - ch) * py, cw, ch, x, y, w, h);
 }
 // 「我的今天」带今天的画：上面一幅这一天日柱的画，下面是主题、分数、今日一句、最好的时段
+// 一颗色珠：底色加左上角一点高光，和今天卡片里的幸运色一个样子
+function bead(ctx, hex, cx, cy, r) {
+  ctx.fillStyle = hex; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  const g = ctx.createRadialGradient(cx - r * 0.36, cy - r * 0.44, 0, cx - r * 0.36, cy - r * 0.44, r * 0.95);
+  g.addColorStop(0, 'rgba(255,255,255,.55)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fill();
+}
 function todayWithArt(ctx, t, art) {
   const x = t.day, a = t.almanac, bx = 120, by = 250, bw = W - 240, bh = 420;
   text(ctx, `${a.m}月${a.d}日 · 周${'日一二三四五六'[a.week]} · 农历${a.lunar.monthCn}月${a.lunar.dayCn}`, W / 2, 200, { size: 38, color: P.muted });
@@ -250,10 +303,23 @@ function todayWithArt(ctx, t, art) {
   const y2 = wrap(ctx, head, W / 2, 1196, evenW(head, 48, 860), 66, 2, { size: 48, font: SERIF, weight: 900 });
   if (t.line.why) wrap(ctx, t.line.why, W / 2, y2 + 12, evenW(t.line.why, 34, 860), 50, 2, { size: 34, color: P.muted });
   const { top } = bestHours(x);
+  const o = t.outfit && t.outfit.colors && t.outfit.colors.length >= 2 ? t.outfit : null;
+  if (!top[0] && !o) return;
+  ctx.fillStyle = P.box; roundRect(ctx, 120, 1420, W - 240, 150, 26); ctx.fill();
+  // 有幸运色时框分两半：左边最佳时段，右边幸运色
+  const hx = o && top[0] ? 120 + (W - 240) / 4 : W / 2, lx = o && top[0] ? 120 + (W - 240) * 3 / 4 : W / 2;
   if (top[0]) {
-    ctx.fillStyle = P.box; roundRect(ctx, 120, 1420, W - 240, 150, 26); ctx.fill();
-    text(ctx, '最佳时段', W / 2, 1474, { size: 32, color: P.muted });
-    text(ctx, hhmm(top[0].i), W / 2, 1544, { size: 60, weight: 700 });
+    text(ctx, '最佳时段', hx, 1474, { size: 32, color: P.muted });
+    text(ctx, o ? hhShort(top[0].i) : hhmm(top[0].i), hx, 1544, { size: o ? 54 : 60, weight: 700 });
+  }
+  if (o) {
+    if (top[0]) { ctx.fillStyle = P.track; ctx.fillRect(W / 2 - 1, 1450, 2, 90); }
+    text(ctx, '幸运色', lx, 1474, { size: 32, color: P.muted });
+    const name = `${o.colors[0].name} · ${o.colors[1].name}`;
+    ctx.font = `700 46px ${SANS}`;
+    const w = 70 + 18 + ctx.measureText(name).width, x0 = lx - w / 2;
+    bead(ctx, o.colors[0].hex, x0 + 22, 1527, 22); bead(ctx, o.colors[1].hex, x0 + 48, 1527, 22);
+    text(ctx, name, x0 + 88, 1544, { size: 46, weight: 700, align: 'left' });
   }
 }
 
@@ -268,15 +334,16 @@ function render(kind, data, theme) {
   return cv;
 }
 
-const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾', term: '节气海报' };
-const SLUG = { card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper', recap: 'recap', term: 'solar-term' };
+const NAMES = { gua: '卦签', card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日幸运色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾', term: '节气海报' };
+const SLUG = { gua: 'gua', card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper', recap: 'recap', term: 'solar-term' };
 // 分享图用 JPG：手机相册、微信都当照片处理（PNG 动辄两三兆，常被当成一个文件）
 const jpg = (cv) => cv.toDataURL('image/jpeg', 0.92);
 // 网页没法直接写进相册：手机上最可靠的是长按图片「保存图片 / 添加到照片」，所以放在最前面说；
 // 「发给朋友」只传图片本身，电脑上给一个下载
-function pvHtml(url, kind, theme) {
+function pvHtml(url, kind, theme, data) {
   const tip = IS_WECHAT ? '长按图片，选「保存图片」存进相册，或直接「发送给朋友」' : '长按图片，就能保存到相册';
   return `<div class="sharepv"><span class="segs pvtheme" role="group" aria-label="图片颜色">${[['light', '白色'], ['dark', '深色']].map(([k, l]) => `<button type="button" data-share-theme="${k}" aria-pressed="${k === theme}">${l}</button>`).join('')}</span>`
+    + (kind === 'gua' ? `<span class="segs pvtheme" role="group" aria-label="问的事">${[['0', '不带问题'], ['1', '带上问的事']].map(([k, l]) => `<button type="button" data-share-q="${k}" aria-pressed="${!!(data && data.withQ) === (k === '1')}">${l}</button>`).join('')}</span>` : '')
     + `<img src="${url}" alt="${esc(NAMES[kind])}分享图">`
     + (IS_MOBILE
       ? `<p class="savetip">${tip}${kind === 'wall' ? '，再在手机设置里设为锁屏' : ''}</p>${!IS_WECHAT && navigator.share ? '<button type="button" class="btn ghost block" data-share-go>发给朋友</button>' : ''}`
@@ -298,7 +365,7 @@ export function share(kind, data) {
   return Promise.all([art ? artOf(art) : Promise.resolve(null), many]).then(([img, imgs]) => {
     const d = { ...data, ...(img ? { img } : {}), ...(imgs ? { imgs } : {}) };
     const cv = render(kind, d, theme);
-    openSheet(kind === 'wall' ? NAMES.wall : '分享' + NAMES[kind], pvHtml(jpg(cv), kind, theme));
+    openSheet(kind === 'wall' ? NAMES.wall : '分享' + NAMES[kind], pvHtml(jpg(cv), kind, theme, d));
     lastShare = { cv, kind, name: NAMES[kind], data: d, theme };
   });
 }
@@ -308,8 +375,15 @@ onClick('[data-share-theme]', (el) => {
   const s = lastShare, theme = el.getAttribute('data-share-theme');
   if (!s || s.theme === theme) return;
   const cv = render(s.kind, s.data, theme);
-  $('#sheet .sbody').innerHTML = pvHtml(jpg(cv), s.kind, theme);
+  $('#sheet .sbody').innerHTML = pvHtml(jpg(cv), s.kind, theme, s.data);
   Object.assign(s, { cv, theme });
+});
+onClick('[data-share-q]', (el) => {
+  const s = lastShare, withQ = el.getAttribute('data-share-q') === '1';
+  if (!s || !!s.data.withQ === withQ) return;
+  s.data = { ...s.data, withQ };
+  s.cv = render(s.kind, s.data, s.theme);
+  $('#sheet .sbody').innerHTML = pvHtml(jpg(s.cv), s.kind, s.theme, s.data);
 });
 
 onClick('[data-share]', (el) => share(el.getAttribute('data-share')));

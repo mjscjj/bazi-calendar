@@ -2,6 +2,7 @@
 // 起卦 → 解读写好 → 追问两次（第二次后输入框收起）→ 把起卦时间挪到 8 天前 → 今天页出现回看卡 → 一键记下 → 补一句
 // → 结果页显示回看 → 问事记录显示“后来…”。手机和电脑、白色和深色各截一遍。服务端以 ASK_AI=fake 启动。
 import { DatabaseSync } from 'node:sqlite';
+import { holdToCast } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out] = process.argv.slice(2);
 const db = new DatabaseSync(dbPath);
@@ -26,7 +27,7 @@ await p.reload(); await p.waitForSelector('.tcard');
 await p.goto(base + '/#/ask'); await p.waitForSelector('#askForm');
 await p.fill('#askForm textarea', '要不要接下新部门的邀请');
 await p.click('[data-acat-v="事业"]');
-await p.click('#askForm button[type=submit]');
+await holdToCast(p);
 await p.waitForSelector('.reading .hl', { timeout: 15000 });
 await p.waitForSelector('#followForm');
 check('解读写好后出现追问框', true);

@@ -25,3 +25,33 @@ export async function touchWheel(p, i, dy) {
 }
 export const wheelOn =(p, i) => p.evaluate((i) => document.querySelectorAll('#sheet .wcol')[i].querySelector('.witem.on').textContent, i);
 
+
+// 每日一签走到底：写下所问 → 回车（跳过按住三秒）→ 点摇签 → 等星盘起签 → 掷筊直到圣杯 → 看签文。
+// 本地服务端用 JIAO_FAKE=xiao,sheng 启动时第 2 次是圣杯；线上是真随机，传 { real: true } 时求不成也算走通，返回 false。
+export async function drawLot(p, question = '', { real = false } = {}) {
+  await p.waitForSelector('#sheet #drawForm');
+  if (question) await p.fill('#drawForm input[name=q]', question);
+  await p.press('#drawForm input[name=q]', 'Enter');
+  await p.click('#sheet [data-shake]');
+  await p.waitForSelector('#sheet [data-toss]', { timeout: 20000 });
+  for (let i = 0; i < 3; i++) {
+    await p.click('#sheet [data-toss]');
+    await p.waitForSelector('#sheet [data-jiao-read], #sheet [data-toss]:not([disabled]), #sheet #reaskForm, #sheet .rit.p-closed', { timeout: 10000 });
+    if (await p.$('#sheet [data-jiao-read]')) { await p.click('#sheet [data-jiao-read]'); await p.waitForSelector('#sheet .rit.p-lot .rpoem'); return true; }
+    if (await p.$('#sheet #reaskForm, #sheet .rit.p-closed')) {
+      if (real) return false;
+      throw new Error('掷筊没求成（服务端启动时加 JIAO_FAKE=xiao,sheng）');
+    }
+  }
+  return false;
+}
+
+// 问事：按住「按住起卦」1.2 秒（像真人一样按住不放），起卦后跳过推演
+export async function holdToCast(p, { skip = true } = {}) {
+  const b = await (await p.$('#askForm [data-hold]')).boundingBox();
+  await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await p.mouse.down(); await p.waitForTimeout(1200); await p.mouse.up();
+  if (!skip) return;
+  await p.waitForSelector('#cast, #sheet .pay', { timeout: 10000 });
+  if (await p.$('#cast')) { await p.click('#cast .ctop [data-cast-skip]'); await p.waitForSelector('#cast', { state: 'detached' }); }
+}

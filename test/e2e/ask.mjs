@@ -1,21 +1,13 @@
 // 问事走查：node test/e2e/ask.mjs <baseUrl> <dbPath> <outDir> <adminPassword>
-// 抽签弹层进入 → 写问题 → 起卦（卦象一爻一爻显出）→ 解读 → 问事记录 → 再问要付费（模拟付款后自动接着起卦）
+// 抽签弹层进入 → 写问题 → 短按只提示、按住才起卦 → 全屏推演（取数、除余、八卦环锁定、六爻、动爻翻转、倾向）
+// → 结果页（走势、依据）→ 看推演重放 → 卦签分享 → 解读 → 问事记录 → 体验那 1 次用完再问要开通会员（模拟付款后自动接着起卦，之后问事不限次）
 // → 用这件事去挑日子 → 电脑端今天页侧栏入口 → 后台规则对比。服务端以 ALIPAY_FAKE=1、ASK_AI=fake 启动。
 import { DatabaseSync } from 'node:sqlite';
+import { drawLot, holdToCast } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out, adminPw] = process.argv.slice(2);
 const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA busy_timeout = 5000'); // 服务也在写，撞上时等一等，别直接报 database is locked
-// 掷筊直到圣杯再解签（服务端用 JIAO_FAKE=xiao,sheng 启动时第 2 次是圣杯）
-async function tossToLot(pg) {
-  await pg.waitForSelector('#sheet [data-toss]', { timeout: 8000 });
-  for (let i = 0; i < 3; i++) {
-    await pg.click('#sheet [data-toss]');
-    await pg.waitForSelector('#sheet [data-jiao-read], #sheet [data-toss]:not([disabled]), #sheet .jdone', { timeout: 8000 });
-    if (await pg.$('#sheet [data-jiao-read]')) { await pg.click('#sheet [data-jiao-read]'); return; }
-    if (await pg.$('#sheet .jdone')) throw new Error('掷筊没求成（服务端启动时加 JIAO_FAKE=xiao,sheng）');
-  }
-}
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
 const errors = [], results = [];
 const check = (name, ok, detail = '') => { results.push(`${ok ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); if (!ok) errors.push(name); };
@@ -34,46 +26,75 @@ await p.evaluate(async (u) => {
 }, user);
 await p.reload(); await p.waitForSelector('.tcard');
 check('手机今天页的小卡里有问事和御守', await p.isVisible('.minis .askmini') && await p.isVisible('.minis .ommini'));
-await p.click('[data-draw]'); await p.waitForSelector('#drawForm'); await p.click('#drawForm button[type=submit]'); await tossToLot(p); await p.waitForSelector('#sheet .askentry', { timeout: 8000 });
+await p.click('[data-draw]'); await drawLot(p); await p.waitForTimeout(4500);
 await p.screenshot({ path: `${out}/a01-lot-entry.png` });
-await p.click('#sheet .askentry'); await p.waitForSelector('#askForm');
+await p.click('#sheet .rlinks a[href="#/ask"]'); await p.waitForSelector('#askForm');
 check('从签弹层进入问事', !(await p.$('#sheet')));
 await p.fill('#askForm textarea', '这周找老板谈加薪合适吗？');
 await p.click('[data-acat-v="事业"]');
 await p.screenshot({ path: `${out}/a02-ask-form.png`, fullPage: true });
-await p.click('#askForm button[type=submit]');
-await p.waitForSelector('.guacard .hex.reveal');
-await p.waitForTimeout(1200);
+check('此刻起卦显示要用的四个数', (await p.$$('[data-amethod="time"] .akm-n b')).length === 4);
+// 短按：不起卦，只提示要按住
+const hb = await (await p.$('#askForm [data-hold]')).boundingBox();
+await p.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
+await p.mouse.down(); await p.waitForTimeout(200); await p.mouse.up(); await p.waitForTimeout(400);
+check('短按不起卦，提示按久一点', (await p.textContent('#holdTip')).includes('按久') && !db.prepare('SELECT 1 FROM asks').get());
+await holdToCast(p, { skip: false });
+await p.waitForSelector('#cast');
+check('推演写出真实的算式', /÷ 8 余/.test(await p.textContent('#cast [data-row="up"]')));
+await p.waitForSelector('#cast.st-end', { timeout: 12000 });
 await p.screenshot({ path: `${out}/a03-casting.png` });
+const cg = await p.evaluate(() => ({ lit: document.querySelectorAll('#cast .rt.on').length, rows: document.querySelectorAll('#cast .crow.done').length }));
+check('八卦环锁定、三行算式都算完', cg.lit === 1 && cg.rows === 3, JSON.stringify(cg));
+await p.waitForSelector('#cast', { state: 'detached', timeout: 8000 });
+check('推演结束自动收起，结果页走势画出来', await p.isVisible('.gx.go .trend'));
 await p.waitForSelector('.reading .hl', { timeout: 15000 });
-await p.waitForTimeout(4200);
+await p.waitForTimeout(1600);
 check('解读写好后出现', (await p.textContent('.reading .hl')).length > 4);
 await p.screenshot({ path: `${out}/a04-result.png`, fullPage: true });
-check('有两个适合的日子', (await p.$$('.chip.pick2')).length === 2);
+check('有两个适合的日子', (await p.$$('.dtile.pick2')).length === 2);
+check('依据里有眼下、后来、时令三行', (await p.$$('.awhy .akw')).length === 3);
+await p.click('[data-cast-replay]'); await p.waitForSelector('#cast');
+await p.click('#cast .ctop [data-cast-skip]'); await p.waitForSelector('#cast', { state: 'detached' });
+check('看推演可以重放、可以跳过', true);
+await p.click('[data-ask-share]'); await p.waitForSelector('#sheet .sharepv img');
+const q0 = await p.getAttribute('#sheet .sharepv img', 'src');
+await p.click('[data-share-q="1"]'); await p.waitForTimeout(300);
+check('卦签默认不带问题，可以切换带上', q0 !== await p.getAttribute('#sheet .sharepv img', 'src'));
+await p.screenshot({ path: `${out}/a04b-share.png` });
+await p.click('#sheet .sh [data-close-sheet]'); await p.waitForSelector('#sheet', { state: 'detached' });
 
 await p.goto(base + '/#/asks'); await p.waitForSelector('.arow');
+check('问事记录每一卦带卦象和走势', !!(await p.$('.arow .hx')) && !!(await p.$('.arow .spark')));
 await p.screenshot({ path: `${out}/a05-asks.png` });
 await p.click('a[href="#/ask"]'); await p.waitForSelector('#askForm');
-check('免费次数用完后按钮显示价格', (await p.textContent('#askForm button[type=submit]')).includes('¥1.9'));
+check('体验那 1 次用完后，按钮写着先开通会员，不再单卖问事', (await p.textContent('#askForm [data-hold]')).includes('先开通会员') && !(await p.textContent('#view')).includes('¥1.9'));
 await p.fill('#askForm textarea', '下个月去成都出差顺利吗');
 await p.click('[data-acat-v="出行"]');
 await p.click('[data-amethod="nums"]');
 const nums = await p.$$('.nums3 input');
 for (const [i, v] of ['3', '8', '21'].entries()) await nums[i].fill(v);
-await p.click('#askForm button[type=submit]');
+await holdToCast(p, { skip: false });
 await p.waitForSelector('#sheet .pay #openAlipay');
+check('弹出的是开通月度会员', (await p.textContent('#sheet .sh b')).includes('月度会员'));
 await p.screenshot({ path: `${out}/a06-pay-ask.png` });
 const uid = db.prepare('SELECT id FROM users WHERE username = ?').get(user).id;
-const no = db.prepare("SELECT out_trade_no FROM orders WHERE user_id = ? AND product = 'ask' ORDER BY id DESC").get(uid).out_trade_no;
+const no = db.prepare("SELECT out_trade_no FROM orders WHERE user_id = ? AND product = 'member' ORDER BY id DESC").get(uid).out_trade_no;
 await p.request.post(base + '/api/dev/pay/' + no, { headers: { 'Content-Type': 'application/json' }, data: {} });
 await p.waitForSelector('#sheet .pay .ok', { timeout: 10000 });
 await p.screenshot({ path: `${out}/a07-paid.png` });
-await p.waitForSelector('.guacard', { timeout: 12000 });
+await p.waitForSelector('#cast', { timeout: 12000 });
+check('报数起卦的推演用报的三个数', (await p.$$eval('#cast .cins b', (bs) => bs.map((x) => x.getAttribute('data-to')).join(','))) === '3,8,21' && (await p.textContent('#cast [data-row="up"]')).includes('3 ÷ 8 余'));
+await p.click('#cast .ctop [data-cast-skip]'); await p.waitForSelector('#cast', { state: 'detached' });
 check('付完自动接着起卦', (await p.textContent('.askq b')).includes('成都'));
+check('问事没有再扣次数，记的是会员', db.prepare("SELECT charge FROM asks WHERE user_id = ? ORDER BY id DESC").get(uid).charge === 'member');
 await p.waitForSelector('.reading .hl', { timeout: 15000 });
 await p.click('[data-ask-pick]'); await p.waitForSelector('#pickForm', { timeout: 8000 });
 check('用这件事去挑日子时带上事项', (await p.$eval('#pickForm input[name=name]', (e) => e.value)).includes('成都') && await p.isVisible('[data-ptype="出行"][aria-pressed="true"]'));
 await p.screenshot({ path: `${out}/a08-ask-to-pick.png` });
+await p.goto(base + '/#/ask'); await p.waitForSelector('#askForm [data-hold]');
+check('开通会员后问事不限次', (await p.textContent('.quota')).includes('不限次') && (await p.textContent('#askForm [data-hold]')).includes('会员不限次'));
+await p.screenshot({ path: `${out}/a08b-member-ask.png` });
 
 // 电脑端
 const dp = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage(); watch(dp, 'desktop');
