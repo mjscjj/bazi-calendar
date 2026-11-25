@@ -617,6 +617,10 @@ test('今天页：本周 7 天、明天寄语、翻到别的周', async () => {
   assert.equal(t.strip.days.length, 7);
   assert.ok(t.strip.days.every((x) => x.luck.length === 2 && x.luck.every((k) => /^#[0-9A-F]{6}$/i.test(k.hex))), '本周每天带幸运色，卡片按它配色');
   assert.deepEqual(t.strip.days.find((x) => x.date === t.date).luck, t.outfit.colors);
+  // 幸运色每天换：每个五行 6 个颜色，每天取两个，相邻两天不会是同一组
+  const pairs = t.strip.days.map((x) => x.luck.map((k) => k.name).join('·'));
+  assert.ok(pairs.every((p, i) => i === 0 || p !== pairs[i - 1]), '相邻两天的幸运色不重样：' + pairs.join(' / '));
+  assert.ok(t.strip.days.every((x) => x.luck[0].name !== x.luck[1].name), '一天的两个颜色不相同');
   assert.equal(new Date(t.strip.start + 'T12:00:00Z').getUTCDay(), 1, '从周一开始');
   const me = t.strip.days.find((x) => x.date === day);
   assert.ok(me && me.line.head && me.almanac.yi);
