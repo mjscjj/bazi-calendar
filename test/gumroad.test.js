@@ -1,25 +1,29 @@
-// Gumroad 海外付款：下单拿结账链接、Ping 验签、首单开通、重复 Ping 不重复加天数、续费、退款扣回。
+// Gumroad 海外付款：下单拿结账链接、Ping 验签、首单开通、重复 Ping 不重复加天数、续费、退款扣回；美国版的 Ping 原样转发。
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import http from 'node:http';
 import { openDb } from '../server/db.js';
 import { createServer } from '../server/app.js';
 import { makeGumroad } from '../server/gumroad.js';
 
 const SECRET = 'test-secret';
 const PRODUCT = 'PROD==';
-let server, base, db;
+let server, base, db, us;
+const forwarded = [];
 const quiet = { info() {}, error() {} };
 
 before(async () => {
+  us = http.createServer((req, res) => { let b = ''; req.on('data', (c) => { b += c; }); req.on('end', () => { forwarded.push({ url: req.url, sig: req.headers['x-gumroad-signature'], type: req.headers['content-type'], body: b }); res.end('ok'); }); });
+  await new Promise((r) => us.listen(0, '127.0.0.1', r));
   db = openDb(':memory:');
   const gumroad = makeGumroad({ GUMROAD_PRODUCT_ID: PRODUCT, GUMROAD_PRODUCT_URL: 'https://seller.gumroad.com/l/mindflow', GUMROAD_PING_SECRET: SECRET });
   gumroad.sale = async () => null;
-  server = createServer({ db, alipay: null, gumroad, env: { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ADMIN_USER: 'admin', ADMIN_PASSWORD: 'adminpass123', ASK_AI: 'fake' }, log: quiet });
+  server = createServer({ db, alipay: null, gumroad, env: { GUMROAD_FORWARD_URL: `http://127.0.0.1:${us.address().port}/sixty/api/us/pay/ping`, BASE_PATH: '/bazi', COOKIE_SECURE: '0', ADMIN_USER: 'admin', ADMIN_PASSWORD: 'adminpass123', ASK_AI: 'fake' }, log: quiet });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   base = `http://127.0.0.1:${server.address().port}/bazi`;
 });
-after(() => server.close());
+after(() => { server.close(); us.close(); });
 
 function client() {
   let cookie = '';
@@ -88,4 +92,20 @@ test('海外付款：首单开通、去重、续费、退款', async () => {
   const m = await c('POST', '/api/pay/gumroad', { plan: 'monthly' });
   assert.equal(m.data.order.amountCents, 499);
   assert.equal(m.data.order.days, 30);
+});
+
+test('美国版的 Ping 原样转发，中文版不处理', async () => {
+  forwarded.length = 0;
+  const before = db.get('SELECT COUNT(*) n FROM orders').n;
+  assert.equal(await ping({ sale_id: 'U1', 'url_params[ref]': 'SXT123', recurrence: 'monthly', price: '499', subscription_id: 'USUB1' }), 200);
+  assert.equal(await ping({ sale_id: 'U2', recurrence: 'monthly', price: '499', subscription_id: 'USUB1', is_recurring_charge: 'true' }), 200);
+  assert.equal(await ping({ sale_id: 'U2', resource_name: 'refund', subscription_id: 'USUB1' }), 200);
+  assert.equal(await ping({ sale_id: 'S9', recurrence: 'yearly', price: '2999', subscription_id: 'SUB1', is_recurring_charge: 'true' }), 200, '中文版的续费不转');
+  await new Promise((r) => setTimeout(r, 100));
+  assert.deepEqual(forwarded.map((f) => new URLSearchParams(f.body).get('sale_id')), ['U1', 'U2', 'U2']);
+  assert.equal(forwarded[0].url, '/sixty/api/us/pay/ping');
+  assert.match(forwarded[0].sig, /^t=\d+,v1=[0-9a-f]{64}$/);
+  assert.equal(forwarded[0].type, 'application/x-www-form-urlencoded');
+  assert.equal(db.get("SELECT COUNT(*) n FROM orders WHERE trade_no IN ('U1','U2')").n, 0, '美国版的单不在中文版记账');
+  assert.equal(db.get('SELECT COUNT(*) n FROM orders').n, before + 1, '只多了中文版那笔续费');
 });

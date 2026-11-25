@@ -379,6 +379,17 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   // 首单按 ref 找到订单，续费按 subscription_id 找到用户，每次扣款加一期天数。取消续费不用处理，到期自然停。
   const gumroadDays = (recurrence) => recurrence === 'yearly' ? 365 : settings.int('member_days');
   const gumroadInfo = () => gumroad ? { monthly: gumroad.plans.monthly.cents, yearly: gumroad.plans.yearly.cents } : null;
+  // 同一个 Gumroad 商品也给美国版 Sixty 收款（订单号 SXT 开头）。不归中文版的 Ping 原样转给 GUMROAD_FORWARD_URL：
+  // ref 是 SXT 开头；或没有 ref 时，续费的订阅、退款/争议的订单在这里查不到
+  const gumroadForward = (env.GUMROAD_FORWARD_URL || '').trim();
+  function notOurs(p) {
+    const ref = p.get('url_params[ref]') || '';
+    if (ref) return ref.startsWith('SXT');
+    const resource = p.get('resource_name') || 'sale';
+    if (resource === 'refund' || resource === 'dispute') return !db.get("SELECT 1 x FROM orders WHERE provider = 'gumroad' AND trade_no = ?", p.get('sale_id'));
+    const sub = p.get('subscription_id');
+    return !(sub && db.get("SELECT 1 x FROM orders WHERE provider = 'gumroad' AND sub_id = ?", sub));
+  }
   async function onGumroadPing(p, rawBody) {
     const saleId = p.get('sale_id');
     if (!saleId || p.get('product_id') !== gumroad.productId) { log.info(`[gumroad] 忽略 ${saleId || '无 sale_id'} 商品 ${p.get('product_id')}`); return; }
@@ -1459,6 +1470,13 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (!gumroad) throw new HttpError(404, '接口不存在');
     if (!gumroad.verify(rawBody, req.headers['x-gumroad-signature'])) { log.error('[gumroad] Ping 验签失败'); throw new HttpError(400, 'bad signature'); }
     const p = new URLSearchParams(rawBody);
+    if (gumroadForward && p.get('product_id') === gumroad.productId && notOurs(p)) {
+      // 美国版的单：原样转发（同一个签名头，对方用同一个密钥验签），失败只记日志
+      fetch(gumroadForward, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Gumroad-Signature': String(req.headers['x-gumroad-signature'] || '') }, body: rawBody, signal: AbortSignal.timeout(10000) })
+        .then((r) => { if (!r.ok) log.error(`[gumroad] 转发 ${p.get('sale_id')} 失败 ${r.status}`); else log.info(`[gumroad] 已转发 ${p.get('resource_name') || 'sale'} ${p.get('sale_id')}`); })
+        .catch((e) => log.error(`[gumroad] 转发 ${p.get('sale_id')} 出错 ${e.message}`));
+      return { __text: 'ok' };
+    }
     setImmediate(() => onGumroadPing(p, rawBody).catch((e) => log.error(`[gumroad] 处理 Ping 出错 ${p.get('sale_id')}: ${e.message}`)));
     return { __text: 'ok' };
   });
