@@ -2,6 +2,7 @@
 import { openDb } from './db.js';
 import { createServer } from './app.js';
 import { makeAlipay } from './alipay.js';
+import { makeGumroad } from './gumroad.js';
 import { loadContent, makeContent } from './content.js';
 
 const env = process.env;
@@ -21,10 +22,12 @@ function fakeAlipay() {
 
 const alipay = env.ALIPAY_FAKE === '1' ? fakeAlipay() : makeAlipay(env);
 if (!alipay) console.warn('[pay] 未配置支付宝，下单接口会返回“支付暂时不可用”');
+const gumroad = makeGumroad(env);
+if (!gumroad) console.warn('[pay] 未配置 Gumroad，海外付款不显示');
 if (!env.ADMIN_PASSWORD) console.warn('[admin] 未设置 ADMIN_PASSWORD，后台无法登录');
 
 const port = parseInt(env.PORT || '3200', 10);
 const host = env.HOST || '127.0.0.1';
-createServer({ db, alipay, env, content: makeContent(loadContent(env.CONTENT_DIR || undefined)) }).listen(port, host, () => {
+createServer({ db, alipay, gumroad, env, content: makeContent(loadContent(env.CONTENT_DIR || undefined)) }).listen(port, host, () => {
   console.log(`[bazi-calendar] listening on http://${host}:${port}${env.BASE_PATH ?? '/bazi'}/`);
 });

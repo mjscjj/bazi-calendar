@@ -1,6 +1,6 @@
 # 流日历
 
-个人行动日历：按出生信息给出每天适合做什么、几点做。注册后免费体验 2 次（按使用日计），之后开通月度会员（支付宝当面付）。
+个人行动日历：按出生信息给出每天适合做什么、几点做。注册后免费体验 2 次（按使用日计），之后开通月度会员（支付宝当面付；海外用户可经 Gumroad 用外币卡或 PayPal 按月/按年订阅）。
 
 - 线上：https://mindflow.zone/bazi/ ，后台 https://mindflow.zone/bazi/admin
 - 起源：`ref/original.html` 是最初的单页版本，打分引擎从这里原样搬到 `server/engine.js`，`test/engine.test.js` 逐日对拍保证一致。
@@ -36,6 +36,7 @@ ALIPAY_FAKE=1 ASK_AI=fake JIAO_FAKE=xiao,sheng COOKIE_SECURE=0 DB_PATH=./data/de
 | `server/stats.js` | 后台数据看板：漏斗、留存、北极星、功能使用、分享邀请、自评吻合度 |
 | `server/app.js` | 全部接口：账号、资料、今天、日历、签、计划与挑日子、邀请、每晚自评、日历订阅、注销、免费次数、会员与支付、反馈、埋点、后台 |
 | `server/alipay.js` | 支付宝当面付：预下单、查单、撤销、通知验签 |
+| `server/gumroad.js` | Gumroad 海外付款：结账链接、Ping 验签、回查订单 |
 | `server/db.js` | SQLite（Node 自带 `node:sqlite`）建表 |
 | `server/settings.js` | 后台可改的价格、免费次数、订单名称、协议文本默认值 |
 | `public/js/` | 前台模块（无构建）：`mood.js` 心情便签（今天页心情板、月历小纸片、当日详情），`main.js` 路由和页签，`today.js` 今天页（本周、跟手滑动的每日卡片、明天寄语；每日一签：默念所求、摇签、掷筊、解签），`calendar.js` 日历，`me.js` 我的和能量档案，`onboard.js` 出生信息表单（日期、时间用 `wheel.js` 的滚轮一次选完，公历农历可切）、能量卡揭晓、引导和加到主屏，`account.js` 登录注册与资料等页面，`pay.js` 支付，`share.js` 分享图（跟随白色 / 深色），`growth.js` 邀请好友和日历订阅，`day.js` 当日详情，`data.js` 展示用常量，`core.js` 公共工具 |
@@ -74,6 +75,7 @@ PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/batch2.mjs http://127.0.0.1:3210/
 - 服务 `bazi-calendar.service` 监听 `127.0.0.1:3200`；备份 `bazi-calendar-backup.timer` 每天 04:30 写到 `/root/backups/bazi-calendar/`。
 - Caddy（容器 `hapi-caddy`）在 `mindflow.zone` 下把 `/bazi/*` 转给 3200，`/bazi/report/*` 是静态的竞品报告；Caddyfile 是单文件挂载，改时必须原地写，先 validate 再 reload。
 - 支付宝与 Ai Article 共用同一个应用（AppID 尾号 9060），订单号以 `LRL` 开头区分；回调 `https://mindflow.zone/bazi/api/pay/notify`。
+- Gumroad（海外付款）：商品 https://mjscjjb.gumroad.com/l/mindflow ，会员一档，月付 $4.99、年付 $29.99，自动续费。下单建一张 `LRG` 开头的待支付订单，订单号放进结账链接的 `ref` 参数；Gumroad 每扣一次款往 `https://mindflow.zone/bazi/api/pay/gumroad/ping` 发一个签名的 Ping，首单按 `ref` 开通，续费按 `subscription_id` 找到用户再加一期（月 30 天、年 365 天），退款或争议自动扣回。用户取消续费不用处理，到期自然停。Gumroad 退款在它的后台操作。Gumroad 禁止卖“在 Gumroad 之外交付的 AI 服务订阅”，所以海外只卖日历会员，问事和御守不走 Gumroad。
 - 服务器上的代码目录就是这个 GitHub 仓库的 clone（`origin` = `git@github.com:mjscjj/bazi-calendar.git`，分支 `master`）。`data/`、`node_modules/` 不进仓库。
 - 推送权限：仓库公开，谁都能 clone；推送用服务器上的仓库专用钥匙 `/root/.ssh/bazi_calendar_deploy`（GitHub 上的 Deploy key，只能推这一个仓库），已经配在服务器这份 clone 的 `core.sshCommand` 里，在服务器上直接 `git push` 就行。想在自己电脑上推，把这把钥匙拷下来，用 `GIT_SSH_COMMAND='ssh -i <钥匙路径> -o IdentitiesOnly=yes' git push`。钥匙泄露了就到仓库 Settings → Deploy keys 删掉重配。
 - 发布：`scripts/deploy.sh` 会先备份数据库，再拉 master（依赖有变就 `npm ci`），然后重启服务、做健康检查。
@@ -81,4 +83,4 @@ PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/batch2.mjs http://127.0.0.1:3210/
   - 服务器上改：直接在 `/root/apps/bazi-calendar` 里改，`./scripts/deploy.sh --local` 先上线看效果，确认后 `git commit` 再 `git push`。别把没提交的改动长期留在服务器上，否则下次有人从本地发布时会拉不下来。
 - 日志：`journalctl -u bazi-calendar -f`。回滚：`git reset --hard <上一个提交> && ./scripts/deploy.sh --local`；数据库回滚用 `/root/backups/bazi-calendar/` 里的备份（先停服务再替换 `data/app.db`）。
 
-配置项：`PORT` `HOST` `BASE_PATH`（默认 `/bazi`）`DB_PATH` `COOKIE_SECURE`（本地 http 设 0）`ADMIN_USER` `ADMIN_PASSWORD` `ALIPAY_APPID` `ALIPAY_PRIVATE_KEY` `ALIPAY_PUBLIC_KEY` `ALIPAY_NOTIFY_URL` `ALIPAY_FAKE` `CONTENT_DIR`（默认仓库里的 `content/`）`PUBLIC_URL`（日历订阅链接用的对外地址，默认按请求头推出来）`ASK_AI`（问事解读：`codex` / `fake` / 不填为关闭）`ASK_MODEL`（默认 gpt-6.2-sol）`ASK_EFFORT`（默认 xhigh）`ASK_CONCURRENCY`（默认 2）`ASK_TIMEOUT_MS`（默认 120000）`ASK_WORKDIR`、`JIAO_FAKE`（只在本地和走查用：掷筊按这个顺序出结果，比如 `xiao,sheng` 第 1 次笑杯、第 2 次圣杯；线上不要设，线上按真实概率圣杯 1/2、笑杯和阴杯各 1/4）。
+配置项：`PORT` `HOST` `BASE_PATH`（默认 `/bazi`）`DB_PATH` `COOKIE_SECURE`（本地 http 设 0）`ADMIN_USER` `ADMIN_PASSWORD` `ALIPAY_APPID` `ALIPAY_PRIVATE_KEY` `ALIPAY_PUBLIC_KEY` `ALIPAY_NOTIFY_URL` `ALIPAY_FAKE` `GUMROAD_PRODUCT_ID` `GUMROAD_PRODUCT_URL` `GUMROAD_PING_SECRET`（三项都填才显示海外付款）`GUMROAD_ACCESS_TOKEN`（回查订单用）`GUMROAD_MONTH_CENTS` `GUMROAD_YEAR_CENTS`（页面显示的美元价格，默认 499 / 2999，要和 Gumroad 后台一致）`CONTENT_DIR`（默认仓库里的 `content/`）`PUBLIC_URL`（日历订阅链接用的对外地址，默认按请求头推出来）`ASK_AI`（问事解读：`codex` / `fake` / 不填为关闭）`ASK_MODEL`（默认 gpt-6.2-sol）`ASK_EFFORT`（默认 xhigh）`ASK_CONCURRENCY`（默认 2）`ASK_TIMEOUT_MS`（默认 120000）`ASK_WORKDIR`、`JIAO_FAKE`（只在本地和走查用：掷筊按这个顺序出结果，比如 `xiao,sheng` 第 1 次笑杯、第 2 次圣杯；线上不要设，线上按真实概率圣杯 1/2、笑杯和阴杯各 1/4）。

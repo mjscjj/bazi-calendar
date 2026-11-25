@@ -96,7 +96,7 @@ const str = (v, max, name) => {
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
 
 // ---------- 应用 ----------
-export function createApp({ db, alipay, env = process.env, log = console, content, ai }) {
+export function createApp({ db, alipay, gumroad = null, env = process.env, log = console, content, ai }) {
   const settings = makeSettings(db);
   const C = content || makeContent(loadContent());
   const M = makeMeihua(C.ask);
@@ -343,7 +343,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     });
   }
   async function syncOrder(o, force) {
-    if (!alipay || o.status !== 'pending') return o;
+    if (!alipay || o.status !== 'pending' || o.provider !== 'alipay') return o;
     const t = nowIso();
     const expired = o.expires_at < t;
     if (!force && !expired && o.last_query_at && new Date(t) - new Date(o.last_query_at) < 3000) return o;
@@ -363,6 +363,59 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     }
     return db.get('SELECT * FROM orders WHERE id = ?', o.id);
   }
+  // 退款：订单改成已退款，扣回会员天数或次数
+  function refundOrder(o) {
+    db.tx(() => {
+      db.run("UPDATE orders SET status='refunded', refunded_at=? WHERE id=?", nowIso(), o.id);
+      const u = db.get('SELECT member_until FROM users WHERE id = ?', o.user_id);
+      if (!u) return;
+      if (CREDIT_COL[o.product]) db.run(`UPDATE users SET ${CREDIT_COL[o.product]} = MAX(0, ${CREDIT_COL[o.product]} - ?) WHERE id = ?`, o.qty, o.user_id);
+      else if (u.member_until) db.run('UPDATE users SET member_until = ? WHERE id = ?', addMs(u.member_until, -o.days * DAY_MS), o.user_id);
+    });
+  }
+
+  // ----- Gumroad（海外外币卡 / PayPal，会员按月或按年自动续费）-----
+  // 下单时先建一张待支付订单，订单号放进结账链接的 ref 参数；Gumroad 每扣一次款发一个 Ping，
+  // 首单按 ref 找到订单，续费按 subscription_id 找到用户，每次扣款加一期天数。取消续费不用处理，到期自然停。
+  const gumroadDays = (recurrence) => recurrence === 'yearly' ? 365 : settings.int('member_days');
+  const gumroadInfo = () => gumroad ? { monthly: gumroad.plans.monthly.cents, yearly: gumroad.plans.yearly.cents } : null;
+  async function onGumroadPing(p, rawBody) {
+    const saleId = p.get('sale_id');
+    if (!saleId || p.get('product_id') !== gumroad.productId) { log.info(`[gumroad] 忽略 ${saleId || '无 sale_id'} 商品 ${p.get('product_id')}`); return; }
+    const sale = await gumroad.sale(saleId).catch((e) => { log.error(`[gumroad] ${e.message}`); return null; });
+    if (sale && sale.missing) { log.error(`[gumroad] 回查不到订单 ${saleId}`); return; }
+    const resource = p.get('resource_name') || 'sale';
+    const found = db.get("SELECT * FROM orders WHERE provider = 'gumroad' AND trade_no = ?", saleId);
+    if (resource === 'refund' || resource === 'dispute') {
+      if (found && found.status === 'paid') { refundOrder(found); log.info(`[gumroad] ${resource} ${saleId} 已扣回 ${found.days} 天`); }
+      else log.error(`[gumroad] ${resource} ${saleId} 没有对应的已付订单`);
+      return;
+    }
+    if (resource !== 'sale' || found) return;
+    const recurrence = p.get('recurrence') || 'monthly';
+    const days = gumroadDays(recurrence);
+    const subId = p.get('subscription_id') || null;
+    const cents = parseInt(p.get('price') || '0', 10) || 0;
+    const test = p.get('test') === 'true';
+    const ref = p.get('url_params[ref]') || '';
+    db.tx(() => {
+      let o = ref ? db.get("SELECT * FROM orders WHERE provider = 'gumroad' AND out_trade_no = ? AND status = 'pending'", ref) : null;
+      if (!o) {
+        const prev = subId && db.get("SELECT user_id FROM orders WHERE provider = 'gumroad' AND sub_id = ? ORDER BY id LIMIT 1", subId);
+        if (!prev) { log.error(`[gumroad] 订单 ${saleId} 找不到用户（ref=${ref || '无'} 订阅 ${subId || '无'}），需人工处理`); return; }
+        const t = nowIso();
+        db.run("INSERT INTO orders(out_trade_no, user_id, amount_cents, days, subject, created_at, expires_at, product, qty, provider, currency) VALUES(?,?,?,?,?,?,?,'member',1,'gumroad','USD')",
+          'LRG' + crypto.createHash('sha1').update(saleId).digest('hex').slice(0, 20), prev.user_id, cents, days, 'MindFlow 会员续费', t, t);
+        o = db.get('SELECT * FROM orders WHERE id = last_insert_rowid()');
+      }
+      db.run("UPDATE orders SET status='paid', paid_at=?, trade_no=?, buyer=?, sub_id=?, amount_cents=?, days=?, subject=subject || ?, notify_raw=? WHERE id=?",
+        nowIso(), saleId, p.get('email') || null, subId, cents, days, test ? '（测试）' : '', rawBody.slice(0, 4000), o.id);
+      if (!db.get('SELECT 1 x FROM users WHERE id = ?', o.user_id)) { log.error(`[gumroad] 账号已注销，订单 ${o.out_trade_no} 需人工处理`); return; }
+      addMemberDays(o.user_id, days);
+      log.info(`[gumroad] 已到账 ${o.out_trade_no} sale=${saleId} user=${o.user_id} ${recurrence} +${days}d${test ? ' 测试单' : ''}`);
+    });
+  }
+
   const qrSvg = (text) => {
     const qr = qrcode(0, 'M');
     qr.addData(text); qr.make();
@@ -370,7 +423,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
   };
   const orderOut = (o, withQr) => ({
     outTradeNo: o.out_trade_no, amountCents: o.amount_cents, days: o.days, subject: o.subject, status: o.status,
-    product: o.product, productName: PRODUCT_NAME[o.product] || o.product, qty: o.qty,
+    product: o.product, productName: PRODUCT_NAME[o.product] || o.product, qty: o.qty, provider: o.provider, currency: o.currency,
     createdAt: o.created_at, expiresAt: o.expires_at, paidAt: o.paid_at,
     ...(withQr && o.status === 'pending' ? { qr: o.qr_code, qrSvg: qrSvg(o.qr_code) } : {}),
   });
@@ -1371,11 +1424,12 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
   });
   route('POST', '/api/pay/orders', async ({ req, ip, body }) => {
     const u = requireUser(req);
-    if (!alipay) throw new HttpError(503, '支付暂时不可用，请稍后再试');
-    if (!limit('order:' + u.id, 10, 3600000)) throw new HttpError(429, '下单太频繁，请稍后再试');
     const P = product(body.product);
-    const reuse = db.get("SELECT * FROM orders WHERE user_id = ? AND status = 'pending' AND product = ? AND expires_at > ? ORDER BY id DESC LIMIT 1", u.id, P.kind, addMs(nowIso(), 60000));
-    if (reuse && reuse.amount_cents === P.amountCents) return { order: orderOut(reuse, true) };
+    const intl = P.kind === 'member' ? gumroadInfo() : null;
+    if (!alipay) { if (intl) return { order: null, intl }; throw new HttpError(503, '支付暂时不可用，请稍后再试'); }
+    if (!limit('order:' + u.id, 10, 3600000)) throw new HttpError(429, '下单太频繁，请稍后再试');
+    const reuse = db.get("SELECT * FROM orders WHERE user_id = ? AND status = 'pending' AND product = ? AND provider = 'alipay' AND expires_at > ? ORDER BY id DESC LIMIT 1", u.id, P.kind, addMs(nowIso(), 60000));
+    if (reuse && reuse.amount_cents === P.amountCents) return { order: orderOut(reuse, true), intl };
     const t = nowIso();
     const outTradeNo = 'LRL' + t.replace(/\D/g, '').slice(0, 14) + String(u.id).padStart(5, '0') + crypto.randomBytes(2).toString('hex');
     const { amountCents, days, subject } = P;
@@ -1386,7 +1440,27 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     }
     db.run('INSERT INTO orders(out_trade_no, user_id, amount_cents, days, subject, qr_code, created_at, expires_at, product, qty) VALUES(?,?,?,?,?,?,?,?,?,?)',
       outTradeNo, u.id, amountCents, days, subject, qr, t, addMs(t, ORDER_MINUTES * 60000), P.kind, 1);
-    return { order: orderOut(db.get('SELECT * FROM orders WHERE out_trade_no = ?', outTradeNo), true) };
+    return { order: orderOut(db.get('SELECT * FROM orders WHERE out_trade_no = ?', outTradeNo), true), intl };
+  });
+  // 海外付款：建一张 Gumroad 待支付订单，返回结账链接（前端新开页面付款，回来后照常轮询订单状态）
+  route('POST', '/api/pay/gumroad', async ({ req, body }) => {
+    const u = requireUser(req);
+    if (!gumroad) throw new HttpError(503, '海外付款暂时不可用');
+    const plan = body.plan === 'yearly' ? 'yearly' : 'monthly';
+    if (!limit('order:' + u.id, 10, 3600000)) throw new HttpError(429, '下单太频繁，请稍后再试');
+    const t = nowIso();
+    const outTradeNo = 'LRG' + t.replace(/\D/g, '').slice(0, 14) + String(u.id).padStart(5, '0') + crypto.randomBytes(2).toString('hex');
+    db.run("INSERT INTO orders(out_trade_no, user_id, amount_cents, days, subject, created_at, expires_at, product, qty, provider, currency) VALUES(?,?,?,?,?,?,?,'member',1,'gumroad','USD')",
+      outTradeNo, u.id, gumroad.plans[plan].cents, gumroadDays(plan), plan === 'yearly' ? 'MindFlow 年度会员' : 'MindFlow 月度会员', t, addMs(t, DAY_MS));
+    return { order: orderOut(db.get('SELECT * FROM orders WHERE out_trade_no = ?', outTradeNo), false), url: gumroad.checkoutUrl({ ref: outTradeNo, plan }) };
+  });
+  // Gumroad Ping：先验签、立刻回 200（它只等 5 秒），再回查订单并开通
+  route('POST', '/api/pay/gumroad/ping', async ({ req, rawBody }) => {
+    if (!gumroad) throw new HttpError(404, '接口不存在');
+    if (!gumroad.verify(rawBody, req.headers['x-gumroad-signature'])) { log.error('[gumroad] Ping 验签失败'); throw new HttpError(400, 'bad signature'); }
+    const p = new URLSearchParams(rawBody);
+    setImmediate(() => onGumroadPing(p, rawBody).catch((e) => log.error(`[gumroad] 处理 Ping 出错 ${p.get('sale_id')}: ${e.message}`)));
+    return { __text: 'ok' };
   });
   route('GET', '/api/pay/orders/:no', async ({ req, params, q }) => {
     const u = requireUser(req);
@@ -1467,7 +1541,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
         signups: one('SELECT COUNT(*) n FROM users WHERE created_at >= ? AND created_at < ?', s, e).n,
         active: one('SELECT COUNT(*) n FROM usage_days WHERE day = ?', d).n,
         paid: one("SELECT COUNT(*) n FROM orders WHERE status IN ('paid','refunded') AND paid_at >= ? AND paid_at < ?", s, e).n,
-        revenueCents: one("SELECT COALESCE(SUM(amount_cents),0) n FROM orders WHERE status = 'paid' AND paid_at >= ? AND paid_at < ?", s, e).n,
+        revenueCents: one("SELECT COALESCE(SUM(amount_cents),0) n FROM orders WHERE status = 'paid' AND currency = 'CNY' AND paid_at >= ? AND paid_at < ?", s, e).n,
       });
     }
     const sum = (k, from) => series.filter((x) => x.day >= from).reduce((a, x) => a + x[k], 0);
@@ -1477,7 +1551,8 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       totals: {
         users, payingUsers: paying, conversion: users ? paying / users : 0,
         activeMembers: one('SELECT COUNT(*) n FROM users WHERE member_until > ?', t).n,
-        revenueCents: one("SELECT COALESCE(SUM(amount_cents),0) n FROM orders WHERE status = 'paid'").n,
+        revenueCents: one("SELECT COALESCE(SUM(amount_cents),0) n FROM orders WHERE status = 'paid' AND currency = 'CNY'").n,
+        revenueUsdCents: one("SELECT COALESCE(SUM(amount_cents),0) n FROM orders WHERE status = 'paid' AND currency = 'USD'").n,
         openFeedback: one("SELECT COUNT(*) n FROM feedback WHERE status = 'open'").n,
       },
       series,
@@ -1536,7 +1611,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const list = db.all(`SELECT u.id, u.username, u.nickname, u.bio, u.birth_date, u.birth_time, u.gender, u.birth_city, u.status, u.member_until, u.created_at, u.last_seen_at, u.locked_until,
       (SELECT COUNT(*) FROM usage_days d WHERE d.user_id = u.id) uses,
       (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id AND o.status = 'paid') paid_orders,
-      (SELECT COALESCE(SUM(amount_cents),0) FROM orders o WHERE o.user_id = u.id AND o.status = 'paid') paid_cents
+      (SELECT COALESCE(SUM(amount_cents),0) FROM orders o WHERE o.user_id = u.id AND o.status = 'paid' AND o.currency = 'CNY') paid_cents
       FROM users u ${where} ORDER BY u.id DESC LIMIT 50 OFFSET ?`, ...args, (page - 1) * 50);
     return { total, page, list };
   });
@@ -1581,7 +1656,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     if (status) { conds.push('o.status = ?'); args.push(status); }
     if (kw) { conds.push('(o.out_trade_no LIKE ? OR u.username LIKE ? OR o.trade_no LIKE ?)'); args.push(`%${kw}%`, `%${kw}%`, `%${kw}%`); }
     const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
-    const list = db.all(`SELECT o.out_trade_no, o.amount_cents, o.days, o.product, o.qty, o.status, o.trade_no, o.buyer, o.created_at, o.paid_at, o.closed_at, o.refunded_at, COALESCE(u.username, '（已注销）') username, o.user_id
+    const list = db.all(`SELECT o.out_trade_no, o.amount_cents, o.currency, o.provider, o.days, o.product, o.qty, o.status, o.trade_no, o.buyer, o.created_at, o.paid_at, o.closed_at, o.refunded_at, COALESCE(u.username, '（已注销）') username, o.user_id
       FROM orders o LEFT JOIN users u ON u.id = o.user_id ${where} ORDER BY o.id DESC LIMIT 200`, ...args);
     return { list };
   });
@@ -1606,13 +1681,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const o = db.get('SELECT * FROM orders WHERE out_trade_no = ?', params.no);
     if (!o) throw new HttpError(404, '订单不存在');
     if (o.status !== 'paid') throw bad('只有已支付的订单可以登记退款');
-    db.tx(() => {
-      db.run("UPDATE orders SET status='refunded', refunded_at=? WHERE id=?", nowIso(), o.id);
-      const u = db.get('SELECT member_until FROM users WHERE id = ?', o.user_id);
-      if (!u) return;
-      if (CREDIT_COL[o.product]) db.run(`UPDATE users SET ${CREDIT_COL[o.product]} = MAX(0, ${CREDIT_COL[o.product]} - ?) WHERE id = ?`, o.qty, o.user_id);
-      else if (u.member_until) db.run('UPDATE users SET member_until = ? WHERE id = ?', addMs(u.member_until, -o.days * DAY_MS), o.user_id);
-    });
+    refundOrder(o);
     adminLog('登记退款', o.out_trade_no, CREDIT_COL[o.product] ? `扣回 ${PRODUCT_NAME[o.product]} ${o.qty} 次` : `扣回 ${o.days} 天`, reason);
     return { ok: true };
   });
@@ -1720,7 +1789,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
         if (req.method !== 'GET' && req.method !== 'HEAD') {
           rawBody = await readBody(req);
           const ct = String(req.headers['content-type'] || '');
-          if (p === '/api/pay/notify') { /* 支付宝表单 */ } else {
+          if (p === '/api/pay/notify' || p === '/api/pay/gumroad/ping') { /* 支付宝、Gumroad 的表单通知 */ } else {
             if (!ct.includes('application/json')) throw new HttpError(415, '请求格式不对');
             try { body = rawBody ? JSON.parse(rawBody) : {}; } catch { throw bad('请求格式不对'); }
             if (!body || typeof body !== 'object') body = {};

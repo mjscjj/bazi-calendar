@@ -246,6 +246,9 @@ const COLUMNS = [
   ['asks', 'reviewed_at', 'TEXT'],
   ['ratings', 'src', "TEXT NOT NULL DEFAULT 'score'"],
   ['users', 'jiazi_done', 'TEXT'],
+  ['orders', 'provider', "TEXT NOT NULL DEFAULT 'alipay'"],
+  ['orders', 'currency', "TEXT NOT NULL DEFAULT 'CNY'"],
+  ['orders', 'sub_id', 'TEXT'],
 ];
 
 export function openDb(file) {
