@@ -413,7 +413,8 @@ async function pageMe() {
     <a class="card daymini" href="#/sign/${p.slug}" style="grid-template-columns:72px 1fr auto"><img src="${art(p)}" alt="" style="width:72px;height:72px">
       <div><p class="label">Your sign</p><b style="font:400 26px/1.1 var(--serif)">${signName(p)}</b><p class="small" style="margin:2px 0 0">${esc(p.name)}</p></div><span class="go">›</span></a>
     <div class="sec">${PLUS.plus ? `<div class="card"><span class="chip el" style="--el:#16151A;--el-tint:#EFEDE7"><span class="dot" style="background:#E0573E"></span>Sixty Plus</span>
-      <p style="margin:10px 0 0">Active until ${fmt(PLUS.until.slice(0, 10), 'long')} · ${PLUS.plan === 'yearly' ? 'Yearly' : 'Monthly'}</p><p class="hint">Manage or cancel any time from your Gumroad receipt email.</p></div>` : ''}</div>
+      ${PLUS.beta ? '<p style="margin:10px 0 0">Free for everyone during the beta.</p><p class="hint">Everything is unlocked while we test. Tell us what you think!</p>'
+        : `<p style="margin:10px 0 0">Active until ${fmt(PLUS.until.slice(0, 10), 'long')} · ${PLUS.plan === 'yearly' ? 'Yearly' : 'Monthly'}</p><p class="hint">Manage or cancel any time from your Gumroad receipt email.</p>`}</div>` : ''}</div>
     <div id="chartBody">${loading(120)}</div>
     <div class="sec"><p class="label">Birth details</p>
       <form class="card" id="birthEdit">

@@ -20,8 +20,11 @@ const addDaysIso = (days) => new Date(Date.now() + days * DAY_MS).toISOString();
 
 export function registerUs({ route, limit, bad, HttpError, content: C, db, env = process.env, log = console }) {
   const gumroad = makeGumroad(env);
+  // 测试期：US_PLUS_FOR_ALL=1 时所有人都是 Plus，付款入口不出现；关掉开关重启就恢复收费
+  const plusForAll = env.US_PLUS_FOR_ALL === '1';
   // 有没有 Plus：浏览器带着 token 来，订单已付且没过期
   const plusOf = (token) => {
+    if (plusForAll) return { plan: 'beta', paid_until: null, email: null };
     if (typeof token !== 'string' || !/^[a-f0-9]{48}$/.test(token)) return null;
     return db.get("SELECT * FROM us_orders WHERE token = ? AND status = 'paid' AND paid_until > ?", token, nowIso()) || null;
   };
@@ -105,7 +108,7 @@ export function registerUs({ route, limit, bad, HttpError, content: C, db, env =
 
   // ----- Sixty Plus：Gumroad 付款（同一个商品，订单号 SXT 开头；Ping 由中文版服务按 ref 转发过来）-----
   const prices = () => (gumroad ? { monthly: gumroad.plans.monthly.cents, yearly: gumroad.plans.yearly.cents } : null);
-  const statusOut = (o) => (o ? { plus: true, plan: o.plan, until: o.paid_until, email: o.email || null } : { plus: false });
+  const statusOut = (o) => (o ? { plus: true, plan: o.plan, until: o.paid_until, email: o.email || null, beta: plusForAll } : { plus: false });
 
   route('GET', '/api/us/pay/status', async ({ q }) => {
     const token = q.get('token') || '';

@@ -1028,3 +1028,19 @@ test('美国版 Sixty Plus：下单拿 token → Gumroad Ping 首单开通 → �
     assert.equal((await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25', plus })).status, 402);
   } finally { srv.close(); }
 });
+
+test('美国版测试期：US_PLUS_FOR_ALL=1 时不付款也能用全部功能', async () => {
+  const srv = createServer({ db: openDb(':memory:'), alipay: null, env: { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ASK_AI: 'fake', US_PLUS_FOR_ALL: '1' }, log: { info() {}, error() {}, warn() {} } });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const B = `http://127.0.0.1:${srv.address().port}/bazi`;
+  const post = async (p, body) => (await fetch(B + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).status;
+  try {
+    const st = await (await fetch(B + '/api/us/pay/status')).json();
+    assert.equal(st.plus, true); assert.equal(st.beta, true);
+    const birth = { date: '1992-03-14', sex: 'f' };
+    assert.equal(await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25' }), 200);
+    assert.equal(await post('/api/us/days', { birth, from: '2026-12-01', n: 31 }), 200);
+    const ch = await (await fetch(B + '/api/us/chart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ birth }) })).json();
+    assert.ok(ch.force && ch.luck);
+  } finally { srv.close(); }
+});
