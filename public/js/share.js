@@ -112,7 +112,8 @@ const DRAW = {
     text(ctx, invite ? `注册后，你们俩各得 ${invite} 天会员` : `幸运元素  ${c.lucky.join(' · ')}`, W / 2, 1550, { size: 44, weight: 600, color: glowText() });
   },
   today(ctx, t) {
-    const x = t.day, a = t.almanac;
+    const x = t.day, a = t.almanac, art = t.arts && t.arts[x.gz];
+    if (t.img && art) { todayWithArt(ctx, t, art); return; }
     text(ctx, `${a.m}月${a.d}日 · 周${'日一二三四五六'[a.week]} · 农历${a.lunar.monthCn}月${a.lunar.dayCn}`, W / 2, 230, { size: 40, color: P.muted });
     text(ctx, '今天是我的', W / 2, 420, { size: 60, font: SERIF, weight: 900 });
     ctx.save(); ctx.shadowColor = glowColor(); ctx.shadowBlur = 70;
@@ -177,6 +178,43 @@ const DRAW = {
   },
 };
 
+// 折成几行时按字数排均匀，免得最后一行只剩一两个字或一个标点
+const evenW = (str, size, maxW) => { const per = Math.ceil(str.length / Math.ceil((str.length * size) / maxW)); return Math.min(maxW, per * size + size * 0.6); };
+// 画按封面方式裁进一个框（取画面偏下的主体，和今天卡片里一样）
+function drawCover(ctx, img, x, y, w, h, py = 0.62) {
+  const sw = img.naturalWidth, sh = img.naturalHeight, r = Math.max(w / sw, h / sh), cw = w / r, ch = h / r;
+  ctx.drawImage(img, (sw - cw) / 2, (sh - ch) * py, cw, ch, x, y, w, h);
+}
+// 「我的今天」带今天的画：上面一幅这一天日柱的画，下面是主题、分数、今日一句、最好的时段
+function todayWithArt(ctx, t, art) {
+  const x = t.day, a = t.almanac, bx = 120, by = 250, bw = W - 240, bh = 420;
+  text(ctx, `${a.m}月${a.d}日 · 周${'日一二三四五六'[a.week]} · 农历${a.lunar.monthCn}月${a.lunar.dayCn}`, W / 2, 200, { size: 38, color: P.muted });
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 44; ctx.shadowOffsetY = 12;
+  roundRect(ctx, bx, by, bw, bh, 36); ctx.fillStyle = '#F6F1E7'; ctx.fill(); ctx.restore();
+  ctx.save(); roundRect(ctx, bx, by, bw, bh, 36); ctx.clip(); drawCover(ctx, t.img, bx, by, bw, bh); ctx.restore();
+  // 左下角：这一天的日柱和画名
+  const cap = `${x.gz}日 · ${art.name}`;
+  ctx.font = `600 30px ${SANS}`;
+  const cw = ctx.measureText(cap).width + 40;
+  ctx.fillStyle = 'rgba(246,241,231,.9)'; roundRect(ctx, bx + 22, by + bh - 74, cw, 52, 14); ctx.fill();
+  text(ctx, cap, bx + 42, by + bh - 37, { size: 30, weight: 600, color: '#2B2620', align: 'left' });
+  text(ctx, '今天是我的', W / 2, 790, { size: 48, font: SERIF, weight: 900 });
+  ctx.save(); ctx.shadowColor = glowColor(); ctx.shadowBlur = 60;
+  text(ctx, THEME[x.ssG][0], W / 2, 960, { size: 160, font: SERIF, weight: 900, color: glowText() }); ctx.restore();
+  text(ctx, `${x.level.p} · 能量 ${x.score}`, W / 2, 1050, { size: 46, weight: 700 });
+  ctx.fillStyle = P.track; roundRect(ctx, 200, 1084, W - 400, 14, 7); ctx.fill();
+  ctx.fillStyle = glowText(); roundRect(ctx, 200, 1084, (W - 400) * x.score / 100, 14, 7); ctx.fill();
+  const head = t.line.head || t.line.text;
+  const y2 = wrap(ctx, head, W / 2, 1196, evenW(head, 48, 860), 66, 2, { size: 48, font: SERIF, weight: 900 });
+  if (t.line.why) wrap(ctx, t.line.why, W / 2, y2 + 12, evenW(t.line.why, 34, 860), 50, 2, { size: 34, color: P.muted });
+  const { top } = bestHours(x);
+  if (top[0]) {
+    ctx.fillStyle = P.box; roundRect(ctx, 120, 1420, W - 240, 150, 26); ctx.fill();
+    text(ctx, '最佳时段', W / 2, 1474, { size: 32, color: P.muted });
+    text(ctx, hhmm(top[0].i), W / 2, 1544, { size: 60, weight: 700 });
+  }
+}
+
 function render(kind, data, theme) {
   mode = theme; P = THEMES[theme];
   const cv = document.createElement('canvas');
@@ -203,7 +241,7 @@ export function share(kind, data) {
   track('share_create', { kind });
   const theme = isDarkNow() ? 'dark' : 'light';
   // 能量卡和邀请海报要先把日柱插画加载好（能量卡页显示过，一般直接命中缓存）
-  const art = kind === 'wall' ? data.arts && data.arts[data.day.gz] && data.arts[data.day.gz].art
+  const art = kind === 'wall' || kind === 'today' ? data.arts && data.arts[data.day.gz] && data.arts[data.day.gz].art
     : (kind === 'card' || kind === 'invite') && data.card && data.card.pillar ? data.card.pillar.art : null;
   return (art ? artOf(art) : Promise.resolve(null)).then((img) => {
     const d = img ? { ...data, img } : data;
