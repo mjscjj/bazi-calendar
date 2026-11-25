@@ -881,3 +881,31 @@ test('收画和会员无关：免费体验用完也照样收下今天的画', as
   assert.equal(r.data.jiazi.fresh, true);
   assert.equal((await c('GET', '/api/jiazi')).data.member, false);
 });
+
+test('月度回顾：这个月打开了几天、收了哪些画、心情、最顺的一天、最好的签、好事', async () => {
+  const c = client();
+  await c('POST', '/api/auth/register', { username: 'recap', password: '12345678', agree: true, birth });
+  const today = bjDay(), month = today.slice(0, 7);
+  await c('GET', '/api/today?date=' + today);
+  const uid = db.get("SELECT id FROM users WHERE username='recap'").id;
+  db.run("UPDATE users SET created_at = ? WHERE id = ?", month + '-01T00:00:00.000Z', uid);
+  const day1 = month + '-01';
+  db.run('INSERT OR IGNORE INTO open_days(user_id, day, created_at) VALUES(?,?,?)', uid, day1, new Date().toISOString());
+  db.run("INSERT INTO moods(user_id, day, mood, color, note, created_at) VALUES(?,?,?,?,?,?)", uid, day1, 'happy', 'apricot', '', new Date().toISOString());
+  db.run("INSERT INTO draws(user_id, day, lot_no, question, status, tosses, created_at) VALUES(?,?,?,?,?,?,?)", uid, day1, 1, '', 'done', '["sheng"]', new Date().toISOString());
+  db.run('INSERT INTO deeds(user_id, day, text, created_at) VALUES(?,?,?,?)', uid, day1, '帮同事搬东西', new Date().toISOString());
+  const r = await c('GET', '/api/recap?month=' + month);
+  assert.equal(r.status, 200);
+  assert.equal(r.data.month, month);
+  assert.equal(r.data.inProgress, true);
+  assert.equal(r.data.opened, today === day1 ? 1 : 2);
+  assert.ok(r.data.arts.length >= 1 && r.data.arts.every((x) => x.art.startsWith('art/pillars/')));
+  assert.equal(r.data.lots, 1);
+  assert.equal(r.data.bestLot.no, 1);
+  assert.equal(r.data.deeds, 1);
+  assert.ok(r.data.best && r.data.best.theme);
+  assert.equal(r.data.moods[0].key, 'happy');
+  // 注册之前的月份、以后的月份都回到这个月
+  assert.equal((await c('GET', '/api/recap?month=2000-01')).data.month, month);
+  assert.equal((await c('GET', '/api/recap?month=2999-01')).data.month, month);
+});

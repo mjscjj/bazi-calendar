@@ -628,6 +628,48 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const c = chart(validBirth(body.birth));
     return { card: C.energyCard(c), nickname: str(body.nickname, 12, '称呼') };
   });
+  // 月度回顾：这个月打开了几天、收了哪些画、心情、最顺的一天、最好的一支签、做了几件好事。
+  // 不传月份时：每月 1–7 号看上个月，之后看这个月（到今天为止）
+  route('GET', '/api/recap', async ({ req, q }) => {
+    const u = requireUser(req);
+    if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
+    const today = bjDay(), cur = today.slice(0, 7);
+    const prevMonth = () => { const [y, m] = cur.split('-').map(Number); return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`; };
+    let month = String(q.get('month') || '');
+    if (!/^\d{4}-\d{2}$/.test(month)) month = +today.slice(8) <= 7 ? prevMonth() : cur;
+    if (month > cur || month < u.created_at.slice(0, 7)) month = cur;
+    const like = month + '-%', [yy, mm] = month.split('-').map(Number);
+    const opened = db.all('SELECT day FROM open_days WHERE user_id = ? AND day LIKE ? ORDER BY day', u.id, like).map((r) => r.day);
+    // 这个月第一次收下的画
+    const arts = [...jiaziOf(u)].filter(([, day]) => day.startsWith(month)).map(([gz, day]) => ({ gz, day, ...C.arts[gz] }));
+    // 心情：每种记了几次
+    const MKc = C.moods, mrows = db.all("SELECT mood FROM moods WHERE user_id = ? AND day LIKE ? AND mood != ''", u.id, like);
+    const moodN = {};
+    for (const r of mrows) moodN[r.mood] = (moodN[r.mood] || 0) + 1;
+    const moods = MKc.moods.filter((x) => moodN[x.key]).map((x) => { const pc = MKc.colors.find((k) => k.key === x.color) || MKc.colors[0]; return { key: x.key, word: x.word, char: x.char, light: pc.light, dark: pc.dark, n: moodN[x.key] }; }).sort((a, b) => b.n - a.n);
+    const notes = db.get('SELECT COUNT(*) n FROM moods WHERE user_id = ? AND day LIKE ?', u.id, like).n;
+    // 最顺的一天：这个月打开过的日子里，系统给的分最高的那天
+    const c = chartOf(u);
+    let best = null;
+    for (const day of opened) {
+      const [y, m, d] = day.split('-').map(Number), x = dayOut(c, y, m, d, false);
+      if (!best || x.score > best.score) best = { day, m, d, score: x.score, theme: THEME[x.ssG][0], level: x.level.p };
+    }
+    // 最好的一支签：上签 > 中签 > 下签，同档取最近的
+    const RANK = { 上签: 3, 中签: 2, 下签: 1 };
+    const lots = db.all("SELECT day, lot_no, question FROM draws WHERE user_id = ? AND day LIKE ? AND status = 'done' ORDER BY day DESC", u.id, like).map((r) => ({ day: r.day, question: r.question, ...C.lot(r.lot_no, 0) }));
+    const bestLot = lots.slice().sort((a, b) => (RANK[b.grade] || 0) - (RANK[a.grade] || 0))[0] || null;
+    return {
+      month, y: yy, m: mm, inProgress: month === cur, name: u.nickname, card: C.energyCard(c),
+      opened: opened.length, arts, moods, notes,
+      best, lots: lots.length, bestLot: bestLot && { no: bestLot.no, grade: bestLot.grade, title: bestLot.title, keyword: bestLot.keyword, day: bestLot.day },
+      deeds: db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ? AND day LIKE ?', u.id, like).n,
+      amulets: db.get('SELECT COUNT(*) n FROM amulets WHERE user_id = ? AND created_at >= ? AND created_at < ?', u.id, month + '-01', nextMonthStart(month)).n,
+      asks: db.get('SELECT COUNT(*) n FROM asks WHERE user_id = ? AND created_at >= ? AND created_at < ?', u.id, month + '-01', nextMonthStart(month)).n,
+      match: rateMonth(u, month + '-01'),
+    };
+  });
+  const nextMonthStart = (month) => { const [y, m] = month.split('-').map(Number); return m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`; };
   // 我的一甲子：收下了哪些日柱的画，各是哪天收下的
   route('GET', '/api/jiazi', async ({ req }) => {
     const u = requireUser(req);

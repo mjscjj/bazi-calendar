@@ -13,6 +13,7 @@ import { pageWish, pageAmulets } from './wish.js';
 import { pageLuck } from './luck.js';
 import { pageLots } from './lots.js';
 import { pageJiazi } from './jiazi.js';
+import { pageRecap } from './recap.js';
 import './share.js';
 
 const PAGES = {
@@ -20,10 +21,10 @@ const PAGES = {
   '/start': pageStart, '/card': pageCard, '/welcome': pageWelcome,
   '/login': pageAuth, '/register': pageAuth, '/forgot': pageForgot,
   '/profile': pageProfile, '/member': pageMember, '/feedback': pageFeedback, '/about': pageAbout,
-  '/invite': pageInvite, '/ics': pageIcs, '/ask': pageAsk, '/ask/result': pageAskResult, '/asks': pageAsks, '/wish': pageWish, '/luck': pageLuck, '/amulets': pageAmulets, '/lots': pageLots, '/jiazi': pageJiazi,
+  '/invite': pageInvite, '/ics': pageIcs, '/ask': pageAsk, '/ask/result': pageAskResult, '/asks': pageAsks, '/wish': pageWish, '/luck': pageLuck, '/amulets': pageAmulets, '/lots': pageLots, '/jiazi': pageJiazi, '/recap': pageRecap,
 };
 const TABS = [['/', '今天', 'sun'], ['/calendar', '日历', 'cal'], ['/me', '我的', 'me']];
-const NEED_LOGIN = ['/me', '/energy', '/welcome', '/profile', '/member', '/feedback', '/invite', '/ics', '/ask', '/ask/result', '/asks', '/wish', '/luck', '/amulets', '/lots', '/jiazi'];
+const NEED_LOGIN = ['/me', '/energy', '/welcome', '/profile', '/member', '/feedback', '/invite', '/ics', '/ask', '/ask/result', '/asks', '/wish', '/luck', '/amulets', '/lots', '/jiazi', '/recap'];
 const GUEST_ONLY = ['/login', '/register', '/forgot', '/start'];
 const ICON = {
   sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
@@ -41,7 +42,7 @@ export function route() {
 const go = (p) => { if (location.hash === '#' + p) renderPage(); else location.hash = '#' + p; };
 
 function renderTop(r) {
-  const tab = TABS.find((t) => t[0] === r.path) ? r.path : (['/energy', '/profile', '/member', '/feedback', '/about', '/card', '/invite', '/ics', '/asks', '/ask', '/ask/result', '/wish', '/luck', '/amulets', '/lots', '/jiazi'].includes(r.path) && S.me ? '/me' : '');
+  const tab = TABS.find((t) => t[0] === r.path) ? r.path : (['/energy', '/profile', '/member', '/feedback', '/about', '/card', '/invite', '/ics', '/asks', '/ask', '/ask/result', '/wish', '/luck', '/amulets', '/lots', '/jiazi', '/recap'].includes(r.path) && S.me ? '/me' : '');
   let h = '<button class="brand" type="button" data-go="/" aria-label="流日历首页"><span class="mk">流</span><b>流日历</b></button>'
     + `<nav class="topnav" aria-label="主导航">${TABS.map(([p, label]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${label}${p === '/me' && S.unread ? '<i class="badge"></i>' : ''}</a>`).join('')}</nav><div class="sp-r">`
     + `<button type="button" class="themebtn" data-theme-toggle aria-label="${isDarkNow() ? '切换到白色' : '切换到深色'}" title="${isDarkNow() ? '切换到白色' : '切换到深色'}">${isDarkNow() ? ICON.light : ICON.dark}</button>`;

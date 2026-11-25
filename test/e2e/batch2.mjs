@@ -299,6 +299,11 @@ check('注销后回到示例页', !db.prepare('SELECT 1 FROM users WHERE id = ?'
   check('撕完回到今天，说收下了今天的画', ((await tp.textContent('.toast').catch(() => '')) || '').includes('收下了今天的画'));
   await tp.reload(); await tp.waitForSelector('#dayswipe'); await tp.waitForTimeout(600);
   check('同一天再打开不再撕', !(await tp.$('#tear')));
+  // 月度回顾：从「我的」进去，看到这个月打开了几天、收的画，能生成分享图
+  await tp.goto(base + '/#/me'); await tp.click('[data-go="/recap"]'); await tp.waitForSelector('.rcstats');
+  check('月度回顾有这个月的数和收的画', +(await tp.textContent('.rcstats div:first-child b')) >= 1 && (await tp.$$('.rcwall img')).length >= 1);
+  await tp.click('[data-recap-share]'); await tp.waitForSelector('#sheet .sharepv img');
+  check('月度回顾能生成分享图', (await tp.textContent('#sheet .sh b')).includes('月度回顾'));
   await tctx.close();
 }
 

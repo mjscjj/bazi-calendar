@@ -153,6 +153,34 @@ const DRAW = {
     wrap(ctx, o.text, W / 2, 1200, 860, 68, 4, { size: 44, color: P.muted });
   },
   invite(ctx, d) { DRAW.card(ctx, { ...d, invite: d.days || 7 }); },
+  // 月度回顾：标题、六个数、这个月收的画（最多 9 张）、最顺的一天、最好的签、最常的心情
+  recap(ctx, d) {
+    const MCN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+    text(ctx, `${d.name || '我'}的${MCN[d.m - 1]}月`, W / 2, 210, { size: 76, font: SERIF, weight: 900 });
+    text(ctx, `${d.y} · 流日历月度回顾${d.inProgress ? '（到今天为止）' : ''}`, W / 2, 272, { size: 34, color: P.muted });
+    const items = [[d.opened, '天打开'], [d.arts.length, '张画'], [d.notes, '条记录'], [d.lots, '支签'], [d.deeds, '件好事'], [d.amulets, '枚御守']];
+    items.forEach(([n, l], i) => {
+      const cx = 240 + (i % 3) * 300, cy = 400 + Math.floor(i / 3) * 150;
+      text(ctx, String(n), cx, cy, { size: 76, weight: 700, color: i ? P.fg : glowText() });
+      text(ctx, l, cx, cy + 46, { size: 30, color: P.muted });
+    });
+    const imgs = (d.imgs || []).filter(Boolean);
+    let y = 700;
+    if (imgs.length) {
+      const per = 3, cell = 200, gap = 16, rows = Math.ceil(imgs.length / per);
+      imgs.forEach((im, i) => {
+        const r = Math.floor(i / per), inRow = Math.min(per, imgs.length - r * per), rw = inRow * cell + (inRow - 1) * gap;
+        const x = (W - rw) / 2 + (i % per) * (cell + gap), yy = y + r * (cell + gap);
+        ctx.save(); roundRect(ctx, x, yy, cell, cell, 18); ctx.clip(); ctx.drawImage(im, x, yy, cell, cell); ctx.restore();
+      });
+      y += rows * (cell + gap) + 40;
+    }
+    const lines = [];
+    if (d.best) lines.push(`最顺的一天 · ${d.best.m}月${d.best.d}日 · ${d.best.theme}`);
+    if (d.bestLot) lines.push(`最好的一支签 · 第 ${d.bestLot.no} 签 ${d.bestLot.title} · ${d.bestLot.grade}`);
+    if (d.moods && d.moods[0]) lines.push(`最常的心情 · ${d.moods[0].word} × ${d.moods[0].n}`);
+    lines.slice(0, 3).forEach((l, i) => text(ctx, l, W / 2, Math.min(y, 1440) + i * 62, { size: 38, color: i ? P.muted : P.fg, weight: i ? 400 : 600 }));
+  },
   wall(ctx, t) {
     const cw = ctx.canvas.width, ch = ctx.canvas.height, x = t.day, a = t.arts[x.gz];
     ctx.fillStyle = mode === 'light' ? '#F6F1E7' : '#17151A'; ctx.fillRect(0, 0, cw, ch);
@@ -226,8 +254,8 @@ function render(kind, data, theme) {
   return cv;
 }
 
-const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏' };
-const SLUG = { card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper' };
+const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾' };
+const SLUG = { card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper', recap: 'recap' };
 // 分享图用 JPG：手机相册、微信都当照片处理（PNG 动辄两三兆，常被当成一个文件）
 const jpg = (cv) => cv.toDataURL('image/jpeg', 0.92);
 // 网页没法直接写进相册：手机上最可靠的是长按图片「保存图片 / 添加到照片」，所以放在最前面说；
@@ -251,8 +279,10 @@ export function share(kind, data) {
   // 能量卡和邀请海报要先把日柱插画加载好（能量卡页显示过，一般直接命中缓存）
   const art = kind === 'wall' || kind === 'today' ? data.arts && data.arts[data.day.gz] && data.arts[data.day.gz].art
     : (kind === 'card' || kind === 'invite') && data.card && data.card.pillar ? data.card.pillar.art : null;
-  return (art ? artOf(art) : Promise.resolve(null)).then((img) => {
-    const d = img ? { ...data, img } : data;
+  // 月度回顾要先把这个月收的画（最多 9 张）都加载好
+  const many = kind === 'recap' ? Promise.all((data.arts || []).slice(0, 9).map((a) => artOf(a.art))) : Promise.resolve(null);
+  return Promise.all([art ? artOf(art) : Promise.resolve(null), many]).then(([img, imgs]) => {
+    const d = { ...data, ...(img ? { img } : {}), ...(imgs ? { imgs } : {}) };
     const cv = render(kind, d, theme);
     openSheet(kind === 'wall' ? NAMES.wall : '分享' + NAMES[kind], pvHtml(jpg(cv), kind, theme));
     lastShare = { cv, kind, name: NAMES[kind], data: d, theme };

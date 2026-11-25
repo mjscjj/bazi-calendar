@@ -33,6 +33,14 @@ function almanacLine(a) {
     + `<span class="yj"><b>宜</b>${a.yi.slice(0, 3).join(' ')}<b>忌</b>${a.ji.slice(0, 2).join(' ')}</span></span><span class="go" aria-hidden="true">›</span></button>`;
 }
 
+// 每月 1–7 号：上个月的回顾生成好了（注册在上个月或更早的人才有）
+function recapNotice(today) {
+  const [y, m, d] = today.split('-').map(Number);
+  if (d > 7 || !S.me || !S.me.createdAt) return '';
+  const pm = m === 1 ? 12 : m - 1, key = `recap-${m === 1 ? y - 1 : y}-${String(pm).padStart(2, '0')}`;
+  if (seen(key) || S.me.createdAt.slice(0, 7) > key.slice(6)) return '';
+  return `<div class="notice good" data-notice="${key}"><p>你的${['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'][pm - 1]}月回顾生成好了：打开了几天、收了几张画、最顺的是哪天。</p><a class="btn sm primary" href="#/recap" data-dismiss-go>去看看</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
+}
 function noticesHtml() {
   const t = S.today, a = S.access;
   let h = '';
@@ -47,6 +55,7 @@ function noticesHtml() {
   // 系统提示同时只放一条，按重要程度：邀请到账 > 体验最后一天 / 会员快到期 > 补出生城市 > 加到主屏
   const today = localToday(), news = (t && t.news) || [];
   if (news.length) h += `<div class="notice good"><p>${news.map((n) => esc(n.text)).join('；')}</p><button type="button" class="x" data-close-notice aria-label="关闭提示">×</button></div>`;
+  else if (recapNotice(today)) h += recapNotice(today);
   else if (a && a.mode === 'free' && a.remaining === 0 && !seen('lastfree-' + today)) {
     h += `<div class="notice" data-notice="lastfree-${today}"><p>今天是最后一次免费体验，之后 ¥${price(S.priceCents)}/月。</p><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
   } else if (a && a.mode === 'member' && a.daysLeft <= 3 && !seen('expiring-' + today)) {
