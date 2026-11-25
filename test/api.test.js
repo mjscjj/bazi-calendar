@@ -1064,3 +1064,24 @@ test('美国版测试期：US_PLUS_FOR_ALL=1 时不付款也能用全部功能',
     assert.ok(ch.force && ch.luck);
   } finally { srv.close(); }
 });
+
+test('美国版开关：邮箱当用户名、性别可以不填、按 DAY_TZ 切天、MEMBER_FOR_ALL 人人是会员；英文城市能排真太阳时', async () => {
+  const env = { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ASK_AI: 'fake', MEMBER_FOR_ALL: '1', GENDER_OPTIONAL: '1' };
+  const srv = createServer({ db: openDb(':memory:'), alipay: null, env, log: { info() {}, error() {}, warn() {} } });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const B = `http://127.0.0.1:${srv.address().port}/bazi`;
+  let cookie = '';
+  const call = async (method, p, body) => { const r = await fetch(B + p, { method, headers: { 'Content-Type': 'application/json', Cookie: cookie }, body: body ? JSON.stringify(body) : undefined }); const sc = r.headers.getSetCookie(); if (sc.length) cookie = sc.map((c) => c.split(';')[0]).join('; '); return { status: r.status, data: await r.json() }; };
+  try {
+    const reg = await call('POST', '/api/auth/register', { username: 'Amy@Example.com', password: 'password123', agree: true, birth: { date: '1992-03-14', time: '08:30', city: 'New York, NY' } });
+    assert.equal(reg.status, 200);
+    const me = (await call('GET', '/api/me')).data;
+    assert.equal(me.user.username, 'amy@example.com');
+    assert.equal(me.access.mode, 'member');
+    const t = (await call('GET', '/api/today')).data;
+    assert.equal(t.chart.pillars.length, 4);
+    assert.equal(t.card.basis.solar, true);
+    assert.equal((await call('GET', '/api/calendar?y=2026&m=12')).status, 200);
+    assert.equal((await call('POST', '/api/auth/login', { username: 'AMY@example.com', password: 'password123' })).status, 200);
+  } finally { srv.close(); }
+});

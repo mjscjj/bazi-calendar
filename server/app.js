@@ -29,7 +29,9 @@ const nowIso = () => new Date().toISOString();
 const addMs = (iso, ms) => new Date(new Date(iso).getTime() + ms).toISOString();
 const DAY_MS = 86400000;
 // 北京时间的日期 YYYY-MM-DD
-export const bjDay = (d = new Date()) => new Date(d.getTime() + 8 * 3600000).toISOString().slice(0, 10);
+// 「今天」按北京时间切；美国版用 DAY_TZ（如 America/Chicago）按当地时间切
+const DAY_FMT = process.env.DAY_TZ ? new Intl.DateTimeFormat('en-CA', { timeZone: process.env.DAY_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }) : null;
+export const bjDay = (d = new Date()) => (DAY_FMT ? DAY_FMT.format(d) : new Date(d.getTime() + 8 * 3600000).toISOString().slice(0, 10));
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const randToken = () => crypto.randomBytes(32).toString('base64url');
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -144,6 +146,8 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
 
   // ----- 免费次数与会员 -----
   function access(u) {
+    // 美国版测试期：MEMBER_FOR_ALL=1 时人人都是会员
+    if (env.MEMBER_FOR_ALL === '1') return { mode: 'member', memberUntil: null, daysLeft: null, beta: true };
     const today = bjDay();
     const until = u.member_until;
     if (until && until > nowIso()) {
@@ -513,7 +517,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
 
   // ----- 校验 -----
   // 出生信息：公历或农历日期、时间、出生城市（换算真太阳时）、时辰交界时选的时辰。needGender=false 用于填写中的预览
-  function validBirth(b, needGender = true) {
+  function validBirth(b, needGender = env.GENDER_OPTIONAL !== '1') {
     const cal = b?.cal === 'lunar' ? 'lunar' : 'solar';
     let date = String(b?.date || '');
     if (cal === 'lunar') {
@@ -535,6 +539,8 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   const birthCols = (b) => [b.date, b.time, b.gender, b.cal, b.city, b.lng, b.tz, b.zhi];
   function validUsername(s) {
     const u = String(s || '').trim();
+    // 也可以用邮箱当用户名（美国版用邮箱登录）
+    if (u.length <= 64 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(u)) return u.toLowerCase();
     if (!/^[\p{Script=Han}A-Za-z0-9_]{3,20}$/u.test(u)) throw bad('用户名需 3–20 位，可用中文、字母、数字和下划线');
     return u;
   }
