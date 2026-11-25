@@ -319,6 +319,11 @@ check('注销后回到示例页', !db.prepare('SELECT 1 FROM users WHERE id = ?'
   check('节气那天今天页最上面有节气卡', (await sp.textContent('.termc b')) === '大雪');
   await sp.click('[data-term]'); await sp.click('#sheet [data-share="term"]'); await sp.waitForSelector('#sheet .sharepv img');
   check('节气卡能存成海报', (await sp.textContent('#sheet .sh b')).includes('节气海报'));
+  await sp.click('#sheet [data-close-sheet]'); await sp.waitForSelector('#sheet', { state: 'detached' });
+  // 十二时辰盘：十二格，点哪一格，下面就说那个时辰
+  check('十二时辰盘有十二格', (await sp.$$('.dslot.cur .hring .hs')).length === 12);
+  const hs = sp.locator('.dslot.cur .hring .hs.worst'); await hs.scrollIntoViewIfNeeded(); await hs.click();
+  check('点一格，下面说那个时辰适合做什么', /时 \d+–\d+ 点/.test(await sp.textContent('.dslot.cur .hcap')), await sp.textContent('.dslot.cur .hcap'));
   await sctx.close();
 }
 

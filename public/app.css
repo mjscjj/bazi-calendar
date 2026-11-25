@@ -1768,3 +1768,24 @@ body.in-ritual{overflow:hidden}
 .termsheet .tn{font-family:var(--f-display);font-size:34px;font-weight:900;letter-spacing:.16em;text-align:center}
 .termsheet p{margin:0;font-size:15px;line-height:1.8}
 .termsheet .mine{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--cinnabar) 9%,transparent);color:var(--fg)}
+/* ================= 十二时辰盘：今天卡片底部 ================= */
+.hdial{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;padding-top:14px;border-top:1px solid rgba(127,127,127,.14)}
+.hdial .times{grid-template-columns:1fr;gap:8px;padding-top:0;border-top:0}
+.hdial .times div{flex-direction:column;align-items:flex-start;gap:0}
+.hring{width:136px;height:136px;display:block;overflow:visible}
+@media (max-width:360px){.hring{width:116px;height:116px}.hdial{gap:12px}}
+.hring .hs{cursor:pointer;transition:opacity .2s,transform .2s;transform-origin:0 0}
+.hring .k5{fill:var(--l5)}.hring .k4{fill:var(--l4)}.hring .k3{fill:color-mix(in srgb,var(--cardmuted) 55%,transparent)}.hring .k2{fill:var(--l2)}.hring .k1{fill:var(--l1)}
+.hring .night{opacity:.38}
+.hring .best{stroke:var(--cardfg);stroke-width:1.6}
+.hring .pick{stroke:var(--cardfg);stroke-width:2.4;opacity:1}
+.hring .glow{animation:hglow 2.4s ease-in-out infinite;filter:drop-shadow(0 0 5px var(--glow))}
+@keyframes hglow{0%,100%{opacity:1}50%{opacity:.62}}
+.hring text{font-size:9px;fill:var(--cardmuted);text-anchor:middle;font-family:var(--f-display)}
+.hring .cn{font-size:17px;font-weight:900;fill:var(--cardfg)}
+.hring .cs{font-size:9px;fill:var(--cardmuted);font-family:var(--f-body)}
+.hring .hand{stroke:var(--cardfg);stroke-width:2.6;stroke-linecap:round}
+.hcap{margin:8px 0 0;min-height:20px;font-size:12.5px;line-height:1.6;color:var(--cardmuted)}
+.hcap b{color:var(--cardfg);font-weight:600}
+@media (min-width:960px){.hring{width:164px;height:164px}}
+@media (prefers-reduced-motion: reduce){.hring .glow{animation:none}}

@@ -1,7 +1,7 @@
 // 今天页，从上往下：本周 7 天（能量趋势和你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天）
 // → 每日一签（默念所求、摇签、掷筊、解签）、穿搭色、问一件事、转运御守 → 记录此刻 → 明天寄语。
 import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath } from './core.js';
-import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars } from './data.js';
+import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, HOUR_TIP } from './data.js';
 import { S, isDemo } from './state.js';
 import { openDay } from './day.js';
 import { recordHtml, onMoodChange, moodScore, cellStickers } from './mood.js';
@@ -144,6 +144,32 @@ function dayArtHtml(t, isToday) {
   return `<button type="button" class="dart" data-day-art="${t.day.gz}" data-day-date="${t.date}" aria-label="${t.day.gz}日的画：${esc(a.name)}"><img src="${a.art}" alt="" width="600" height="600" decoding="async">`
     + `<span class="cap"><b>${t.day.gz}日</b>${esc(a.name)}</span>${seal}${me ? `<span class="me"><img src="${me.art}" alt=""></span>` : ''}</button>`;
 }
+// 十二时辰盘：一圈 24 小时，子时在最上面；十二格按好坏上色，夜里的几格淡一些；
+// 今天有一根指针指着现在，现在正是好时辰时那一格微微发亮；点哪一格，下面说那个时辰适合做什么
+const nowZhi = () => { const d = new Date(); return Math.floor((d.getHours() + 1) / 2) % 12; };
+const hourCap = (u, isNow) => (u ? `<b>${isNow ? '此刻 · ' : ''}${u.name} ${u.range.replace('-', '–')} 点</b> · ${HOUR_TIP[u.ss] || ''} · ${u.level.p} ${u.score}` : '');
+function dialHtml(x, isToday, top, worst) {
+  if (!x.hours || x.hours.length < 12) return '';
+  const R1 = 54, R0 = 38, pt = (r, a) => `${(r * Math.sin(a)).toFixed(2)} ${(-r * Math.cos(a)).toFixed(2)}`;
+  const best = new Set(top.map((u) => u.i)), now = nowZhi();
+  const segs = x.hours.map((u) => {
+    const a0 = ((2 * u.i - 1) / 24) * 2 * Math.PI + 0.018, a1 = ((2 * u.i + 1) / 24) * 2 * Math.PI - 0.018;
+    const d = `M${pt(R1, a0)} A${R1} ${R1} 0 0 1 ${pt(R1, a1)} L${pt(R0, a1)} A${R0} ${R0} 0 0 0 ${pt(R0, a0)}Z`;
+    const cls = `hs k${u.level.k}${u.night ? ' night' : ''}${best.has(u.i) ? ' best' : ''}${worst && worst.i === u.i ? ' worst' : ''}${isToday && u.i === now ? ' now' : ''}${isToday && u.i === now && best.has(u.i) ? ' glow' : ''}`;
+    const lab = ((2 * u.i) / 24) * 2 * Math.PI;
+    return `<path class="${cls}" d="${d}" data-hour="${u.i}" data-cap="${esc(hourCap(u, isToday && u.i === now))}"><title>${u.name} ${u.range} 点</title></path>`
+      + `<text x="${(64 * Math.sin(lab)).toFixed(1)}" y="${(-64 * Math.cos(lab) + 3.5).toFixed(1)}">${u.name[0]}</text>`;
+  }).join('');
+  let hand = '';
+  if (isToday) {
+    const d = new Date(), a = ((d.getHours() + d.getMinutes() / 60) / 24) * 2 * Math.PI;
+    // 指针只画在圆环上那一截，不挡中间的字
+    hand = `<line class="hand" x1="${(30 * Math.sin(a)).toFixed(2)}" y1="${(-30 * Math.cos(a)).toFixed(2)}" x2="${(58 * Math.sin(a)).toFixed(2)}" y2="${(-58 * Math.cos(a)).toFixed(2)}"/>`;
+  }
+  const c = isToday ? x.hours[now] : top[0];
+  const center = c ? `<text class="cn" y="-2">${c.name}</text><text class="cs" y="13">${isToday ? '此刻' : '最佳'} · ${c.level.p}</text>` : '';
+  return `<svg class="hring" viewBox="-74 -74 148 148" role="img" aria-label="十二时辰：${top.map((u) => u.name).join('、')}最好">${segs}${hand}${center}</svg>`;
+}
 function youHtml(t) {
   const x = t.day, isToday = t.date === localToday();
   const { dos, donts } = dosDonts(x, false);
@@ -165,8 +191,9 @@ function youHtml(t) {
     + `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`
     + `<dl class="yj2"><div><dt>宜</dt><dd>${short(dos.slice(0, 3))}</dd></div><div><dt>忌</dt><dd>${short(donts.slice(0, 2))}</dd></div></dl>`
     + (isToday ? `<div class="nowline" id="nowline">${nowText(x)}</div>` : '')
-    + `<div class="times">${top.map((u, i) => `<div><small>${i ? '次佳' : '最佳时段'}</small><b>${hhShort(u.i)}</b></div>`).join('')}`
-    + (worst ? `<div class="bad"><small>尽量避开</small><b>${hhShort(worst.i)}</b></div>` : '') + '</div>'
+    + `<div class="hdial">${dialHtml(x, isToday, top, worst)}<div class="times">${top.map((u, i) => `<div><small>${i ? '次佳' : '最佳时段'}</small><b>${hhShort(u.i)}</b></div>`).join('')}`
+    + (worst ? `<div class="bad"><small>尽量避开</small><b>${hhShort(worst.i)}</b></div>` : '') + '</div></div>'
+    + `<p class="hcap" aria-live="polite">${hourCap(x.hours.find((u) => u.i === (isToday ? nowZhi() : (top[0] || {}).i)) || top[0], isToday)}</p>`
     + '<button type="button" class="more" data-today-detail>看十二时辰和理由 ›</button></section>';
 }
 
@@ -563,6 +590,12 @@ onClick('[data-day-art]', (el) => {
     + (t.demo ? '<a class="btn primary block" href="#/start" data-close-sheet>测测我的日柱</a>'
       : `<div class="acts">${isToday ? '<button type="button" class="btn ghost" data-share="wall">存成今天的锁屏</button>' : ''}<a class="btn primary" href="#/jiazi" data-close-sheet>我的一甲子 · ${j ? j.n : 0}/60</a></div>`)
     + '</div>');
+});
+onClick('[data-hour]', (el) => {
+  const cap = el.closest('.tcard') && el.closest('.tcard').querySelector('.hcap');
+  if (cap) cap.innerHTML = el.getAttribute('data-cap');
+  el.closest('svg').querySelectorAll('.hs.pick').forEach((x) => x.classList.remove('pick'));
+  el.classList.add('pick');
 });
 onClick('[data-today-detail]', () => { const t = S.today, v = dayView() || t; openDay(v.day, t.chart, t.name, t.plans); });
 onClick('[data-a2hs-later]', (el) => { localStorage.setItem('lrl:a2hs-later', String(Date.now())); el.closest('.notice').remove(); });
