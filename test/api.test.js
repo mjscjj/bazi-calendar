@@ -956,7 +956,11 @@ test('美国版（/us/）：页面能打开；英文内容和插画齐全；网�
   for (const p of us.pillars) assert.ok(p.name && p.intro && art('pillars', p.art), p.cn);
   assert.equal(Object.keys(us.pairs).length, 55);
   for (const [k, p] of Object.entries(us.pairs)) assert.ok(p.name && art('pairs', p.art), k);
-  for (const k of Object.keys(us.tenGods)) assert.ok(us.themes[k]?.xi?.do.length === 2 && us.themes[k]?.ji?.dont.length === 2, k);
+  for (const k of Object.keys(us.tenGods)) for (const tone of ['xi', 'ji']) { assert.equal(us.themes[k][tone].length, 3, k); assert.ok(us.themes[k][tone].every((v) => v.title && v.line && v.do.length === 2 && v.dont.length === 2), k); }
+  assert.equal(Object.keys(us.oracle.lots).length, 100);
+  for (const [n, l] of Object.entries(us.oracle.lots)) assert.ok(l.title && l.reading && l.keyword && l.verse.length === 4, n);
+  const zhTopics = JSON.parse(fs.readFileSync(new URL('../content/lot-topics.json', import.meta.url))).topics.map((t) => t.key);
+  for (const k of zhTopics) for (let st = 1; st <= 5; st++) assert.ok(us.oracle.topics[k]?.advice[st]?.do.length === 2, `${k} ${st}`);
   // 和 public/us/us.js 的 cycleIndex 同一个算法
   const { dayGz } = await import('../server/engine.js');
   const idx = (s) => { const [y, m, d] = s.split('-').map(Number); return ((Math.floor(Date.UTC(y, m - 1, d) / 864e5) + 17) % 60 + 60) % 60; };

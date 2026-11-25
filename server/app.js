@@ -830,7 +830,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     const u = requireUser(req);
     drawGate(u);
     const date = validDay(body.date);
-    const question = str(body.question, 30, '所问之事');
+    const question = str(body.question, env.US_EDITION === '1' ? 80 : 30, '所问之事');
     const old = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);
     // 三次都是阴杯：换个问题重新摇一支（签号跟着轮次变）
     if (old && old.status === 'reask') {
@@ -850,7 +850,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     const r = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);
     if (!r) throw bad('先摇一支签');
     if (r.status !== 'pending') return { toss: null, draw: drawOut(r, levelOn(u, date)) };
-    const question = 'question' in body ? str(body.question, 30, '所问之事') : r.question;
+    const question = 'question' in body ? str(body.question, env.US_EDITION === '1' ? 80 : 30, '所问之事') : r.question;
     const before = JSON.parse(r.tosses || '[]');
     // 本地开发和浏览器走查用：JIAO_FAKE=xiao,sheng 表示第 1 次笑杯、第 2 次圣杯，依此类推。线上不要设
     const fake = (process.env.JIAO_FAKE || '').split(',').filter((x) => ['sheng', 'xiao', 'yin'].includes(x));
@@ -1421,10 +1421,8 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (!u || !u.birth_date) throw new HttpError(404, '订阅链接已失效');
     db.run('UPDATE users SET cal_fetched_at = ? WHERE id = ?', nowIso(), u.id);
     const c = chartOf(u);
-    const body = buildIcs({
-      c, C, userId: u.id, name: u.nickname, today: bjDay(), plans: plansOf(u, null),
-      expired: access(u).mode === 'blocked', url: publicBase(req) + '/',
-    });
+    const opts = { c, C, userId: u.id, name: u.nickname, today: bjDay(), plans: plansOf(u, null), expired: access(u).mode === 'blocked', url: publicBase(req) + '/' };
+    const body = usSite ? usSite.ics({ ...opts, url: publicBase(req) + '/us/' }) : buildIcs(opts);
     return { __raw: body, __type: 'text/calendar; charset=utf-8', __headers: { 'Cache-Control': 'private, max-age=1800', 'Content-Disposition': 'inline; filename="liurili.ics"' } };
   });
 

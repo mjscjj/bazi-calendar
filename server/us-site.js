@@ -3,6 +3,8 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { dayOut } from './engine.js';
+import { bestHours } from '../public/js/data.js';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -70,7 +72,45 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
 <meta property="og:image" content="${esc(base + image)}"><meta property="og:url" content="${esc(base + to)}"><meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="refresh" content="0;url=${esc(base + to)}"></head><body><script>location.replace(${JSON.stringify(base + to)})</script><a href="${esc(base + to)}">Open Sixty</a></body></html>`;
   };
+  // 手机日历订阅（英文）：未来 60 天每天一条全天日程；定了时段的计划按手机本地时间（不带时区）
+  const GAN = '甲乙丙丁戊己庚辛壬癸', pad = (n) => String(n).padStart(2, '0'), DAY = 86400000;
+  const icsText = (s) => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  const fold = (line) => { const out = []; let cur = '', n = 0; for (const ch of line) { const b = Buffer.byteLength(ch); if (n + b > (out.length ? 74 : 75)) { out.push(cur); cur = ''; n = 0; } cur += ch; n += b; } out.push(cur); return out.join('\r\n '); };
+  const hourLabel = (i) => { const a = (i * 2 + 23) % 24, f = (h) => `${h % 12 || 12}${h < 12 ? 'am' : 'pm'}`; return `${f(a)}–${f((a + 2) % 24)}`; };
+  function ics({ c, userId, name, today, plans, expired, url, days = 60 }) {
+    const now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MindFlow//Sixty//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+      `X-WR-CALNAME:${icsText('Sixty' + (name ? ' · ' + name : ''))}`, 'REFRESH-INTERVAL;VALUE=DURATION:PT6H', 'X-PUBLISHED-TTL:PT6H'];
+    const dv = (t) => { const d = new Date(t); return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`; };
+    const allDay = (uid, t, summary, desc) => L.push('BEGIN:VEVENT', `UID:${uid}`, `DTSTAMP:${now}`, `DTSTART;VALUE=DATE:${dv(t)}`, `DTEND;VALUE=DATE:${dv(t + DAY)}`,
+      `SUMMARY:${icsText(summary)}`, `DESCRIPTION:${icsText(desc)}`, 'TRANSP:TRANSPARENT', `URL:${url}`, 'END:VEVENT');
+    const [ty, tm, td] = today.split('-').map(Number), t0 = Date.UTC(ty, tm - 1, td);
+    if (expired) allDay(`expired-${userId}@mindflow.zone`, t0, 'Sixty Plus has ended', `Renew to bring your daily readings back.\n${url}`);
+    else {
+      for (let k = 0; k < days; k++) {
+        const t = t0 + k * DAY, d = new Date(t), x = dayOut(c, d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), true);
+        const e = GAN.indexOf(x.gz[0]) >> 1, tone = c.ji.includes(e) ? 'ji' : 'xi', vs = C.themes[x.ssG][tone], th = vs[(Math.floor(t / DAY) + 17) % 60 % vs.length], best = bestHours(x).top.map((h) => hourLabel(h.i));
+        allDay(`day-${dv(t)}-${userId}@mindflow.zone`, t, `${C.levels[x.level.k].word} · ${th.title.replace(/^A Day (to|for|of) /, '').replace(/^An? /, '')} · best ${best[0]}`,
+          `${th.title}\n${th.line}\nDo: ${th.do.join('; ')}\nSkip: ${th.dont.join('; ')}\nBest hours: ${best.join(', ')}\n\nFor reflection and fun — not advice.`);
+      }
+      for (const p of plans) {
+        if (!p.date) continue;
+        const [y, m, d] = p.date.split('-').map(Number), t = Date.UTC(y, m - 1, d);
+        if (t < t0) continue;
+        if (p.hour == null) { allDay(`plan-${p.id}@mindflow.zone`, t, '📌 ' + p.name, p.reason || ''); continue; }
+        // 第 i 个时辰从 (2i+23)%24 点开始，子时从前一天 23 点开始；不带时区，手机按自己的本地时间显示
+        const st = t + ((p.hour * 2 + 23) % 24) * 3600000 - (p.hour === 0 ? DAY : 0);
+        const fl = (ms) => { const z = new Date(ms); return `${z.getUTCFullYear()}${pad(z.getUTCMonth() + 1)}${pad(z.getUTCDate())}T${pad(z.getUTCHours())}0000`; };
+        L.push('BEGIN:VEVENT', `UID:plan-${p.id}@mindflow.zone`, `DTSTAMP:${now}`, `DTSTART:${fl(st)}`, `DTEND:${fl(st + 7200000)}`,
+          `SUMMARY:${icsText('📌 ' + p.name)}`, `DESCRIPTION:${icsText(p.reason || '')}`, `URL:${url}`, 'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsText(p.name)}`, 'TRIGGER:-PT30M', 'END:VALARM', 'END:VEVENT');
+      }
+    }
+    L.push('END:VCALENDAR');
+    return L.map(fold).join('\r\n') + '\r\n';
+  }
+
   return {
+    ics,
     page(p, req) {
       let m = p.match(/^\/s\/([a-z]{3,12})\/?$/);
       if (m) {

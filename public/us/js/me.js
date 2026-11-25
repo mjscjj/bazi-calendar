@@ -1,7 +1,7 @@
 // Me (chart, elements, cycles, settings), your collection of 60, friends and pair paintings, and the public sign page.
 import { $, $$, esc, S, api, store, track, toast, buzz, reduced, localDay, fmt, byGz, bySlug, pillarOf, signName, aSign, fullName, stemOf, elOf, art, elStyle, chipEl,
   WX, EL, GAN, ZHI, ANIMAL, gzName, shareBase, ageOf, loading, failed, openSheet, closeSheet, readBirthday, maskBirthday, birthdayValue, countUp } from './core.js';
-import { shareSign, sharePair } from './share.js';
+import { shareSign, sharePair, shareImage } from './share.js';
 
 const view = () => $('#view');
 const FB_TYPE = '建议'; // 中文版的反馈分类，美国版一律记成「建议」
@@ -22,7 +22,7 @@ export async function pageMe() {
     <div class="tiles3">
       <a class="card tile" href="#/collection"><b id="meCol">·</b><span>of 60 collected</span></a>
       <a class="card tile" href="#/friends"><b id="meFr">·</b><span>friends</span></a>
-      <button class="card tile" id="meShare"><b>↗</b><span>share sign</span></button>
+      <a class="card tile" href="#/recap"><b>✦</b><span>your month</span></a>
     </div>
     <div id="chartBody">${loading(160)}</div>
     <div class="sec"><p class="label">Settings</p>
@@ -35,7 +35,6 @@ export async function pageMe() {
       </div>
       <p class="hint">${S.me.access?.beta ? 'Sixty Plus is free for everyone during the beta.' : ''}</p></div>
   </div>`;
-  $('#meShare').addEventListener('click', () => shareSign(p));
   $$('[data-theme]').forEach((x) => x.addEventListener('click', () => { store.set('theme', x.dataset.theme); applyTheme(); $$('[data-theme]').forEach((y) => y.setAttribute('aria-pressed', String(y === x))); }));
   $('[data-act=birth]').addEventListener('click', birthSheet);
   $('[data-act=fb]').addEventListener('click', () => {
@@ -133,6 +132,10 @@ export async function pageCollection() {
   try {
     const j = await api('GET', 'jiazi'), got = new Map(j.list.map((x) => [x.gz, x.day])), today = pillarOf(localDay());
     $('#colTitle').innerHTML = `<span data-n>0</span> <em>of 60</em>`; countUp($('[data-n]'), j.n, 800);
+    $('#wall').insertAdjacentHTML('beforebegin', `<div class="card reward"><div class="bar"><span class="t"><i style="--w:${Math.round(j.n / 60 * 100)}%"></i></span></div>
+      ${j.n >= 60 ? '<button class="btn block" id="poster" style="margin-top:12px">Download your full-cycle poster</button>' : `<p class="small" style="margin:8px 0 0">Collect all 60 to unlock your full-cycle poster — ${60 - j.n} to go.</p>`}</div>`);
+    requestAnimationFrame(() => $('.reward .t i')?.classList.add('grow'));
+    $('#poster')?.addEventListener('click', () => shareImage(posterOf, 'sixty-full-cycle.jpg', 'poster'));
     $('#wall').innerHTML = S.C.pillars.map((x, i) => { const has = got.has(x.cn); return `<a href="#/sign/${x.slug}" class="${has ? 'has' : 'empty'}${x.slug === today.slug ? ' now' : ''}" style="--i:${i}">
       ${has ? `<img src="${art(x)}" alt="" loading="lazy" width="180" height="180">` : `<span class="ph">${x.no}</span>`}<div class="nm">${signName(x)}</div><div class="sub">${has ? fmt(got.get(x.cn), 'md') : x.slug === today.slug ? 'Today' : 'Not yet'}</div></a>`; }).join('');
   } catch (e) { $('#wall').innerHTML = failed(e.message); }
@@ -150,8 +153,9 @@ export async function pageFriends() {
   try {
     const { list } = await api('GET', 'friends');
     $('#flist').innerHTML = list.length ? list.map((f) => { if (!f.pair) return ''; const e = pairEn(f.pair, stemOf(p).image, '…'); return `
-      <div class="card friend"><img src="${e.art}" alt="" width="64" height="64"><div><h3 class="h3">${esc(/[一-鿿]/.test(f.name) ? 'Friend' : f.name)}</h3><p>${esc(e.name)} · ${e.tag}</p>${f.pair.best ? `<p class="small">Best day together: ${fmt(f.pair.best.date || `${f.pair.best.y}-${f.pair.best.m}-${f.pair.best.d}`)}</p>` : ''}</div></div>`; }).join('')
+      <button class="card friend" data-f="${list.indexOf(f)}"><img src="${e.art}" alt="" width="64" height="64"><div><h3 class="h3">${esc(/[一-鿿]/.test(f.name) ? 'Friend' : f.name)}</h3><p>${esc(e.name)} · ${e.tag}</p>${f.pair.best ? `<p class="small">Best day together: ${fmt(bestDate(f.pair.best))}</p>` : ''}</div><span class="go">›</span></button>`; }).join('')
       : `<div class="card empty"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--ink-3)" stroke-width="1.5" style="margin:0 auto"><circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/></svg><h3 class="h3" style="margin-top:10px">No one here yet</h3><p>Friends show up here once they open your link.</p></div>`;
+    $$('[data-f]').forEach((b) => b.addEventListener('click', () => friendSheet(list[+b.dataset.f])));
   } catch (e) { $('#flist').innerHTML = failed(e.message); }
 }
 async function inviteSheet() {
@@ -219,4 +223,56 @@ const LEGAL = {
 export function pageLegal(kind) {
   const [title, body] = LEGAL[kind] || LEGAL.terms;
   view().innerHTML = `<div class="page legal"><p class="label" style="margin-top:6px">Last updated November 26, 2026</p><h1 class="display">${title}</h1>${body}</div>`;
+}
+
+const bestDate = (b) => b.date || `${b.y}-${String(b.m).padStart(2, '0')}-${String(b.d).padStart(2, '0')}`;
+function friendSheet(f) {
+  // the pair painting's file name holds both stems (jia-yi.webp); the one that isn't mine is my friend's
+  const p = S.me.p, stems = String(f.pair.art || '').split('/').pop().replace('.webp', '').split('-'), mine = p.stem;
+  const theirs = stems[0] === mine ? stems[1] : stems[0], e = pairEn(f.pair, stemOf(p).image, S.C.stems[theirs]?.image || 'them'), name = /[一-鿿]/.test(f.name) ? 'Your friend' : f.name;
+  buzz(5); track('us_friend_open');
+  openSheet(`<button class="x" aria-label="Close">×</button><p class="label">You & ${esc(name)}</p><h2 class="h2">${esc(e.name)}</h2>
+    <div class="art" style="margin-top:14px"><img src="${e.art}" alt="" width="720" height="720"><div class="tag"><span class="chip">${e.tag}</span></div></div>
+    <p class="intro" style="font-size:22px">${esc(e.text)}</p>
+    ${f.pair.best ? `<div class="card" style="margin-top:14px"><p class="label">Best day to do something together</p><h3 class="h3" style="margin-top:6px">${fmt(bestDate(f.pair.best), 'full')}</h3><p class="small" style="margin:4px 0 0">The day in the next two weeks that is strongest for both of you.</p></div>` : ''}
+    <button class="btn ghost block" id="fShare" style="margin-top:14px">Share our painting</button>`);
+  $('#fShare').addEventListener('click', () => sharePair({ art: e.art, el: elOf(p), kicker: `Me & ${name}`, title: e.name, sub: e.tag, meta: signName(p), body: 'Every pair of signs makes a painting of its own. What do you make with your people?' }));
+}
+
+// ---------- your month: #/recap ----------
+export async function pageRecap(month) {
+  view().innerHTML = `<div class="page">${loading(420)}</div>`;
+  let r;
+  try { r = await api('GET', 'recap' + (month ? `?month=${month}` : '')); } catch (e) { view().innerHTML = `<div class="page">${failed(e.message)}</div>`; return; }
+  const name = new Date(r.y, r.m - 1, 1).toLocaleString('en-US', { month: 'long' });
+  const counts = {}; (r.moods || []).forEach((m) => { const k = m.key || m.mood; counts[k] = (counts[k] || 0) + (m.n || 1); });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const best = r.best && r.best.day ? r.best : null, prev = new Date(r.y, r.m - 2, 1), next = new Date(r.y, r.m, 1);
+  const ym = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  view().innerHTML = `<div class="page recap" style="${elStyle(elOf(S.me.p))}">
+    <div class="monthbar"><a class="navbtn" href="#/recap?m=${ym(prev)}" aria-label="Previous month">‹</a><p class="label">${r.inProgress ? 'So far this month' : 'Your month'}</p>${r.inProgress ? '<span class="navbtn ghostspace"></span>' : `<a class="navbtn" href="#/recap?m=${ym(next)}" aria-label="Next month">›</a>`}</div>
+    <h1 class="display">Your ${name}</h1>
+    <div class="tiles3" style="margin-top:18px"><div class="card tile"><b data-n="${r.opened}">0</b><span>days opened</span></div><div class="card tile"><b data-n="${r.arts.length}">0</b><span>paintings</span></div><div class="card tile"><b data-n="${r.lots}">0</b><span>oracle lots</span></div></div>
+    ${r.arts.length ? `<div class="sec"><p class="label">Collected in ${name}</p><div class="miniwall">${r.arts.map((a, i) => `<img src="${art(byGz(a.gz))}" alt="" style="--i:${i}" loading="lazy">`).join('')}</div></div>` : ''}
+    ${best ? `<div class="sec"><p class="label">Your strongest day</p><a class="card daymini" href="#/today?d=${best.day}"><img src="${art(pillarOf(best.day))}" alt="" width="56" height="56"><div><b>${fmt(best.day, 'full')}</b><p class="small" style="margin:2px 0 0">Scored ${best.score}</p></div><span class="go">›</span></a></div>` : ''}
+    ${top ? `<div class="sec"><p class="label">Most-felt mood</p><div class="card"><h3 class="h2" style="font-size:28px">${S.C.moods[top[0]] || top[0]}</h3><p class="small" style="margin:4px 0 0">${top[1]} time${top[1] === 1 ? '' : 's'} this month</p></div></div>` : ''}
+    ${r.match?.rated >= 3 ? `<div class="sec"><p class="label">How often Sixty matched your days</p><div class="card"><h3 class="h2" style="font-size:36px">${Math.round(r.match.match / r.match.rated * 100)}%</h3><p class="small" style="margin:4px 0 0">${r.match.match} of ${r.match.rated} evenings you rated</p></div></div>` : ''}
+    <button class="btn block" id="recapShare" style="margin-top:22px">Share my ${name}</button></div>`;
+  $$('[data-n]').forEach((x) => countUp(x, +x.dataset.n, 800));
+  $('#recapShare').addEventListener('click', () => sharePair({ art: art(best ? pillarOf(best.day) : S.me.p), el: elOf(S.me.p), kicker: `My ${name}`, title: `${r.opened} days · ${r.arts.length} paintings`, sub: `${signName(S.me.p)} on Sixty`, meta: best ? `Strongest day: ${fmt(best.day, 'md')}` : 'Sixty', body: 'Every day has one of 60 paintings. Collect them all — one a day.' }));
+  track('us_recap');
+}
+
+// ---------- the full-cycle poster (unlocks at 60 / 60) ----------
+async function posterOf() {
+  const W = 1200, cols = 6, cell = 180, gap = 12, top = 190, cv = document.createElement('canvas');
+  cv.width = W; cv.height = top + 10 * (cell + gap) + 150;
+  const ctx = cv.getContext('2d'); ctx.fillStyle = '#F6F5F1'; ctx.fillRect(0, 0, cv.width, cv.height);
+  await document.fonts.load("400 80px 'Instrument Serif'");
+  ctx.fillStyle = '#16151A'; ctx.font = "400 84px 'Instrument Serif'"; ctx.fillText('My Sixty', 60, 120);
+  ctx.font = "italic 400 40px 'Instrument Serif'"; ctx.fillStyle = '#57545A'; ctx.fillText('The full cycle, one painting a day', 420, 118);
+  const x0 = (W - cols * cell - (cols - 1) * gap) / 2;
+  await Promise.all(S.C.pillars.map((p, i) => new Promise((ok) => { const im = new Image(); im.onload = () => { const x = x0 + (i % cols) * (cell + gap), y = top + Math.floor(i / cols) * (cell + gap); ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, cell, cell, 14); ctx.clip(); ctx.drawImage(im, x, y, cell, cell); ctx.restore(); ok(); }; im.onerror = ok; im.src = art(p); })));
+  ctx.fillStyle = '#16151A'; ctx.font = '600 26px Inter'; ctx.fillText('mindflow.zone/sixty', 60, cv.height - 60);
+  return cv;
 }

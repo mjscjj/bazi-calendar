@@ -57,3 +57,4 @@ export async function shareImage(make, filename, sign, link) {
 }
 export const shareSign = (p) => shareImage(() => drawCard({ art: `../art/pillars/${p.art}`, el: elOf(p), kicker: 'My sign', title: signName(p), sub: p.name, meta: `${fullName(p)} · No. ${p.no} of 60`, body: p.intro }), `sixty-${p.slug}.jpg`, p.slug, `${shareBase()}s/${p.slug}`);
 export const sharePair = (o) => shareImage(() => drawCard(o), `sixty-pair.jpg`, 'pair');
+export const drawCardPublic = drawCard;

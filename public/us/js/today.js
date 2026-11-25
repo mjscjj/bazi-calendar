@@ -1,5 +1,6 @@
 // Today: a week strip, a swipeable card for the selected day (with "Why?"), a draggable 24-hour dial,
 // do / skip, lucky colors, tomorrow — and, on the first open of a day, pull down to tear off yesterday.
+import { shareImage, drawCardPublic } from './share.js';
 import { $, $$, esc, S, api, store, track, toast, buzz, reduced, countUp, localDay, addDays, fmt, parse, WEEK, MONTHS, byGz, signName, art, elStyle, elOf,
   level, theme, toneOf, tenName, pillarOf, whyList, hourRange, hourNow, ring, loading, failed, ymd } from './core.js';
 
@@ -25,7 +26,7 @@ export async function pageToday(want) {
     renderWeek(); renderDay(false);
     const firstDay = new Date(S.me.user.createdAt).toDateString() === new Date().toDateString(); // 注册当天没有「昨天」可撕
     if (t.jiazi?.fresh && t.prev && !firstDay && store.get('torn') !== t.date && !reduced()) tearOff(t);
-    else if (t.jiazi?.fresh) toast(`Collected today's painting · ${t.jiazi.n} / 60`);
+    else if (t.jiazi?.fresh) { toast(`Collected today's painting · ${t.jiazi.n} / 60`); setTimeout(() => flyIn(t.jiazi.n), 500); }
   } catch (e) {
     if (e.status === 401) { location.hash = '#/signin'; return; }
     $('#daycard').innerHTML = failed(e.message);
@@ -40,6 +41,7 @@ function renderCollect(j) {
 
 const dayOf = (date) => strip?.days.find((x) => x.date === date);
 function renderWeek() {
+  if (!$('#week')) return;
   const today = localDay();
   $('#week').innerHTML = strip.days.map((x) => { const t = parse(x.date); return `<button data-d="${x.date}" class="lv${x.day.level.k}${x.date === sel ? ' on' : ''}${x.date === today ? ' today' : ''}" aria-label="${fmt(x.date)}">
     <span>${WEEK[t.getDay()][0]}</span><b>${t.getDate()}</b><i></i></button>`; }).join('');
@@ -56,7 +58,8 @@ async function go(date, dir) {
 }
 
 function renderDay(animate, dir = 1) {
-  const x = dayOf(sel), d = x.day, k = d.level.k, th = theme(d.ssG, x.line?.tone || toneOf(S.today?.chart, d.gz)), lv = level(k), dp = byGz(d.gz), today = localDay();
+  if (!$('#daycard')) return; // left the page while loading
+  const x = dayOf(sel), d = x.day, k = d.level.k, th = theme(d.ssG, x.line?.tone || toneOf(S.today?.chart, d.gz), sel), lv = level(k), dp = byGz(d.gz), today = localDay();
   $('#tdKicker').textContent = sel === today ? 'Today' : sel === addDays(today, 1) ? 'Tomorrow' : sel === addDays(today, -1) ? 'Yesterday' : fmt(sel, 'md');
   $('#tdTitle').textContent = fmt(sel, 'full');
   const card = $('#daycard');
@@ -66,6 +69,7 @@ function renderDay(animate, dir = 1) {
     <div class="dc-body">
       <div class="score lv${k}">${ring(d.score)}<div><div class="word">${lv.word}</div><p>${th.title}</p></div></div>
       <p class="dc-line">${th.line}</p>
+      <button class="share-day" id="shareDay" aria-label="Share this day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
       <button class="why-btn" aria-expanded="false"><span>Why?</span><small>${tenName(d.ssG)} · ${why.length} signals</small></button>
       <div class="why" hidden>${why.map((w) => `<div class="wrow"><b class="${w.v >= 0 ? 'up' : 'down'}">${w.v >= 0 ? '+' : '−'}${Math.abs(w.v)}</b><div><p>${esc(w.en)}</p><small>${esc(w.t)}</small></div></div>`).join('')}
         <p class="hint">Scored from how the day's stem and branch meet your four pillars — the classical Ten Gods method.</p></div>
@@ -78,6 +82,7 @@ function renderDay(animate, dir = 1) {
     if (open) track('us_why');
   });
   swipe(card);
+  card.querySelector('#shareDay').addEventListener('click', () => shareDay(x, th, lv));
   renderBelow(x);
 }
 
@@ -100,19 +105,24 @@ function swipe(card) {
 }
 
 function renderBelow(x) {
-  const d = x.day, th = theme(d.ssG, x.line?.tone || toneOf(S.today?.chart, d.gz)), today = localDay();
+  if (!$('#below')) return;
+  const d = x.day, th = theme(d.ssG, x.line?.tone || toneOf(S.today?.chart, d.gz), sel), today = localDay();
   const best = d.hours.filter((h) => h.i >= 4 && h.i <= 10).sort((a, b) => b.score - a.score).slice(0, 2);
   const t = S.today, isToday = sel === today;
+  const night = isToday && (new Date().getHours() >= 18 || t?.rate?.today);
   $('#below').innerHTML = `
+    ${night ? tonightHtml(t) : ''}
     <div class="card dial-card"><div class="dial-head"><p class="label">Your hours</p><span class="small">Drag the hand</span></div>
       <div class="dial" id="dial">${dialSvg(d.hours)}<div class="dial-center"><b id="dhRange"></b><span id="dhWord"></span><small id="dhWhy"></small></div></div>
       <div class="hours">${best.map((h) => `<span class="chip good">Best ${hourRange(h.i)}</span>`).join('')}</div></div>
     <div class="card dodont"><div><p class="label">Do</p><ul>${th.do.map((v) => `<li>${esc(v)}</li>`).join('')}</ul></div>
       <div class="no"><p class="label">Skip</p><ul>${th.dont.map((v) => `<li>${esc(v)}</li>`).join('')}</ul></div></div>
+    ${isToday ? moodHtml(t) : ''}
     ${x.luck?.length ? `<div class="card"><p class="label">Lucky colors</p><div class="swatches">${x.luck.map((c) => `<span class="sw big"><i style="background:${c.hex}"></i></span>`).join('')}</div><p class="hint">Wear one of these to tune the day in your favor.</p></div>` : ''}
-    ${isToday && t?.tomorrow ? `<button class="card daymini" id="tmr"><img src="${art(pillarOf(ymd(t.tomorrow)))}" alt="" width="56" height="56"><div><p class="label">Tomorrow</p><b>${level(t.tomorrow.level.k).word} · ${theme(t.tomorrow.ssG, toneOf(t.chart, pillarOf(ymd(t.tomorrow)).cn)).title}</b><p class="small" style="margin:2px 0 0">Best ${hourRange(t.tomorrow.hours[0])}</p></div><span class="go">›</span></button>` : ''}
+    ${isToday && t?.tomorrow ? `<button class="card daymini" id="tmr"><img src="${art(pillarOf(ymd(t.tomorrow)))}" alt="" width="56" height="56"><div><p class="label">Tomorrow</p><b>${level(t.tomorrow.level.k).word} · ${theme(t.tomorrow.ssG, toneOf(t.chart, pillarOf(ymd(t.tomorrow)).cn), ymd(t.tomorrow)).title}</b><p class="small" style="margin:2px 0 0">Best ${hourRange(t.tomorrow.hours[0])}</p></div><span class="go">›</span></button>` : ''}
     <a class="btn ghost block" href="#/pick">Find your best day for…</a>`;
   wireDial(d.hours, isToday);
+  if (isToday) { wireTonight(); wireMoods(); installCard(); }
   $('#tmr')?.addEventListener('click', () => go(addDays(today, 1), 1));
 }
 
@@ -171,7 +181,7 @@ function tearOff(t) {
     store.set('torn', t.date);
     if (torn) { rip(); buzz(25); page.classList.add('gone'); track('us_tear'); }
     el.classList.add('out');
-    setTimeout(() => { el.remove(); toast(`Collected today's painting · ${t.jiazi.n} / 60`); $('.collect')?.classList.add('pop'); }, torn ? 650 : 250);
+    setTimeout(() => { el.remove(); toast(`Collected today's painting · ${t.jiazi.n} / 60`); flyIn(t.jiazi.n); }, torn ? 650 : 250);
   };
   el.querySelector('.skip').addEventListener('click', () => done(false));
   page.addEventListener('pointerdown', (e) => { y0 = e.clientY; page.setPointerCapture(e.pointerId); page.style.transition = 'none'; });
@@ -188,4 +198,76 @@ function rip() {
     f.type = 'bandpass'; f.frequency.value = 2600; f.Q.value = 0.7; g.gain.value = 0.5;
     src.buffer = buf; src.connect(f).connect(g).connect(ac.destination); src.start();
   } catch {}
+}
+
+// ---------- tonight: how did today go? ----------
+function tonightHtml(t) {
+  const r = t.rate || {}, sm = r.summary || {}, acc = sm.rated >= 3 ? Math.round(sm.match / sm.rated * 100) : null;
+  return `<div class="card tonight"><p class="label">Tonight</p>
+    ${r.today ? `<h3 class="h3" style="margin-top:6px">You rated today ${S.C.ratings[r.today - 1].toLowerCase()}.</h3>
+      <p class="muted" style="margin:4px 0 0">${acc != null ? `This month Sixty matched your days <b>${acc}%</b> of the time (${sm.match} of ${sm.rated}).` : `Rate a few more evenings and we'll show how often Sixty matches your days.`}</p>`
+    : `<h3 class="h3" style="margin-top:6px">How did today go?</h3><div class="rate" role="radiogroup">${S.C.ratings.map((w, i) => `<button data-s="${i + 1}" aria-label="${w}"><i>${['😣', '😕', '😐', '🙂', '😄'][i]}</i><span>${w}</span></button>`).join('')}</div>
+      <p class="hint">Your ratings show how often Sixty gets your days right.</p>`}</div>`;
+}
+function wireTonight() {
+  $$('.rate button').forEach((b) => b.addEventListener('click', async () => {
+    buzz(10); b.classList.add('on');
+    try { const r = await api('POST', 'ratings', { day: localDay(), score: +b.dataset.s, note: '' }); S.today.rate = { ...(S.today.rate || {}), today: +b.dataset.s, summary: r.summary }; track('us_rate', { s: +b.dataset.s }); renderBelow(dayOf(sel)); }
+    catch (e) { toast(e.message); }
+  }));
+}
+
+// ---------- mood check-in ----------
+const MOOD_EMOJI = { happy: '😊', full: '💪', calm: '🌿', tired: '😴', upset: '😤', low: '🌧️' };
+function moodHtml(t) {
+  const kit = t.moodKit, mine = (t.moods || []).filter((m) => m.day === localDay());
+  if (!kit) return '';
+  const colorOf = (k) => { const c = kit.colors.find((x) => x.key === k); return document.documentElement.dataset.theme === 'dark' ? c?.dark : c?.light; };
+  return `<div class="card moods"><div class="dial-head"><p class="label">How do you feel?</p><span class="small">${mine.length ? `${mine.length} today` : 'Tap one'}</span></div>
+    <div class="moodrow">${kit.moods.map((m) => `<button data-m="${m.key}" data-c="${m.color}" style="--mc:${colorOf(m.color)}"><i>${MOOD_EMOJI[m.key] || '•'}</i><span>${S.C.moods[m.key] || m.key}</span></button>`).join('')}</div>
+    ${mine.length ? `<div class="moodlog">${mine.map((m) => `<span class="chip" style="background:${colorOf(m.color)};border-color:transparent">${MOOD_EMOJI[m.mood] || ''} ${S.C.moods[m.mood] || m.mood}${m.note ? ` · ${esc(m.note)}` : ''}</span>`).join('')}</div>` : ''}</div>`;
+}
+function wireMoods() {
+  $$('.moodrow button').forEach((b) => b.addEventListener('click', async () => {
+    buzz(8); b.classList.add('pick');
+    try {
+      const r = await api('POST', 'moods', { day: localDay(), mood: b.dataset.m, color: b.dataset.c, note: '' });
+      S.today.moods = r.moods; track('us_mood', { m: b.dataset.m }); toast(`Noted: ${S.C.moods[b.dataset.m]}`); renderBelow(dayOf(sel));
+    } catch (e) { toast(e.message); }
+  }));
+}
+
+// ---------- share my day ----------
+function shareDay(x, th, lv) {
+  const d = x.day, dp = byGz(d.gz), best = d.hours.filter((h) => h.i >= 4 && h.i <= 10).sort((a, b) => b.score - a.score)[0];
+  shareImage(() => drawCardPublic({ art: art(dp), el: elOf(S.me.p), kicker: sel === localDay() ? 'My day' : fmt(sel, 'md'), title: `${lv.word} · ${d.score}`, sub: th.title,
+    meta: `${fmt(sel, 'full')} · best ${hourRange(best.i)}`, body: th.line }), `sixty-day-${sel}.jpg`, 'day');
+}
+
+// ---------- collecting: today's painting flies into the ring ----------
+function flyIn(n) {
+  const from = $('#daycard .dc-art img'), to = $('.collect');
+  if (!from || !to || reduced()) return;
+  const a = from.getBoundingClientRect(), b = to.getBoundingClientRect(), img = from.cloneNode();
+  img.className = 'flyer'; Object.assign(img.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px' });
+  document.body.appendChild(img);
+  requestAnimationFrame(() => { Object.assign(img.style, { transform: `translate(${b.left + b.width / 2 - a.left - a.width / 2}px, ${b.top + b.height / 2 - a.top - a.height / 2}px) scale(${36 / a.width})`, opacity: '.2', borderRadius: '50%' }); });
+  setTimeout(() => { img.remove(); to.classList.remove('pop'); void to.offsetWidth; to.classList.add('pop'); buzz(12); if (n % 10 === 0) toast(n === 60 ? 'All 60 collected — the full cycle!' : `${n} of 60 — a milestone!`); }, 800);
+}
+
+// ---------- add to home screen: from the second day you visit ----------
+let installEvt = null;
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; });
+function installCard() {
+  const days = new Set(store.get('days') || []); days.add(localDay()); store.set('days', [...days].slice(-30));
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (standalone || days.size < 2 || store.get('a2hs') || $('#a2hs')) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  $('#below').insertAdjacentHTML('beforeend', `<div class="card a2hs" id="a2hs"><button class="x" aria-label="Dismiss">×</button>
+    <p class="label">Make it a habit</p><h3 class="h3" style="margin-top:6px">Add Sixty to your Home Screen</h3>
+    <p class="muted" style="margin:4px 0 12px;font-size:15px">Open your day in one tap, like an app.</p>
+    ${installEvt ? '<button class="btn block" id="doInstall">Add to Home Screen</button>' : ios ? '<ol class="steps"><li>Tap the <b>Share</b> button in Safari</li><li>Choose <b>Add to Home Screen</b></li></ol>' : '<p class="small">Use your browser menu → <b>Install app</b> or <b>Add to Home screen</b>.</p>'}</div>`);
+  $('#a2hs .x').addEventListener('click', () => { store.set('a2hs', 1); $('#a2hs').remove(); });
+  $('#doInstall')?.addEventListener('click', async () => { installEvt.prompt(); const r = await installEvt.userChoice.catch(() => null); track('us_install', { r: r?.outcome }); store.set('a2hs', 1); $('#a2hs')?.remove(); });
+  track('us_install_card');
 }

@@ -17,15 +17,24 @@ export async function pageCalendar() {
     <div class="legend">${[5, 4, 3, 2, 1].map((k) => `<span class="lv${k}"><i></i>${level(k).word}</span>`).join('')}</div>
     <div class="card" id="monthSum" style="margin-top:16px">${loading(60)}</div>
     <div class="sec"><a class="btn block" href="#/pick">Find your best day for…</a></div>
+    <div class="sec" id="plans"></div>
+    <div class="sec"><div class="card feed"><p class="label">Your calendar app</p><h3 class="h3" style="margin-top:6px">See every day in Apple or Google Calendar</h3>
+      <p class="muted" style="margin:4px 0 12px;font-size:15px">A daily line with your level, theme and best hours — updated automatically, plus your saved plans.</p>
+      <div class="row"><button class="btn ghost" data-feed="apple" style="flex:1">Apple</button><button class="btn ghost" data-feed="google" style="flex:1">Google</button></div></div></div>
   </div>`;
+  $$('[data-feed]').forEach((b) => b.addEventListener('click', () => addFeed(b.dataset.feed)));
   $$('[data-mv]').forEach((b) => b.addEventListener('click', () => { const t = new Date(y, m - 1 + +b.dataset.mv, 1); month = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`; buzz(5); pageCalendar(); }));
   let data;
-  try { data = await api('GET', `calendar?y=${y}&m=${m}`); } catch (e) { $('#monthSum').innerHTML = failed(e.message); return; }
+  try { data = await api('GET', `calendar?y=${y}&m=${m}`); } catch (e) { $('#monthSum') && ($('#monthSum').innerHTML = failed(e.message)); return; }
+  if (!$('#cal')) return; // left the page while loading
   const byDate = Object.fromEntries(data.days.map((d) => [ymd(d), d]));
   for (const [d, x] of Object.entries(byDate)) {
     const b = $(`#cal button[data-d="${d}"]`); if (!b) continue;
     b.classList.add('lv' + x.level.k);
     if (x.lunar?.jieqi) b.classList.add('term');
+    const mood = data.moods?.filter((mm) => mm.d === x.d).pop();
+    if (mood) { const c = data.moodKit?.colors.find((cc) => cc.key === mood.color); b.insertAdjacentHTML('beforeend', `<em class="md" style="background:${document.documentElement.dataset.theme === 'dark' ? c?.dark : c?.light}"></em>`); }
+    if (data.ratings?.some((rr) => rr.d === x.d)) b.classList.add('rated');
     b.setAttribute('aria-label', `${fmt(d)}: ${level(x.level.k).word}`);
     b.addEventListener('click', () => openDay(x, data.chart));
   }
@@ -35,10 +44,20 @@ export async function pageCalendar() {
   $('#monthSum').innerHTML = `<div class="msum"><div><b data-n="${good.length}">0</b><span>strong days</span></div><div><b>${fmt(ymd(best), 'md')}</b><span>best day</span></div>
     <div><b class="sm">${(() => { const t = data.days.filter((d) => d.lunar?.jieqi); return t.length ? `${S.C.seasons[t[0].lunar.jieqi]}${t.length > 1 ? ` +${t.length - 1}` : ''}` : '—'; })()}</b><span>new micro-season</span></div></div>`;
   countUp($('[data-n]'), good.length, 700);
+  const mine = (data.plans || []).filter((pl) => pl.date && pl.date >= localDay()).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 10);
+  $('#plans').innerHTML = mine.length ? `<p class="label">Coming up</p><div class="stack-gap">${mine.map((pl) => `<a class="card planrow" href="#/today?d=${pl.date}"><div class="d"><b>${parse(pl.date).getDate()}</b><span>${WEEK[parse(pl.date).getDay()]}</span></div><div><h3 class="h3">${esc(pl.name)}</h3><p class="small" style="margin:2px 0 0">${pl.hour != null ? hourRange(pl.hour) : 'All day'}</p></div></a>`).join('')}</div>` : '';
+}
+async function addFeed(kind) {
+  try {
+    const f = await api('GET', 'me/calendar-feed');
+    track('us_feed', { kind });
+    if (kind === 'google') window.open('https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(f.webcal), '_blank');
+    else location.href = f.webcal;
+  } catch (e) { toast(e.message); }
 }
 
 function openDay(x, chart) {
-  const d = ymd(x), dp = byGz(x.gz), th = theme(x.ssG, toneOf(chart, x.gz)), lv = level(x.level.k);
+  const d = ymd(x), dp = byGz(x.gz), th = theme(x.ssG, toneOf(chart, x.gz), d), lv = level(x.level.k);
   buzz(5);
   openSheet(`<button class="x" aria-label="Close">×</button><p class="label">${d === localDay() ? 'Today' : fmt(d, 'md')}</p><h2 class="h2">${fmt(d, 'full')}</h2>
     <div class="stack-gap" style="margin-top:14px">
@@ -81,6 +100,7 @@ async function run() {
   const tiles = Array.from({ length: n }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); });
   const set = r.excluded ? (r.excluded.ji + r.excluded.po + r.excluded.chong) : Math.max(0, n - (r.candidates || n));
   const grid = $('#scanGrid');
+  if (!grid) return;
   grid.innerHTML = tiles.map((d, i) => `<i style="--i:${i}" class="${picks.includes(d) ? 'pick' : ''}" title="${d}"><span>${parse(d).getDate()}</span></i>`).join('');
   const dur = reduced() ? 0 : Math.min(1600, 40 * n), wait = Math.max(0, dur - (performance.now() - t0));
   if (!reduced()) {
@@ -94,11 +114,17 @@ async function run() {
     $('#scanTxt').innerHTML = `<b>${n}</b> days scanned · <b>${set}</b> set aside · <b>${r.picks.length}</b> picked`;
     buzz(12);
     out.insertAdjacentHTML('beforeend', `<p class="label" style="margin:22px 0 10px">Your best days for ${esc(label.charAt(0).toLowerCase() + label.slice(1))}</p>
-      <div class="stack-gap">${r.picks.map((p, i) => { const d = picks[i], t = parse(d), th = theme(p.ssG, toneOf(chart, pillarOf(d).cn)); return `
+      <div class="stack-gap">${r.picks.map((p, i) => { const d = picks[i], t = parse(d), th = theme(p.ssG, toneOf(chart, pillarOf(d).cn), d); return `
         <a class="card result lv${p.level.k} rise" style="--i:${i}" href="#/today?d=${d}"><div class="d"><span>${WEEK[t.getDay()]}</span><b>${t.getDate()}</b><span>${MONTHS[t.getMonth()].slice(0, 3)}</span></div>
           <div><p class="rank">${i === 0 ? (r.best ? 'Best pick' : 'Top pick') : `Option ${i + 1}`}</p><h3 class="h3" style="margin-top:6px">${fmt(d, 'full')}</h3>
           <p class="muted" style="margin:4px 0 0;font-size:15px">${level(p.level.k).word} · ${th.title}${p.fit ? ` · <span class="fit">${tenName(p.ssG)} days suit this</span>` : ''}</p>
-          <div class="hours">${p.hours.map((h) => `<span class="chip good">${hourRange(h)}</span>`).join('')}</div></div></a>`; }).join('')}</div>
+          <div class="hours">${p.hours.map((h) => `<span class="chip good">${hourRange(h)}</span>`).join('')}</div>
+          <button class="btn ghost save" data-save="${d}" data-h="${p.hours[0]}">Save to my plans</button></div></a>`; }).join('')}</div>
       <p class="hint">Days that clash with your birth month or year, or that the old almanac marks as unsuitable for this, are set aside first.</p>`);
+    $$('[data-save]').forEach((b) => b.addEventListener('click', async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      try { await api('POST', 'plans', { name: label, type: pick.type, date: b.dataset.save, hour: +b.dataset.h, reason: '' }); b.textContent = 'Saved ✓'; b.disabled = true; buzz(10); track('us_plan_save', { type: pick.type }); toast('Saved — it shows in your calendar'); }
+      catch (x) { toast(x.message); }
+    }));
   }, wait);
 }

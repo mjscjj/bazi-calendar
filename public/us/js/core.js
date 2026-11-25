@@ -49,7 +49,8 @@ export const artOf = (gz) => art(byGz(gz));
 export const elStyle = (el) => `--el:${S.C.elements[el].color};--el-tint:${S.C.elements[el].tint}`;
 export const level = (k) => S.C.levels[k];
 // a day's theme depends on its Ten God and whether the day's element fuels you (xi) or drains you (ji)
-export const theme = (ten, tone) => S.C.themes[ten][tone === 'ji' ? 'ji' : 'xi'];
+// three wordings each, rotated by date so the same day always reads the same (the calendar feed uses the same rule)
+export const theme = (ten, tone, date) => { const a = S.C.themes[ten][tone === 'ji' ? 'ji' : 'xi']; return a[date ? cycleIndex(date) % a.length : 0]; };
 export const toneOf = (chart, gz) => { const e = GAN.indexOf(gz[0]) >> 1; return chart?.xi?.includes(e) ? 'xi' : chart?.ji?.includes(e) ? 'ji' : 'neutral'; };
 export const tenName = (ten) => S.C.tenGods[ten]?.[0] || ten;
 export const tenFull = (ten) => (S.C.tenGods[ten] ? `${S.C.tenGods[ten][0]} (${S.C.tenGods[ten][1]} · ${ten})` : ten);

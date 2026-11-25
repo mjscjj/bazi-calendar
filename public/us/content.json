@@ -1,5 +1,5 @@
 {
- "_about": "Sixty (US) copy — edit freely, keep the keys. pillars: the 60 day signs; stems: element, image, traits; themes: what a day means, by its Ten God and tone (xi = the day's element fuels you, ji = it drains you; neutral uses xi); tenGods: [friendly name, classical name]; levels: the five day levels; seasons: the 24 solar terms; pairKinds/pairs: friend paintings; elements: colors and what fuels you. Art lives in ../art/.",
+ "_about": "Sixty (US) copy — edit freely, keep the keys. pillars: the 60 day signs; stems: element, image, traits; themes: what a day means, by its Ten God and tone (xi = the day's element fuels you, ji = it drains you; neutral uses xi), 3 variants each, rotated by date; oracle: the Daily Oracle (100 lots, toss texts, 9 topics × 1–5 stars); tenGods: [friendly name, classical name]; levels: the five day levels; seasons: the 24 solar terms; pairKinds/pairs: friend paintings; elements: colors and what fuels you. Art lives in ../art/.",
  "stems": {
   "jia": {
    "cn": "甲",
@@ -808,264 +808,784 @@
  },
  "themes": {
   "正官": {
-   "xi": {
-    "title": "A Day for Recognition",
-    "line": "Structure works for you. Bosses, rules and reputation are on your side.",
-    "do": [
-     "Show your work to someone senior",
-     "Follow the process — it pays off"
-    ],
-    "dont": [
-     "Cut corners",
-     "Pick a fight with authority"
-    ]
-   },
-   "ji": {
-    "title": "A Day of Expectations",
-    "line": "Other people's expectations weigh more than usual. Meet them, but don't twist yourself to fit.",
-    "do": [
-     "Get the must-dos done early",
-     "Ask what's actually expected"
-    ],
-    "dont": [
-     "Overpromise to please someone",
-     "Take criticism as final"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Day for Recognition",
+     "line": "Structure works for you. Bosses, rules and reputation are on your side.",
+     "do": [
+      "Show your work to someone senior",
+      "Follow the process — it pays off"
+     ],
+     "dont": [
+      "Cut corners",
+      "Pick a fight with authority"
+     ]
+    },
+    {
+     "title": "A Day to Earn Trust",
+     "line": "Reliability gets noticed today, so let your steady, by-the-book work speak for you.",
+     "do": [
+      "Deliver exactly what you promised",
+      "Update your manager without being asked"
+     ],
+     "dont": [
+      "Improvise on formal tasks",
+      "Skip the fine print"
+     ]
+    },
+    {
+     "title": "A Day to Set Your Rhythm",
+     "line": "Routines and clear rules feel good today, so give your life a little more structure.",
+     "do": [
+      "Plan tomorrow before bed",
+      "Tidy up one messy system"
+     ],
+     "dont": [
+      "Wing your important commitments",
+      "Ignore a reasonable rule"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Day of Expectations",
+     "line": "Other people's expectations weigh more than usual. Meet them, but don't twist yourself to fit.",
+     "do": [
+      "Get the must-dos done early",
+      "Ask what's actually expected"
+     ],
+     "dont": [
+      "Overpromise to please someone",
+      "Take criticism as final"
+     ]
+    },
+    {
+     "title": "A Day to Know Your Limits",
+     "line": "Duties pile up and the bar feels high, so focus on what truly needs you.",
+     "do": [
+      "Rank today's obligations by deadline",
+      "Say plainly what you can deliver"
+     ],
+     "dont": [
+      "Agree to every request",
+      "Judge yourself by others' standards"
+     ]
+    },
+    {
+     "title": "A Day to Stay Composed",
+     "line": "Rules and feedback may feel tight today; stay calm, steady and true to yourself.",
+     "do": [
+      "Hear feedback, then take a breath",
+      "Keep your replies short and polite"
+     ],
+     "dont": [
+      "Bend your values to fit in",
+      "Argue the rules in the moment"
+     ]
+    }
+   ]
   },
   "七杀": {
-   "xi": {
-    "title": "A Day to Push Through",
-    "line": "Pressure turns into drive. You can move something big today.",
-    "do": [
-     "Tackle the hardest task first",
-     "Make the bold call"
-    ],
-    "dont": [
-     "Wait for permission",
-     "Waste the momentum on small stuff"
-    ]
-   },
-   "ji": {
-    "title": "A High-Pressure Day",
-    "line": "Pressure is high and patience is thin. Pace yourself and pick your battles.",
-    "do": [
-     "Set one clear boundary",
-     "Take a real break mid-day"
-    ],
-    "dont": [
-     "Take on everyone's problems",
-     "Decide big things while angry"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Day to Push Through",
+     "line": "Pressure turns into drive. You can move something big today.",
+     "do": [
+      "Tackle the hardest task first",
+      "Make the bold call"
+     ],
+     "dont": [
+      "Wait for permission",
+      "Waste the momentum on small stuff"
+     ]
+    },
+    {
+     "title": "A Day to Rise to It",
+     "line": "A tough challenge brings out your best, so step up and own the hard thing.",
+     "do": [
+      "Volunteer for the stretch assignment",
+      "Set a tight, real deadline"
+     ],
+     "dont": [
+      "Play it safe by default",
+      "Shrink from a hard conversation"
+     ]
+    },
+    {
+     "title": "A Day to Break Through",
+     "line": "Your energy is strong and focused, perfect for clearing an obstacle that's been in your way.",
+     "do": [
+      "Name the obstacle, then tackle it",
+      "Push your workout a little harder"
+     ],
+     "dont": [
+      "Overthink before you move",
+      "Let doubt slow your pace"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A High-Pressure Day",
+     "line": "Pressure is high and patience is thin. Pace yourself and pick your battles.",
+     "do": [
+      "Set one clear boundary",
+      "Take a real break mid-day"
+     ],
+     "dont": [
+      "Take on everyone's problems",
+      "Decide big things while angry"
+     ]
+    },
+    {
+     "title": "A Day to Protect Your Energy",
+     "line": "Demands come from every side today, so save your strength for what truly matters.",
+     "do": [
+      "Drop one nonessential task",
+      "Eat and sleep on schedule"
+     ],
+     "dont": [
+      "Say yes under pressure",
+      "Push through exhaustion"
+     ]
+    },
+    {
+     "title": "A Day to Keep Cool",
+     "line": "Tension runs high and tempers flare easily; slow down and respond rather than react.",
+     "do": [
+      "Count to ten before replying",
+      "Step outside for fresh air"
+     ],
+     "dont": [
+      "Escalate a minor conflict",
+      "Issue ultimatums"
+     ]
+    }
+   ]
   },
   "正印": {
-   "xi": {
-    "title": "A Day to Be Supported",
-    "line": "Good for learning, resting and letting people help you.",
-    "do": [
-     "Read, study or take a class",
-     "Ask a mentor for advice"
-    ],
-    "dont": [
-     "Force a tough negotiation",
-     "Skip rest to look busy"
-    ]
-   },
-   "ji": {
-    "title": "A Slow, Heavy Day",
-    "line": "Comfort pulls at you and things move slowly. Rest is fine — just don't stall on what matters.",
-    "do": [
-     "Do one thing you've been putting off",
-     "Keep plans simple"
-    ],
-    "dont": [
-     "Hide behind research",
-     "Lean on others for everything"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Day to Be Supported",
+     "line": "Good for learning, resting and letting people help you.",
+     "do": [
+      "Read, study or take a class",
+      "Ask a mentor for advice"
+     ],
+     "dont": [
+      "Force a tough negotiation",
+      "Skip rest to look busy"
+     ]
+    },
+    {
+     "title": "A Day to Recharge",
+     "line": "Gentle energy surrounds you today, perfect for restoring yourself and soaking up good advice.",
+     "do": [
+      "Go to bed early tonight",
+      "Spend time somewhere calm"
+     ],
+     "dont": [
+      "Fill every gap with tasks",
+      "Refuse a kind offer"
+     ]
+    },
+    {
+     "title": "A Day to Grow Your Skills",
+     "line": "Learning comes easily today, and the right teacher or resource may be close at hand.",
+     "do": [
+      "Start that course or tutorial",
+      "Thank someone who taught you"
+     ],
+     "dont": [
+      "Pretend you know it all",
+      "Rush past the basics"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Slow, Heavy Day",
+     "line": "Comfort pulls at you and things move slowly. Rest is fine — just don't stall on what matters.",
+     "do": [
+      "Do one thing you've been putting off",
+      "Keep plans simple"
+     ],
+     "dont": [
+      "Hide behind research",
+      "Lean on others for everything"
+     ]
+    },
+    {
+     "title": "A Day to Get Moving",
+     "line": "It's easy to stay in your comfort zone today, so take one small, real step forward.",
+     "do": [
+      "Start before you feel ready",
+      "Set a timer for twenty minutes"
+     ],
+     "dont": [
+      "Wait for perfect conditions",
+      "Spend all day planning"
+     ]
+    },
+    {
+     "title": "A Day to Trust Yourself",
+     "line": "Help is welcome, but today calls for leaning on your own judgment a little more.",
+     "do": [
+      "Make one decision yourself",
+      "Handle one small task solo"
+     ],
+     "dont": [
+      "Ask for reassurance repeatedly",
+      "Hand off what's yours to do"
+     ]
+    }
+   ]
   },
   "偏印": {
-   "xi": {
-    "title": "A Day for Deep Thinking",
-    "line": "Your mind wants quiet. Good for research, strategy and time alone.",
-    "do": [
-     "Block two hours of focus time",
-     "Journal or plan next month"
-    ],
-    "dont": [
-     "Overbook your social calendar",
-     "Overthink small replies"
-    ]
-   },
-   "ji": {
-    "title": "A Restless, Inward Day",
-    "line": "You may feel out of sync with people. Keep to yourself a little, and don't read too much into things.",
-    "do": [
-     "Take a walk alone",
-     "Write it down before you say it"
-    ],
-    "dont": [
-     "Assume the worst",
-     "Make big decisions on a hunch"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Day for Deep Thinking",
+     "line": "Your mind wants quiet. Good for research, strategy and time alone.",
+     "do": [
+      "Block two hours of focus time",
+      "Journal or plan next month"
+     ],
+     "dont": [
+      "Overbook your social calendar",
+      "Overthink small replies"
+     ]
+    },
+    {
+     "title": "A Day for Fresh Insight",
+     "line": "Unusual ideas and quiet hunches are sharp today, so follow your curiosity somewhere new.",
+     "do": [
+      "Explore a topic outside your field",
+      "Sketch an unconventional solution"
+     ],
+     "dont": [
+      "Dismiss a strange idea too fast",
+      "Fill every silence with noise"
+     ]
+    },
+    {
+     "title": "A Day for Solitude",
+     "line": "Time on your own restores you today, so protect it and let your thoughts settle.",
+     "do": [
+      "Turn off notifications for a while",
+      "Take yourself on a solo outing"
+     ],
+     "dont": [
+      "Feel guilty about alone time",
+      "Force small talk"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Restless, Inward Day",
+     "line": "You may feel out of sync with people. Keep to yourself a little, and don't read too much into things.",
+     "do": [
+      "Take a walk alone",
+      "Write it down before you say it"
+     ],
+     "dont": [
+      "Assume the worst",
+      "Make big decisions on a hunch"
+     ]
+    },
+    {
+     "title": "A Day to Stay Grounded",
+     "line": "Your mind may spin and wander today, so lean on simple routines to stay steady.",
+     "do": [
+      "Stick to your usual routine",
+      "Do something with your hands"
+     ],
+     "dont": [
+      "Spiral on what-ifs",
+      "Start too many new things"
+     ]
+    },
+    {
+     "title": "A Day to Check Your Read",
+     "line": "Signals from others may feel confusing today, so ask before you assume anything.",
+     "do": [
+      "Ask a clarifying question",
+      "Talk it through with someone trusted"
+     ],
+     "dont": [
+      "Read tone into short texts",
+      "Pull away from everyone"
+     ]
+    }
+   ]
   },
   "比肩": {
-   "xi": {
-    "title": "A Day for Allies",
-    "line": "Friends and teammates have your back. Collaborate.",
-    "do": [
-     "Team up on a shared project",
-     "Reach out to an old friend"
-    ],
-    "dont": [
-     "Go it alone out of pride",
-     "Turn down help"
-    ]
-   },
-   "ji": {
-    "title": "A Crowded Day",
-    "line": "Everyone wants a piece of the same thing. Share the credit, guard your time.",
-    "do": [
-     "Be clear about who does what",
-     "Protect one hour for yourself"
-    ],
-    "dont": [
-     "Lend money casually",
-     "Get drawn into comparisons"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Day for Allies",
+     "line": "Friends and teammates have your back. Collaborate.",
+     "do": [
+      "Team up on a shared project",
+      "Reach out to an old friend"
+     ],
+     "dont": [
+      "Go it alone out of pride",
+      "Turn down help"
+     ]
+    },
+    {
+     "title": "A Day for Teamwork",
+     "line": "Shared effort goes further today, so lean on your team and lift them too.",
+     "do": [
+      "Split a big task with a peer",
+      "Give a teammate public credit"
+     ],
+     "dont": [
+      "Hoard information",
+      "Insist on doing it your way"
+     ]
+    },
+    {
+     "title": "A Day to Reconnect",
+     "line": "Your people are close at hand today, a great time to strengthen your circle.",
+     "do": [
+      "Plan a hangout with friends",
+      "Join a group or club activity"
+     ],
+     "dont": [
+      "Cancel plans to stay in",
+      "Keep good news to yourself"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Crowded Day",
+     "line": "Everyone wants a piece of the same thing. Share the credit, guard your time.",
+     "do": [
+      "Be clear about who does what",
+      "Protect one hour for yourself"
+     ],
+     "dont": [
+      "Lend money casually",
+      "Get drawn into comparisons"
+     ]
+    },
+    {
+     "title": "A Day to Hold Your Ground",
+     "line": "Peers may crowd your space or plans today, so stay friendly but keep what's yours.",
+     "do": [
+      "State your share clearly",
+      "Keep your own priorities first"
+     ],
+     "dont": [
+      "Give away your credit",
+      "Match others step for step"
+     ]
+    },
+    {
+     "title": "A Day to Run Your Race",
+     "line": "Comparison is tempting today, so focus on your own pace and let others run theirs.",
+     "do": [
+      "Track only your own progress",
+      "Mute feeds that stir envy"
+     ],
+     "dont": [
+      "Measure yourself against friends",
+      "Split costs without agreeing first"
+     ]
+    }
+   ]
   },
   "劫财": {
-   "xi": {
-    "title": "A Competitive Day",
-    "line": "A little rivalry sharpens you. Go after it — and play fair.",
-    "do": [
-     "Compete for what you want",
-     "Network with confidence"
-    ],
-    "dont": [
-     "Hold back out of politeness",
-     "Undersell yourself"
-    ]
-   },
-   "ji": {
-    "title": "A Day to Guard Your Wallet",
-    "line": "Spending and rivalry run high. Stay sharp and watch your money.",
-    "do": [
-     "Double-check shared money",
-     "Sleep on big purchases"
-    ],
-    "dont": [
-     "Impulse-buy",
-     "Rush into joint deals"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Competitive Day",
+     "line": "A little rivalry sharpens you. Go after it — and play fair.",
+     "do": [
+      "Compete for what you want",
+      "Network with confidence"
+     ],
+     "dont": [
+      "Hold back out of politeness",
+      "Undersell yourself"
+     ]
+    },
+    {
+     "title": "A Day to Go for It",
+     "line": "Healthy competition fires you up today, so put yourself forward and aim high.",
+     "do": [
+      "Apply, pitch or put your name in",
+      "Set a personal best to beat"
+     ],
+     "dont": [
+      "Wait for your turn",
+      "Shy away from a challenge"
+     ]
+    },
+    {
+     "title": "A Day to Make Your Move",
+     "line": "Bold, social energy works for you today, so speak up and grow your network.",
+     "do": [
+      "Introduce yourself to someone new",
+      "Ask directly for what you want"
+     ],
+     "dont": [
+      "Let others take your spot",
+      "Apologize for your ambition"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Day to Guard Your Wallet",
+     "line": "Spending and rivalry run high. Stay sharp and watch your money.",
+     "do": [
+      "Double-check shared money",
+      "Sleep on big purchases"
+     ],
+     "dont": [
+      "Impulse-buy",
+      "Rush into joint deals"
+     ]
+    },
+    {
+     "title": "A Day to Protect What's Yours",
+     "line": "Others may reach for your time, money or credit today, so hold steady and stay clear.",
+     "do": [
+      "Put agreements in writing",
+      "Keep valuables close"
+     ],
+     "dont": [
+      "Cosign or guarantee anything",
+      "Share passwords or PINs"
+     ]
+    },
+    {
+     "title": "A Day to Skip the Contest",
+     "line": "Rivalry may feel personal today, but you don't need to win every round.",
+     "do": [
+      "Let one argument go",
+      "Stick to your spending plan"
+     ],
+     "dont": [
+      "Spend to keep up with others",
+      "Turn friendly games serious"
+     ]
+    }
+   ]
   },
   "食神": {
-   "xi": {
-    "title": "A Day of Ease",
-    "line": "Relaxed and creative. Make something you enjoy.",
-    "do": [
-     "Cook, create or play",
-     "Say yes to a small pleasure"
-    ],
-    "dont": [
-     "Overschedule yourself",
-     "Turn fun into homework"
-    ]
-   },
-   "ji": {
-    "title": "A Lazy-Feeling Day",
-    "line": "Comfort is tempting and focus is soft. Enjoy it, but finish one real thing.",
-    "do": [
-     "Pick one task and finish it",
-     "Move your body"
-    ],
-    "dont": [
-     "Overindulge",
-     "Let the whole day drift"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Day of Ease",
+     "line": "Relaxed and creative. Make something you enjoy.",
+     "do": [
+      "Cook, create or play",
+      "Say yes to a small pleasure"
+     ],
+     "dont": [
+      "Overschedule yourself",
+      "Turn fun into homework"
+     ]
+    },
+    {
+     "title": "A Day to Savor",
+     "line": "Simple pleasures feel extra good today, so slow down and enjoy what's in front of you.",
+     "do": [
+      "Eat a meal without screens",
+      "Share a treat with someone"
+     ],
+     "dont": [
+      "Rush through your lunch",
+      "Feel guilty about enjoying yourself"
+     ]
+    },
+    {
+     "title": "A Day for Playful Ideas",
+     "line": "Creativity flows when you keep it light, so make something just for the joy of it.",
+     "do": [
+      "Doodle, write or play music",
+      "Try a fun new recipe"
+     ],
+     "dont": [
+      "Judge your first draft",
+      "Make it all about results"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Lazy-Feeling Day",
+     "line": "Comfort is tempting and focus is soft. Enjoy it, but finish one real thing.",
+     "do": [
+      "Pick one task and finish it",
+      "Move your body"
+     ],
+     "dont": [
+      "Overindulge",
+      "Let the whole day drift"
+     ]
+    },
+    {
+     "title": "A Day of Gentle Effort",
+     "line": "Motivation runs low today, so set a small goal and let that be enough.",
+     "do": [
+      "Break work into tiny steps",
+      "Reward yourself after one task"
+     ],
+     "dont": [
+      "Plan an overambitious day",
+      "Scroll away the afternoon"
+     ]
+    },
+    {
+     "title": "A Day to Keep It Balanced",
+     "line": "Indulgence is tempting today, so enjoy a little, then get back to what matters.",
+     "do": [
+      "Drink water and take a walk",
+      "Set a clear stopping time"
+     ],
+     "dont": [
+      "Binge your free time away",
+      "Snack mindlessly all day"
+     ]
+    }
+   ]
   },
   "伤官": {
-   "xi": {
-    "title": "A Day to Speak Up",
-    "line": "Ideas are flowing and you want to be heard. Go for it.",
-    "do": [
-     "Pitch a bold idea",
-     "Write, post or perform"
-    ],
-    "dont": [
-     "Hold back your best idea",
-     "Wait for perfect"
-    ]
-   },
-   "ji": {
-    "title": "A Day to Mind Your Words",
-    "line": "You'll want to say exactly what you think. Say it kindly — or sleep on it.",
-    "do": [
-     "Vent in a journal first",
-     "Choose your audience"
-    ],
-    "dont": [
-     "Send the angry email",
-     "Criticize anyone in public"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Day to Speak Up",
+     "line": "Ideas are flowing and you want to be heard. Go for it.",
+     "do": [
+      "Pitch a bold idea",
+      "Write, post or perform"
+     ],
+     "dont": [
+      "Hold back your best idea",
+      "Wait for perfect"
+     ]
+    },
+    {
+     "title": "A Day to Share Your Voice",
+     "line": "Your words land with energy today, so say what you think and make it count.",
+     "do": [
+      "Lead the meeting discussion",
+      "Post the thing you've drafted"
+     ],
+     "dont": [
+      "Water down your opinion",
+      "Let others speak for you"
+     ]
+    },
+    {
+     "title": "A Day to Break the Mold",
+     "line": "Your inventive streak is strong today, so question the usual way and try your own.",
+     "do": [
+      "Rethink one outdated process",
+      "Start a creative side project"
+     ],
+     "dont": [
+      "Copy what everyone else does",
+      "Shelve an idea for being unusual"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Day to Mind Your Words",
+     "line": "You'll want to say exactly what you think. Say it kindly — or sleep on it.",
+     "do": [
+      "Vent in a journal first",
+      "Choose your audience"
+     ],
+     "dont": [
+      "Send the angry email",
+      "Criticize anyone in public"
+     ]
+    },
+    {
+     "title": "A Day to Listen First",
+     "line": "Your opinions run hot today, so hear people out before you share yours.",
+     "do": [
+      "Let others finish speaking",
+      "Ask before giving feedback"
+     ],
+     "dont": [
+      "Interrupt to correct someone",
+      "Argue just to win"
+     ]
+    },
+    {
+     "title": "A Day to Keep It Diplomatic",
+     "line": "Rules and authority may irritate you today, so choose tact over bluntness and protect your relationships.",
+     "do": [
+      "Reread messages before sending",
+      "Frame critiques as suggestions"
+     ],
+     "dont": [
+      "Challenge your boss publicly",
+      "Post while you're upset"
+     ]
+    }
+   ]
   },
   "正财": {
-   "xi": {
-    "title": "A Payoff Day",
-    "line": "Steady effort pays off. Good for money and practical work.",
-    "do": [
-     "Handle bills, budgets and admin",
-     "Finish what you started"
-    ],
-    "dont": [
-     "Gamble on long shots",
-     "Leave things half done"
-    ]
-   },
-   "ji": {
-    "title": "A Day of Small Leaks",
-    "line": "Money and time slip away in small ways. Keep a tight grip on the details.",
-    "do": [
-     "Check your accounts",
-     "Say no to one extra commitment"
-    ],
-    "dont": [
-     "Lend without a plan",
-     "Chase quick returns"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Payoff Day",
+     "line": "Steady effort pays off. Good for money and practical work.",
+     "do": [
+      "Handle bills, budgets and admin",
+      "Finish what you started"
+     ],
+     "dont": [
+      "Gamble on long shots",
+      "Leave things half done"
+     ]
+    },
+    {
+     "title": "A Day for Steady Progress",
+     "line": "Consistent, practical work goes far today, so put your energy into tasks that build value.",
+     "do": [
+      "Knock out your top priority",
+      "Update your budget or tracker"
+     ],
+     "dont": [
+      "Get distracted by shortcuts",
+      "Skip the boring parts"
+     ]
+    },
+    {
+     "title": "A Day to Get Organized",
+     "line": "Order brings real satisfaction today, perfect for sorting finances, files and plans.",
+     "do": [
+      "Clear your inbox or desk",
+      "Review a recurring subscription"
+     ],
+     "dont": [
+      "Put off paperwork again",
+      "Start something you can't finish"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Day of Small Leaks",
+     "line": "Money and time slip away in small ways. Keep a tight grip on the details.",
+     "do": [
+      "Check your accounts",
+      "Say no to one extra commitment"
+     ],
+     "dont": [
+      "Lend without a plan",
+      "Chase quick returns"
+     ]
+    },
+    {
+     "title": "A Day to Mind the Details",
+     "line": "Small slips can add up today, so slow down and double-check the basics.",
+     "do": [
+      "Proofread before you submit",
+      "Review receipts and charges"
+     ],
+     "dont": [
+      "Rush through forms",
+      "Assume someone else checked"
+     ]
+    },
+    {
+     "title": "A Day to Spend Wisely",
+     "line": "Little expenses and time drains add up today, so stay mindful of where things go.",
+     "do": [
+      "Write down what you spend",
+      "Cancel one unused subscription"
+     ],
+     "dont": [
+      "Buy just because it's on sale",
+      "Say yes to every errand"
+     ]
+    }
+   ]
   },
   "偏财": {
-   "xi": {
-    "title": "A Lucky-Break Day",
-    "line": "Unexpected chances and connections show up. Stay open.",
-    "do": [
-     "Network, or say yes to an invite",
-     "Try a side project"
-    ],
-    "dont": [
-     "Ignore a random opportunity",
-     "Overplan"
-    ]
-   },
-   "ji": {
-    "title": "A Day of Temptations",
-    "line": "Shiny offers and easy money call. Most aren't what they seem today.",
-    "do": [
-     "Ask one more question before saying yes",
-     "Keep your budget in view"
-    ],
-    "dont": [
-     "Spend the windfall before it lands",
-     "Chase every shiny thing"
-    ]
-   }
+   "xi": [
+    {
+     "title": "A Lucky-Break Day",
+     "line": "Unexpected chances and connections show up. Stay open.",
+     "do": [
+      "Network, or say yes to an invite",
+      "Try a side project"
+     ],
+     "dont": [
+      "Ignore a random opportunity",
+      "Overplan"
+     ]
+    },
+    {
+     "title": "A Day to Say Yes",
+     "line": "Surprises and new faces bring fresh possibilities today, so keep your door open.",
+     "do": [
+      "Accept a last-minute invite",
+      "Follow up with a new contact"
+     ],
+     "dont": [
+      "Stick rigidly to the plan",
+      "Dismiss a chance conversation"
+     ]
+    },
+    {
+     "title": "A Day to Explore",
+     "line": "Curiosity serves you well today, so wander a little and see what turns up.",
+     "do": [
+      "Try a new spot or route",
+      "Pitch a small creative venture"
+     ],
+     "dont": [
+      "Dismiss an unusual offer outright",
+      "Lock in every hour"
+     ]
+    }
+   ],
+   "ji": [
+    {
+     "title": "A Day of Temptations",
+     "line": "Shiny offers and easy money call. Most aren't what they seem today.",
+     "do": [
+      "Ask one more question before saying yes",
+      "Keep your budget in view"
+     ],
+     "dont": [
+      "Spend the windfall before it lands",
+      "Chase every shiny thing"
+     ]
+    },
+    {
+     "title": "A Day for Fine Print",
+     "line": "Deals that look easy may hide strings today, so slow down and check before committing.",
+     "do": [
+      "Research before you sign up",
+      "Get a second opinion"
+     ],
+     "dont": [
+      "Fall for limited-time pressure",
+      "Invest in what you don't understand"
+     ]
+    },
+    {
+     "title": "A Day to Stay Focused",
+     "line": "Distractions and side offers pull at you today, so stick with what you've already started.",
+     "do": [
+      "Finish one plan before another",
+      "Keep a spending limit in mind"
+     ],
+     "dont": [
+      "Jump at every side hustle",
+      "Spread yourself too thin"
+     ]
+    }
+   ]
   }
  },
  "elements": {
@@ -1486,5 +2006,1508 @@
    "name": "Twin Streams in Drizzle",
    "art": "gui-gui.webp"
   }
- }
+ },
+ "oracle": {
+  "grades": {
+   "上签": "Upper lot",
+   "中签": "Middle lot",
+   "下签": "Lower lot"
+  },
+  "jiao": {
+   "sheng": {
+    "name": "Yes",
+    "line": "One up, one down — the oracle agrees this is your lot."
+   },
+   "xiao": {
+    "name": "Laughing blocks",
+    "line": "Both face up — ask again, a little more clearly."
+   },
+   "yin": {
+    "name": "Not yet",
+    "line": "Both face down — breathe, then toss again."
+   },
+   "ask": "Toss the moon blocks to confirm this is your lot.",
+   "rules": "Up to three tosses. One up and one down means yes. Three \"not yet\" in a row means it's time to rephrase.",
+   "closed": "The blocks didn't say yes today. Let it rest — come back tomorrow."
+  },
+  "lots": {
+   "1": {
+    "title": "Heaven and Earth Begin",
+    "verse": [
+     "Heaven and earth open, a good beginning",
+     "The day is right, everything in place",
+     "Drawing this is no small thing",
+     "Those who walk true are called forward"
+    ],
+    "reading": "The verse sees a fresh start with everything already in place, and it favors people who act plainly and honestly. Bring out an idea you have been holding back today and say it straight.",
+    "keyword": "Begin With Integrity"
+   },
+   "2": {
+    "title": "The Whale Before the Gate",
+    "verse": [
+     "The whale, not yet a dragon, keeps the river",
+     "Do not try to rise too high yet",
+     "One day its shape will change",
+     "And it will leap the Dragon Gate"
+    ],
+    "reading": "You are still building strength in familiar waters, and pushing for the leap too early would cost you. Pick one piece of work in front of you today and do it thoroughly, saving your energy for later.",
+    "keyword": "Gather Strength"
+   },
+   "3": {
+    "title": "Swallow in the Rain",
+    "verse": [
+     "Through wind and rain, heading home",
+     "Like a swallow on the wing",
+     "Carrying mud to build a nest",
+     "The nest falls, and needs mud again"
+    ],
+    "reading": "The verse sees hard work that keeps coming undone because it is spread too thin. Choose the one thing that matters most today, make it solid, and let the rest wait.",
+    "keyword": "Gather Your Energy"
+   },
+   "4": {
+    "title": "The Old Mirror Made Whole",
+    "verse": [
+     "An ancient mirror, whole once more",
+     "What was parted comes back together",
+     "The house takes on a new look",
+     "Blessings carry on to those who follow"
+    ],
+    "reading": "Something that was broken off is ready to reconnect, and old ties may hold new openings. Reach out today to a friend or former coworker you have not talked to in a while.",
+    "keyword": "Renew Old Ties"
+   },
+   "5": {
+    "title": "Digging for a Spring",
+    "verse": [
+     "Boring into grassland, searching for a spring",
+     "Dig as you might, water won't come",
+     "Then, unplanned, a true friend appears",
+     "Hand in hand, you climb the sky"
+    ],
+    "reading": "Forcing one approach is wearing you out, while help may be waiting somewhere you are not looking. Stop grinding on the same spot today and talk your problem through with someone new.",
+    "keyword": "Walk With Others"
+   },
+   "6": {
+    "title": "Beneath the Eagle's Cliff",
+    "verse": [
+     "Settling low beneath the cliff",
+     "Where the eagle keeps its nest",
+     "It takes a steady, sturdy heart",
+     "Plan well, and the wide world opens"
+    ],
+    "reading": "The verse honors someone willing to start low and carry real weight, planning ahead until there is room to move. Take on a task others are avoiding today and do it carefully.",
+    "keyword": "Do Real Work"
+   },
+   "7": {
+    "title": "Mud on the Mountain Road",
+    "verse": [
+     "Wandering past barrier after barrier",
+     "Wading through mud to cross the mountains",
+     "Hoping to find work in distant places",
+     "A thousand miles, and still not home"
+    ],
+    "reading": "You may feel pulled to keep searching elsewhere, but restless motion is wearing you down right now. Hold off on any sudden change of direction today and steady the work already in your hands.",
+    "keyword": "Hold Your Ground"
+   },
+   "8": {
+    "title": "Pines Through Every Season",
+    "verse": [
+     "Pines and cypress thick and thriving",
+     "Rain, snow, wind and frost can't harm them",
+     "One day, suddenly, they're put to use",
+     "Grown into beams that hold a house"
+    ],
+    "reading": "Your steady growth through pressure is quietly turning into real strength. Instead of rushing to prove yourself today, spend an hour sharpening a skill you will need later.",
+    "keyword": "Grow Deep Roots"
+   },
+   "9": {
+    "title": "The Moon at Its Height",
+    "verse": [
+     "Please leave aside the private scheme",
+     "Bring this to the fair-minded instead",
+     "A clear heart, shining clean",
+     "Like the bright moon high at center sky"
+    ],
+    "reading": "The verse asks for a clear, open heart, bright and plain as the full moon. If there is a disagreement today, put it openly on the table and speak fairly.",
+    "keyword": "Speak Openly"
+   },
+   "10": {
+    "title": "Holding a Lamp, Seeking Fire",
+    "verse": [
+     "Priceless jade lies hidden in your stone",
+     "Yet you go searching distant lands",
+     "Like holding a lamp and hunting fire",
+     "Better to stop and look close"
+    ],
+    "reading": "What you are chasing far away may already be within reach. Take stock today of the skills, tools and people you already have before looking anywhere else.",
+    "keyword": "Look Within"
+   },
+   "11": {
+    "title": "A Guide on the Road",
+    "verse": [
+     "You hope for something rare and fine",
+     "But family matters keep you busy",
+     "In the end you hit the mark",
+     "A guide will lead you to good ground"
+    ],
+    "reading": "Small obligations have slowed you down, but someone with experience can help you find the way. When you get stuck today, ask a mentor or senior colleague one clear question.",
+    "keyword": "Ask for Guidance"
+   },
+   "12": {
+    "title": "The Turn Is Near",
+    "verse": [
+     "Hard times leave, good times step close",
+     "A wise friend comes down the mountain",
+     "Word comes with the tiger and hare",
+     "Set your mind, and the rush turns calm"
+    ],
+    "reading": "The verse sees a turn from hard to easier that is only a step away. If something small goes wrong today, hold off on judging it and try a different angle.",
+    "keyword": "Turn the Tide"
+   },
+   "13": {
+    "title": "The Golden Belt",
+    "verse": [
+     "Raised in a house of plenty",
+     "Fine things all around you",
+     "Given a purple robe and golden belt",
+     "Your name travels across four seas"
+    ],
+    "reading": "You have a real foundation to stand on, and the chance to be recognized for it. Show one of your strengths openly today, and pair it with an easy, humble manner.",
+    "keyword": "Show Your Strengths"
+   },
+   "14": {
+    "title": "Crane Out of the Cage",
+    "verse": [
+     "Like a crane leaving its cage",
+     "Free of the bars, every road opens",
+     "North, south, east, west, nothing blocks",
+     "You may climb straight to the clouds"
+    ],
+    "reading": "Something that has been holding you in is ready to be let go, and the way opens once it is. Drop one old habit or stale task today and use that space for what you actually want to do.",
+    "keyword": "Break Free"
+   },
+   "15": {
+    "title": "Birds Without a Nest",
+    "verse": [
+     "The traveler swallows a bitter day",
+     "If trouble flares, don't step close",
+     "The nest is broken, the birds unsheltered",
+     "Seek the deep woods and settle safe"
+    ],
+    "reading": "You may be carrying a grievance that is hard to swallow, and reacting now would only scatter you further. Skip the argument today, find a quiet place to steady yourself, and make your case later.",
+    "keyword": "Steady Yourself First"
+   },
+   "16": {
+    "title": "Jade in the Dust",
+    "verse": [
+     "Worried brows begin to ease",
+     "Gladness breaks through the clouds",
+     "Like jade hidden in the dirt",
+     "A skilled hand lifts it into light"
+    ],
+    "reading": "Your worries are starting to clear, and good work of yours is waiting to be found. Polish a piece of your work today and show it to someone who knows the field.",
+    "keyword": "Step Into View"
+   },
+   "17": {
+    "title": "A Painted Cake",
+    "verse": [
+     "Don't listen to idle gossip",
+     "Keep your own quiet practice, morning and night",
+     "If wild talk is taken as truth",
+     "Can a painted cake ease hunger"
+    ],
+    "reading": "Rumors and empty promises are not worth building on. Check any news you hear today before acting on it, and put your effort into what is real.",
+    "keyword": "Check the Facts"
+   },
+   "18": {
+    "title": "Sun Sets, Moon Rises",
+    "verse": [
+     "The golden sun sinks, the moon climbs east",
+     "Day and night turning since ancient times",
+     "Seekers of every path do well",
+     "Every trade follows its own heart"
+    ],
+    "reading": "Like day and night, things are moving in their natural rhythm, and your path fits within it. Work your plan at your own pace today, do your part well, and let the rest unfold.",
+    "keyword": "Keep Your Rhythm"
+   },
+   "19": {
+    "title": "Boat at the Rapids",
+    "verse": [
+     "Launching a boat at the rapids' edge",
+     "Why push into wind and waves",
+     "If you want a safe, calm crossing",
+     "Wait for the water to settle"
+    ],
+    "reading": "You are facing fast, unsettled water, and rushing through it now adds risk. If something urgent and tangled lands on you today, pause and gather the facts before you move.",
+    "keyword": "Wait for Calm"
+   },
+   "20": {
+    "title": "Clear Skies After Spring Rain",
+    "verse": [
+     "After long spring rain, the sky clears",
+     "Sun and moon grow slowly bright",
+     "Old troubles fade, new things take hold",
+     "Watch, and leap the Dragon Gate"
+    ],
+    "reading": "A long gray stretch is lifting, making room to close the old and open the new. Wrap up one lingering task today, then start the next thing with a free hand.",
+    "keyword": "Turn the Page"
+   },
+   "21": {
+    "title": "Dragon and Serpent Meet",
+    "verse": [
+     "Yin and yang join as they should",
+     "Two families meet in quiet joy",
+     "See the dragon and serpent come together",
+     "Bears enter dreams, the circle complete"
+    ],
+    "reading": "The verse sees two sides fitting well together, each completing the other. It is a good day to talk through a partnership or settle an agreement, and to share a good meal with someone close.",
+    "keyword": "Join Hands"
+   },
+   "22": {
+    "title": "Rain on Dry Fields",
+    "verse": [
+     "In drought, the fields lie parched",
+     "Then sweet rain falls, soaking through",
+     "Flowers, fruit and grass drink deep",
+     "Now you know what rain is worth"
+    ],
+    "reading": "If you are in a dry stretch, help may arrive in a form you did not expect. Notice who is offering a hand today, and look for one small way to help someone else too.",
+    "keyword": "Accept the Help"
+   },
+   "23": {
+    "title": "Reaching for the Moon Laurel",
+    "verse": [
+     "Reaching for the laurel on the moon",
+     "The sky's gate is not closed to you",
+     "Suddenly, good word arrives",
+     "Everyone smiles at the flower you wear"
+    ],
+    "reading": "The way up is more open than you think, and good word can arrive when you least expect it. Send the application, proposal or invitation you have been holding today.",
+    "keyword": "Take the Leap"
+   },
+   "24": {
+    "title": "Petals on the Water",
+    "verse": [
+     "No clear reason, no settled home",
+     "Drifting like petals on the water",
+     "Seeking favor takes hard effort",
+     "And still it ends in tangled threads"
+    ],
+    "reading": "Things feel muddled and you may be drifting with every current right now. Hold off on big decisions today, stay out of gossip, and sort out your own tasks one at a time.",
+    "keyword": "Untangle the Threads"
+   },
+   "25": {
+    "title": "Past the Worry",
+    "verse": [
+     "Past several rounds of worry and danger",
+     "From now, you stand on firm ground",
+     "An easy heart finds easy plans",
+     "Meet someone wise, and do great work"
+    ],
+    "reading": "You have come through a stretch of worry and can start building again on steadier footing. Loosen your shoulders today and spend some time talking with someone you trust; a good idea may come from a casual chat.",
+    "keyword": "Ease Your Mind"
+   },
+   "26": {
+    "title": "A Letter From Afar",
+    "verse": [
+     "Word drifts down and turns to air",
+     "A letter arrives from the sky's edge",
+     "It promises the honors you hoped for",
+     "Yet in the end, it is empty"
+    ],
+    "reading": "Something that sounds wonderful may be thinner than it looks, and your steady ground matters more than a bright promise. Today, before you count on any offer, ask one clear follow-up question and keep tending your own work.",
+    "keyword": "Keep to Your Ground"
+   },
+   "27": {
+    "title": "Back Against the Mountain",
+    "verse": [
+     "One plan, one use, one written page",
+     "You weigh before and after, and hesitate",
+     "When the hour comes, help arrives",
+     "Like a mountain wall to lean on"
+    ],
+    "reading": "You've been thinking hard and holding back, and the verse says support tends to appear when the timing is right. Today, write your plan on one page and ask someone you trust for honest feedback before you choose when to move.",
+    "keyword": "Plan, Then Move"
+   },
+   "28": {
+    "title": "Moon Behind Clouds",
+    "verse": [
+     "In the east the moon rises, lovely",
+     "In a moment clouds cover its light",
+     "It waxes full, and it wanes",
+     "Idle talk is only idle talk"
+    ],
+    "reading": "Something clear has been briefly clouded over, perhaps by a misunderstanding or loose talk, but the light is still there. Today, resist the urge to explain yourself right away; let things settle and revisit it once the air has cleared.",
+    "keyword": "Let the Clouds Pass"
+   },
+   "29": {
+    "title": "The Sword Leaves Its Sheath",
+    "verse": [
+     "A sword drawn from its case shines",
+     "Sheathed, it gathered no dust at all",
+     "Now a steady hand brings it out",
+     "Its edge and bearing earn respect"
+    ],
+    "reading": "Skills you've kept polished out of sight are ready to be seen, especially alongside someone who believes in you. Today, volunteer for one meaningful task and let people watch you do it well.",
+    "keyword": "Show Your Edge"
+   },
+   "30": {
+    "title": "Snake in the Grass",
+    "verse": [
+     "Don't go asking others for favors",
+     "A crane flies in; hidden arrows follow",
+     "Gather firewood, and a snake waits",
+     "Sharp tongues may leave you uneasy"
+    ],
+    "reading": "This is a moment to move carefully, since not every helping hand or friendly word is what it seems. Today, handle the important things yourself, ask fewer favors, and keep a little back when you speak.",
+    "keyword": "Speak With Care"
+   },
+   "31": {
+    "title": "Tea in a Quiet Corner",
+    "verse": [
+     "Sit at ease in a quiet place",
+     "Well fed, sip tea, sit or lie down",
+     "Set down body and mind, no rush",
+     "No blame or trouble comes calling"
+    ],
+    "reading": "Nothing here needs to be forced, and calm is your advantage right now. Today, work through your list at an even pace and set aside fifteen minutes for tea and doing nothing.",
+    "keyword": "Ease Your Mind"
+   },
+   "32": {
+    "title": "Jade Inside the Stone",
+    "verse": [
+     "The road ahead is distant, yet sure",
+     "Who knows there is jade within stone",
+     "One day a skilled hand splits it open",
+     "And the green jade is finally seen"
+    ],
+    "reading": "Your worth may not be visible yet, but it is real and waiting for the right eyes. Today, polish one skill a little further and share your work with someone who truly knows the craft.",
+    "keyword": "Await the Right Eye"
+   },
+   "33": {
+    "title": "Treasure Already Within",
+    "verse": [
+     "You carry treasures beyond price",
+     "Holding jade, why search outside",
+     "Better to wait for a discerning eye",
+     "Ease your heart, then ease it more"
+    ],
+    "reading": "Much of what you're looking for elsewhere is already in you. Today, skip the comparisons, trust what you've built, and give your full attention to the task in front of you.",
+    "keyword": "Trust Yourself"
+   },
+   "34": {
+    "title": "Red Sun at Noon",
+    "verse": [
+     "Coming and going with grace and respect",
+     "Words loyal and kind, promises kept",
+     "When the heart is unclear, let it settle",
+     "Like the bright red sun at noon"
+    ],
+    "reading": "Steady integrity is your strongest footing, and a quiet heart makes the way clear. Today, follow through on one thing you told a friend or teammate you would do.",
+    "keyword": "Keep Your Word"
+   },
+   "35": {
+    "title": "Clearing the Thorns",
+    "verse": [
+     "Straighten your robes, renew the old ways",
+     "The path seems endless, yet it pays",
+     "Sweep the thorns from the road ahead",
+     "Three agree, and walk as one again"
+    ],
+    "reading": "This is a time to regroup, reset, and find common purpose with the people around you. Today, sit down with your team to realign on one goal and clear away a small obstacle together.",
+    "keyword": "Regroup and Restart"
+   },
+   "36": {
+    "title": "The Monkey Slips Its Chain",
+    "verse": [
+     "Don't fret over the troubles before you",
+     "The open ground holds much to gather",
+     "Like a monkey slipping its golden chain",
+     "Home to its mountain cave, at ease"
+    ],
+    "reading": "Something that has been weighing on you is less binding than it feels. Today, deal with one task that's been hanging over you, and notice how much lighter you feel afterward.",
+    "keyword": "Lay Down the Load"
+   },
+   "37": {
+    "title": "Candle in the Wind",
+    "verse": [
+     "Waiting for calm and better days",
+     "A candle in the wind won't hold",
+     "Better to sit in the inner hall",
+     "Where a still flame shines unshaken"
+    ],
+    "reading": "Pushing hard or standing out right now would only make your light waver. Today, keep a low profile, work quietly at your own rhythm, and skip one unnecessary errand or meeting.",
+    "keyword": "Stay in Stillness"
+   },
+   "38": {
+    "title": "Moonlight on a Secret Book",
+    "verse": [
+     "Moonlight on a secret book, so still",
+     "Then sudden clouds and mist roll in",
+     "Ease your heart until the mist lifts",
+     "Then is the time to change course"
+    ],
+    "reading": "The way forward is hidden for a while, and that is no reason to worry. Today, hold off on big changes, rest your mind, and make your next move once things look clear again.",
+    "keyword": "Wait for Clear Skies"
+   },
+   "39": {
+    "title": "Polishing Stone Into Mirror",
+    "verse": [
+     "News from far away is hard to read",
+     "Don't overthink or force the outcome",
+     "Grinding a stone to make a mirror",
+     "Only spends your strength in vain"
+    ],
+    "reading": "Some results simply aren't yours to reach for right now, and straining after them only wears you down. Today, set aside one thing you can't control and spend your energy on something you can.",
+    "keyword": "Don't Force It"
+   },
+   "40": {
+    "title": "Sun Sets, Moon Rises",
+    "verse": [
+     "The red sun sinks in the west",
+     "The moon rabbit climbs in the east",
+     "Yin grows, yang fades, and things flow",
+     "A gentle hand now fills the heart"
+    ],
+    "reading": "The season around you is shifting, and a softer, more receptive approach suits this turn. Today, adjust one plan to fit the change instead of resisting it, and try a gentler tone in a tricky conversation.",
+    "keyword": "Bend With Change"
+   },
+   "41": {
+    "title": "Sweetness With a Hook",
+    "verse": [
+     "Remember the good advice you've heard",
+     "Don't take a thief in as kin",
+     "Don't crave the sweetness of the moment",
+     "Think how it may look years ahead"
+    ],
+    "reading": "An offer that looks unusually sweet deserves a second look before you commit. Today, when something seems too generous, take time to learn more about who is offering before you say yes.",
+    "keyword": "Look Before You Commit"
+   },
+   "42": {
+    "title": "Grace for Every Living Thing",
+    "verse": [
+     "Grace pours down from on high",
+     "Ask again; nothing lost, nothing more",
+     "All living things share in its blessing",
+     "On earth and above, the way opens"
+    ],
+    "reading": "You are surrounded by more kindness than you may notice, and it flows outward easily now. Today, pass some of it on: call someone in your family or do a friend a small favor.",
+    "keyword": "Give Back"
+   },
+   "43": {
+    "title": "All Things Complete",
+    "verse": [
+     "Heaven and earth shift, all things whole",
+     "Tend yourself, sustain yourself, find peace",
+     "The countless forms of life all shine",
+     "Each thing as you wish; give thanks"
+    ],
+    "reading": "You have what you need to stand on your own and move things forward at your own pace. Today, take one project fully into your own hands, set your own rhythm, and give it your honest best.",
+    "keyword": "Stand on Your Own"
+   },
+   "44": {
+    "title": "Black and White Board",
+    "verse": [
+     "Two well-matched players face the board",
+     "Black and white, the game undecided",
+     "A single move decides it all",
+     "Find the move that serves you best"
+    ],
+    "reading": "You are evenly matched with a challenge, and one well-considered step will matter more than many hurried ones. Today, before you act on something competitive, pause to find the single key move and make it with care.",
+    "keyword": "One Key Move"
+   },
+   "45": {
+    "title": "Spring Water When Thirsty",
+    "verse": [
+     "Gentleness has always outlasted force",
+     "A house of kindness thrives and flourishes",
+     "Whoever draws this lot today",
+     "Finds sweet water in their thirst"
+    ],
+    "reading": "Softness and goodwill are your real strength now, and they refresh everyone around you. Today, meet a disagreement with patience and one extra measure of understanding.",
+    "keyword": "Soft Overcomes Hard"
+   },
+   "46": {
+    "title": "Old Tree Flowers Again",
+    "verse": [
+     "Keep patiently to your old path",
+     "Hold your heart steady, think no ill",
+     "Wait for someone's gentle push",
+     "And the old dry branch will bloom"
+    ],
+    "reading": "This isn't the moment to switch directions; steady work in your current lane is quietly building toward something. Today, do your usual work well and keep an eye out for the person whose small help could make the difference.",
+    "keyword": "Stay the Course"
+   },
+   "47": {
+    "title": "Flowers on Brocade",
+    "verse": [
+     "Flowers on brocade, colors brighter still",
+     "Good fortune arrives, joy on both sides",
+     "Don't regret that recognition came late",
+     "One leap, and the word spreads far"
+    ],
+    "reading": "Something you've worked toward for a long time is gaining momentum, and late doesn't mean less. Today, give your long-held goal one more determined push.",
+    "keyword": "See It Through"
+   },
+   "48": {
+    "title": "The Great Bird Takes Wing",
+    "verse": [
+     "In autumn a small bird becomes a roc",
+     "Joyful, it loves to soar and climb",
+     "Ten thousand miles into the clouds",
+     "No other bird can follow it"
+    ],
+    "reading": "You are ready for a bigger stretch than you've been allowing yourself. Today, take on one goal slightly beyond your comfort zone and give yourself room to grow into it.",
+    "keyword": "Rise With the Wind"
+   },
+   "49": {
+    "title": "Water Turned to Ice",
+    "verse": [
+     "Sky cold, earth frozen, water ice",
+     "Why grasp for honors now",
+     "Better to keep to yourself, sit still",
+     "When the time turns, all grows clear"
+    ],
+    "reading": "Conditions are too cold for forcing hard things forward, and that is a season, not a verdict. Today, prepare quietly for a task you've been pushing, and save the real effort for when things warm up.",
+    "keyword": "Wait for the Thaw"
+   },
+   "50": {
+    "title": "Sails Full of Wind",
+    "verse": [
+     "Lakes and seas are yours to roam",
+     "Raise the sail high and steer freely",
+     "When the fair wind comes, it carries you",
+     "A boat laden with treasures, layer on layer"
+    ],
+    "reading": "Momentum is on your side, and open water invites you to explore. Today, reach out to someone new or visit a place outside your usual circle, and see what the trip brings.",
+    "keyword": "Sail With the Wind"
+   },
+   "51": {
+    "title": "A Cool Summer Wind",
+    "verse": [
+     "The longest days of summer burn,",
+     "and everyone is worn down by heat.",
+     "Yet the world knows how you feel:",
+     "a soft breeze comes, and it cools."
+    ],
+    "reading": "You may be running hot and restless, but relief tends to arrive once you stop fighting the heat. When irritation rises today, step away for a few minutes and let yourself cool down before you respond.",
+    "keyword": "Calm Brings Cool"
+   },
+   "52": {
+    "title": "Reaching for the Moon",
+    "verse": [
+     "You reach to catch the moon in water,",
+     "and after all that work, nothing's there.",
+     "Let idle talk and gossip pass,",
+     "or you'll wear yourself out alone."
+    ],
+    "reading": "You may be pouring effort into something that looks real but can't be held. Today, check whether your goal is concrete, and skip any argument that won't change anything.",
+    "keyword": "Stay Practical"
+   },
+   "53": {
+    "title": "Dragon and Tiger Call",
+    "verse": [
+     "A setback turns into your moment,",
+     "dragon and tiger calling in harmony.",
+     "The clear sky holds an open road,",
+     "and your chance will come again."
+    ],
+    "reading": "The last disappointment is not the final word on where you're headed. Today, try the same thing once more, but change one part of how you go about it.",
+    "keyword": "Try Again"
+   },
+   "54": {
+    "title": "Treasure in a Dream",
+    "verse": [
+     "You find treasure in a dream",
+     "and wake to empty hands.",
+     "The hill you dug gave back a hoe;",
+     "take another road, with a hand to help."
+    ],
+    "reading": "Holding tighter to one plan may only leave you more tired right now. Today, try a different angle on the problem or ask someone to lend a hand, and steady things first.",
+    "keyword": "Take Another Road"
+   },
+   "55": {
+    "title": "Eat When Hungry",
+    "verse": [
+     "Good parents pass down to children and grandchildren;",
+     "food and clothing come in plenty.",
+     "The elders at home are content;",
+     "eat when hungry, sleep when tired."
+    ],
+    "reading": "Your life right now is asking for nothing dramatic, just ordinary care done well. Today, put family and daily life first: eat a proper meal and get to bed a little early.",
+    "keyword": "Ordinary Good Days"
+   },
+   "56": {
+    "title": "Stream Over Small Stones",
+    "verse": [
+     "Over small stones the stream runs loud;",
+     "under wind and moon, helpers are busy.",
+     "Ask which way the road goes,",
+     "and don't follow the flowers' scent into the woods."
+    ],
+    "reading": "There are good people and good roads around you, but the way forward isn't obvious yet. Today, get clear on where you're going before you start, and notice what's tempting you off course.",
+    "keyword": "Ask Before Going"
+   },
+   "57": {
+    "title": "Wind Past the Ear",
+    "verse": [
+     "Gossip is wind passing your ear;",
+     "what you need will gather on its own.",
+     "Don't keep holding the old story;",
+     "your heart and theirs are much alike."
+    ],
+    "reading": "Old grievances and chatter are taking up more of your mind than they deserve. Today, let one past slight go, and in a conversation look for the ground you share instead of the point you disagree on.",
+    "keyword": "Release Old Grudges"
+   },
+   "58": {
+    "title": "Tend Your Own Field",
+    "verse": [
+     "Remember these plain words:",
+     "don't chase a new trade far from home.",
+     "Keep to the craft you already know;",
+     "other roads won't serve you now."
+    ],
+    "reading": "Your steadiness right now comes from the work you already know, not from something unfamiliar. Today, skip the side quest and go one level deeper on a thing you're already good at.",
+    "keyword": "Tend Your Craft"
+   },
+   "59": {
+    "title": "A Tower Ringed by Thorns",
+    "verse": [
+     "You climb the high tower to hide;",
+     "thorns grow thick on every side.",
+     "The sky is high, the span uncertain;",
+     "grab one thing and you may lose two."
+    ],
+    "reading": "This is a moment where pushing forward could cost more than it gains. Today, keep a low profile, take no big risks, and look after your own plans first.",
+    "keyword": "Lie Low"
+   },
+   "60": {
+    "title": "Kindling for the Fire",
+    "verse": [
+     "You carry kindling to fight a fire,",
+     "and it burns across three thousand miles.",
+     "Rather than chase glory now,",
+     "put things away and spare your heart."
+    ],
+    "reading": "Some of what you're doing to fix a conflict may be feeding it instead. Today, if tension flares, pause before you answer and give it time to cool.",
+    "keyword": "Cool It Down"
+   },
+   "61": {
+    "title": "Songs Under the Moon",
+    "verse": [
+     "Poems at sunset, songs beneath the moon,",
+     "laughing along with the moment's play.",
+     "Some meetings can't be avoided;",
+     "voices rise together in one song."
+    ],
+    "reading": "Connection is finding you through easy, social moments rather than careful planning. Today, relax at whatever gathering you're in and be sincere, because someone may surprise you.",
+    "keyword": "Meet What Comes"
+   },
+   "62": {
+    "title": "Danger That Isn't",
+    "verse": [
+     "Dawn and dusk, you're quietly upheld;",
+     "what looks like danger isn't danger.",
+     "When a trusted guide takes your hand,",
+     "good things follow close behind."
+    ],
+    "reading": "The problem in front of you may look worse than it actually is. Today, stay calm and bring it to someone you trust, since it may untangle faster than you expect.",
+    "keyword": "Stay Composed"
+   },
+   "63": {
+    "title": "A Needle Lost at Sea",
+    "verse": [
+     "Long ago a needle slipped from the boat;",
+     "today you search the sea again.",
+     "Even if the needle can be found,",
+     "it will cost you time and care."
+    ],
+    "reading": "You're trying to recover something lost, and it's possible, but not quick. Today, write out the steps it would take and work through just the first one.",
+    "keyword": "Patient Recovery"
+   },
+   "64": {
+    "title": "Fish in the Net",
+    "verse": [
+     "A fish swims in a blue-green pool,",
+     "then the net closes on every side.",
+     "You search for a way to turn free;",
+     "struggling now only stirs up trouble."
+    ],
+    "reading": "You may feel hemmed in, and thrashing about would only tangle things further. Today, avoid stirring up conflict and simply watch, quietly, for where the opening is.",
+    "keyword": "Watch for Openings"
+   },
+   "65": {
+    "title": "Joy That Isn't Yet",
+    "verse": [
+     "The joy in front of you isn't joy yet;",
+     "not in danger, and not at ease.",
+     "Why cut flesh to patch a wound?",
+     "Keep to the old way and wait."
+    ],
+    "reading": "Something may look good on the surface while quietly costing you more than it gives. Today, don't trade a long-term good for a short-term win; hold your ground and wait for a better time.",
+    "keyword": "Hold and Wait"
+   },
+   "66": {
+    "title": "Frost at Dusk",
+    "verse": [
+     "The road is steep, the horse is tired,",
+     "the troops are scattered and worn.",
+     "High waves split the oar and boat;",
+     "at dusk, flowers fade and frost comes down."
+    ],
+    "reading": "This stretch is rough on several fronts at once, and that's a reason to slow down, not to push. Today, rest and restock, and set out again only when you're properly ready.",
+    "keyword": "Rest and Recharge"
+   },
+   "67": {
+    "title": "A Golden Scale",
+    "verse": [
+     "A golden thread weighs your heart:",
+     "no more, no less, not light or heavy.",
+     "Live upright all your days,",
+     "and your gifts will shine on their own."
+    ],
+    "reading": "Your fairness and honesty are the strongest things you have going right now. Today, when you make a call, treat everyone evenly and stick to the facts; people notice.",
+    "keyword": "Fair and Upright"
+   },
+   "68": {
+    "title": "Joy at the Gate",
+    "verse": [
+     "Good news gathers at your door;",
+     "a house of kindness grows bright.",
+     "Plans and harvests come together,",
+     "and what aches finds its remedy."
+    ],
+    "reading": "Good things are growing out of the kindness you and those around you have built up. Today, gather with family or friends, share a piece of good news, and pass the good mood along.",
+    "keyword": "Share the Joy"
+   },
+   "69": {
+    "title": "Plum on a Winter Ridge",
+    "verse": [
+     "Winter comes; one plum branch on the ridge,",
+     "leaves gone, wood bare, yet unbroken.",
+     "When spring arrives in a hurry,",
+     "it blooms first among all flowers."
+    ],
+    "reading": "If you're in a low season, it is a season, not a verdict. Today, don't give up on the thing you care about; do one small thing to keep it alive until warmer days.",
+    "keyword": "Endure Till Spring"
+   },
+   "70": {
+    "title": "The Restless Bee",
+    "verse": [
+     "Day after day, like a bee for flowers,",
+     "you fly southwest, then off to the east.",
+     "Spring ends, the blossoms fall and vanish,",
+     "yet you keep the same old route."
+    ],
+    "reading": "Running in many directions may be leaving you tired with little to show for it. Today, stop and name the one thing you actually want, and put your energy there.",
+    "keyword": "Focus on One"
+   },
+   "71": {
+    "title": "Two Arrows, One Bow",
+    "verse": [
+     "You see a dragon at the crossroads,",
+     "a heart pulled between two homes.",
+     "One bow strung with two arrows,",
+     "and the horse can't settle down."
+    ],
+    "reading": "You may be trying to keep two options alive, and it's keeping you unsettled. Today, compare them honestly side by side, then choose one and give it your full effort.",
+    "keyword": "Choose One"
+   },
+   "72": {
+    "title": "Honey and the Sting",
+    "verse": [
+     "To get the honey, you go to the hive,",
+     "but fear the needle in its tail.",
+     "Another path may open before you,",
+     "yet in the dark, thorns grow thick."
+    ],
+    "reading": "An opportunity that looks sweet may carry a cost you haven't seen yet. Today, ask a few more questions about it and understand the price before you decide.",
+    "keyword": "Think Twice"
+   },
+   "73": {
+    "title": "Spring Thunder Wakes",
+    "verse": [
+     "Spring thunder rolls, and the insects sing;",
+     "with one turn you rise from the mud.",
+     "Now you see how comings and goings work;",
+     "in a single morning, you become a dragon."
+    ],
+    "reading": "The ground under you is waking up, and the change you've been waiting on is ready to move. Today, take one bold, concrete step toward the thing you've wanted to start.",
+    "keyword": "Seize the Moment"
+   },
+   "74": {
+    "title": "A Bird Into the Cage",
+    "verse": [
+     "Like a swan that flies into a cage,",
+     "you try to turn, but find no way.",
+     "North, south, east, west, each door is hard;",
+     "this is a time to wait."
+    ],
+    "reading": "You may have walked into a tight spot, and forcing your way out now would only make it tighter. Today, hold off on bold moves or new promises, and take time to see clearly where you stand.",
+    "keyword": "Wait and See"
+   },
+   "75": {
+    "title": "Carrying a Tiger Uphill",
+    "verse": [
+     "Like carrying a tiger over a high mountain,",
+     "trembling, your courage gone cold.",
+     "Then, without warning, good things turn up;",
+     "still, keep yourself safe and steady."
+    ],
+    "reading": "You're under real pressure, and careful, steady steps are what will carry you through it. Today, take things in order and protect your footing; a turn for the better may be just one step ahead.",
+    "keyword": "Move With Care"
+   },
+   "76": {
+    "title": "The Carp in Deep Water",
+    "verse": [
+     "Fish and dragons swim in one pond,",
+     "so keep still in the deep water.",
+     "One morning your head breaks the surface",
+     "and you leap the gate of dragons."
+    ],
+    "reading": "You are in an ordinary spot among many others, and your moment hasn't arrived yet. Today, do the unglamorous work in front of you steadily and let your strength quietly build.",
+    "keyword": "Wait in the Deep"
+   },
+   "77": {
+    "title": "Fame Beyond the Clouds",
+    "verse": [
+     "In dreams you speak of great riches,",
+     "and fame drifts far beyond the clouds.",
+     "Long rivers and distant mountains blur the truth;",
+     "a wise word makes you smile again."
+    ],
+    "reading": "Big dreams are floating out of reach right now, too far away to act on. Today, turn one plan into a single first step, and listen openly if someone offers advice.",
+    "keyword": "Take the First Step"
+   },
+   "78": {
+    "title": "Water Just Warm",
+    "verse": [
+     "Cold water, not yet brought to boil,",
+     "rests neither cold nor hot, just warm.",
+     "To walk the world you need nothing else",
+     "when a hundred skills live in your hands."
+    ],
+    "reading": "You're at a good, balanced point, and what you carry inside is your real strength. Today, spend some time learning or sharpening one skill so you feel steady wherever you go.",
+    "keyword": "Sharpen Your Skills"
+   },
+   "79": {
+    "title": "The Unpaid Promise",
+    "verse": [
+     "You made a wish to stay safe,",
+     "and safe you stayed, but never repaid.",
+     "Do not forget what you once vowed;",
+     "a promise is not a light thing."
+    ],
+    "reading": "Some promise you made, maybe a small one, is still waiting to be kept. Today, look over what you've told others you'd do and follow through on at least one of them.",
+    "keyword": "Keep Your Word"
+   },
+   "80": {
+    "title": "Sun and Moon Shine Clear",
+    "verse": [
+     "You climbed the high cliffs seeking wisdom",
+     "when a call came from an unexpected door.",
+     "Sun and moon keep shining in clear skies;",
+     "an honest name travels across four seas."
+    ],
+    "reading": "You're walking one path, and an opening may appear from a direction you weren't watching. Today, keep doing things the honest way and stay ready to say yes when a good chance shows up.",
+    "keyword": "Upright and Ready"
+   },
+   "81": {
+    "title": "Fair Wind Home",
+    "verse": [
+     "Parasol leaves fall as autumn closes,",
+     "and the traveler drifts homeward like a cloud.",
+     "The sky lends a strong and steady wind,",
+     "carrying a boat full of treasures home."
+    ],
+    "reading": "A season of effort is winding down, and the wind is at your back. Today, wrap up one thing you've finished, write down what you learned, and let others see the work.",
+    "keyword": "Bring It Home"
+   },
+   "82": {
+    "title": "A Lotus in the Fire",
+    "verse": [
+     "Fierce flames climb into the sky,",
+     "yet a lotus blooms inside the fire.",
+     "In the end it comes to no harm,",
+     "still growing leaves, roots, and branches."
+    ],
+    "reading": "Things around you may feel heated, but what matters to you is not being destroyed. Today, when pressure rises, slow your breathing and respond one step at a time.",
+    "keyword": "Calm Through Fire"
+   },
+   "83": {
+    "title": "Waiting for the Full Moon",
+    "verse": [
+     "Like the moon on its third night,",
+     "half there, half missing, not yet whole.",
+     "Wait for the fifteenth's gentle evening,",
+     "when light and fullness reach everywhere."
+    ],
+    "reading": "What you're working on is only halfway formed, and that's simply where it is in its cycle. Today, take the next ordinary step and let it grow toward complete in its own time.",
+    "keyword": "Let It Grow Whole"
+   },
+   "84": {
+    "title": "Dreaming Under the Pines",
+    "verse": [
+     "Trading good character for a name,",
+     "even good fortune can turn around.",
+     "Drunk, you lose track of the road,",
+     "dreaming hazily in the pine shade."
+    ],
+    "reading": "Right now it's easy to get swept up in image, noise, or other people's expectations and lose your footing. Today, keep a clear head, skip one optional social obligation, and don't make big decisions in the heat of the moment.",
+    "keyword": "Stay Clear-Headed"
+   },
+   "85": {
+    "title": "Fog on the Mountain Road",
+    "verse": [
+     "Dark clouds and fog veil the mountain road;",
+     "still the moon returns to full.",
+     "Wake from the long dream through your books,",
+     "and a guide will lead you higher."
+    ],
+    "reading": "The way ahead isn't clear yet, and pushing blindly won't help. Today, invest in yourself by reading or learning something useful, and notice who around you might point the way.",
+    "keyword": "Learn While You Wait"
+   },
+   "86": {
+    "title": "Thunder on Open Ground",
+    "verse": [
+     "Spring flowers blaze across the terrace,",
+     "and carts roll in from far away.",
+     "Leap the three great waves at the gate,",
+     "like thunder breaking on open ground."
+    ],
+    "reading": "Energy is gathering around you, and this is a moment to make your move. Today, give your full effort to the exam, pitch, or presentation that matters most.",
+    "keyword": "Go All In"
+   },
+   "87": {
+    "title": "Halfway Up at Sunset",
+    "verse": [
+     "Halfway up the ridge, the sun sinks low;",
+     "steep cliffs offer no easy rest.",
+     "Look up, the sky still watches over you,",
+     "and you are standing on safe ground."
+    ],
+    "reading": "You're in a tiring stretch, with the hardest part of the climb still around you. Today, slow down, focus on your next secure step, and reach out to someone who has your back.",
+    "keyword": "Steady Steps"
+   },
+   "88": {
+    "title": "The Wooden Tiger",
+    "verse": [
+     "A tiger carved of wood guards the door,",
+     "fierce to look at, harmless to touch.",
+     "There is truly nothing here to fear;",
+     "only worry makes the heart jump."
+    ],
+    "reading": "Something or someone looks more threatening than it actually is. Today, before reacting, take a calm second look and check the facts.",
+    "keyword": "Don't Scare Yourself"
+   },
+   "89": {
+    "title": "Jade Inside the Stone",
+    "verse": [
+     "Your comings and goings move with ease,",
+     "like flawless jade hidden in stone.",
+     "When a wise friend shows you where to look,",
+     "the treasure shines and brings you joy."
+    ],
+    "reading": "There is real value in something you have that hasn't been seen yet, maybe not even by you. Today, ask someone you trust to look over your work and point out what you might be missing.",
+    "keyword": "Seek Good Counsel"
+   },
+   "90": {
+    "title": "A Letter on the Wind",
+    "verse": [
+     "Suddenly good news takes to the sky,",
+     "and a boat comes home full of treasure.",
+     "Ask about the road ahead: it is kind,",
+     "with helping hands still waiting further on."
+    ],
+    "reading": "Momentum is on your side, and support is closer than you think. Today, move forward on something you've been waiting to start, and reach out to one person who can help.",
+    "keyword": "Ride the Momentum"
+   },
+   "91": {
+    "title": "Road Wide as Sky",
+    "verse": [
+     "Smooth out your worried brow and step forward;",
+     "the road ahead is turning bright.",
+     "A great path opens, wide as the sky,",
+     "and open hands make an open heart."
+    ],
+    "reading": "The worries that held you back are loosening, and the way forward is wider than it looks. Today, take one step you've been hesitating on, and share something generously with someone.",
+    "keyword": "Step Out Freely"
+   },
+   "92": {
+    "title": "Student Returns a Master",
+    "verse": [
+     "Since youth you've planned and built with care;",
+     "what you need comes without chasing it.",
+     "Plan your hopes together with a partner;",
+     "you leave a student, return a master."
+    ],
+    "reading": "Your steady planning and effort have been adding up, even when you couldn't see it. Today, sketch out one long-term goal and choose a small action that moves it forward.",
+    "keyword": "Build With Care"
+   },
+   "93": {
+    "title": "Rain on Phoenix Feathers",
+    "verse": [
+     "The phoenix's feathers drip with rain,",
+     "and for now the sparrows mock it.",
+     "One day the clouds will clear,",
+     "and it will smooth its wings again."
+    ],
+    "reading": "You may feel underestimated or treated unfairly right now, and it stings. Today, don't let it sink in too deep; take care of yourself first and trust that you'll have room to spread out again.",
+    "keyword": "Wait for Clear Skies"
+   },
+   "94": {
+    "title": "The Zither and the Listener",
+    "verse": [
+     "Don't stoop to petty people's ways;",
+     "when things slip, blame flies everywhere.",
+     "A zither's song needs an ear that understands;",
+     "keep steady and quiet, and calm returns."
+    ],
+    "reading": "There's friction or misunderstanding around you, and arguing it out won't settle much. Today, step back from who's right and wrong, and spend time talking with one friend who really gets you.",
+    "keyword": "Find Your Listener"
+   },
+   "95": {
+    "title": "When the Golden Rooster Crows",
+    "verse": [
+     "Ambition is built one morning at a time;",
+     "too much wine and pleasure wears it down.",
+     "When the golden rooster calls the dawn,",
+     "good things come out to meet you."
+    ],
+    "reading": "Distractions and easy comforts are quietly draining the energy your goals need. Today, cut back on one indulgence and get up early to do the single most important task first.",
+    "keyword": "Gather Your Focus"
+   },
+   "96": {
+    "title": "The Shining Pagoda",
+    "verse": [
+     "A towering pagoda, unlike any other,",
+     "gleams with light on all eight sides.",
+     "Set your heart and practice with devotion;",
+     "do good, and blessings find their way."
+    ],
+    "reading": "Kindness and steady intention are your brightest qualities right now. Today, do one small good thing for a coworker or a stranger, and notice how it lifts your own mood too.",
+    "keyword": "One Good Deed"
+   },
+   "97": {
+    "title": "Flowers in a Mirror",
+    "verse": [
+     "A candle lit in the wind throws thin shadows,",
+     "blurring like flowers in a mirror.",
+     "You keep tidying it, again and again,",
+     "not seeing it's only a drifting raft."
+    ],
+    "reading": "Some of what's keeping you busy looks lively but may not lead anywhere real. Today, drop one task that's just for show and give that energy to a goal that truly matters.",
+    "keyword": "Choose the Real"
+   },
+   "98": {
+    "title": "A Bird Near the Net",
+    "verse": [
+     "In your plans and travels, go slowly;",
+     "rushing and fretting only stir up trouble.",
+     "Like a bird that flies into a net,",
+     "it takes time to find the way out."
+    ],
+    "reading": "Things feel tangled right now, and hurrying will likely tighten the knot. Today, hold off on launching anything new, keep your emotions steady, and step away from arguments until the picture clears.",
+    "keyword": "Slow Down"
+   },
+   "99": {
+    "title": "Rain After the Fire",
+    "verse": [
+     "Reins in hand, you charge straight ahead,",
+     "half into worry, half into trouble.",
+     "Like a house where fire takes hold,",
+     "until the season's rain falls and cools it."
+    ],
+    "reading": "Pushing hard right now may run you into more than you expected. Today, ease off the charge, prepare a backup plan for one important thing, and remember that difficult stretches do pass.",
+    "keyword": "Prepare Ahead"
+   },
+   "100": {
+    "title": "Keep the Old Path",
+    "verse": [
+     "The signs have spoken plainly to you;",
+     "the restless mind talks itself into fog.",
+     "The elder takes the lot and walks home,",
+     "keeping old ways until the time comes."
+    ],
+    "reading": "Overthinking and hurrying are clouding your view more than any outside problem. Today, avoid big changes, keep your current rhythm, and let the right moment come to you.",
+    "keyword": "Keep Your Rhythm"
+   }
+  },
+  "topics": {
+   "self": {
+    "name": "Overall",
+    "advice": {
+     "1": {
+      "say": "This is a low stretch, so pushing hard may drain you; hold steady for now.",
+      "do": [
+       "Put big decisions on hold for now",
+       "Talk it through with someone you trust"
+      ]
+     },
+     "2": {
+      "say": "Momentum is slow right now, so effort may stretch thin; build your energy first.",
+      "do": [
+       "Skip new projects; focus on one or two",
+       "Rest, move your body, and leave some slack"
+      ]
+     },
+     "3": {
+      "say": "Neither good nor bad, just steady; daily effort is what carries you.",
+      "do": [
+       "Do the work in front of you well",
+       "Keep regular hours and leave room to breathe"
+      ]
+     },
+     "4": {
+      "say": "Things lean your way, but the momentum still needs your push.",
+      "do": [
+       "Set one goal this month; check it weekly",
+       "Say yes to a good fit, then adjust"
+      ]
+     },
+     "5": {
+      "say": "Your energy is strong and efforts tend to land; a good time to go bold.",
+      "do": [
+       "Revive a shelved plan; start with the top one",
+       "Reach out to people who can help you"
+      ]
+     }
+    }
+   },
+   "work": {
+    "name": "Work & Career",
+    "advice": {
+     "1": {
+      "say": "This is hard to land right now, and forcing it may cost you.",
+      "do": [
+       "Hold off on big changes; keep your footing",
+       "Build your skills so you're ready later"
+      ]
+     },
+     "2": {
+      "say": "There's real resistance now; a yes may come slowly, and things may drag.",
+      "do": [
+       "Don't rush to decide or quit; compare options",
+       "Do your homework, then push when timing improves"
+      ]
+     },
+     "3": {
+      "say": "Progress is possible, but expect several rounds before it comes together.",
+      "do": [
+       "Pin down terms and dates in writing",
+       "Keep a backup plan so you feel steady"
+      ]
+     },
+     "4": {
+      "say": "This can come together smoothly; a good time to take the lead.",
+      "do": [
+       "Schedule interviews, pitches, or talks soon",
+       "Make your case clearly on one page"
+      ]
+     },
+     "5": {
+      "say": "Your projects and talks look promising, and helpful people are close by.",
+      "do": [
+       "Ask for what you need; don't concede first",
+       "Settle key points now and put them in writing"
+      ]
+     }
+    }
+   },
+   "money": {
+    "name": "Money",
+    "advice": {
+     "1": {
+      "say": "Money may slip away easily now; protecting what you have matters most.",
+      "do": [
+       "Avoid loans, co-signing, and chasing hot buys",
+       "Keep emergency savings separate and untouched"
+      ]
+     },
+     "2": {
+      "say": "Earning feels harder now, and spending may outpace what comes in.",
+      "do": [
+       "Pause big outlays and lending to others",
+       "Double-check before you sign or pay"
+      ]
+     },
+     "3": {
+      "say": "Some income comes in, but modestly; steady earning and careful spending matter most.",
+      "do": [
+       "Track your spending for one week",
+       "Skip investments you don't understand yet"
+      ]
+     },
+     "4": {
+      "say": "There's room to grow your money, and effort tends to be rewarded.",
+      "do": [
+       "Focus on your main, steady income",
+       "Small experiments are fine; stay within your means"
+      ]
+     },
+     "5": {
+      "say": "Money paths look open now, with chances from steady work and side sources.",
+      "do": [
+       "Collect what you're owed; negotiate prices now",
+       "Save a portion before you spend"
+      ]
+     }
+    }
+   },
+   "love": {
+    "name": "Love",
+    "advice": {
+     "1": {
+      "say": "This relationship faces many obstacles now; forcing it may leave you drained.",
+      "do": [
+       "Give each other space; don't decide while upset",
+       "Turn your attention back to your own life"
+      ]
+     },
+     "2": {
+      "say": "Your rhythms are out of sync, so misunderstandings or delays are likely.",
+      "do": [
+       "Let disagreements cool before you talk",
+       "Care for yourself; don't push the other person"
+      ]
+     },
+     "3": {
+      "say": "The connection is there, but it needs time; don't rush it.",
+      "do": [
+       "Keep talking; don't demand a firm answer",
+       "If single, get out and notice who's around"
+      ]
+     },
+     "4": {
+      "say": "The connection is warm and mutual; a good time to take a step forward.",
+      "do": [
+       "Plan a proper date; leave work talk out",
+       "Show you care; don't keep score"
+      ]
+     },
+     "5": {
+      "say": "You two are deeply in sync; it feels right, and good things may be near.",
+      "do": [
+       "Say what's in your heart; don't wait",
+       "Consider meeting family or talking about the future"
+      ]
+     }
+    }
+   },
+   "health": {
+    "name": "Health",
+    "advice": {
+     "1": {
+      "say": "Pay close attention now; don't let small issues grow into big ones.",
+      "do": [
+       "See a doctor soon; consider a second opinion",
+       "Let family know how you're doing"
+      ]
+     },
+     "2": {
+      "say": "Your body is asking you to slow down; don't push through.",
+      "do": [
+       "If you need a doctor, go; don't wait",
+       "Cut back on late nights and social events"
+      ]
+     },
+     "3": {
+      "say": "Recovery takes some time; it won't happen all at once.",
+      "do": [
+       "Keep regular hours, eat light, attend follow-ups",
+       "Note any discomfort and tell your doctor"
+      ]
+     },
+     "4": {
+      "say": "Recovery looks on track; keep up the care that's working.",
+      "do": [
+       "Finish the treatment your doctor prescribed",
+       "Prioritize sleep; it helps more than supplements"
+      ]
+     },
+     "5": {
+      "say": "Your baseline is strong, and you tend to bounce back from small things.",
+      "do": [
+       "Keep your current sleep and exercise habits",
+       "Stay on schedule with regular checkups"
+      ]
+     }
+    }
+   },
+   "home": {
+    "name": "Home & Family",
+    "advice": {
+     "1": {
+      "say": "Home feels unsettled right now; aim for calm first.",
+      "do": [
+       "Hold off on big family decisions",
+       "Ask an elder or trusted friend to help mediate"
+      ]
+     },
+     "2": {
+      "say": "Something at home may feel off; give it extra attention.",
+      "do": [
+       "Listen and be present more than you advise",
+       "Check doors, windows, water, and power"
+      ]
+     },
+     "3": {
+      "say": "Home is mostly steady, with the occasional small friction.",
+      "do": [
+       "Let small things go; skip dinner-table debates",
+       "Tidy up regularly; a clear space clears the mind"
+      ]
+     },
+     "4": {
+      "say": "Home is settled, and everyone looks out for each other.",
+      "do": [
+       "Make time for family, even a quick call",
+       "Handle small repairs as you notice them"
+      ]
+     },
+     "5": {
+      "say": "Home is warm and thriving, with something to celebrate.",
+      "do": [
+       "Host a family gathering; take a group photo",
+       "Start planning a move or renovation if you wish"
+      ]
+     }
+    }
+   },
+   "move": {
+    "name": "Travel & Moving",
+    "advice": {
+     "1": {
+      "say": "This isn't a great time for long trips or moving.",
+      "do": [
+       "If you must go, confirm every step ahead",
+       "Stay alert and keep valuables on you"
+      ]
+     },
+     "2": {
+      "say": "Getting on the move meets obstacles now, and delays are likely.",
+      "do": [
+       "Postpone a move if you can; plan a backup",
+       "Others may run late; don't just wait around"
+      ]
+     },
+     "3": {
+      "say": "You can go, but there's no rush; leave room in your plans.",
+      "do": [
+       "Keep a half day open for flexibility",
+       "Before moving, clarify the lease and costs"
+      ]
+     },
+     "4": {
+      "say": "Travel tends to go smoothly, and it's a fine time to move.",
+      "do": [
+       "Book tickets and lodging early for an easy trip",
+       "Be open to help from people you meet"
+      ]
+     },
+     "5": {
+      "say": "Travel and moves flow well; a new place may bring a fresh start.",
+      "do": [
+       "Lock in that trip or move you've wanted",
+       "Watch for news from someone you're awaiting"
+      ]
+     }
+    }
+   },
+   "dispute": {
+    "name": "Conflicts",
+    "advice": {
+     "1": {
+      "say": "This situation doesn't favor you; cutting losses early is wise.",
+      "do": [
+       "Don't start fights; step back when you can",
+       "Keep your records and protect your rights"
+      ]
+     },
+     "2": {
+      "say": "Going head-to-head may cost you time and energy.",
+      "do": [
+       "Stay calm; don't speak while angry",
+       "Get professional advice before your next step"
+      ]
+     },
+     "3": {
+      "say": "Both sides have a point; meeting halfway likely serves you better.",
+      "do": [
+       "Settle if you can; save time and stress",
+       "Find a mediator both sides trust"
+      ]
+     },
+     "4": {
+      "say": "You have the upper hand, but leave the other side a graceful exit.",
+      "do": [
+       "State what you want; keep messages and receipts",
+       "Negotiate first; use formal steps if needed"
+      ]
+     },
+     "5": {
+      "say": "You stand on solid ground, and things may lean your way.",
+      "do": [
+       "Gather your evidence and make your case",
+       "Have a professional review your position"
+      ]
+     }
+    }
+   },
+   "find": {
+    "name": "Lost & Found",
+    "advice": {
+     "1": {
+      "say": "Recovery looks unlikely; letting go can also limit your loss.",
+      "do": [
+       "Focus on minimizing the damage",
+       "Give important items one fixed home"
+      ]
+     },
+     "2": {
+      "say": "This may be hard to find and could take a while.",
+      "do": [
+       "Report it lost and replace what's needed",
+       "Don't let it consume your energy"
+      ]
+     },
+     "3": {
+      "say": "It can likely be found, but it'll take some effort; be patient.",
+      "do": [
+       "Search your usual spots one by one",
+       "Try another way to reach the person"
+      ]
+     },
+     "4": {
+      "say": "There's a good chance of recovery; follow the clues.",
+      "do": [
+       "Search in the direction your reading suggests",
+       "Ask people nearby if they've seen it"
+      ]
+     },
+     "5": {
+      "say": "Things look likely to turn up soon, and people can be reached.",
+      "do": [
+       "Retrace where you last used it",
+       "Reach out; they may be waiting too"
+      ]
+     }
+    }
+   }
+  }
+ },
+ "moods": {
+  "happy": "Happy",
+  "full": "Fulfilled",
+  "calm": "Calm",
+  "tired": "Tired",
+  "upset": "Upset",
+  "low": "Low"
+ },
+ "ratings": [
+  "Rough",
+  "Meh",
+  "Okay",
+  "Good",
+  "Great"
+ ]
 }
