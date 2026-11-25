@@ -1493,7 +1493,7 @@ body.in-ritual{overflow:hidden}
 /* 便签角上的 × 点一下先变成「撕掉」，再点才撕 */
 .stk .x.arm{width:auto;height:24px;top:4px;right:4px;padding:0 9px;border-radius:12px;background:rgba(20,18,24,.82);color:#fff;font-size:12px;font-weight:600;opacity:1}
 /* ================= 今天的画、我的一甲子 ================= */
-.dart{position:relative;display:block;width:100%;aspect-ratio:2/1;border:0;padding:0;margin:2px 0 14px;border-radius:16px;overflow:hidden;background:#F6F1E7;box-shadow:0 0 0 1px rgba(0,0,0,.05)}
+.dart{position:relative;display:block;width:100%;aspect-ratio:2/1;border:0;padding:0;margin:14px 0 4px;border-radius:16px;overflow:hidden;background:#F6F1E7;box-shadow:0 0 0 1px rgba(0,0,0,.05)}
 .dart>img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 62%}
 .dart .cap{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;align-items:baseline;max-width:calc(100% - 76px);padding:5px 10px;border-radius:10px;background:rgba(246,241,231,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#2B2620;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dart .cap b{font-family:var(--f-display);font-size:13.5px}
