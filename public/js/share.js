@@ -1,7 +1,7 @@
 // 分享图：能量卡、你的今天、每日一签、穿搭色、邀请海报五种竖版图片（1080×1920），底部带二维码。浏览器里用画布绘制。
 // 另有「今日锁屏」：按手机屏幕比例（1170×2532），上面留给锁屏时钟，下面是今天的画和你的主题。
 // 跟随当前的白色 / 深色主题，预览时也能手动换；登录用户的二维码都带着自己的邀请码。
-import { $, esc, openSheet, onClick, toast, track, IS_IOS, isDarkNow } from './core.js';
+import { $, esc, openSheet, onClick, toast, track, IS_MOBILE, IS_WECHAT, isDarkNow } from './core.js';
 import { THEME, hhmm, bestHours, HOUR_TIP } from './data.js';
 import { S } from './state.js';
 
@@ -227,11 +227,19 @@ function render(kind, data, theme) {
 }
 
 const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏' };
+const SLUG = { card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper' };
+// 分享图用 JPG：手机相册、微信都当照片处理（PNG 动辄两三兆，常被当成一个文件）
+const jpg = (cv) => cv.toDataURL('image/jpeg', 0.92);
+// 网页没法直接写进相册：手机上最可靠的是长按图片「保存图片 / 添加到照片」，所以放在最前面说；
+// 「发给朋友」只传图片本身，电脑上给一个下载
 function pvHtml(url, kind, theme) {
+  const tip = IS_WECHAT ? '长按图片，选「保存图片」存进相册，或直接「发送给朋友」' : '长按图片，就能保存到相册';
   return `<div class="sharepv"><span class="segs pvtheme" role="group" aria-label="图片颜色">${[['light', '白色'], ['dark', '深色']].map(([k, l]) => `<button type="button" data-share-theme="${k}" aria-pressed="${k === theme}">${l}</button>`).join('')}</span>`
-    + `<img src="${url}" alt="${esc(NAMES[kind])}分享图">${IS_IOS
-      ? `<button type="button" class="btn primary block" data-share-go>分享或保存</button><p class="note" style="margin:0;text-align:center">也可以长按上面的图片，存到相册${kind === 'wall' ? '，再在手机设置里设为锁屏' : ''}</p>`
-      : `<div class="acts"><a class="btn ghost" href="${url}" download="流日历-${NAMES[kind]}.png" data-share-save>保存图片</a><button type="button" class="btn primary" data-share-go>分享</button></div>`}</div>`;
+    + `<img src="${url}" alt="${esc(NAMES[kind])}分享图">`
+    + (IS_MOBILE
+      ? `<p class="savetip">${tip}${kind === 'wall' ? '，再在手机设置里设为锁屏' : ''}</p>${!IS_WECHAT && navigator.share ? '<button type="button" class="btn ghost block" data-share-go>发给朋友</button>' : ''}`
+      : `<a class="btn primary block" href="${url}" download="liurili-${SLUG[kind]}.jpg" data-share-save>保存图片</a>${navigator.share ? '<button type="button" class="btn ghost block" data-share-go>分享</button>' : ''}`)
+    + '</div>';
 }
 // data 不传时从当前页面的数据里取（邀请海报由邀请页传进来）
 export function share(kind, data) {
@@ -246,7 +254,7 @@ export function share(kind, data) {
   return (art ? artOf(art) : Promise.resolve(null)).then((img) => {
     const d = img ? { ...data, img } : data;
     const cv = render(kind, d, theme);
-    openSheet(kind === 'wall' ? NAMES.wall : '分享' + NAMES[kind], pvHtml(cv.toDataURL('image/png'), kind, theme));
+    openSheet(kind === 'wall' ? NAMES.wall : '分享' + NAMES[kind], pvHtml(jpg(cv), kind, theme));
     lastShare = { cv, kind, name: NAMES[kind], data: d, theme };
   });
 }
@@ -256,7 +264,7 @@ onClick('[data-share-theme]', (el) => {
   const s = lastShare, theme = el.getAttribute('data-share-theme');
   if (!s || s.theme === theme) return;
   const cv = render(s.kind, s.data, theme);
-  $('#sheet .sbody').innerHTML = pvHtml(cv.toDataURL('image/png'), s.kind, theme);
+  $('#sheet .sbody').innerHTML = pvHtml(jpg(cv), s.kind, theme);
   Object.assign(s, { cv, theme });
 });
 
@@ -266,16 +274,10 @@ onClick('[data-share-go]', () => {
   const s = lastShare;
   if (!s) return;
   s.cv.toBlob((blob) => {
-    const file = new File([blob], `流日历-${s.name}.png`, { type: 'image/png' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: '流日历 · ' + s.name }).then(() => track('share_done', { kind: s.kind }), () => {});
-    } else if (IS_IOS) {
-      toast('长按上面的图片，就能存到相册');
-    } else {
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
-      toast('已保存图片，可以发给朋友了');
-      track('share_save', { kind: s.kind });
-    }
-  }, 'image/png');
+    // 只传图片本身，不带标题文字：带了标题，系统和微信常把它当成一个文件发出去
+    const file = new File([blob], `liurili-${SLUG[s.kind]}.jpg`, { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file] }).then(() => track('share_done', { kind: s.kind }), () => {});
+    else toast(IS_MOBILE ? '长按上面的图片，就能保存到相册' : '用「保存图片」存下来，再发给朋友');
+  }, 'image/jpeg', 0.92);
 });
 

@@ -126,8 +126,8 @@ function enableDrag(bg) {
   const sheet = $('.sheet', bg);
   let y0 = null, dy = 0, t0 = 0;
   sheet.addEventListener('touchstart', (e) => {
-    // 滚轮自己上下滚，手指在滚轮上时不拖弹层
-    if (e.target.closest('.wheels')) return;
+    // 滚轮自己上下滚；分享图要长按保存，手指一动就拖弹层会把长按打断
+    if (e.target.closest('.wheels, .sharepv img')) return;
     if (!e.target.closest('.grab,.sh') && sheet.scrollTop > 0) return;
     y0 = e.touches[0].clientY; dy = 0; t0 = Date.now();
     sheet.style.transition = 'none';
