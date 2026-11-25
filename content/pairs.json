@@ -1,0 +1,251 @@
+{
+ "_说明": "两个人的画：按两个人的日干配对，55 种组合（含同一日干），每种一张画（public/art/pairs/ 下）和一个画名。kinds 是按五行算出的六种关系：天干五合是「合」，同五行是「同」，你生 TA 是「我生」，TA 生你是「生我」，你克 TA 是「我克」，TA 克你是「克我」。tag 是关系标签，text 是对「你」说的一句话，{me} 是你的本命形象，{you} 是 TA 的。写法：大白话，不说好坏，不吓人。可以直接改，改完重启服务生效。",
+ "kinds": {
+  "合": {
+   "tag": "天生合拍",
+   "text": "你是{me}，TA 是{you}，天干相合：在一起很自然，彼此都更像自己。"
+  },
+  "同": {
+   "tag": "并肩的伙伴",
+   "text": "你们都是{me}：想法像、节奏像，是能一起走很远的伙伴。"
+  },
+  "我生": {
+   "tag": "你托着 TA",
+   "text": "你是{me}，TA 是{you}：你常常托着 TA，TA 也让你的心意有了去处。"
+  },
+  "生我": {
+   "tag": "TA 托着你",
+   "text": "你是{me}，TA 是{you}：TA 常常托着你，在 TA 身边你更有底气。"
+  },
+  "我克": {
+   "tag": "你推着 TA",
+   "text": "你是{me}，TA 是{you}：你会推着 TA 往前走，磨合时记得多给 TA 一点空间。"
+  },
+  "克我": {
+   "tag": "TA 推着你",
+   "text": "你是{me}，TA 是{you}：TA 会推着你往前走，磨合过去，就是最懂你的人。"
+  }
+ },
+ "pairs": {
+  "甲甲": {
+   "name": "并肩的双树",
+   "art": "jia-jia.webp"
+  },
+  "甲乙": {
+   "name": "缠树的藤花",
+   "art": "jia-yi.webp"
+  },
+  "甲丙": {
+   "name": "向阳的大树",
+   "art": "jia-bing.webp"
+  },
+  "甲丁": {
+   "name": "树下的灯火",
+   "art": "jia-ding.webp"
+  },
+  "甲戊": {
+   "name": "山上的松",
+   "art": "jia-wu.webp"
+  },
+  "甲己": {
+   "name": "田边的大树",
+   "art": "jia-ji.webp"
+  },
+  "甲庚": {
+   "name": "倚树的剑",
+   "art": "jia-geng.webp"
+  },
+  "甲辛": {
+   "name": "枝头的玉坠",
+   "art": "jia-xin.webp"
+  },
+  "甲壬": {
+   "name": "江边的大树",
+   "art": "jia-ren.webp"
+  },
+  "甲癸": {
+   "name": "雨中的大树",
+   "art": "jia-gui.webp"
+  },
+  "乙乙": {
+   "name": "相缠的花藤",
+   "art": "yi-yi.webp"
+  },
+  "乙丙": {
+   "name": "向阳的花",
+   "art": "yi-bing.webp"
+  },
+  "乙丁": {
+   "name": "花间的灯笼",
+   "art": "yi-ding.webp"
+  },
+  "乙戊": {
+   "name": "山坡上的花",
+   "art": "yi-wu.webp"
+  },
+  "乙己": {
+   "name": "园中的花",
+   "art": "yi-ji.webp"
+  },
+  "乙庚": {
+   "name": "缠花的剑",
+   "art": "yi-geng.webp"
+  },
+  "乙辛": {
+   "name": "落花与玉",
+   "art": "yi-xin.webp"
+  },
+  "乙壬": {
+   "name": "江上的莲",
+   "art": "yi-ren.webp"
+  },
+  "乙癸": {
+   "name": "带露的花",
+   "art": "yi-gui.webp"
+  },
+  "丙丙": {
+   "name": "日与倒影",
+   "art": "bing-bing.webp"
+  },
+  "丙丁": {
+   "name": "日落灯起",
+   "art": "bing-ding.webp"
+  },
+  "丙戊": {
+   "name": "日出群山",
+   "art": "bing-wu.webp"
+  },
+  "丙己": {
+   "name": "晒谷的田野",
+   "art": "bing-ji.webp"
+  },
+  "丙庚": {
+   "name": "日光照剑",
+   "art": "bing-geng.webp"
+  },
+  "丙辛": {
+   "name": "阳光里的宝石",
+   "art": "bing-xin.webp"
+  },
+  "丙壬": {
+   "name": "海上日出",
+   "art": "bing-ren.webp"
+  },
+  "丙癸": {
+   "name": "雨后的彩虹",
+   "art": "bing-gui.webp"
+  },
+  "丁丁": {
+   "name": "成对的灯笼",
+   "art": "ding-ding.webp"
+  },
+  "丁戊": {
+   "name": "山中的灯",
+   "art": "ding-wu.webp"
+  },
+  "丁己": {
+   "name": "田舍的灯",
+   "art": "ding-ji.webp"
+  },
+  "丁庚": {
+   "name": "炉火炼剑",
+   "art": "ding-geng.webp"
+  },
+  "丁辛": {
+   "name": "烛光里的珠宝",
+   "art": "ding-xin.webp"
+  },
+  "丁壬": {
+   "name": "江上的灯船",
+   "art": "ding-ren.webp"
+  },
+  "丁癸": {
+   "name": "雨夜的灯",
+   "art": "ding-gui.webp"
+  },
+  "戊戊": {
+   "name": "连绵的双峰",
+   "art": "wu-wu.webp"
+  },
+  "戊己": {
+   "name": "山下的田",
+   "art": "wu-ji.webp"
+  },
+  "戊庚": {
+   "name": "山中藏剑",
+   "art": "wu-geng.webp"
+  },
+  "戊辛": {
+   "name": "山里的玉",
+   "art": "wu-xin.webp"
+  },
+  "戊壬": {
+   "name": "山海相望",
+   "art": "wu-ren.webp"
+  },
+  "戊癸": {
+   "name": "雨后青山",
+   "art": "wu-gui.webp"
+  },
+  "己己": {
+   "name": "相连的梯田",
+   "art": "ji-ji.webp"
+  },
+  "己庚": {
+   "name": "田里的金",
+   "art": "ji-geng.webp"
+  },
+  "己辛": {
+   "name": "土里的珍珠",
+   "art": "ji-xin.webp"
+  },
+  "己壬": {
+   "name": "流过田野的江",
+   "art": "ji-ren.webp"
+  },
+  "己癸": {
+   "name": "春雨润田",
+   "art": "ji-gui.webp"
+  },
+  "庚庚": {
+   "name": "交叠的双剑",
+   "art": "geng-geng.webp"
+  },
+  "庚辛": {
+   "name": "镶玉的剑",
+   "art": "geng-xin.webp"
+  },
+  "庚壬": {
+   "name": "江边的剑",
+   "art": "geng-ren.webp"
+  },
+  "庚癸": {
+   "name": "雨中的剑",
+   "art": "geng-gui.webp"
+  },
+  "辛辛": {
+   "name": "一对珍珠",
+   "art": "xin-xin.webp"
+  },
+  "辛壬": {
+   "name": "海里的珍珠",
+   "art": "xin-ren.webp"
+  },
+  "辛癸": {
+   "name": "雨中的宝石",
+   "art": "xin-gui.webp"
+  },
+  "壬壬": {
+   "name": "汇流的江河",
+   "art": "ren-ren.webp"
+  },
+  "壬癸": {
+   "name": "落进大海的雨",
+   "art": "ren-gui.webp"
+  },
+  "癸癸": {
+   "name": "双溪细雨",
+   "art": "gui-gui.webp"
+  }
+ }
+}

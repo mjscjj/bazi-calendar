@@ -309,6 +309,17 @@ export function cardHtml(c, name) {
     + (c.basis ? `<div class="basis">${c.basis.solar ? `按真太阳时 ${c.basis.time} · ${c.basis.zhi}时排盘 · ${esc(c.basis.city)}` : `按北京时间 ${c.basis.time} · ${c.basis.zhi}时排盘（没填出生城市）`}</div>` : '') + '</div>';
 }
 
+// 朋友邀请来测的：完整能量卡下面给一张「你和 TA 的画」（邀请模块按需加载，免得循环引用）
+function loadPair() {
+  const p = readLocal('pending'), inv = readLocal('invite');
+  if (!p || !p.birth || !inv || !inv.code || Date.now() - (inv.at || 0) > 30 * 86400000) return;
+  api('POST', 'pair', { birth: p.birth, code: inv.code }).then((d) => import('./growth.js').then(({ pairHtml }) => {
+    const box = $('#pairBox');
+    if (!box) return;
+    box.innerHTML = pairHtml(d.pair, d.best, d.name, `注册后，${esc(d.name)}也会在邀请记录里看到你们的画。`);
+    track('pair_view', { from: 'invitee', kind: d.pair.kind });
+  }), () => {});
+}
 // 刚测完时分三张翻开：日柱插画和称号 → 性格 → 五行和幸运元素，最后再看完整的卡
 function stepHtml(c, name, k) {
   const total = c.force.reduce((a, f) => a + f.pct, 0) || 100;
@@ -325,7 +336,8 @@ let reveal = null;
 export function pageCard() {
   const v = $('#view');
   const full = (c, name, actions) => {
-    v.innerHTML = `<div class="reveal">${cardHtml(c, name)}<div class="acts">${actions}</div>${c.noTime ? '<p class="note" style="margin:0;text-align:center">没填出生时间，按年、月、日三柱推算。</p>' : ''}</div>`;
+    v.innerHTML = `<div class="reveal">${cardHtml(c, name)}<div id="pairBox"></div><div class="acts">${actions}</div>${c.noTime ? '<p class="note" style="margin:0;text-align:center">没填出生时间，按年、月、日三柱推算。</p>' : ''}</div>`;
+    if (!S.me) loadPair();
   };
   const show = (c, name, actions) => {
     setGlow(WX.indexOf(c.element));

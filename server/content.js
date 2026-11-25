@@ -8,6 +8,10 @@ const DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../co
 // 日柱插画放在 public/art/pillars/，和文案目录无关（测试会把 content 拷到别处）
 const ART_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../public/art/pillars');
 const JIAZI = Array.from({ length: 60 }, (_, i) => GAN[i % 10] + ZHI[i % 12]);
+const PAIR_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../public/art/pairs');
+// 两个日干的组合键：按天干顺序排，55 种（含同一日干）
+const pairKey = (a, b) => (GAN.indexOf(a) <= GAN.indexOf(b) ? a + b : b + a);
+const HE = ['甲己', '乙庚', '丙辛', '丁壬', '戊癸'];
 const gwx = (g) => Math.floor(GAN.indexOf(g) / 2);
 const TEN = ['正财', '偏财', '正官', '七杀', '正印', '偏印', '比肩', '劫财', '食神', '伤官'];
 
@@ -30,6 +34,14 @@ export function loadContent(dir = DIR) {
     for (const k of ['name', 'tag', 'intro', 'strong', 'weak', 'art']) need(typeof p[k] === 'string' && p[k], `日柱图鉴 ${gz} 缺少 ${k}`);
     need(fs.existsSync(path.join(ART_DIR, p.art)), `日柱图鉴 ${gz} 的插画 public/art/pillars/${p.art} 不存在`);
   }
+  // 两个人的画：55 种日干组合各一张画和画名，六种关系各一个标签和一句话
+  const pairs = read(dir, 'pairs.json');
+  for (let i = 0; i < 10; i++) for (let j = i; j < 10; j++) {
+    const k = GAN[i] + GAN[j], p = pairs.pairs?.[k];
+    need(p && p.name && p.art, `两个人的画缺少 ${k}`);
+    need(fs.existsSync(path.join(PAIR_DIR, p.art)), `两个人的画 ${k} 的插画 public/art/pairs/${p.art} 不存在`);
+  }
+  for (const k of ['合', '同', '我生', '生我', '我克', '克我']) need(pairs.kinds?.[k]?.tag && pairs.kinds[k].text?.includes('{me}'), `两个人的画缺少关系 ${k}`);
   const line = read(dir, 'daily-line.json');
   for (const t of TEN) need(line.relations?.[t], `今日一句缺少十神 ${t}`);
   for (const k of [1, 2, 3, 4, 5]) need(Array.isArray(line.heads?.[k]) && line.heads[k].length, `今日一句缺少档位 ${k} 的行动话`);
@@ -91,7 +103,7 @@ export function loadContent(dir = DIR) {
   need(terms.length === 24 && new Set(terms).size === 24, '御守的季节要覆盖 24 个节气');
   for (const [k, x] of Object.entries(amulets.seasons)) need(x.colors?.length === 2 && ['blossom', 'wave', 'leaf', 'snow'].includes(x.motif), `御守季节 ${k} 缺颜色或图案`);
   need(amulets.birthday?.colors?.length === 2 && amulets.birthday.ink, '御守缺少生日款颜色');
-  return { cards, pillars, line, outfit, lots, pick, ask, askPrompt, askFollowPrompt, amulets, moods };
+  return { cards, pillars, pairs, line, outfit, lots, pick, ask, askPrompt, askFollowPrompt, amulets, moods };
 }
 
 export function makeContent(c) {
@@ -102,7 +114,14 @@ export function makeContent(c) {
   const dayNum = (day) => day.y * 372 + day.m * 31 + day.d;
 
   return {
-    arts, pick: c.pick, ask: c.ask, askPrompt: c.askPrompt, askFollowPrompt: c.askFollowPrompt, amulets: c.amulets, moods: c.moods,
+    arts, pick: c.pick, ask: c.ask,
+    // 两个人的画：me 是「你」的日干，you 是对方的
+    pair(me, you) {
+      const p = c.pairs.pairs[pairKey(me, you)], a = gwx(me), b = gwx(you);
+      const kind = HE.includes(pairKey(me, you)) ? '合' : a === b ? '同' : (a + 1) % 5 === b ? '我生' : (b + 1) % 5 === a ? '生我' : (a + 2) % 5 === b ? '我克' : '克我';
+      const k = c.pairs.kinds[kind];
+      return { name: p.name, art: 'art/pairs/' + p.art, kind, tag: k.tag, line: k.text.replace('{me}', c.cards[me].image).replace('{you}', c.cards[you].image) };
+    }, askPrompt: c.askPrompt, askFollowPrompt: c.askFollowPrompt, amulets: c.amulets, moods: c.moods,
     pickType: (name) => c.pick.types.find((t) => t.name === name) || null,
     // 能量卡：日柱图鉴（插画、称号、介绍）、本命形象、性格词、五行比例、幸运元素
     energyCard(chart) {

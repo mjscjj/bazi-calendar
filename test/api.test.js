@@ -285,7 +285,7 @@ test('埋点批量写入，非法事件名丢弃', async () => {
 
 test('内容文件缺字段时启动失败', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lrl-content-'));
-  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json', 'day-pillars.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
+  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json', 'day-pillars.json', 'pairs.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
   assert.doesNotThrow(() => loadContent(dir));
   const cards = JSON.parse(fs.readFileSync(path.join(dir, 'energy-cards.json'), 'utf8'));
   delete cards.cards['癸'];
@@ -688,4 +688,27 @@ test('一甲子：每天打开收下当天日柱的画，集满 60 张送一枚�
   // 能量卡：出生那天的农历、月相、节气
   const card = (await client()('POST', '/api/preview/card', { birth: { date: '1992-06-08', time: '08:30', gender: '男' } })).data.card;
   assert.deepEqual(card.born, { lunar: '五月初八', moon: '上弦月', term: '芒种', days: 3 });
+});
+
+test('两个人的画：被邀请的朋友测完就能看；邀请人在邀请列表里看到每个朋友和自己的画', async () => {
+  const a = client();
+  await a('POST', '/api/auth/register', { username: 'pairer', password: '12345678', agree: true, birth });
+  const code = (await a('GET', '/api/me/invite')).data.code;
+  const friend = { date: '1992-06-08', time: '08:30', gender: '男' };
+  const r = await client()('POST', '/api/pair', { birth: friend, code });
+  assert.equal(r.status, 200);
+  const p = r.data.pair;
+  assert.ok(p.name && p.tag && p.line.startsWith('你是') && ['合', '同', '我生', '生我', '我克', '克我'].includes(p.kind));
+  assert.equal((await fetch(base + '/' + p.art)).status, 200);
+  const days = (Date.parse(r.data.best.date) - Date.parse(bjDay())) / 86400000;
+  assert.ok(days >= 1 && days <= 14, '一起做事的日子在未来两周里');
+  assert.equal((await client()('POST', '/api/pair', { birth: friend, code: 'XXXXX' })).status, 404);
+  // 朋友注册后，邀请人那边看到的是从自己的角度说的同一张画
+  await client()('POST', '/api/auth/register', { username: 'pairee', password: '12345678', agree: true, birth: friend, invite: code });
+  const row = (await a('GET', '/api/me/invite')).data.list[0];
+  assert.equal(row.pair.name, p.name);
+  assert.equal(row.pair.art, p.art);
+  assert.equal(row.pair.best.date, r.data.best.date);
+  const flip = { 我生: '生我', 生我: '我生', 我克: '克我', 克我: '我克', 合: '合', 同: '同' };
+  assert.equal(row.pair.kind, flip[p.kind], '两边的关系方向相反');
 });

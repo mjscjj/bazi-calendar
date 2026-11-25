@@ -1542,3 +1542,16 @@ body.in-ritual{overflow:hidden}
 @keyframes rodR{0%{left:50%;opacity:1}88%{left:100%;opacity:1}100%{left:100%;opacity:0}}
 @keyframes sealIn{0%{opacity:0;transform:scale(2.4) rotate(-16deg)}60%{opacity:1}100%{opacity:.94;transform:scale(1) rotate(-6deg)}}
 @media (prefers-reduced-motion: reduce){.art.scroll.unroll .paper,.art.scroll.unroll .pseal{animation:none}.art.scroll.unroll::before,.art.scroll.unroll::after{display:none}}
+/* ================= 两个人的画 ================= */
+.pairc{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;background:var(--surface);box-shadow:var(--ring);border-radius:22px;padding:20px 18px}
+.sbody .pairc{background:none;box-shadow:none;padding:4px 0 0}
+.pairc small{font-size:12.5px;color:var(--muted);letter-spacing:.06em}
+.pairc .pa{width:min(80%,300px);height:auto;aspect-ratio:1;border-radius:18px;object-fit:cover;background:#F6F1E7;box-shadow:0 12px 30px -16px rgba(0,0,0,.5)}
+.pairc .pn{margin-top:4px;font-family:var(--f-display);font-size:22px;letter-spacing:.06em}
+.pairc .ptag{font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--cinnabar) 12%,transparent);color:var(--cinnabar)}
+.pairc .pl{margin:4px 0 0;font-size:14.5px;line-height:1.75}
+.pairc .pbest{margin:0;font-size:13.5px;color:var(--muted)}
+.pairc .pbest b{color:var(--fg)}
+.ilist .pmini{flex:none;width:40px;height:40px;border:0;padding:0;border-radius:10px;overflow:hidden;background:#F6F1E7}
+.ilist .pmini img{display:block;width:100%;height:100%;object-fit:cover}
+.ilist .pmini + span{flex:1}

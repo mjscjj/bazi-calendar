@@ -1,5 +1,5 @@
 // 邀请好友、订阅到手机日历两个子页，以及朋友点开邀请链接时的落地处理。
-import { $, esc, api, toast, onClick, currentPath, dtText, readLocal, writeLocal, IS_IOS, IS_MOBILE, track } from './core.js';
+import { $, esc, api, toast, openSheet, onClick, currentPath, dtText, readLocal, writeLocal, IS_IOS, IS_MOBILE, track } from './core.js';
 import { S } from './state.js';
 import { footHtml } from './today.js';
 import { share } from './share.js';
@@ -23,13 +23,21 @@ export function catchInvite() {
 }
 export const pendingInvite = () => { const v = readLocal('invite'); return v && Date.now() - (v.at || 0) < 30 * 86400000 ? v : null; };
 
+// 两个人的画：画、画名、关系、一句话、未来两周最适合一起做事的一天（被邀请的朋友测完能量卡、邀请记录里都用）
+export function pairHtml(p, best, who, note = '') {
+  return `<section class="pairc"><small>你和${esc(who)}的画</small><img class="pa" src="${esc(p.art)}" alt="" width="600" height="600" decoding="async">`
+    + `<b class="pn">${esc(p.name)}</b><span class="ptag">${esc(p.tag)}</span><p class="pl">${esc(p.line)}</p>`
+    + (best ? `<p class="pbest">未来两周，<b>${best.m}月${best.d}日 周${'日一二三四五六'[best.week]}</b>最适合你们一起做事</p>` : '')
+    + (note ? `<p class="note" style="margin:0">${note}</p>` : '') + '</section>';
+}
+
 // ---------- 邀请好友 ----------
 export function pageInvite() {
   const v = $('#view'), T = '邀请好友';
   v.innerHTML = phead(T) + '<div class="sk" style="height:190px"></div><div class="sk" style="height:120px"></div>';
   api('GET', 'me/invite').then((d) => {
     if (currentPath() !== '/invite') return;
-    S.inviteCode = d.code;
+    S.inviteCode = d.code; S.invList = d.list;
     const url = inviteUrl(d.code);
     const st = (r) => (r.status === 'done' ? `<em class="ok">已生效 +${d.days} 天</em>` : r.status === 'capped' ? '<em>已生效 · 本月奖励已满</em>' : r.status === 'blocked' ? '<em>同一台设备注册，不计奖励</em>' : `<em>${esc(r.need)}</em>`);
     v.innerHTML = phead(T)
@@ -37,11 +45,17 @@ export function pageInvite() {
       + `<div class="linkbox"><span>${esc(url.replace(/^https?:\/\//, ''))}</span><button type="button" class="btn sm primary" data-inv-copy>复制</button></div>`
       + '<button type="button" class="btn ghost block" data-inv-poster>生成邀请海报</button></section>'
       + `<section class="card"><div class="stats3"><div><b>${d.stats.invited}</b><small>已邀请</small></div><div><b>${d.stats.done}</b><small>已生效</small></div><div><b>${d.stats.days}</b><small>得到的天数</small></div></div></section>`
-      + `<section class="card"><h3>邀请记录</h3>${d.list.length ? `<div class="ilist">${d.list.map((r) => `<div><span>${esc(r.name)}<small>${dtText(r.at)}</small></span>${st(r)}</div>`).join('')}</div>` : '<div class="empty">还没有朋友通过你的链接注册</div>'}</section>`
+      + `<section class="card"><h3>邀请记录</h3>${d.list.length ? `<div class="ilist">${d.list.map((r, i) => `<div>${r.pair ? `<button type="button" class="pmini" data-pair="${i}" aria-label="看你和 ${esc(r.name)} 的画"><img src="${esc(r.pair.art)}" alt=""></button>` : ''}<span>${esc(r.name)}<small>${dtText(r.at)}</small></span>${st(r)}</div>`).join('')}</div>` : '<div class="empty">还没有朋友通过你的链接注册</div>'}</section>`
       + `<p class="note" style="margin:0;text-align:center">${d.left > 0 ? `本月还能获得 ${d.left} 次奖励` : '本月的邀请奖励已经满了，朋友注册仍然能拿到奖励'}</p>` + footHtml();
     S.inviteUrl = url;
   }, (e) => { v.innerHTML = errHtml(T, e); });
 }
+onClick('[data-pair]', (el) => {
+  const r = S.invList && S.invList[+el.getAttribute('data-pair')];
+  if (!r || !r.pair) return;
+  track('pair_view', { from: 'inviter', kind: r.pair.kind });
+  openSheet('你们俩的画', pairHtml(r.pair, r.pair.best, r.name));
+});
 onClick('[data-inv-copy]', () => { track('invite_copy'); copy(`我在用流日历，按出生信息算每天适合做什么。测测你是什么型：${S.inviteUrl}`, '已复制，发给朋友吧'); });
 onClick('[data-inv-poster]', (el) => {
   if (el.disabled) return;

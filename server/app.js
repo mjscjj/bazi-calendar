@@ -414,6 +414,17 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     }
     return { start: days[0].date, days };
   }
+  // 两个人一起做事最合适的一天：未来两周里，两人分数里较低的那个最高的一天（两人都不差）
+  function pairBest(cA, cB) {
+    const [y, m, d] = bjDay().split('-').map(Number);
+    let best = null;
+    for (let k = 1; k <= 14; k++) {
+      const dt = new Date(Date.UTC(y, m - 1, d + k)), a = dt.getUTCFullYear(), b = dt.getUTCMonth() + 1, e = dt.getUTCDate();
+      const x = dayOut(cA, a, b, e, false), z = dayOut(cB, a, b, e, false), sc = Math.min(x.score, z.score);
+      if (!best || sc > best.sc) best = { sc, date: ymd(dt), m: b, d: e, week: dt.getUTCDay() };
+    }
+    return { date: best.date, m: best.m, d: best.d, week: best.week };
+  }
   // 明天寄语：明天的主题、档位、最好的时段，和一句今晚能做的准备话
   function tomorrowOf(c, date) {
     const [y, m, d] = date.split('-').map(Number);
@@ -1058,10 +1069,24 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const card = inv.birth_date ? C.energyCard(chartOf(inv)) : null;
     return { name: inv.nickname || '你的朋友', days: settings.int('invite_days'), card: card && { symbol: card.symbol, element: card.element, image: card.image, traits: card.traits, pillar: { gz: card.pillar.gz, name: card.pillar.name, art: card.pillar.art } } };
   });
+  route('POST', '/api/pair', async ({ body, ip }) => {
+    if (!limit('preview:' + ip, 30, 3600000)) throw new HttpError(429, '操作太频繁，请稍后再试');
+    const inv = db.get("SELECT * FROM users WHERE invite_code = ? AND status = 'active'", String(body.code || '').toUpperCase());
+    if (!inv || !inv.birth_date) throw new HttpError(404, '邀请链接已失效');
+    const me = chart(validBirth(body.birth)), you = chartOf(inv);
+    return { name: inv.nickname || '你的朋友', pair: C.pair(me.dm, you.dm), best: pairBest(me, you) };
+  });
   route('GET', '/api/me/invite', async ({ req }) => {
     const u = requireUser(req);
     const days = settings.int('invite_days'), cap = settings.int('invite_cap');
-    const list = db.all('SELECT i.status, i.created_at, i.done_at, u.nickname, u.username, (SELECT COUNT(*) FROM usage_days d WHERE d.user_id = u.id) uses, u.birth_date FROM invites i JOIN users u ON u.id = i.invitee_id WHERE i.inviter_id = ? ORDER BY i.id DESC LIMIT 100', u.id);
+    const list = db.all('SELECT i.status, i.created_at, i.done_at, i.invitee_id, u.nickname, u.username, (SELECT COUNT(*) FROM usage_days d WHERE d.user_id = u.id) uses, u.birth_date FROM invites i JOIN users u ON u.id = i.invitee_id WHERE i.inviter_id = ? ORDER BY i.id DESC LIMIT 100', u.id);
+    const mine = u.birth_date ? chartOf(u) : null;
+    // 两个人的画：测过能量卡的朋友，和你配一张
+    const pairWith = (r) => {
+      if (!mine || !r.birth_date) return null;
+      const fc = chartOf(db.get('SELECT * FROM users WHERE id = ?', r.invitee_id));
+      return { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) };
+    };
     const monthStart = new Date(Date.parse(bjDay().slice(0, 8) + '01T00:00:00+08:00')).toISOString();
     const usedThisMonth = db.get("SELECT COUNT(*) n FROM invites WHERE inviter_id = ? AND status = 'done' AND done_at >= ?", u.id, monthStart).n;
     const done = list.filter((r) => r.status === 'done').length;
@@ -1071,6 +1096,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       list: list.map((r) => ({
         name: shownName(r), status: r.status, at: r.done_at || r.created_at,
         need: r.status !== 'pending' ? '' : !r.birth_date ? '等 TA 测完能量卡' : '等 TA 明天再打开一次',
+        pair: pairWith(r),
       })),
     };
   });
