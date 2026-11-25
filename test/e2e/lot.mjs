@@ -5,6 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out] = process.argv.slice(2);
 const db = new DatabaseSync(dbPath);
+db.exec('PRAGMA busy_timeout = 5000'); // 服务也在写，撞上时等一等，别直接报 database is locked
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
 const errors = [], results = [];
 const check = (name, ok, detail = '') => { results.push(`${ok ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); if (!ok) errors.push(name); };

@@ -5,6 +5,7 @@ import { setBirth } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out] = process.argv.slice(2);
 const db = new DatabaseSync(dbPath);
+db.exec('PRAGMA busy_timeout = 5000'); // 服务也在写，撞上时等一等，别直接报 database is locked
 // 掷筊直到圣杯再解签（服务端用 JIAO_FAKE=xiao,sheng 启动时第 2 次是圣杯）
 async function tossToLot(pg) {
   await pg.waitForSelector('#sheet [data-toss]', { timeout: 8000 });

@@ -110,7 +110,7 @@ function amuletSheet() {
     + `<p class="note" style="margin:0;text-align:center">${{ deed: `善缘款 · 用你的幸运色（${esc(a.looks.deed.element)}）织成，盖「善行」印`, energy: `静心款 · 用你的幸运色（${esc(a.looks.deed.element)}）织成，盖「静心」印`, basic: `转运款 · 用你的幸运色（${esc(a.looks.deed.element)}）织成`, term: `节气款 · ${esc(a.term)}时节的颜色和图案`, birthday: '生日款 · 只在你的生日月有' }[style]}</p>`
     + `<div class="pills" role="group" aria-label="心愿">${a.wishes.map((w) => `<button type="button" data-ox-wish="${esc(w.name)}" aria-pressed="${w.name === X.wish}">${esc(w.name)}</button>`).join('')}</div>`
     + (X.mode === 'buy' ? `<div class="pills" role="group" aria-label="款式"><button type="button" data-ox-style="basic" aria-pressed="${X.style === 'basic'}">转运款</button><button type="button" data-ox-style="term" aria-pressed="${X.style === 'term'}">节气款</button>${a.birthdayMonth ? `<button type="button" data-ox-style="birthday" aria-pressed="${X.style === 'birthday'}">生日款</button>` : ''}</div>` : '')
-    + `<button type="button" class="btn primary block" data-ox-go>${X.mode === 'deed' ? `用 ${S.luck.deeds.per} 件善行换` : X.mode === 'energy' ? `用 ${S.luck.practice.per} 分钟换` : a.credits ? `用已有的 ${a.credits} 枚里的 1 枚` : `${price} 买一枚`}</button></div>`;
+    + `<button type="button" class="btn primary block" data-ox-go>${X.mode === 'deed' ? `用 ${S.luck.deeds.per} 件善行换` : X.mode === 'energy' ? `用 ${S.luck.practice.per} 分钟换` : a.credits ? (a.credits > 1 ? `用已有的 ${a.credits} 枚里的 1 枚` : '用已有的 1 枚') : `${price} 买一枚`}</button></div>`;
 }
 const redrawOx = () => { const b = $('#sheet .sbody'); if (b && $('.omx', b)) b.innerHTML = amuletSheet(); };
 function openAmuletSheet(mode) {
