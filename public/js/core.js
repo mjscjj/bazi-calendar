@@ -41,6 +41,13 @@ export function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
 }
 
+// 访客点了要先测能量卡才能用的功能：说一句，再给一个去测（或去保存已经测好的卡）的按钮，不只闪一下提示
+export function guestAsk(what) {
+  const tested = !!readLocal('pending');
+  openSheet(tested ? '保存你的能量卡' : '先测测你的能量卡', `<div class="guestask"><p>${tested ? '你的能量卡已经测好了。保存' : '测测你的能量卡并注册'}后，就能${esc(what)}。${tested ? '' : '不用先注册，测完再决定要不要保存。'}</p>`
+    + `<a class="btn primary block" href="#/${tested ? 'card' : 'start'}" data-close-sheet>${tested ? '保存我的能量卡' : '测测我的能量卡'}</a></div>`);
+}
+
 // 本地记一笔，用于“只提示一次”“今天关过了”这类状态
 export function seen(key) { try { return !!localStorage.getItem('lrl:' + key); } catch { return false; } }
 export function mark(key, v = '1') { try { localStorage.setItem('lrl:' + key, v); } catch { /* 无痕模式 */ } }

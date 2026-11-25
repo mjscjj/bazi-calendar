@@ -67,7 +67,8 @@ function renderTabbar(r) {
 export function renderPage() {
   closeSheet();
   const r = route();
-  if (!S.me && NEED_LOGIN.includes(r.path)) return go('/login');
+  // 要登录的页面：记下想去哪，登录后回到这里
+  if (!S.me && NEED_LOGIN.includes(r.path)) { try { sessionStorage.setItem('lrl:next', location.hash); } catch { /* 无痕模式 */ } return go('/login'); }
   if (S.me && GUEST_ONLY.includes(r.path)) return go(S.me.birth ? '/' : '/welcome');
   if (S.me && !S.me.birth && !['/welcome', '/about', '/card'].includes(r.path)) return go('/welcome');
   renderTop(r);

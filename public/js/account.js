@@ -52,7 +52,9 @@ export function pageAuth(r) {
         // 在朋友的邀请落地页登录（比如微信里点开链接）：登录后两人连上，弹出你们俩的画
         if (!reg && inv && inv.code && Date.now() - (inv.at || 0) < 30 * 86400000) linkFriend(inv.code);
         if (inv) writeLocal('invite', null);
-        location.hash = S.me.birth ? '#/' : '#/welcome';
+        let next = '';
+        try { next = (!reg && sessionStorage.getItem('lrl:next')) || ''; sessionStorage.removeItem('lrl:next'); } catch { /* 无痕模式 */ }
+        location.hash = S.me.birth ? next || '#/' : '#/welcome';
       })
       .catch((e2) => { btn.disabled = false; err.textContent = e2.message; });
   });

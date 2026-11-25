@@ -157,6 +157,13 @@ await ap.click('#sheet [data-close-sheet]'); await ap.waitForSelector('#sheet', 
   check('在朋友链接的落地页登录，登录后也弹出你们俩的画', (await gp.textContent('#sheet .pairc small')).includes('阿杰'));
   check('登录后清掉本地的邀请信息', !(await gp.evaluate(() => localStorage.getItem('lrl:invite'))));
   await gctx.close();
+  // 没登录时打开要登录的页面：登录后回到那一页
+  const nctx = await browser.newContext(iphone); const np = await nctx.newPage(); watch(np, 'next');
+  await np.goto(base + '/#/jiazi'); await np.waitForSelector('#authForm');
+  await np.fill('input[name=username]', 'lk' + suffix); await np.fill('input[name=password]', 'link12345');
+  await np.click('#authForm button[type=submit]'); await np.waitForSelector('.jzgrid', { timeout: 8000 });
+  check('没登录时打开「我的一甲子」，登录后回到一甲子', np.url().endsWith('#/jiazi'), np.url());
+  await nctx.close();
 }
 check('邀请记录显示已生效', (await ap.textContent('.ilist')).includes('已生效'));
 await ap.screenshot({ path: `${out}/b11-invite-done.png`, fullPage: true });

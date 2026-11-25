@@ -1,6 +1,6 @@
 // 今天页，从上往下：本周 7 天（能量趋势和你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天）
 // → 每日一签、穿搭色、问一件事、本月御守 → 记录此刻 → 明天寄语。
-import { $, $$, esc, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath } from './core.js';
+import { $, $$, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath } from './core.js';
 import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort } from './data.js';
 import { S, isDemo } from './state.js';
 import { openDay } from './day.js';
@@ -350,7 +350,7 @@ document.addEventListener('submit', (e) => {
   }, (err) => toast(err.message));
 });
 onClick('[data-close-notice]', (el) => el.closest('.notice').remove());
-onClick('[data-demo-tip]', (el, e) => { e.preventDefault(); toast(`测测你的能量卡并注册后，就能${el.getAttribute('data-demo-tip')}`); });
+onClick('[data-demo-tip]', (el, e) => { e.preventDefault(); guestAsk(el.getAttribute('data-demo-tip')); });
 onClick('[data-dismiss-go]', (el) => { const n = el.closest('[data-notice]'); if (n) mark(n.getAttribute('data-notice')); });
 
 function minisHtml(t) {
@@ -595,7 +595,7 @@ onClick('[data-almanac]', () => {
   if (a) almanacSheet(a, !S.today || selDate() === S.today.date);
 });
 onClick('[data-draw]', () => {
-  if (isDemo()) { toast('注册后，每天给你抽一支属于你的签'); return; }
+  if (isDemo()) { guestAsk('每天抽一支属于你的签'); return; }
   drawSheet();
 });
 onClick('[data-outfit]', outfitSheet);

@@ -1,6 +1,6 @@
 // 今天的记录：可以记心情，也可以单纯记一件事，两样都有也行；记下的以便签形式排在下面。月历格子上的小纸片、当日详情里的便签也在这里。
 // 心情词、默认纸色、分数都在 content/moods.json。
-import { $, esc, api, toast, onClick, track, localToday, openSheet, dismissSheet } from './core.js';
+import { $, esc, api, toast, onClick, track, localToday, openSheet, dismissSheet, guestAsk } from './core.js';
 import { S, isDemo } from './state.js';
 
 export const kitOf = () => (S.today && S.today.moodKit) || (S.cal && S.cal.moodKit) || null;
@@ -68,7 +68,7 @@ function sheetBody() {
 }
 const redrawSheet = () => { const b = $('#sheet .sbody'); if (b && $('#moodForm', b)) b.innerHTML = sheetBody(); };
 function openRecord(day, mood) {
-  if (isDemo()) { toast('测测你的能量卡并注册后，就能记录心情'); return; }
+  if (isDemo()) { guestAsk('记录心情'); return; }
   const kit = kitOf();
   if (!kit) return;
   ui.day = day; ui.mood = mood || null; ui.note = ''; ui.colorSet = false;

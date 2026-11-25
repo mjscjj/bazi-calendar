@@ -1565,3 +1565,5 @@ body.in-ritual{overflow:hidden}
 .frrow:disabled{opacity:1;cursor:default}
 /* 锁住的页面上画扁一点，小屏上「开通会员」也要在第一屏 */
 .dart.lockart{aspect-ratio:3/1;margin:0 0 14px;text-decoration:none}
+.guestask{display:flex;flex-direction:column;gap:14px}
+.guestask p{margin:0;line-height:1.8}

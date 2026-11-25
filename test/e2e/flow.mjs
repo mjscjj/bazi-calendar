@@ -22,6 +22,10 @@ step('访客看示例的今天');
 await page.goto(base + '/');
 await page.waitForSelector('.tcard');
 await shot('01-demo-today', true);
+// 访客点要注册才能用的功能：弹一句说明和「测测我的能量卡」按钮，不只闪一下提示
+await page.click('[data-draw]'); await page.waitForSelector('#sheet .guestask a[href="#/start"]');
+await shot('01b-guest-ask');
+await closeSheet();
 
 step('测测我的能量卡（不用注册）');
 await page.click('.notice a[href="#/start"]');
