@@ -649,8 +649,10 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     // 收画和会员无关：体验用完、会员到期也照样收下今天的画
     const fresh = recordOpen(u), got = jiaziOf(u), gz = dayGz(date);
     const jiazi = { n: got.size, has: got.has(gz), fresh: fresh && got.get(gz) === bjDay(), reward: jiaziReward(u, got.size) };
+    // 撕日历：每天第一次打开，先撕掉昨天那一页
+    const yd = new Date(Date.UTC(y, m - 1, d - 1)), prev = almanac(yd.getUTCFullYear(), yd.getUTCMonth() + 1, yd.getUTCDate());
     const a = access(u);
-    if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), art: { gz, ...C.arts[gz] }, jiazi, ...priceInfo() });
+    if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), art: { gz, ...C.arts[gz] }, jiazi, prev, ...priceInfo() });
     recordUse(u);
     activateInvite(u);
     const drawn = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);
@@ -662,6 +664,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     t.moods = moodsOn(u, date);
     t.moodKit = moodKit();
     t.jiazi = jiazi;
+    t.prev = prev;
     t.luck = { unused: unusedDeeds(u), per: C.luck.deeds.per_amulet, energy: energyHave(u), energyPer: C.luck.energy.per_amulet_minutes };
     withMoods(u, t.strip);
     t.news = newsFor(u);

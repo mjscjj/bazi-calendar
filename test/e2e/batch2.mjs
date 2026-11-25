@@ -280,6 +280,28 @@ await bp.click('#delForm button[type=submit]');
 await bp.waitForSelector('.notice.demo, .invban');
 check('注销后回到示例页', !db.prepare('SELECT 1 FROM users WHERE id = ?').get(fid));
 
+// 撕日历：老用户每天第一次打开，先撕掉昨天那页；注册当天、同一天再打开都不出现
+{
+  const tctx = await browser.newContext(iphone); const tp = await tctx.newPage(); watch(tp, 'tear');
+  await tp.goto(base + '/'); await tp.waitForSelector('#dayswipe');
+  await tp.evaluate(async (u) => fetch('api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: 'tear12345', agree: true, birth: { date: '1990-10-19', time: '10:00', gender: '女', city: '杭州' } }) }), 'tr' + suffix);
+  await tp.evaluate(() => { localStorage.setItem('lrl:guide', '1'); localStorage.setItem('lrl:a2hs-later', String(Date.now())); });
+  await tp.goto(base + '/?r=1#/'); await tp.waitForSelector('#dayswipe'); await tp.waitForTimeout(600);
+  check('注册当天没有「昨天」，不出撕页', !(await tp.$('#tear')));
+  const tid = db.prepare('SELECT id FROM users WHERE username = ?').get('tr' + suffix).id;
+  db.prepare('UPDATE users SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 3 * 864e5).toISOString(), tid);
+  db.prepare('DELETE FROM open_days WHERE user_id = ?').run(tid);
+  await tp.evaluate(() => { for (const k of Object.keys(localStorage)) if (/^lrl:(tear|stamp):/.test(k)) localStorage.removeItem(k); });
+  await tp.goto(base + '/?r=2#/'); await tp.waitForSelector('#tear .tleaf');
+  check('老用户每天第一次打开，挂着昨天那页', /\d+/.test(await tp.textContent('#tear .tleaf .tnum')));
+  await tp.screenshot({ path: `${out}/b23-tear.png` });
+  await tp.click('#tear .tgo'); await tp.waitForSelector('#tear', { state: 'detached', timeout: 4000 });
+  check('撕完回到今天，说收下了今天的画', ((await tp.textContent('.toast').catch(() => '')) || '').includes('收下了今天的画'));
+  await tp.reload(); await tp.waitForSelector('#dayswipe'); await tp.waitForTimeout(600);
+  check('同一天再打开不再撕', !(await tp.$('#tear')));
+  await tctx.close();
+}
+
 console.log(results.join('\n'));
 console.log('ERRORS:', errors.length ? errors : 'none');
 await browser.close();

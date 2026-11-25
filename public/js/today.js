@@ -6,6 +6,7 @@ import { S, isDemo } from './state.js';
 import { openDay } from './day.js';
 import { recordHtml, onMoodChange, moodScore, cellStickers } from './mood.js';
 import { cardArt, cardTitle } from './onboard.js';
+import { shouldTear, showTear } from './tear.js';
 
 export function loadToday() {
   S.todayErr = null;
@@ -355,20 +356,33 @@ export function pageToday() {
     S.today = null; S.tsel = null; S.wcache = {}; renderToday();
     loadToday().then(() => {
       if (currentPath() !== '/') return;
+      const stampNew = !seen('stamp:' + localToday());
       renderToday();
       if (S.today) prefetch();
-      if (S.today && !S.today.demo) { track('today_open', { level: S.today.day.level.k }); jiaziNews(S.today.jiazi, S.today.arts[S.today.day.gz].name, S.today.date, false); }
-      else if (S.todayLocked && S.todayLocked.art) jiaziNews(S.todayLocked.jiazi, S.todayLocked.art.name, localToday(), true);
+      const t = S.today && !S.today.demo ? S.today : null, L = !t && S.todayLocked && S.todayLocked.art ? S.todayLocked : null;
+      if (t) track('today_open', { level: t.day.level.k });
+      if (!t && !L) return;
+      const art = t ? { ...t.arts[t.day.gz], gz: t.day.gz } : L.art;
+      const news = () => jiaziNews((t || L).jiazi, art.name, localToday(), !t, stampNew);
+      // 每天第一次打开：先撕掉昨天那页日历，撕完再盖「收」字印、说收下了今天的画
+      if (shouldTear(t || L)) showTear(t || L, art, () => { if (currentPath() !== '/') return; replaySeal(); news(); });
+      else news();
     });
   }
 }
 
 // 收下今天的画：当天第一次打开时说一句；第一次集满一甲子时说送了什么
-function jiaziNews(j, name, date, locked) {
+// 盖「收」字印的动画再放一遍（撕日历时它在撕页下面放过了）
+function replaySeal() {
+  const el = $('#view .dslot.cur .dart .seal, #view .lockart .seal');
+  if (!el) return;
+  el.classList.remove('fresh'); void el.offsetWidth; el.classList.add('fresh');
+}
+function jiaziNews(j, name, date, locked, stampNew = !seen('stamp:' + date)) {
   if (!j) return;
   if (j.reward) { toast(`集齐一甲子！送你一枚御守，${locked ? '开通会员后' : ''}在「转运御守」里直接领`); return; }
   // 新用户的引导、点朋友链接弹出的画还在时不弹，免得压在弹层上（印照样盖）
-  if (j.fresh && !seen('stamp:' + date) && seen('guide') && !S.linking) toast(`收下了今天的画「${name}」· 已收 ${j.n} / 60`);
+  if (j.fresh && stampNew && seen('guide') && !S.linking) toast(`收下了今天的画「${name}」· 已收 ${j.n} / 60`);
 }
 
 // ---------- 弹层 ----------
