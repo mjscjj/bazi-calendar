@@ -7,7 +7,7 @@ const addDays = (d, n) => bjDay(Date.parse(d + 'T12:00:00+08:00') + n * DAY_MS);
 // 功能使用：埋点名 → 看板上的名字
 const FEATURES = [
   ['draw', '每日一签'], ['outfit_open', '穿搭色'], ['pick_pin', '挑日子定下'], ['share_create', '生成分享图'],
-  ['ask_done', '问事'], ['ask_follow', '问事追问'], ['ask_review', '问事回看'], ['rate', '每晚自评'], ['mood_stick', '贴心情便签'], ['wish_done', '祈愿'], ['ics_open', '打开日历订阅页'],
+  ['ask_done', '问事'], ['ask_follow', '问事追问'], ['ask_review', '问事回看'], ['rate', '每晚自评'], ['mood_stick', '记一笔'], ['deed_add', '记善行'], ['deed_exchange', '善行换御守'], ['practice_meditate', '冥想练习'], ['practice_release', '释放练习'], ['draw_toss', '掷筊'], ['energy_exchange', '冥想换御守'], ['amulet_buy', '直接买御守'], ['wish_done', '祈愿（旧版）'], ['ics_open', '打开日历订阅页'],
 ];
 
 export function adminStats(db, now = Date.now()) {

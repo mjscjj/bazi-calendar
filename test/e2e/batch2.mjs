@@ -2,10 +2,20 @@
 // 出生城市和真太阳时、时辰交界、农历切换 → 邀请落地和注册 → 第二天生效 → 每晚自评 → 订阅到手机日历 → 邀请页
 // → 分享图白色/深色 → 电脑端挑日子横排 → 后台看板 → 注销账号。服务端以 ALIPAY_FAKE=1 启动。
 import { DatabaseSync } from 'node:sqlite';
-import { wheel, wheelOn, touchWheel, skipRite } from './helpers.mjs';
+import { wheel, wheelOn, touchWheel } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out, adminPw] = process.argv.slice(2);
 const db = new DatabaseSync(dbPath);
+// 掷筊直到圣杯再解签（服务端用 JIAO_FAKE=xiao,sheng 启动时第 2 次是圣杯）
+async function tossToLot(pg) {
+  await pg.waitForSelector('#sheet [data-toss]', { timeout: 8000 });
+  for (let i = 0; i < 3; i++) {
+    await pg.click('#sheet [data-toss]');
+    await pg.waitForSelector('#sheet [data-jiao-read], #sheet [data-toss]:not([disabled]), #sheet .jdone', { timeout: 8000 });
+    if (await pg.$('#sheet [data-jiao-read]')) { await pg.click('#sheet [data-jiao-read]'); return; }
+    if (await pg.$('#sheet .jdone')) throw new Error('掷筊没求成（服务端启动时加 JIAO_FAKE=xiao,sheng）');
+  }
+}
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
 const errors = [], results = [];
 const check = (name, ok, detail = '') => { results.push(`${ok ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); if (!ok) errors.push(name); };
@@ -204,7 +214,10 @@ check('当日详情里有那天的便签和那句话', (await rp.textContent('#s
 await rp.screenshot({ path: `${out}/b13d-day-moods.png` });
 await rp.click('#sheet [data-close-sheet]'); await rp.waitForSelector('#sheet', { state: 'detached' });
 await rp.goto(base + '/#/'); await rp.waitForSelector('.tcard');
-await rp.click('[data-draw]'); await skipRite(rp, '下周的签约');
+await rp.click('[data-draw]'); await rp.waitForSelector('#drawForm');
+await rp.fill('#drawForm input[name=q]', '下周的签约'); await rp.click('#drawForm button[type=submit]');
+await tossToLot(rp);
+await rp.waitForSelector('#sheet .lot', { timeout: 8000 });
 await rp.goto(base + '/#/lots'); await rp.waitForSelector('.lrow');
 check('签谱里有这支签和所问', (await rp.textContent('.lrow')).includes('下周的签约'));
 await rp.screenshot({ path: `${out}/b13c-lots.png`, fullPage: true });

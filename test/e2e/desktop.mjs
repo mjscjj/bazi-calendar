@@ -1,8 +1,18 @@
 // 桌面版走查：node test/e2e/desktop.mjs <baseUrl> <outDir>
 // 1440×900：顶栏导航、今天页两栏、日历右侧详情面板（点日子不弹窗）、我的两栏、登录注册左右分栏；逐页截图。
-import { setBirth, skipRite } from './helpers.mjs';
+import { setBirth } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, out] = process.argv.slice(2);
+// 掷筊直到圣杯再解签（服务端用 JIAO_FAKE=xiao,sheng 启动时第 2 次是圣杯）
+async function tossToLot(pg) {
+  await pg.waitForSelector('#sheet [data-toss]', { timeout: 8000 });
+  for (let i = 0; i < 3; i++) {
+    await pg.click('#sheet [data-toss]');
+    await pg.waitForSelector('#sheet [data-jiao-read], #sheet [data-toss]:not([disabled]), #sheet .jdone', { timeout: 8000 });
+    if (await pg.$('#sheet [data-jiao-read]')) { await pg.click('#sheet [data-jiao-read]'); return; }
+    if (await pg.$('#sheet .jdone')) throw new Error('掷筊没求成（服务端启动时加 JIAO_FAKE=xiao,sheng）');
+  }
+}
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
 const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
 const errors = [], results = [];
@@ -48,8 +58,9 @@ await page.waitForFunction(() => document.querySelector('.dslot.cur .eyebrow')?.
 await shot('d4b-tomorrow');
 await page.click('.dslot.cur [data-day-go]'); await page.waitForSelector('.wstrip .wc.today.on');
 await page.click('[data-draw]');
-await page.waitForSelector('#sheet .rite'); await shot('d5a-rite-modal');
-await skipRite(page);
+await page.waitForSelector('#drawForm'); await page.click('#drawForm button[type=submit]');
+await tossToLot(page);
+await page.waitForSelector('#sheet .lot', { timeout: 6000 });
 await shot('d5-lot-modal');
 await page.click('#sheet .close');
 await page.waitForSelector('#sheet', { state: 'detached' });

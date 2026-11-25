@@ -173,7 +173,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     for (const r of db.all('SELECT day FROM open_days WHERE user_id = ? ORDER BY day', u.id)) { const gz = dayGz(r.day); if (!got.has(gz)) got.set(gz, r.day); }
     return got;
   }
-  // 第一次集满 60 张，送一枚特别款御守（只送一次）
+  // 第一次集满 60 张，送一枚御守（加一次御守次数，转运页「直接买一枚」里免费领；只送一次）
   function jiaziReward(u, n) {
     if (n < 60 || u.jiazi_done) return false;
     return db.run('UPDATE users SET jiazi_done = ?, amulet_credits = amulet_credits + 1 WHERE id = ? AND jiazi_done IS NULL', nowIso(), u.id).changes > 0;
@@ -238,14 +238,6 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       db.run('UPDATE invites SET invitee_seen = 1 WHERE id = ?', mine.id);
     }
     return out;
-  }
-
-  // 今天页的回看提醒：最早一条到了日子还没回看的问事
-  function askReviewFor(u) {
-    const since = new Date(Date.now() - (FO.review_days + FO.review_window + 2) * DAY_MS).toISOString();
-    const a = db.all("SELECT * FROM asks WHERE user_id = ? AND status = 'done' AND outcome IS NULL AND created_at >= ? ORDER BY id", u.id, since).find((x) => reviewOf(x).remind);
-    if (!a) return null;
-    return { id: a.id, question: a.question, tendency: JSON.parse(a.gua).tendency, createdAt: a.created_at, outcomes: FO.outcomes.map(({ key, text }) => ({ key, text })) };
   }
 
   // ----- 计划 -----
@@ -414,7 +406,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     for (let k = 0; k < 7; k++) {
       const dt = new Date(Date.UTC(y, m - 1, d - dow + k)), [a, b, e] = [dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate()];
       const x = dayOut(c, a, b, e, true);
-      days.push({ date: ymd(dt), day: x, line: C.dailyLine(c, x), almanac: almanac(a, b, e) });
+      days.push({ date: ymd(dt), day: x, line: C.dailyLine(c, x), almanac: almanac(a, b, e), luck: C.outfit(c, x).colors });
     }
     return { start: days[0].date, days };
   }
@@ -661,18 +653,18 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, almanac: almanac(y, m, d), art: { gz, ...C.arts[gz] }, jiazi, ...priceInfo() });
     recordUse(u);
     activateInvite(u);
-    const drawn = db.get('SELECT lot_no, question FROM draws WHERE user_id = ? AND day = ?', u.id, date);
+    const drawn = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);
     const t = todayFor(birthOf(u), xiOf(u), date, { access: access(db.get('SELECT * FROM users WHERE id = ?', u.id)), name: u.nickname });
     t.plans = plansOf(u, t.chart);
-    t.draw = drawn ? { ...C.lot(drawn.lot_no, t.day.level.k), question: drawn.question } : null;
+    t.draw = drawOut(drawn, t.day.level.k);
+    t.jiao = jiaoText();
     t.rate = rateInfo(u, t.chart, date);
     t.moods = moodsOn(u, date);
     t.moodKit = moodKit();
     t.jiazi = jiazi;
-    t.amulet = { taken: !!db.get("SELECT 1 x FROM amulets WHERE user_id = ? AND month = ? AND style = 'basic'", u.id, date.slice(0, 7)) };
+    t.luck = { unused: unusedDeeds(u), per: C.luck.deeds.per_amulet, energy: energyHave(u), energyPer: C.luck.energy.per_amulet_minutes };
     withMoods(u, t.strip);
     t.news = newsFor(u);
-    t.askReview = askReviewFor(u);
     return t;
   });
   // 今天页滑到别的周：那一周 7 天的数据
@@ -687,23 +679,66 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
   route('GET', '/api/demo/today', async ({ q }) => {
     return todayFor(DEMO_BIRTH, null, validDay(q.get('date')), { name: DEMO_NAME, demo: true, plans: [], draw: null });
   });
-  route('POST', '/api/draws/today', async ({ req, body }) => {
-    const u = requireUser(req);
+  // ----- 每日一签：默念所求 → 摇签（先只知道签号）→ 掷筊向神明确认 → 解签 -----
+  // status：pending 摇出了签、还没掷出圣杯；done 圣杯，签文可以看；
+  // reask 连续 max_tries 次都是阴杯，换个问题重新摇（一天最多 max_rounds 轮）；closed 掷满了没有圣杯，今天不能再求
+  const J = C.jiao;
+  const jiaoText = () => ({ steps: J.steps, intro: J.intro, drawn: J.drawn, rules: J.rules, results: J.results, giveUp: J.give_up, reask: J.reask, roundsOut: J.rounds_out, maxTries: J.max_tries, maxRounds: J.max_rounds });
+  function drawOut(r, level) {
+    if (!r) return null;
+    const tosses = JSON.parse(r.tosses || '[]');
+    if (r.status === 'done') return { status: 'done', ...C.lot(r.lot_no, level, topicOf(r)), question: r.question, tosses, round: r.rounds };
+    return { status: r.status, no: r.lot_no, question: r.question, tosses, round: r.rounds, roundsLeft: Math.max(0, J.max_rounds - r.rounds) };
+  }
+  // 问的是哪类事：从问题里认，认出来的那类在解签里排第一
+  const topicOf = (r) => C.lotTopicOf(r.question);
+  const drawGate = (u) => {
     if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
     const a = access(u);
     if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, ...priceInfo() });
+  };
+  const levelOn = (u, date) => { const [y, m, d] = date.split('-').map(Number); return dayOut(chartOf(u), y, m, d, false).level.k; };
+  // 摇签：每人每天一支，当天不变；摇出来先是 pending，要掷筊确认
+  route('POST', '/api/draws/today', async ({ req, body }) => {
+    const u = requireUser(req);
+    drawGate(u);
     const date = validDay(body.date);
     const question = str(body.question, 30, '所问之事');
-    db.run('INSERT OR IGNORE INTO draws(user_id, day, lot_no, question, created_at) VALUES(?,?,?,?,?)', u.id, date, C.lotNumber(u.id, date), question, nowIso());
-    const r = db.get('SELECT lot_no, question FROM draws WHERE user_id = ? AND day = ?', u.id, date);
-    const [y, m, d] = date.split('-').map(Number);
-    const day = dayOut(chartOf(u), y, m, d, false);
-    return { draw: { ...C.lot(r.lot_no, day.level.k), question: r.question } };
+    const old = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);
+    // 三次都是阴杯：换个问题重新摇一支（签号跟着轮次变）
+    if (old && old.status === 'reask') {
+      if (old.rounds >= J.max_rounds) throw new HttpError(409, J.rounds_out);
+      if (!question || question === old.question) throw bad('换个问题再求，写下新的问题');
+      const round = old.rounds + 1;
+      db.run("UPDATE draws SET lot_no = ?, question = ?, status = 'pending', tosses = '[]', rounds = ? WHERE user_id = ? AND day = ?", C.lotNumber(u.id, `${date}#${round}`), question, round, u.id, date);
+    } else db.run("INSERT OR IGNORE INTO draws(user_id, day, lot_no, question, status, tosses, created_at) VALUES(?,?,?,?,'pending','[]',?)", u.id, date, C.lotNumber(u.id, date), question, nowIso());
+    const r = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);
+    return { draw: drawOut(r, levelOn(u, date)) };
+  });
+  // 掷筊：结果由服务器定，按两块筊杯各自正反一半的概率：圣杯 1/2，笑杯 1/4，阴杯 1/4
+  route('POST', '/api/draws/today/toss', async ({ req, body }) => {
+    const u = requireUser(req);
+    drawGate(u);
+    const date = validDay(body.date);
+    const r = db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date);
+    if (!r) throw bad('先摇一支签');
+    if (r.status !== 'pending') return { toss: null, draw: drawOut(r, levelOn(u, date)) };
+    const question = 'question' in body ? str(body.question, 30, '所问之事') : r.question;
+    const before = JSON.parse(r.tosses || '[]');
+    // 本地开发和浏览器走查用：JIAO_FAKE=xiao,sheng 表示第 1 次笑杯、第 2 次圣杯，依此类推。线上不要设
+    const fake = (process.env.JIAO_FAKE || '').split(',').filter((x) => ['sheng', 'xiao', 'yin'].includes(x));
+    const faces = [crypto.randomInt(2), crypto.randomInt(2)];
+    const toss = fake.length ? fake[before.length % fake.length] : faces[0] !== faces[1] ? 'sheng' : faces[0] ? 'xiao' : 'yin';
+    const tosses = [...before, toss];
+    const status = toss === 'sheng' ? 'done' : tosses.length < J.max_tries ? 'pending'
+      : tosses.every((x) => x === 'yin') ? (r.rounds < J.max_rounds ? 'reask' : 'closed') : 'closed';
+    db.run('UPDATE draws SET tosses = ?, status = ?, question = ? WHERE user_id = ? AND day = ?', JSON.stringify(tosses), status, question, u.id, date);
+    return { toss, draw: drawOut(db.get('SELECT * FROM draws WHERE user_id = ? AND day = ?', u.id, date), levelOn(u, date)) };
   });
   // 签谱：抽过的签都在这里，可以回看
   route('GET', '/api/draws', async ({ req }) => {
     const u = requireUser(req);
-    return { list: db.all('SELECT day, lot_no, question FROM draws WHERE user_id = ? ORDER BY day DESC LIMIT 200', u.id).map((r) => ({ day: r.day, question: r.question, ...C.lot(r.lot_no, 0) })) };
+    return { list: db.all("SELECT day, lot_no, question FROM draws WHERE user_id = ? AND status = 'done' ORDER BY day DESC LIMIT 200", u.id).map((r) => ({ day: r.day, question: r.question, ...C.lot(r.lot_no, 0, topicOf(r)) })) };
   });
 
   // 埋点：批量上报，失败不影响使用
@@ -970,8 +1005,9 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     return { ask: askDetail(db.get('SELECT * FROM asks WHERE id = ?', id)) };
   });
 
-  // ----- 祈愿与御守 -----
-  // 静坐一段时间后领一枚这个月的御守：基础款每月一枚免费（用幸运元素的颜色）；节气款、生日款单次付费
+  // ----- 转运御守 -----
+  // 御守三种来路：攒够 5 件善行换一枚（善缘款）；冥想累计 20 分钟换一枚（静心款，释放练习每次也算几分钟）；
+  // 或者直接买（转运款、节气款、生日款，¥3.9）。善缘款、静心款、转运款都用幸运元素的颜色。
   const CN_MONTH = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
   function amuletInfo(u) {
     const today = bjDay(), month = today.slice(0, 7), m = +today.slice(5, 7);
@@ -987,7 +1023,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
   // 三种款式的样子：基础款用幸运元素的颜色；节气款按当月节气的季节换颜色和图案；生日款是金色
   function lookOf(style, info) {
     const A = C.amulets;
-    const look = style === 'basic' ? { colors: A.element_colors[info.element], element: info.element }
+    const look = style === 'basic' || style === 'deed' || style === 'energy' ? { colors: A.element_colors[info.element], element: info.element }
       : style === 'term' ? { colors: A.seasons[info.season].colors, motif: A.seasons[info.season].motif, term: info.term }
         : { colors: A.birthday.colors, ink: A.birthday.ink, motif: 'star' };
     return { ...look, monthCn: info.monthCn };
@@ -1003,28 +1039,128 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       list: db.all('SELECT * FROM amulets WHERE user_id = ? ORDER BY id DESC', u.id).map(amuletOut),
     };
   });
-  route('POST', '/api/amulets', async ({ req, body }) => {
-    const u = requireUser(req);
+  const luckGate = (u) => {
     if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
     if (access(u).mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: access(u), ...priceInfo() });
-    const A = C.amulets, info = amuletInfo(u);
-    const wish = A.wishes.find((w) => w.name === body.wish);
-    if (!wish) throw bad('选一个心愿');
-    const way = body.way === 'bowl' ? 'bowl' : 'incense';
-    const minutes = parseInt(body.minutes, 10);
-    if (!A.minutes.includes(minutes)) throw bad('时长不对');
-    const style = ['basic', 'term', 'birthday'].includes(body.style) ? body.style : 'basic';
-    if (style === 'basic' && info.basicTaken) throw bad('这个月的基础款已经领过了，下个月再来');
+  };
+  const wishOf = (name) => { const w = C.amulets.wishes.find((x) => x.name === name); if (!w) throw bad('选一个心愿'); return w; };
+  // 直接买一枚：转运款（basic）、节气款、生日款
+  route('POST', '/api/amulets', async ({ req, body }) => {
+    const u = requireUser(req);
+    luckGate(u);
+    const info = amuletInfo(u), wish = wishOf(body.wish);
+    if (!['basic', 'term', 'birthday'].includes(body.style)) throw bad('选一个款式');
+    if (body.way && body.way !== 'buy') throw bad('御守现在靠做好事、提能量来换，也可以直接买一枚');
+    const style = body.style;
     if (style === 'birthday' && !info.birthdayMonth) throw bad('生日款只在你的生日月才有');
     const look = lookOf(style, info);
     const id = db.tx(() => {
-      if (style !== 'basic' && !db.run('UPDATE users SET amulet_credits = amulet_credits - 1 WHERE id = ? AND amulet_credits > 0', u.id).changes) {
-        throw new HttpError(402, `特别款 ¥${(info.priceCents / 100).toFixed(1)} 一枚`, { error: 'need_pay', product: 'amulet', priceCents: info.priceCents });
+      if (!db.run('UPDATE users SET amulet_credits = amulet_credits - 1 WHERE id = ? AND amulet_credits > 0', u.id).changes) {
+        throw new HttpError(402, `御守 ¥${(info.priceCents / 100).toFixed(1)} 一枚`, { error: 'need_pay', product: 'amulet', priceCents: info.priceCents });
       }
       return Number(db.run('INSERT INTO amulets(user_id, month, wish, way, minutes, style, look, created_at) VALUES(?,?,?,?,?,?,?,?)',
-        u.id, info.month, wish.name, way, minutes, style, JSON.stringify(look), nowIso()).lastInsertRowid);
+        u.id, info.month, wish.name, 'buy', 0, style, JSON.stringify(look), nowIso()).lastInsertRowid);
     });
     return { amulet: amuletOut(db.get('SELECT * FROM amulets WHERE id = ?', id)) };
+  });
+  // 做好事：记一件善行；攒够 per_amulet 件换一枚善缘款
+  const LK = C.luck;
+  const deedOut = (r) => ({ id: r.id, day: r.day, text: r.text, used: !!r.amulet_id, createdAt: r.created_at });
+  const unusedDeeds = (u) => db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ? AND amulet_id IS NULL', u.id).n;
+  function deedInfo(u) {
+    return {
+      per: LK.deeds.per_amulet, dailyMax: LK.deeds.daily_max, maxLen: LK.deeds.max_len, examples: LK.deeds.examples,
+      unused: unusedDeeds(u), today: db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ? AND day = ?', u.id, bjDay()).n,
+      total: db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ?', u.id).n,
+      list: db.all('SELECT * FROM deeds WHERE user_id = ? ORDER BY id DESC LIMIT 30', u.id).map(deedOut),
+    };
+  }
+  // 能量：练习累计的分钟数减去已经换掉的（换的时候记在那枚御守的 minutes 上）
+  const energyHave = (u) => db.get('SELECT COALESCE(SUM(minutes), 0) n FROM practices WHERE user_id = ?', u.id).n
+    - db.get("SELECT COALESCE(SUM(minutes), 0) n FROM amulets WHERE user_id = ? AND way = 'energy'", u.id).n;
+  function practiceInfo(u) {
+    const since = new Date(Date.now() - 7 * DAY_MS).toISOString();
+    const n = (kind, from) => db.get('SELECT COUNT(*) n FROM practices WHERE user_id = ? AND kind = ? AND created_at >= ?', u.id, kind, from).n;
+    return {
+      week: { meditate: n('meditate', since), release: n('release', since) }, total: { meditate: n('meditate', ''), release: n('release', '') },
+      have: energyHave(u), per: LK.energy.per_amulet_minutes, releaseMinutes: LK.energy.release_minutes,
+    };
+  }
+  route('GET', '/api/luck', async ({ req }) => {
+    const u = requireUser(req);
+    if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
+    const A = C.amulets, info = amuletInfo(u);
+    return {
+      mode: access(u).mode, deeds: deedInfo(u), practice: practiceInfo(u), release: LK.release,
+      meditate: { minutes: A.minutes, breath: A.breath },
+      amulets: {
+        count: db.get('SELECT COUNT(*) n FROM amulets WHERE user_id = ?', u.id).n, wishes: A.wishes, monthCn: info.monthCn,
+        credits: info.credits, priceCents: info.priceCents, birthdayMonth: info.birthdayMonth, term: info.term,
+        looks: { deed: lookOf('deed', info), energy: lookOf('energy', info), basic: lookOf('basic', info), term: lookOf('term', info), birthday: lookOf('birthday', info) },
+      },
+    };
+  });
+  route('POST', '/api/deeds', async ({ req, body }) => {
+    const u = requireUser(req);
+    luckGate(u);
+    const text = str(body.text, LK.deeds.max_len, '这件好事');
+    if (text.length < 2) throw bad('写一句做了什么好事');
+    const day = bjDay();
+    if (db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ? AND day = ?', u.id, day).n >= LK.deeds.daily_max) throw new HttpError(409, `一天最多记 ${LK.deeds.daily_max} 件，明天再来`);
+    db.run('INSERT INTO deeds(user_id, day, text, created_at) VALUES(?,?,?,?)', u.id, day, text, nowIso());
+    return { deeds: deedInfo(u) };
+  });
+  route('DELETE', '/api/deeds/:id', async ({ req, params }) => {
+    const u = requireUser(req);
+    const r = db.get('SELECT * FROM deeds WHERE id = ? AND user_id = ?', Number(params.id), u.id);
+    if (!r) throw new HttpError(404, '这条善行不在了');
+    if (r.amulet_id) throw bad('这件已经换成御守了，不能删');
+    db.run('DELETE FROM deeds WHERE id = ?', r.id);
+    return { deeds: deedInfo(u) };
+  });
+  route('POST', '/api/amulets/exchange', async ({ req, body }) => {
+    const u = requireUser(req);
+    luckGate(u);
+    const info = amuletInfo(u), wish = wishOf(body.wish), per = LK.deeds.per_amulet;
+    if (body.by === 'energy') {
+      const need = LK.energy.per_amulet_minutes;
+      const eid = db.tx(() => {
+        const have = energyHave(u);
+        if (have < need) throw new HttpError(409, `还差 ${need - have} 分钟`);
+        return Number(db.run('INSERT INTO amulets(user_id, month, wish, way, minutes, style, look, created_at) VALUES(?,?,?,?,?,?,?,?)',
+          u.id, info.month, wish.name, 'energy', need, 'energy', JSON.stringify(lookOf('energy', info)), nowIso()).lastInsertRowid);
+      });
+      return { amulet: amuletOut(db.get('SELECT * FROM amulets WHERE id = ?', eid)), practice: practiceInfo(u) };
+    }
+    const id = db.tx(() => {
+      const ids = db.all('SELECT id FROM deeds WHERE user_id = ? AND amulet_id IS NULL ORDER BY id LIMIT ?', u.id, per).map((r) => r.id);
+      if (ids.length < per) throw new HttpError(409, `还差 ${per - ids.length} 件善行`);
+      const aid = Number(db.run('INSERT INTO amulets(user_id, month, wish, way, minutes, style, look, created_at) VALUES(?,?,?,?,?,?,?,?)',
+        u.id, info.month, wish.name, 'deed', 0, 'deed', JSON.stringify(lookOf('deed', info)), nowIso()).lastInsertRowid);
+      db.run(`UPDATE deeds SET amulet_id = ? WHERE id IN (${ids.map(() => '?').join(',')})`, aid, ...ids);
+      return aid;
+    });
+    return { amulet: amuletOut(db.get('SELECT * FROM amulets WHERE id = ?', id)), deeds: deedInfo(u) };
+  });
+  // 提能量：冥想、释放练习，只记一次练习
+  route('POST', '/api/practices', async ({ req, body }) => {
+    const u = requireUser(req);
+    luckGate(u);
+    const kind = body.kind;
+    if (!['meditate', 'release'].includes(kind)) throw bad('练习类型不对');
+    if (!limit('practice:' + u.id, 40, DAY_MS)) throw new HttpError(429, '今天练得够多了，休息一下');
+    let minutes = 0, detail = {};
+    if (kind === 'meditate') {
+      minutes = parseInt(body.minutes, 10);
+      if (!C.amulets.minutes.includes(minutes)) throw bad('时长不对');
+      detail = { way: body.way === 'bowl' ? 'bowl' : 'incense' };
+    } else {
+      const sc = (v) => { const n = parseInt(v, 10); if (!(n >= 0 && n <= 10)) throw bad('分数在 0 到 10 之间'); return n; };
+      detail = { before: sc(body.before), after: sc(body.after), rounds: Math.min(LK.release.max_rounds, Math.max(1, parseInt(body.rounds, 10) || 1)) };
+      minutes = LK.energy.release_minutes;
+    }
+    db.run('INSERT INTO practices(user_id, kind, minutes, detail, created_at) VALUES(?,?,?,?,?)', u.id, kind, minutes, JSON.stringify(detail), nowIso());
+    return { practice: practiceInfo(u) };
   });
 
   // 每晚自评：今天或昨天，1–5 分；同时记下系统当天的判断，用来对照
@@ -1169,7 +1305,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const u = requireUser(req);
     if (!checkPassword(String(body.password || ''), u.pass_hash)) throw bad('密码不对');
     db.tx(() => {
-      for (const t of ['sessions', 'usage_days', 'open_days', 'plans', 'draws', 'feedback', 'ratings', 'events', 'asks', 'ask_follows', 'amulets', 'moods']) db.run(`DELETE FROM ${t} WHERE user_id = ?`, u.id);
+      for (const t of ['sessions', 'usage_days', 'open_days', 'plans', 'draws', 'feedback', 'ratings', 'events', 'asks', 'ask_follows', 'amulets', 'moods', 'deeds', 'practices']) db.run(`DELETE FROM ${t} WHERE user_id = ?`, u.id);
       db.run('DELETE FROM friend_links WHERE a = ? OR b = ?', u.id, u.id);
       db.run('DELETE FROM invites WHERE inviter_id = ? OR invitee_id = ?', u.id, u.id);
       db.run("UPDATE orders SET status = 'closed', closed_at = ? WHERE user_id = ? AND status = 'pending'", nowIso(), u.id);

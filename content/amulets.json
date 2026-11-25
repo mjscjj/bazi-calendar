@@ -1,5 +1,5 @@
 {
- "_说明": "祈愿与御守用的内容。wishes：心愿、御守上竖写的字（text）和选择按钮上的单字（char）；minutes：可选的时长；breath：仪式里循环的呼吸引导；element_colors：基础款按幸运元素取的两种颜色（浅、深）；seasons：节气款按当月节气所在的季节换颜色和图案（motif 可选 blossom / wave / leaf / snow）；birthday：生日款的颜色。改完重启服务生效。",
+ "_说明": "祈愿与御守用的内容。wishes：心愿、御守上竖写的字（text）和选择按钮上的单字（char）；minutes：冥想可选的时长（分钟）；breath：仪式里循环的呼吸引导；element_colors：基础款按幸运元素取的两种颜色（浅、深）；seasons：节气款按当月节气所在的季节换颜色和图案（motif 可选 blossom / wave / leaf / snow）；birthday：生日款的颜色。改完重启服务生效。",
  "wishes": [
   {
    "name": "学业",
@@ -30,7 +30,9 @@
  "minutes": [
   1,
   3,
-  5
+  5,
+  10,
+  20
  ],
  "breath": [
   "慢慢吸气……",

@@ -13,6 +13,7 @@ const PAIR_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '
 const pairKey = (a, b) => (GAN.indexOf(a) <= GAN.indexOf(b) ? a + b : b + a);
 const HE = ['甲己', '乙庚', '丙辛', '丁壬', '戊癸'];
 const gwx = (g) => Math.floor(GAN.indexOf(g) / 2);
+const XIANJI = ['家宅', '自身', '求财', '交易', '婚姻', '六甲', '行人', '田蚕', '六畜', '寻人', '公讼', '移徙', '失物', '疾病', '山坟'];
 const TEN = ['正财', '偏财', '正官', '七杀', '正印', '偏印', '比肩', '劫财', '食神', '伤官'];
 
 function need(cond, msg) { if (!cond) throw new Error(`[content] ${msg}`); }
@@ -59,7 +60,23 @@ export function loadContent(dir = DIR) {
     need(l.no === i + 1, `签号不连续：第 ${i + 1} 条是 ${l.no}`);
     need(l.grade && l.title && l.plain && l.keyword, `第 ${l.no} 签缺少字段`);
     need(Array.isArray(l.poem) && l.poem.length === 4, `第 ${l.no} 签的签诗不是四句`);
+    need(Array.isArray(l.jieqian) && l.jieqian.length === 4 && l.jieqian.every((x) => typeof x === 'string' && x), `第 ${l.no} 签的解曰不是四句`);
+    need(l.xianji && typeof l.xianji === 'object' && Object.keys(l.xianji).every((k) => XIANJI.includes(k)), `第 ${l.no} 签的仙机事项不对`);
   });
+  // 解签分事：每类事对应几项仙机断语，断语定顺/平/缓
+  const lotTopics = read(dir, 'lot-topics.json');
+  need(['g', 'm', 'b'].every((k) => lotTopics.tones?.[k]), '分事解签缺少顺/平/缓的叫法');
+  need(Array.isArray(lotTopics.topics) && lotTopics.topics.length, '分事解签缺少事项分类');
+  for (const t of lotTopics.topics) {
+    need(t.key && t.name && Array.isArray(t.items) && t.items.length && t.items.every((k) => XIANJI.includes(k)), `分事解签 ${t.key} 的仙机项不对`);
+    need(Array.isArray(t.words) && t.words.length, `分事解签 ${t.key} 缺少关键词`);
+    need([1, 2, 3, 4, 5].every((k) => t.advice?.[k]?.say && Array.isArray(t.advice[k].do) && t.advice[k].do.length), `分事解签 ${t.key} 缺少 1–5 星的说明和建议`);
+  }
+  need(new Set(lotTopics.topics.map((t) => t.key)).size === lotTopics.topics.length, '分事解签的 key 重复');
+  need(lotTopics.missing?.text && ['上签', '中签', '下签'].every((g) => lotTopics.missing.grade?.[g] >= 1 && lotTopics.missing.grade[g] <= 5), '分事解签缺少签谱未载时的提示');
+  need(['g', 'm', 'b'].every((k) => lotTopics.stars?.[k] >= 1 && lotTopics.stars[k] <= 5) && Array.isArray(lotTopics.stars.high) && Array.isArray(lotTopics.stars.low), '分事解签缺少星数规则');
+  for (const [w, v] of Object.entries(lotTopics.words || {})) need(Array.isArray(v) && ['g', 'm', 'b'].includes(v[0]), `断语 ${w} 的语气不对`);
+  for (const l of lots) for (const v of Object.values(l.xianji)) need(lotTopics.words[v], `第 ${l.no} 签的断语「${v}」没有收录到 lot-topics.json`);
   const pick = read(dir, 'pick.json');
   need(Array.isArray(pick.all_ji), '挑日子缺少 all_ji');
   need(Array.isArray(pick.types) && pick.types.length, '挑日子缺少事项');
@@ -95,6 +112,17 @@ export function loadContent(dir = DIR) {
   for (const x of moods.colors) need(/^[a-z]+$/.test(x.key || '') && x.name && /^#[0-9A-Fa-f]{6}$/.test(x.light || '') && /^#[0-9A-Fa-f]{6}$/.test(x.dark || ''), `便签颜色「${x.name || x.key}」要有 key、name、light、dark（#RRGGBB）`);
   for (const x of moods.moods) need(moods.colors.some((c) => c.key === x.color), `心情「${x.word}」的默认颜色 ${x.color} 不在 colors 里`);
   for (const list of [moods.moods, moods.colors]) need(new Set(list.map((x) => x.key)).size === list.length, '心情便签的 key 有重复');
+  const jiao = read(dir, 'jiao.json');
+  need(Number.isInteger(jiao.max_tries) && jiao.max_tries >= 1 && Number.isInteger(jiao.max_rounds) && jiao.max_rounds >= 1 && jiao.intro && jiao.drawn && jiao.rules && jiao.give_up && jiao.reask && jiao.rounds_out && Array.isArray(jiao.steps) && jiao.steps.length === 4, '掷筊缺少 max_tries、max_rounds、steps（四步）、intro、drawn、rules、reask、give_up 或 rounds_out');
+  for (const k of ['sheng', 'xiao', 'yin']) need(jiao.results?.[k]?.name && jiao.results[k].face && jiao.results[k].text, `掷筊缺少结果 ${k} 的 name、face、text`);
+  const luck = read(dir, 'luck.json');
+  const dz = luck.deeds || {};
+  need(Number.isInteger(dz.per_amulet) && dz.per_amulet >= 1 && Number.isInteger(dz.daily_max) && dz.daily_max >= 1 && Number.isInteger(dz.max_len) && dz.max_len >= 10, '转运御守缺少 deeds 的 per_amulet、daily_max 或 max_len');
+  need(Array.isArray(dz.examples) && dz.examples.length, '转运御守缺少善行例子 examples');
+  need(Number.isInteger(luck.energy?.per_amulet_minutes) && luck.energy.per_amulet_minutes >= 1 && Number.isInteger(luck.energy?.release_minutes) && luck.energy.release_minutes >= 0, '转运御守缺少 energy 的 per_amulet_minutes 或 release_minutes');
+  const rl = luck.release || {};
+  need(rl.intro && rl.topic?.title && rl.before?.title && rl.after?.title && rl.again && rl.done && rl.note && Number.isInteger(rl.max_rounds), '释放练习的文字不全（intro、topic、before、after、again、done、note、max_rounds）');
+  need(Array.isArray(rl.steps) && rl.steps.length && rl.steps.every((x) => x.title && x.text && (x.wait || (Array.isArray(x.choices) && x.choices.length))), '释放练习的每一步要有 title、text，和 wait 或 choices');
   const amulets = read(dir, 'amulets.json');
   need(Array.isArray(amulets.wishes) && amulets.wishes.every((w) => w.name && w.text && w.char), '御守缺少心愿');
   need(Array.isArray(amulets.minutes) && amulets.minutes.length && Array.isArray(amulets.breath) && amulets.breath.length, '御守缺少时长或呼吸引导');
@@ -103,7 +131,7 @@ export function loadContent(dir = DIR) {
   need(terms.length === 24 && new Set(terms).size === 24, '御守的季节要覆盖 24 个节气');
   for (const [k, x] of Object.entries(amulets.seasons)) need(x.colors?.length === 2 && ['blossom', 'wave', 'leaf', 'snow'].includes(x.motif), `御守季节 ${k} 缺颜色或图案`);
   need(amulets.birthday?.colors?.length === 2 && amulets.birthday.ink, '御守缺少生日款颜色');
-  return { cards, pillars, pairs, line, outfit, lots, pick, ask, askPrompt, askFollowPrompt, amulets, moods };
+  return { cards, pillars, pairs, line, outfit, lots, lotTopics, pick, ask, askPrompt, askFollowPrompt, amulets, moods, luck, jiao };
 }
 
 export function makeContent(c) {
@@ -121,7 +149,7 @@ export function makeContent(c) {
       const kind = HE.includes(pairKey(me, you)) ? '合' : a === b ? '同' : (a + 1) % 5 === b ? '我生' : (b + 1) % 5 === a ? '生我' : (a + 2) % 5 === b ? '我克' : '克我';
       const k = c.pairs.kinds[kind];
       return { name: p.name, art: 'art/pairs/' + p.art, kind, tag: k.tag, line: k.text.replace('{me}', c.cards[me].image).replace('{you}', c.cards[you].image) };
-    }, askPrompt: c.askPrompt, askFollowPrompt: c.askFollowPrompt, amulets: c.amulets, moods: c.moods,
+    }, askPrompt: c.askPrompt, askFollowPrompt: c.askFollowPrompt, amulets: c.amulets, moods: c.moods, luck: c.luck, jiao: c.jiao,
     pickType: (name) => c.pick.types.find((t) => t.name === name) || null,
     // 能量卡：日柱图鉴（插画、称号、介绍）、本命形象、性格词、五行比例、幸运元素
     energyCard(chart) {
@@ -167,9 +195,37 @@ export function makeContent(c) {
       const h = crypto.createHash('sha256').update(`${seed}:${date}`).digest();
       return (h.readUInt32BE(0) % 100) + 1;
     },
-    lot(no, level) {
-      const l = c.lots[no - 1];
-      return { no: l.no, grade: l.grade, title: l.title, poem: l.poem, plain: l.plain, keyword: l.keyword, hint: level ? c.line.draw_hints[level] : '' };
+    // 从问题里认出问的是哪类事：命中最长关键词的那类；「整体运势」的词（最近、今年）只在别的都没命中时用
+    lotTopicOf(question) {
+      let best = '', len = 0;
+      const q = String(question || '').toLowerCase();
+      for (const t of c.lotTopics.topics) {
+        for (const w of t.words) {
+          const score = w.length - (t.key === 'self' ? 0.5 : 0);
+          if (score > len && q.includes(w.toLowerCase())) { best = t.key; len = score; }
+        }
+      }
+      return best;
+    },
+    // topic：从问题认出来的那类放最前面；每类按断语折成 1–5 颗星，给说明和建议
+    lot(no, level, topic = '') {
+      const l = c.lots[no - 1], T = c.lotTopics, S = T.stars;
+      const starOf = (v, tone) => (S.high.includes(v) ? 5 : S.low.includes(v) ? 1 : S[tone]);
+      let topics = T.topics.map((t) => {
+        const items = t.items.filter((k) => l.xianji[k]).map((k) => {
+          const [tone, gloss] = T.words[l.xianji[k]];
+          return { k, v: l.xianji[k], gloss: gloss || '', stars: starOf(l.xianji[k], tone) };
+        });
+        const stars = items.length ? Math.round(items.reduce((a, x) => a + x.stars, 0) / items.length) : T.missing.grade[l.grade] || 3;
+        const adv = t.advice[stars];
+        return { key: t.key, name: t.name, items, stars, say: (items.length ? '' : T.missing.text) + adv.say, tips: adv.do, note: t.note || '', asked: t.key === topic };
+      });
+      topics = [...topics.filter((t) => t.asked), ...topics.filter((t) => !t.asked)];
+      return {
+        no: l.no, grade: l.grade, title: l.title, poem: l.poem, plain: l.plain, keyword: l.keyword, hint: level ? c.line.draw_hints[level] : '',
+        jieqian: l.jieqian, xianji: XIANJI.map((k) => ({ k, v: l.xianji[k] || '' })), topics,
+        titles: { list: T.list_title, asked: T.asked_tag, advice: T.advice_label, table: T.table_title },
+      };
     },
   };
 }

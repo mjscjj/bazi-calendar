@@ -1,14 +1,15 @@
-// 祈愿与御守：选心愿、方式（点香 / 颂钵）、时长和款式 → 全屏静坐（倒计时、呼吸引导，切出去自动暂停）
-// → 揭晓一枚这个月的御守（用幸运色织成）→ 收进「我的御守」，可以分享。中途结束不发御守。
+// 御守的样子、冥想（全屏静坐：点香 / 颂钵、倒计时、呼吸引导，切出去自动暂停）、我的御守。
+// 御守现在只靠做好事换（善缘款），节气款、生日款单独买；转运页在 luck.js。
 import { $, $$, esc, api, toast, onClick, currentPath, openSheet, price, track } from './core.js';
 import { S } from './state.js';
 import { footHtml, memberLockHtml } from './today.js';
-import { openPay } from './pay.js';
 import { share } from './share.js';
 
 const phead = (title) => `<div class="phead"><button type="button" class="back" data-back aria-label="返回">‹</button><h1>${title}</h1></div>`;
-const STYLE_NAME = { basic: '基础款', term: '节气款', birthday: '生日款' };
+export const STYLE_NAME = { basic: '转运款', deed: '善缘款', energy: '静心款', term: '节气款', birthday: '生日款' };
 const WAY_NAME = { incense: '点一炷香', bowl: '敲颂钵' };
+// 御守下面那行小字：怎么来的
+export const amuletFrom = (a) => (a.way === 'deed' ? `${STYLE_NAME[a.style]} · 5 件善行换的` : a.way === 'energy' ? `${STYLE_NAME[a.style]} · ${a.minutes} 分钟冥想换的` : a.way === 'buy' ? `${STYLE_NAME[a.style]} · 买的` : `${STYLE_NAME[a.style]} · ${WAY_NAME[a.way]} ${a.minutes} 分钟`);
 const SERIF = 'Songti SC,STSong,Noto Serif CJK SC,Source Han Serif SC,serif';
 
 // ---------- 御守的样子（SVG） ----------
@@ -23,7 +24,7 @@ export function omamoriSvg(a, key = 'x') {
   const L = a.look, [c1, c2] = L.colors, bd = a.style === 'birthday';
   const ink = bd ? L.ink : '#F6EFDC', gold = bd ? '#A8781F' : '#E9D9A8', g = 'om' + key;
   const text = (a.wish || '').split('');
-  const seal = a.style === 'term' ? L.term : bd ? '生辰' : '';
+  const seal = a.style === 'term' ? L.term : bd ? '生辰' : a.style === 'deed' ? '善行' : a.style === 'energy' ? '静心' : '';
   return `<svg viewBox="0 0 180 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(L.monthCn)}${esc(a.wish)}御守"><defs><linearGradient id="${g}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`
     + (L.motif ? `<pattern id="${g}p" width="26" height="26" patternUnits="userSpaceOnUse">${MOTIF[L.motif]}</pattern>` : '') + '</defs>'
     + `<path d="M90 6C110 6 118 18 118 30v4H62v-4C62 18 70 6 90 6Z" fill="none" stroke="${gold}" stroke-width="3"/>`
@@ -45,55 +46,12 @@ function svgImage(svg) {
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   });
 }
-function shareAmulet(a) {
+export function shareAmulet(a) {
   svgImage(omamoriSvg(a, 's' + a.id)).then((img) => share('amulet', { img, a }), () => toast('图片生成失败，再试一次'));
 }
 
-// ---------- 选择 ----------
-let W = null; // 当前这次祈愿的选择
-export function pageWish() {
-  const v = $('#view');
-  v.innerHTML = phead('本月祈愿') + '<div class="sk" style="height:420px"></div>';
-  api('GET', 'amulets').then((d) => {
-    if (currentPath() !== '/wish') return;
-    S.amu = d;
-    if (d.mode === 'blocked') { $('#view').innerHTML = phead('本月祈愿') + memberLockHtml('祈愿、每月领一枚御守') + (d.list.length ? '<p style="margin:0;text-align:center"><a class="tbtn" href="#/amulets">看我的御守 ›</a></p>' : '') + footHtml(); return; }
-    W = W || { wish: d.wishes[1] ? d.wishes[1].name : d.wishes[0].name, way: 'incense', minutes: d.minutes.includes(3) ? 3 : d.minutes[0] };
-    if (!W.style || (W.style === 'basic' && d.basicTaken) || (W.style === 'birthday' && !d.birthdayMonth)) W.style = d.basicTaken ? 'term' : 'basic';
-    renderWish();
-  }, (e) => { v.innerHTML = phead('本月祈愿') + `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`; });
-}
-function styleCard(key) {
-  const d = S.amu, a = { wish: W.wish, style: key, look: d.looks[key] };
-  const sub = key === 'basic' ? `幸运色 · ${d.element}<br>${d.basicTaken ? '本月已领' : '本月免费'}`
-    : `${key === 'term' ? d.term + '时节' : '只在生日月'}<br>${d.credits ? `还有 ${d.credits} 次` : '¥' + price(d.priceCents)}`;
-  const off = key === 'basic' && d.basicTaken;
-  return `<button type="button" class="stycard" data-wstyle="${key}" aria-pressed="${W.style === key}"${off ? ' disabled' : ''}><span class="pv">${omamoriSvg(a, 'pv' + key)}</span><b>${STYLE_NAME[key]}</b><small>${sub}</small></button>`;
-}
-function renderWish() {
-  const d = S.amu, seg = (k, opts) => `<span class="segs" role="group">${opts.map(([v, l]) => `<button type="button" data-w${k}="${v}" aria-pressed="${String(W[k]) === String(v)}">${l}</button>`).join('')}</span>`;
-  const special = W.style !== 'basic' && !d.credits;
-  $('#view').innerHTML = phead('本月祈愿')
-    + '<p class="lead">静下来几分钟，许一个心愿，领一枚这个月的御守。</p>'
-    + `<div class="field"><span>心愿</span><div class="wishes">${d.wishes.map((w) => `<button type="button" data-wwish="${esc(w.name)}" aria-pressed="${w.name === W.wish}"><i>${esc(w.char)}</i>${esc(w.name)}</button>`).join('')}</div></div>`
-    + `<div class="field"><span>方式</span>${seg('way', [['incense', '点一炷香'], ['bowl', '敲颂钵']])}</div>`
-    + `<div class="field"><span>时长</span>${seg('minutes', d.minutes.map((m) => [m, m + ' 分钟']))}</div>`
-    + `<div class="field"><span>款式</span><div class="stys">${['basic', 'term'].concat(d.birthdayMonth ? ['birthday'] : []).map(styleCard).join('')}</div></div>`
-    + `<button type="button" class="btn primary block" data-wish-start>${special ? `¥${price(d.priceCents)} 开始` : '开始'}</button>`
-    + `<p class="note" style="margin:0">每月一枚基础款免费；节气款、生日款 ¥${price(d.priceCents)}。建议戴上耳机，找个安静的地方；中途结束不发御守。</p>`
-    + (d.list.length ? '<p style="margin:0;text-align:center"><a class="tbtn" href="#/amulets">我的御守 ›</a></p>' : '') + footHtml();
-}
-onClick('[data-wwish]', (el) => { W.wish = el.getAttribute('data-wwish'); renderWish(); });
-onClick('[data-wway]', (el) => { W.way = el.getAttribute('data-wway'); renderWish(); });
-onClick('[data-wminutes]', (el) => { W.minutes = +el.getAttribute('data-wminutes'); renderWish(); });
-onClick('[data-wstyle]', (el) => { if (el.disabled) return; W.style = el.getAttribute('data-wstyle'); renderWish(); });
-onClick('[data-wish-start]', () => {
-  const d = S.amu;
-  if (d.mode === 'blocked') { openPay(() => pageWish()); return; }
-  const cfg = { ...W, breath: d.breath };
-  if (W.style !== 'basic' && !d.credits) { openPay(() => { d.credits = (d.credits || 0) + 1; startRitual(cfg); }, { product: 'amulet' }); return; }
-  startRitual(cfg);
-});
+// 以前的「本月祈愿」页，现在都去转运页
+export function pageWish() { location.replace('#/luck'); }
 
 // ---------- 静坐 ----------
 let R = null;
@@ -122,8 +80,9 @@ function strike(soft) {
   if (rp) { const i = document.createElement('i'); rp.appendChild(i); setTimeout(() => i.remove(), 2600); }
 }
 const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-function startRitual(cfg) {
-  track('wish_start', { way: cfg.way, minutes: cfg.minutes, style: cfg.style });
+// 冥想：cfg = { way, minutes, breath }；练完只记一次练习，不发御守
+export function startRitual(cfg) {
+  track('practice_meditate_start', { way: cfg.way, minutes: cfg.minutes });
   const total = cfg.minutes * 60;
   R = { cfg, total, elapsed: 0, last: performance.now(), paused: false, step: 0 };
   const el = document.createElement('div');
@@ -133,7 +92,7 @@ function startRitual(cfg) {
     + (cfg.way === 'incense'
       ? '<div class="stage"><div class="incense"><div class="burn"><span class="smoke s1"></span><span class="smoke s2"></span><span class="smoke s3"></span><span class="ember"></span><span class="stick"></span></div><span class="censer"></span></div></div>'
       : '<div class="stage"><button type="button" class="sbowl" data-strike aria-label="敲一下颂钵"><span class="ripples"></span><span class="bw"></span></button><p class="btip">点一下颂钵，听它慢慢散开</p></div>')
-    + `<div class="rbottom"><div class="timer" id="rTimer">${mmss(total)}</div><span class="rwish">心愿 · ${esc(cfg.wish)}</span><button type="button" class="rend" data-ritual-end>提前结束</button></div>`
+    + `<div class="rbottom"><div class="timer" id="rTimer">${mmss(total)}</div><span class="rwish">冥想 · ${cfg.minutes} 分钟</span><button type="button" class="rend" data-ritual-end>提前结束</button></div>`
     + '<div class="rpause" hidden><p>已暂停</p><button type="button" class="btn primary" data-ritual-resume>继续</button></div>';
   document.body.appendChild(el);
   document.body.classList.add('in-ritual');
@@ -178,11 +137,11 @@ addEventListener('popstate', () => {
   if (!R || (history.state && history.state.lrlRitual)) return;
   const done = R.done;
   closeRitual(true);
-  if (!done) toast('已结束，这次没有领御守');
+  if (!done) toast('已结束，这次不算');
 });
 onClick('[data-strike]', () => strike());
 onClick('[data-ritual-resume]', () => { audio(); pause(false); });
-onClick('[data-ritual-end]', () => { if (confirm('提前结束就不发御守了，确定结束吗？')) { track('wish_quit'); closeRitual(); toast('已结束，这次没有领御守'); } });
+onClick('[data-ritual-end]', () => { if (confirm('提前结束这次就不算了，确定结束吗？')) { track('practice_meditate_quit'); closeRitual(); toast('已结束，这次不算'); } });
 
 function finishRitual() {
   if (R.done) return;
@@ -191,25 +150,23 @@ function finishRitual() {
   strike(true);
   const el = $('#ritual'), cfg = R.cfg;
   el.classList.add('ending');
-  api('POST', 'amulets', { wish: cfg.wish, way: cfg.way, minutes: cfg.minutes, style: cfg.style }).then((d) => {
-    track('wish_done', { style: cfg.style, minutes: cfg.minutes });
-    W = null; S.amu = null; if (S.today) S.today.amulet = { taken: true };
-    const a = d.amulet;
-    R.amulet = a;
+  api('POST', 'practices', { kind: 'meditate', way: cfg.way, minutes: cfg.minutes }).then((d) => {
+    track('practice_meditate', { way: cfg.way, minutes: cfg.minutes });
+    if (S.luck) S.luck.practice = d.practice;
+    if (S.today && S.today.luck) S.today.luck.energy = d.practice.have;
     setTimeout(() => {
       el.classList.add('revealed');
-      el.innerHTML = `<div class="reveal2"><p class="sub">${esc(a.look.monthCn)} · ${esc(a.wish)}</p><h1>收下你的御守</h1><div class="omamori">${omamoriSvg(a, 'rv' + a.id)}</div>`
-        + `<p class="sub">${a.style === 'basic' ? `用你的幸运色（${esc(a.look.element)}）织成` : a.style === 'term' ? `${esc(a.look.term)}时节的特别款` : '生日月的特别款'}。收在「我的御守」里。</p>`
-        + '<div class="acts"><button type="button" class="btn ghost" data-om-share>分享</button><button type="button" class="btn primary" data-om-keep>收下</button></div></div>';
+      const p = d.practice, full = p.have >= p.per;
+      el.innerHTML = `<div class="reveal2"><p class="sub">冥想 · ${cfg.minutes} 分钟</p><h1>练完了</h1>`
+        + `<p class="sub">攒了 ${cfg.minutes} 分钟，现在一共 ${p.have}/${p.per} 分钟。${full ? '够换一枚御守了。' : '心静下来，好运才找得到你。'}</p>`
+        + '<div class="acts"><button type="button" class="btn primary" data-ritual-close>回到转运页</button></div></div>';
     }, 900);
   }, (e) => {
     el.innerHTML = `<div class="reveal2"><p class="sub">${esc(e.message)}</p><div class="acts"><button type="button" class="btn ghost" data-ritual-close>先回去</button><button type="button" class="btn primary" data-ritual-retry>再试一次</button></div></div>`;
   });
 }
 onClick('[data-ritual-retry]', () => { if (R) { R.done = false; finishRitual(); } });
-onClick('[data-ritual-close]', () => closeRitual());
-onClick('[data-om-share]', () => { if (R && R.amulet) shareAmulet(R.amulet); });
-onClick('[data-om-keep]', () => { closeRitual(); setTimeout(() => { location.hash = '#/amulets'; }, 50); });
+onClick('[data-ritual-close]', () => { closeRitual(); if (currentPath() === '/luck') setTimeout(() => window.dispatchEvent(new Event('lrl:luck')), 60); });
 
 // ---------- 我的御守 ----------
 export function pageAmulets() {
@@ -219,15 +176,15 @@ export function pageAmulets() {
     if (currentPath() !== '/amulets') return;
     S.amuList = d.list;
     v.innerHTML = phead('我的御守')
-      + (d.basicTaken ? '' : `<a class="omnew" href="#/wish"><span>${esc(d.monthCn)}的御守还没领</span><small>静坐几分钟，领一枚 ›</small></a>`)
-      + (d.list.length ? `<div class="omgrid">${d.list.map((a) => `<button type="button" class="omcard" data-om="${a.id}"><span class="pv">${omamoriSvg(a, 'g' + a.id)}</span><b>${esc(a.look.monthCn)} · ${esc(a.wish)}</b><small>${STYLE_NAME[a.style]} · ${WAY_NAME[a.way]} ${a.minutes} 分钟</small></button>`).join('')}</div>`
-        : '<div class="empty">还没有御守。每个月静坐几分钟，就能领一枚。</div>')
-      + (d.basicTaken ? '<p style="margin:0;text-align:center"><a class="tbtn" href="#/wish">再领一枚特别款 ›</a></p>' : '') + footHtml();
+      + '<a class="omnew" href="#/luck"><span>做好事、提能量，都能换御守</span><small>去转运页 ›</small></a>'
+      + (d.list.length ? `<div class="omgrid">${d.list.map((a) => `<button type="button" class="omcard" data-om="${a.id}"><span class="pv">${omamoriSvg(a, 'g' + a.id)}</span><b>${esc(a.look.monthCn)} · ${esc(a.wish)}</b><small>${esc(amuletFrom(a))}</small></button>`).join('')}</div>`
+        : '<div class="empty">还没有御守。做 5 件好事，或者冥想攒够 20 分钟，就能换一枚。</div>')
+      + '<p style="margin:0;text-align:center"><button type="button" class="tbtn" data-om-buy>直接买一枚 ›</button></p>' + footHtml();
   }, (e) => { v.innerHTML = phead('我的御守') + `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`; });
 }
 onClick('[data-om]', (el) => {
   const a = (S.amuList || []).find((x) => x.id === +el.getAttribute('data-om'));
   if (!a) return;
-  openSheet(`${a.look.monthCn} · ${a.wish}`, `<div class="omview"><div class="omamori">${omamoriSvg(a, 'v' + a.id)}</div><p class="note" style="margin:0;text-align:center">${STYLE_NAME[a.style]} · ${WAY_NAME[a.way]} ${a.minutes} 分钟 · ${esc(a.createdAt.slice(0, 10))}</p><button type="button" class="btn ghost block" data-om-share2="${a.id}">分享</button></div>`);
+  openSheet(`${a.look.monthCn} · ${a.wish}`, `<div class="omview"><div class="omamori">${omamoriSvg(a, 'v' + a.id)}</div><p class="note" style="margin:0;text-align:center">${esc(amuletFrom(a))} · ${esc(a.createdAt.slice(0, 10))}</p><button type="button" class="btn ghost block" data-om-share2="${a.id}">分享</button></div>`);
 });
 onClick('[data-om-share2]', (el) => { const a = (S.amuList || []).find((x) => x.id === +el.getAttribute('data-om-share2')); if (a) shareAmulet(a); });

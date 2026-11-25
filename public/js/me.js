@@ -32,7 +32,7 @@ export function pageMe() {
       + `<div class="mrow" role="group" aria-label="外观"><span>外观</span><span class="seg3">${[['light', '白色'], ['dark', '深色'], ['auto', '跟随系统']].map(([k, l]) => `<span role="button" tabindex="0" data-theme-set="${k}" aria-pressed="${getTheme() === k}">${l}</span>`).join('')}</span></div>`
       + '</section></div><div class="mcol"><section class="mlist">'
       + row('data-go="/asks"', '问事记录', '梅花易数 · 每月免费 1 次')
-      + row('data-go="/amulets"', '我的御守', '每月一枚')
+      + row('data-go="/luck"', '转运御守', '做好事、提能量换御守') + row('data-go="/amulets"', '我的御守', '')
       + row('data-go="/lots"', '我的签谱', '抽过的签都在这里')
       + row('data-go="/invite"', '邀请好友', `朋友的画 · 各得 ${S.inviteDays || 7} 天`)
       + row('data-go="/ics"', '订阅到手机日历', '每天出现在日历里')

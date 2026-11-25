@@ -1222,9 +1222,9 @@ body.in-ritual{overflow:hidden}
 .follows .fa{margin:0;font-size:14.5px;line-height:1.8}
 .follows .adv{margin:0;background:var(--sunk);border-radius:12px;padding:10px 12px;font-size:14px}
 .follows .adv b{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
-.followf,.arnote{display:flex;gap:8px}
-.followf input,.rvnote,.arnote input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
-.followf input:focus,.rvnote:focus,.arnote input:focus{outline:none;border-color:var(--accent)}
+.followf{display:flex;gap:8px}
+.followf input,.rvnote{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.followf input:focus,.rvnote:focus{outline:none;border-color:var(--accent)}
 .followf .btn{flex:none}
 .ftip{margin:0;font-size:12.5px;color:var(--muted);line-height:1.7}
 .ftip b{color:var(--fg)}
@@ -1237,10 +1237,6 @@ body.in-ritual{overflow:hidden}
 .rvsaid b{font-family:var(--f-display);font-size:17px}
 .rvsaid span{font-size:14px;color:var(--muted)}
 .opills button{padding:7px 14px}
-.areview .arq{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--fg);background:var(--sunk);border-radius:12px;padding:10px 12px}
-.areview .arq span{font-weight:600;font-size:14.5px;line-height:1.6}
-.areview .arq small{font-size:12px;color:var(--muted)}
-.areview.done .tbtn{align-self:flex-start;font-size:12.5px}
 .alist em.due{font-style:normal;color:var(--cinnabar);font-weight:600}
 
 /* ================= 心情便签（原每晚自评） ================= */
@@ -1398,7 +1394,7 @@ body.in-ritual{overflow:hidden}
 :root[data-theme="dark"] .stkfull{background:var(--pd);color:var(--fg)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stkfull{background:var(--pd);color:var(--fg)}}
 .stk.ev{padding-top:24px}
-/* ================= 滚轮选日期、今天页左右滑、求签仪式 ================= */
+/* ================= 滚轮选日期 ================= */
 /* 出生日期 / 时间：一行字，点开是滚轮 */
 .pickbox{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;text-align:left;min-height:46px}
 .pickbox .ph{color:var(--muted)}
@@ -1416,61 +1412,6 @@ body.in-ritual{overflow:hidden}
 .witem.on{color:var(--fg);font-weight:700;font-size:19px}
 .wband{position:absolute;left:0;right:0;top:80px;height:40px;border-radius:10px;background:color-mix(in srgb,var(--fg) 6%,transparent);pointer-events:none;z-index:-1}
 .wno{align-self:center}
-/* 求签仪式：默念、上香、掷筊请示、摇签、掷筊确认 */
-.rite{display:flex;flex-direction:column;gap:14px;padding:4px 0 2px}
-.ritesteps{list-style:none;margin:0;padding:0;display:flex;justify-content:space-between;gap:4px;counter-reset:rs}
-.ritesteps li{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;color:var(--muted);counter-increment:rs}
-.ritesteps li::before{content:counter(rs);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;background:var(--sunk);color:var(--muted)}
-.ritesteps li.done::before{content:"✓";background:color-mix(in srgb,var(--glow) 22%,transparent);color:var(--glow-ink)}
-.ritesteps li.on{color:var(--fg);font-weight:600}
-.ritesteps li.on::before{background:var(--fg);color:var(--bg)}
-.ritebody{display:flex;flex-direction:column;align-items:stretch;gap:14px;min-height:330px;justify-content:flex-end}
-.ritebody .tip{margin:0;text-align:center;color:var(--muted);font-size:14px;line-height:1.7}
-.ritebody .tip .bei{display:block;font-family:var(--f-display);font-weight:900;font-size:20px;color:var(--fg);letter-spacing:.1em}
-.ritebody .tip .bei.ok{color:var(--glow-ink)}
-.riteskip{align-self:center;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;padding:6px 10px;text-decoration:underline;text-underline-offset:3px}
-.prayc{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:14px;padding:6px 14px;margin:auto 0}
-.prayc p,.prayc label{margin:0;display:flex;align-items:center;gap:14px;min-height:44px;font-size:15px}
-.prayc p+p,.prayc label{border-top:1px solid var(--line)}
-.prayc span{flex:none;width:2.4em;color:var(--muted);font-size:13px}
-.prayc input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:none;border:0;padding:10px 0;outline:none}
-/* 上香 */
-.riteinc{position:relative;height:190px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;margin:auto 0}
-.riteinc .sticks{display:flex;gap:16px;margin-bottom:-6px}
-.riteinc .sticks i{position:relative;width:4px;height:92px;border-radius:2px;background:linear-gradient(#a8693f 0 72%,#c43b2a 72%)}
-.riteinc .sticks i:nth-child(2){height:104px}
-.riteinc .sticks i::before{content:"";position:absolute;left:-2px;top:-3px;width:8px;height:8px;border-radius:50%;background:#ff7a2a;box-shadow:0 0 10px 3px #ff9a3c;opacity:0;transition:opacity .25s}
-.riteinc .sticks i::after{content:"";position:absolute;left:-5px;bottom:100%;width:14px;height:54px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--muted) 45%,transparent),transparent);filter:blur(3px);opacity:0}
-.riteinc .sticks i.lit::before{opacity:1}
-.riteinc .sticks i.lit::after{animation:smoke 2.6s ease-out infinite}
-.riteinc .sticks i:nth-child(2).lit::after{animation-delay:.6s}.riteinc .sticks i:nth-child(3).lit::after{animation-delay:1.2s}
-@keyframes smoke{0%{opacity:0;transform:translateY(8px) scaleX(.6)}30%{opacity:.9}100%{opacity:0;transform:translateY(-46px) translateX(6px) scaleX(1.4)}}
-.riteinc .burner{width:118px;height:46px;border-radius:10px 10px 46px 46px;background:linear-gradient(160deg,var(--ink2),var(--ink));box-shadow:inset 0 6px 0 color-mix(in srgb,var(--glow) 30%,transparent)}
-/* 掷筊 */
-.jiao{height:132px;display:flex;align-items:flex-end;justify-content:center;gap:22px;padding-bottom:4px;margin:auto 0 0}
-.jbl{display:flex;justify-content:center;gap:22px;height:18px;margin:-10px 0 auto}
-.jbl span{width:66px;text-align:center;font-size:13px;font-weight:600;color:var(--muted)}
-.jiao .jb{width:66px;height:38px;overflow:visible;transform:rotate(var(--r,-10deg))}
-.jiao .jb:nth-child(2){--r:12deg}
-.jiao .jb path{fill:#cf5a40}
-.jiao .jb .hl{fill:none;stroke:rgba(255,255,255,.5);stroke-width:2.4;stroke-linecap:round;opacity:0}
-.jiao .jb.round path:first-child{fill:#8e2b1e}
-.jiao .jb.round .hl{opacity:1}
-.jiao .jb.flat path:first-child{fill:#d9684c}
-.jiao.toss .jb{animation:toss .72s cubic-bezier(.3,.7,.4,1)}
-.jiao.toss .jb:nth-child(2){animation-name:toss2;animation-duration:.68s}
-@keyframes toss{0%{transform:translateY(0) rotate(var(--r))}45%{transform:translateY(-96px) rotate(calc(var(--r) + 380deg))}100%{transform:translateY(0) rotate(calc(var(--r) + 720deg))}}
-@keyframes toss2{0%{transform:translateY(0) rotate(var(--r))}45%{transform:translateY(-84px) rotate(calc(var(--r) - 340deg))}100%{transform:translateY(0) rotate(calc(var(--r) - 720deg))}}
-.cups{display:flex;justify-content:center;gap:12px;margin-top:-6px}
-.cups i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:15px;background:var(--sunk);color:var(--muted);transition:background .25s,color .25s,transform .25s}
-.cups i.on{background:var(--glow);color:#fff;transform:scale(1.08)}
-/* 摇签落签 */
-.tubewrap .tube i{background:linear-gradient(90deg,#e8c48c,#d9ab68);opacity:1}
-.tubewrap{position:relative;height:200px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;margin:auto 0}
-.tubewrap .fallen{position:absolute;left:calc(50% + 34px);bottom:6px;width:22px;height:120px;border-radius:4px;background:linear-gradient(90deg,#e8c48c,#d9ab68);display:flex;align-items:flex-start;justify-content:center;padding-top:10px;transform-origin:50% 100%;transform:rotate(58deg);animation:fall .5s cubic-bezier(.4,1.4,.6,1) both}
-.tubewrap .fallen b{writing-mode:vertical-rl;font-family:var(--f-display);font-weight:900;font-size:13px;color:#7a2a18;letter-spacing:.1em}
-@keyframes fall{from{transform:translateY(-90px) rotate(0)}to{transform:rotate(58deg)}}
-@media (prefers-reduced-motion: reduce){.jiao.toss .jb,.tubewrap .fallen,.riteinc .sticks i.lit::after{animation:none}}
 /* ================= 日柱图鉴：能量卡的插画 ================= */
 .art{display:block;flex:none;overflow:hidden;background:#F6F1E7;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
 .art img{display:block;width:100%;height:100%;object-fit:cover}
@@ -1573,3 +1514,179 @@ body.in-ritual{overflow:hidden}
 /* 分享图：长按图片保存到相册是手机上最可靠的办法，提示放醒目一点；图片允许长按呼出系统菜单 */
 .sharepv .savetip{margin:0;text-align:center;font-size:15px;font-weight:600;color:var(--fg)}
 .sharepv img{-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+
+/* ================= 转运御守：做好事、提能量 ================= */
+.lintro{margin:0;font-size:14px;color:var(--muted);line-height:1.7}
+.lsec{background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lsh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.lsh h2{margin:0;font-family:var(--f-display);font-size:20px;font-weight:900}
+.lsh small{font-size:12.5px;color:var(--muted)}
+.dprog{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dprog > span{font-size:13px;color:var(--muted)}
+.dprog > span b{color:var(--fg);font-size:16px}
+.dslots{display:flex;gap:6px}
+.dslots i{width:34px;height:34px;border-radius:9px;border:1.5px dashed var(--line);display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:15px;color:#FFF4EC}
+.dslots i.on{border:0;background:var(--cinnabar);transform:rotate(-4deg);box-shadow:0 2px 6px -2px rgba(194,65,45,.6)}
+.dslots i.on:nth-child(even){transform:rotate(3deg)}
+.deedf{display:flex;gap:8px}
+.deedf input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.deedf input:focus{outline:none;border-color:var(--accent)}
+.deedf .btn{flex:none}
+.dtip{margin:-4px 0 0;font-size:12.5px;color:var(--muted)}
+.dex{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+.dex::-webkit-scrollbar{display:none}
+.dex button{flex:none;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:999px;padding:6px 12px;font-size:13px}
+.dlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.dlist li{position:relative;display:flex;flex-direction:column;gap:2px;padding:10px 34px 10px 0;border-top:1px solid var(--line)}
+.dlist li span{font-size:14.5px;line-height:1.55}
+.dlist li small{font-size:12px;color:var(--muted)}
+.dlist li.used span{color:var(--muted)}
+.dlist li .x{position:absolute;right:0;top:6px;width:32px;height:32px;border:0;background:none;color:var(--muted);font-size:16px}
+.lcards{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.lcard{border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.lcard > b{font-size:16px}
+.lcard > small{font-size:12px;color:var(--muted);margin-top:-8px}
+.lcard p{margin:0;font-size:13.5px;line-height:1.65;color:var(--muted)}
+.lcard .pills button{min-width:0;padding:7px 13px;font-size:14px;min-height:38px}
+.lmine{gap:0;padding:4px 16px}
+.lkrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 0;border:0;background:none;color:var(--fg);font:inherit;text-decoration:none;text-align:left;width:100%}
+.lkrow + .lkrow{border-top:1px solid var(--line)}
+.lkrow span{font-size:15px}
+.lkrow b{font-size:13px;font-weight:500;color:var(--muted)}
+.omx{display:flex;flex-direction:column;gap:14px;align-items:center;width:100%}
+.omx .omamori{width:200px;height:300px}
+.omx .omamori.sm{width:150px;height:225px}
+.omx .pills{justify-content:center}
+.acts2{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;width:100%}
+@media (min-width:960px){.lcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 释放练习：全屏，一步一步 */
+.release{position:fixed;inset:0;z-index:45;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(56px + env(safe-area-inset-top,0px)) 24px calc(30px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain;overflow-y:auto}
+.release .rx{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:40px;height:40px;border-radius:50%;border:0;background:var(--sunk);color:var(--fg);font-size:18px}
+.relbody{width:100%;max-width:440px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .4s ease-out}
+.relbody h1{margin:0;font-family:var(--f-display);font-size:28px;font-weight:900;line-height:1.25}
+.relbody .rbig{font-size:52px;display:flex;align-items:center;gap:14px}
+.relbody .rbig span{color:var(--cinnabar);font-size:34px}
+.rtext{margin:0;font-size:16px;line-height:1.8;color:var(--fg)}
+.relnote{margin:0;font-size:12.5px;line-height:1.7;color:var(--muted)}
+.rquote{margin:0;font-size:14px;color:var(--muted)}
+.rround{margin:0;font-size:12.5px;color:var(--muted);letter-spacing:.04em}
+.rinput{font:inherit;font-size:16px;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.rinput:focus{outline:none;border-color:var(--accent)}
+.rscale{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
+.rscale button{aspect-ratio:1;min-width:0;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:9px;font-size:14px;font-variant-numeric:tabular-nums;padding:0}
+.rscale button[aria-pressed="true"]{background:var(--cinnabar);border-color:var(--cinnabar);color:#fff}
+.rscale-l{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:-10px}
+.rchoices{display:flex;gap:10px;flex-wrap:wrap}
+.rchoices .btn{flex:1;min-width:120px;min-height:48px;font-size:16px}
+.rbreath{display:grid;place-items:center;height:120px}
+.rbreath i{width:56px;height:56px;border-radius:50%;background:color-mix(in srgb,var(--cinnabar) 22%,transparent);animation:relBreath 8s ease-in-out infinite}
+@keyframes relBreath{0%,100%{transform:scale(.7)}50%{transform:scale(1.6)}}
+@media (prefers-reduced-motion: reduce){.rbreath i{animation:none}.relbody{animation:none}}
+/* 转运页的两个分页：做好事 / 提能量 */
+.ltabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;background:var(--sunk);border-radius:16px;padding:5px}
+.ltabs button{position:relative;border:0;background:transparent;border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted)}
+.ltabs button b{font-family:var(--f-display);font-size:17px;font-weight:900}
+.ltabs button small{font-size:12px}
+.ltabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--ring)}
+.ltabs .dot{position:absolute;top:8px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--cinnabar)}
+.ltip{margin:0;font-size:13.5px;color:var(--muted);line-height:1.6}
+.eprog{display:flex;flex-direction:column;gap:6px}
+.eprog > span{font-size:13px;color:var(--muted)}
+.eprog > span b{color:var(--fg);font-size:16px}
+.ebar{height:10px;border-radius:999px;background:var(--sunk);overflow:hidden}
+.ebar i{display:block;height:100%;border-radius:inherit;background:var(--cinnabar);transition:width .4s ease-out}
+.lbuy{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+.lbuy > div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lbuy b{font-size:15px}
+.lbuy small{font-size:12.5px;color:var(--muted)}
+.lbuy .btn{flex:none}
+
+/* ================= 每日一签：默念所求 → 摇签 → 掷筊 → 解签 ================= */
+.jiao{display:flex;flex-direction:column;gap:14px}
+.jsteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.jsteps li{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);position:relative}
+.jsteps li::before{content:"";position:absolute;top:11px;left:-50%;right:50%;height:1.5px;background:var(--line)}
+.jsteps li:first-child::before{display:none}
+.jsteps li i{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11.5px;font-weight:700;background:var(--sunk);color:var(--muted)}
+.jsteps li.done i{background:color-mix(in srgb,var(--cinnabar) 18%,var(--surface));color:var(--cinnabar)}
+.jsteps li.done::before,.jsteps li.on::before{background:var(--cinnabar)}
+.jsteps li.on i{background:var(--cinnabar);color:#fff}
+.jsteps li.on{color:var(--fg);font-weight:600}
+.jdrawn{display:flex;gap:18px;align-items:center;padding:6px 4px}
+.jside{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.jno{margin:0;font-size:15px}
+.jno b{font-family:var(--f-display);font-size:22px;color:var(--cinnabar)}
+/* 签：一支木签，上面写着签号 */
+.jstick{flex:none;width:34px;height:150px;border-radius:17px 17px 4px 4px;background:linear-gradient(90deg,#B65A2E,#D9824F 45%,#B05328);box-shadow:0 8px 18px -8px rgba(120,50,20,.6);position:relative;animation:stickUp .6s cubic-bezier(.2,.9,.3,1.2) both}
+.jstick span{position:absolute;top:22px;left:0;right:0;text-align:center;font-family:var(--f-display);font-weight:900;font-size:15px;color:#2B160B}
+@keyframes stickUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+/* 筊杯：两块月牙，正面浅（平的一面），反面深（鼓的一面） */
+.jstage{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:120px;justify-content:center}
+.jpair{display:flex;gap:22px;justify-content:center;align-items:flex-end;height:108px}
+.jb{display:flex;flex-direction:column;align-items:center;gap:4px}
+.jb svg{width:50px;height:78px;overflow:visible}
+.jb .body{fill:#7E2418;stroke:#5A160D;stroke-width:1.5}
+.jb .shine{fill:none;stroke:rgba(255,255,255,.22);stroke-width:3;stroke-linecap:round}
+.jb.up .body{fill:#E9A06F;stroke:#B0532A}
+.jb .face{fill:none;stroke:rgba(120,50,20,.35);stroke-width:1.5}
+.jb.flip svg{transform:scaleX(-1)}
+.jb em{font-style:normal;font-size:12px;color:var(--muted)}
+.jpair.rest .jb em,.jpair.tossing .jb em{visibility:hidden}
+.jpair.tossing .jb svg{animation:jToss 1.1s cubic-bezier(.3,.6,.4,1) infinite}
+.jpair.tossing .jb.flip svg{animation-name:jTossR;animation-delay:.08s}
+.jpair.land .jb svg{animation:jLand .35s ease-out both}
+@keyframes jToss{0%{transform:translateY(0) rotate(0)}45%{transform:translateY(-60px) rotate(300deg)}100%{transform:translateY(0) rotate(720deg)}}
+@keyframes jTossR{0%{transform:scaleX(-1) translateY(0) rotate(0)}45%{transform:scaleX(-1) translateY(-54px) rotate(-280deg)}100%{transform:scaleX(-1) translateY(0) rotate(-720deg)}}
+@keyframes jLand{0%{transform:translateY(-10px)}60%{transform:translateY(2px)}100%{transform:none}}
+.jpair.land .jb.flip svg{animation:none;transform:scaleX(-1)}
+.jres{margin:0;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.jside .jres{align-items:flex-start;text-align:left}
+.jres b{font-family:var(--f-display);font-size:22px;font-weight:900}
+.jres small{font-size:12.5px;color:var(--muted)}
+.jres.sheng b{color:var(--cinnabar)}
+.jres.yin b{color:var(--muted)}
+.jqin{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.jqin:focus{outline:none;border-color:var(--accent)}
+.jrules{text-align:center;line-height:1.7}
+.jdone{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+:root[data-theme="dark"] .jb .body{fill:#9C3422;stroke:#C2593C}
+:root[data-theme="dark"] .jb.up .body{fill:#ECAA80;stroke:#F0B48F}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .jb .body{fill:#9C3422;stroke:#C2593C}:root:not([data-theme="light"]) .jb.up .body{fill:#ECAA80;stroke:#F0B48F}}
+@media (prefers-reduced-motion: reduce){.jpair .jb svg,.jstick{animation:none!important}}
+.jhist{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.jhist span{font-size:12px;border-radius:999px;padding:3px 10px;background:var(--sunk);color:var(--muted)}
+.jhist span.sheng{color:var(--cinnabar)}
+.jhist span.yin{color:var(--fg)}
+/* ---------- 解签：逐项运势 ---------- */
+.lot .jieyue{margin:0;text-align:center;font-family:var(--f-display);font-size:15px;letter-spacing:.1em;line-height:1.8}
+.lot .jieyue small{display:block;font-family:inherit;font-size:11px;color:var(--muted);letter-spacing:.2em}
+.ltlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:4px 14px}
+.ltlist h3{margin:10px 0 2px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.08em}
+.ltrow{padding:12px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.ltrow:last-child{border-bottom:0}
+.lthead{display:flex;align-items:center;gap:8px}
+.lthead b{font-size:15px}
+.lthead em{font-style:normal;font-size:11px;font-weight:700;color:var(--cinnabar);border:1px solid var(--cinnabar);border-radius:999px;padding:0 7px;line-height:18px}
+.lstars{margin-left:auto;display:inline-flex;gap:1px;font-size:14px;letter-spacing:0}
+.lstars i{font-style:normal;color:var(--muted);opacity:.25}
+.lstars i.on{color:var(--cinnabar);opacity:1}
+.ltitems{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6}
+.ltitems i{font-style:normal;margin:0 6px;opacity:.6}
+.ltitems small{font-size:12px;margin-left:4px}
+.lttext{margin:0;font-size:14px;line-height:1.7}
+.ltadv{margin:0;font-size:13.5px;line-height:1.7;color:var(--fg)}
+.ltadv span{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);background:var(--sunk);border-radius:6px;padding:0 6px;margin-right:6px;line-height:18px;vertical-align:1px}
+.ltnote{margin:0;font-size:12px;color:var(--muted)}
+.xianji{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface)}
+.xianji summary{cursor:pointer;font-size:13px;color:var(--muted)}
+.xjgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 6px;margin-top:10px}
+.xjgrid span{display:flex;flex-direction:column;align-items:center;font-size:13px;font-family:var(--f-display);font-weight:600}
+.xjgrid small{font-family:var(--f-body);font-weight:400;font-size:11px;color:var(--muted)}
+/* ---------- 卡片跟着当天幸运色 ---------- */
+.tcard.luck{--glow:var(--lk);--gtext:var(--lk-ink);
+  background:radial-gradient(75% 65% at 100% 0%, color-mix(in srgb,var(--lk) 38%,transparent) 0%, transparent 72%),radial-gradient(60% 50% at 0% 100%, color-mix(in srgb,var(--lk2) 18%,transparent) 0%, transparent 70%),linear-gradient(165deg,#FFFFFF,#FBFBFC)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tcard.luck{--gtext:var(--lk);
+  background:radial-gradient(70% 60% at 100% 0%, color-mix(in srgb,var(--lk) 30%,transparent) 0%, transparent 70%),radial-gradient(60% 50% at 0% 100%, color-mix(in srgb,var(--lk2) 16%,transparent) 0%, transparent 70%),linear-gradient(165deg,#2A2530,#17151A)}}
+:root[data-theme="dark"] .tcard.luck{--gtext:var(--lk);
+  background:radial-gradient(70% 60% at 100% 0%, color-mix(in srgb,var(--lk) 30%,transparent) 0%, transparent 70%),radial-gradient(60% 50% at 0% 100%, color-mix(in srgb,var(--lk2) 16%,transparent) 0%, transparent 70%),linear-gradient(165deg,#2A2530,#17151A)}
+.tcard.luck.k1 .ring::before,.tcard.luck.k2 .ring::before{background:conic-gradient(var(--gtext) calc(var(--p) * 1%), var(--ctrack) 0)}

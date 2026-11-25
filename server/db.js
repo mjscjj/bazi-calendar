@@ -132,6 +132,24 @@ CREATE TABLE IF NOT EXISTS moods (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS moods_user_day ON moods(user_id, day);
+CREATE TABLE IF NOT EXISTS deeds (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  day TEXT NOT NULL,
+  text TEXT NOT NULL,
+  amulet_id INTEGER,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS deeds_user ON deeds(user_id, amulet_id);
+CREATE TABLE IF NOT EXISTS practices (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  kind TEXT NOT NULL,
+  minutes INTEGER NOT NULL DEFAULT 0,
+  detail TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS practices_user ON practices(user_id, created_at);
 CREATE TABLE IF NOT EXISTS invites (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   inviter_id INTEGER NOT NULL,
@@ -216,6 +234,9 @@ const COLUMNS = [
   ['users', 'ask_credits', 'INTEGER NOT NULL DEFAULT 0'],
   ['ratings', 'note', "TEXT NOT NULL DEFAULT ''"],
   ['draws', 'question', "TEXT NOT NULL DEFAULT ''"],
+  ['draws', 'status', "TEXT NOT NULL DEFAULT 'done'"],
+  ['draws', 'tosses', "TEXT NOT NULL DEFAULT '[]'"],
+  ['draws', 'rounds', 'INTEGER NOT NULL DEFAULT 1'],
   ['users', 'amulet_credits', 'INTEGER NOT NULL DEFAULT 0'],
   ['orders', 'product', "TEXT NOT NULL DEFAULT 'member'"],
   ['orders', 'qty', 'INTEGER NOT NULL DEFAULT 1'],

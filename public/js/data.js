@@ -27,6 +27,24 @@ export function setGlow(i) {
   document.documentElement.style.setProperty('--glow', GLOW[i]);
   document.documentElement.style.setProperty('--glow-ink', GLOW_INK[i]);
 }
+// 幸运色 → 卡片配色：两种幸运色里挑更鲜明的做主色，调到在深浅底上都看得清
+const hsl = (hex) => {
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  const s = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+  const h = !d ? 0 : mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [Math.round(((h * 60) + 360) % 360), s, l];
+};
+const css = ([h, s, l]) => `hsl(${h} ${Math.round(s * 100)}% ${Math.round(l * 100)}%)`;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+export function luckVars(colors) {
+  if (!colors || !colors.length) return '';
+  const cs = colors.map((c) => hsl(c.hex)).sort((a, b) => b[1] * (1 - Math.abs(b[2] - 0.5)) - a[1] * (1 - Math.abs(a[2] - 0.5)));
+  const [m, o] = [cs[0], cs[1] || cs[0]];
+  const glow = [m[0], Math.min(m[1], 0.8), clamp(m[2], 0.56, 0.7)], ink = [m[0], Math.min(m[1], 0.75), clamp(m[2], 0.32, 0.44)];
+  const two = [o[0], Math.min(o[1], 0.8), clamp(o[2], 0.5, 0.72)];
+  return `--lk:${css(glow)};--lk-ink:${css(ink)};--lk2:${css(two)}`;
+}
 export const WEEK = '日一二三四五六';
 const DISHI_START = { 甲: 11, 丙: 2, 戊: 2, 庚: 5, 壬: 8, 乙: 6, 丁: 9, 己: 9, 辛: 0, 癸: 3 };
 const DS = ['长生', '沐浴', '冠带', '临官', '帝旺', '衰', '病', '死', '墓', '绝', '胎', '养'];

@@ -55,25 +55,11 @@ const askId = db.prepare('SELECT id FROM asks WHERE user_id = ?').get(uid).id;
 db.prepare('UPDATE asks SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 8 * 86400000).toISOString(), askId);
 await p.evaluate(() => { localStorage.setItem('lrl:theme', '"light"'); });
 await p.goto(base + '/'); await p.reload(); await p.waitForSelector('.tcard');
-await p.waitForSelector('.areview', { timeout: 8000 });
-check('今天页出现回看卡', (await p.textContent('.areview .q')).includes('后来怎样了'));
-await p.locator('.areview').scrollIntoViewIfNeeded();
-await p.screenshot({ path: `${out}/f03-today-review-light.png` });
-await p.evaluate(() => { localStorage.setItem('lrl:theme', '"dark"'); }); await p.reload(); await p.waitForSelector('.areview');
-await p.locator('.areview').scrollIntoViewIfNeeded();
-await p.screenshot({ path: `${out}/f04-today-review-dark.png` });
-await p.click('[data-areview="progress"]');
-await p.waitForSelector('.areview.done');
-await p.fill('.arnote input', '谈了一次，下周再定');
-await p.click('.arnote button');
-await p.waitForSelector('.areview .rsaid');
-check('今天页记下回看和一句话', (await p.textContent('.areview')).includes('有进展'));
-await p.screenshot({ path: `${out}/f05-today-reviewed-dark.png` });
-await p.reload(); await p.waitForSelector('.tcard'); await p.waitForTimeout(500);
-check('记过以后今天页不再提醒', !(await p.$('.areview')));
-
-await p.goto(base + '/#/ask/result?id=' + askId); await p.waitForSelector('.review .rvsaid');
-check('结果页显示回看', (await p.textContent('.review')).includes('谈了一次'));
+await p.waitForTimeout(800);
+check('今天页不再放回看卡', !(await p.$('.areview')));
+await p.goto(base + '/#/ask/result?id=' + askId); await p.waitForSelector('[data-review="progress"]');
+await p.click('[data-review="progress"]'); await p.waitForSelector('.review .rvsaid');
+check('结果页可以回看', (await p.textContent('.review')).includes('有进展'));
 check('过了 7 天追问截止', (await p.textContent('.follows .ftip')).includes('截止'));
 await p.locator('.review').scrollIntoViewIfNeeded();
 await p.screenshot({ path: `${out}/f06-result-reviewed-dark.png` });
@@ -97,21 +83,6 @@ for (const theme of ['light', 'dark']) {
   await dp.screenshot({ path: `${out}/f08-desk-result-${theme}.png`, fullPage: true });
   await dctx.close();
 }
-// 电脑端今天页回看卡：再造一条到期的问事
-db.prepare("INSERT INTO asks(user_id, question, qkey, category, gua, days, status, reading, charge, created_at) SELECT user_id, '下个月去成都出差顺利吗', 'x', category, gua, days, 'done', reading, 'free', ? FROM asks WHERE id = ?").run(new Date(Date.now() - 9 * 86400000).toISOString(), askId);
-for (const theme of ['light', 'dark']) {
-  const dctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  const dp = await dctx.newPage(); watch(dp, 'desktop-today-' + theme);
-  await dp.goto(base + '/#/login');
-  await dp.evaluate((t) => { localStorage.setItem('lrl:theme', JSON.stringify(t)); localStorage.setItem('lrl:guide', '1'); localStorage.setItem('lrl:a2hs-done', '1'); }, theme);
-  await dp.reload();
-  await dp.fill('input[name=username]', user); await dp.fill('input[name=password]', 'follow123');
-  await dp.click('#authForm button[type=submit]'); await dp.waitForSelector('.areview', { timeout: 8000 });
-  check(`电脑端今天页回看卡（${theme}）`, (await dp.textContent('.areview')).includes('成都'));
-  await dp.screenshot({ path: `${out}/f09-desk-today-${theme}.png`, fullPage: true });
-  await dctx.close();
-}
-
 console.log(results.join('\n'));
 console.log('ERRORS:', errors.length ? errors : 'none');
 await browser.close();

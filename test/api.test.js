@@ -256,8 +256,22 @@ test('今天页：大家的今天、今日一句、穿搭、签当天固定', as
   const d2 = await c('POST', '/api/draws/today', { date: today });
   assert.equal(d1.status, 200);
   assert.equal(d1.data.draw.no, d2.data.draw.no);
-  assert.equal(d1.data.draw.poem.length, 4);
-  assert.ok(d1.data.draw.hint);
+  assert.equal(d1.data.draw.status, 'pending', '摇出来先要掷筊确认');
+  assert.equal(d1.data.draw.poem, undefined, '没掷出圣杯前看不到签文');
+  // 掷到圣杯为止（测试里把这一天的记录重置成 pending，直到掷出圣杯）
+  const uid0 = db.get("SELECT user_id FROM draws WHERE day = ? ORDER BY created_at DESC LIMIT 1", today).user_id;
+  let tz;
+  for (let i = 0; i < 60; i++) {
+    tz = await c('POST', '/api/draws/today/toss', { date: today });
+    assert.ok(['sheng', 'xiao', 'yin'].includes(tz.data.toss));
+    if (tz.data.toss === 'sheng') break;
+    assert.equal(tz.data.draw.poem, undefined);
+    db.run("UPDATE draws SET status = 'pending', tosses = '[]' WHERE user_id = ? AND day = ?", uid0, today);
+  }
+  assert.equal(tz.data.draw.status, 'done');
+  assert.equal(tz.data.draw.poem.length, 4);
+  assert.ok(tz.data.draw.hint);
+  assert.equal((await c('POST', '/api/draws/today/toss', { date: today })).data.toss, null, '确认过就不再掷');
   const t2 = await c('GET', '/api/today?date=' + today);
   assert.equal(t2.data.draw.no, d1.data.draw.no);
   assert.equal((await c('GET', '/api/today?date=1999-01-01')).status, 400, '只接受前后两天');
@@ -285,7 +299,7 @@ test('埋点批量写入，非法事件名丢弃', async () => {
 
 test('内容文件缺字段时启动失败', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lrl-content-'));
-  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json', 'day-pillars.json', 'pairs.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
+  for (const f of ['energy-cards.json', 'daily-line.json', 'outfit.json', 'lots.json', 'pick.json', 'ask.json', 'ask-prompt.md', 'ask-follow-prompt.md', 'amulets.json', 'moods.json', 'day-pillars.json', 'pairs.json', 'luck.json', 'jiao.json', 'lot-topics.json']) fs.copyFileSync(new URL('../content/' + f, import.meta.url), path.join(dir, f));
   assert.doesNotThrow(() => loadContent(dir));
   const cards = JSON.parse(fs.readFileSync(path.join(dir, 'energy-cards.json'), 'utf8'));
   delete cards.cards['癸'];
@@ -296,6 +310,11 @@ test('内容文件缺字段时启动失败', () => {
   delete pl.pillars['癸亥'];
   fs.writeFileSync(path.join(dir, 'day-pillars.json'), JSON.stringify(pl));
   assert.throws(() => loadContent(dir), /癸亥/);
+  fs.copyFileSync(new URL('../content/day-pillars.json', import.meta.url), path.join(dir, 'day-pillars.json'));
+  const lt = JSON.parse(fs.readFileSync(path.join(dir, 'lot-topics.json'), 'utf8'));
+  delete lt.words['守旧'];
+  fs.writeFileSync(path.join(dir, 'lot-topics.json'), JSON.stringify(lt));
+  assert.throws(() => loadContent(dir), /守旧/, '签里用到的断语都要收录');
 });
 
 test('能量卡带日柱图鉴：插画、称号和按身强身弱的一句', async () => {
@@ -523,7 +542,7 @@ test('问事：追问最多 2 次、拒答、过期；7 天后回看和今天页
   assert.equal(a.follow.open, false, '过了 7 天不能再追问');
   const today = new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
   let t = (await c('GET', '/api/today?date=' + today)).data;
-  assert.equal(t.askReview.id, id, '今天页提醒回看');
+  assert.equal('askReview' in t, false, '今天页不再放回看卡');
   assert.equal((await c('GET', '/api/asks')).data.list[0].remind, true);
   const badOutcome = await c('POST', `/api/asks/${id}/review`, { outcome: 'great' });
   assert.equal(badOutcome.status, 400);
@@ -531,8 +550,6 @@ test('问事：追问最多 2 次、拒答、过期；7 天后回看和今天页
   assert.equal(rv.data.ask.review.outcome.text, '有进展');
   assert.equal(rv.data.ask.review.note, '谈了一次，下周再定');
   assert.equal(rv.data.ask.review.remind, false);
-  t = (await c('GET', '/api/today?date=' + today)).data;
-  assert.equal(t.askReview, null, '回看过就不再提醒');
   const dis = await c('POST', `/api/asks/${id}/review`, { outcome: 'dismiss' });
   assert.equal(dis.data.ask.review.outcome.key, 'progress', '已经回看过，点“不用了”不覆盖');
   assert.equal((await c('GET', '/api/asks')).data.list[0].outcome.text, '有进展');
@@ -598,6 +615,8 @@ test('今天页：本周 7 天、明天寄语、翻到别的周', async () => {
   await c('POST', '/api/moods', { day, mood: 'calm', color: 'sky' });
   const t = (await c('GET', '/api/today?date=' + day)).data;
   assert.equal(t.strip.days.length, 7);
+  assert.ok(t.strip.days.every((x) => x.luck.length === 2 && x.luck.every((k) => /^#[0-9A-F]{6}$/i.test(k.hex))), '本周每天带幸运色，卡片按它配色');
+  assert.deepEqual(t.strip.days.find((x) => x.date === t.date).luck, t.outfit.colors);
   assert.equal(new Date(t.strip.start + 'T12:00:00Z').getUTCDay(), 1, '从周一开始');
   const me = t.strip.days.find((x) => x.date === day);
   assert.ok(me && me.line.head && me.almanac.yi);
@@ -614,6 +633,88 @@ test('今天页：本周 7 天、明天寄语、翻到别的周', async () => {
   assert.equal((await client()('GET', '/api/demo/today?date=' + day)).data.strip.days.length, 7);
 });
 
+test('每日一签：掷筊最多三次，圣杯就停；三次都是阴杯换个问题重新求；三次没圣杯不再掷', async () => {
+  const c = client();
+  await c('POST', '/api/auth/register', { username: 'jiaoer', password: '12345678', agree: true, birth });
+  const day = bjDay();
+  assert.equal((await c('POST', '/api/draws/today/toss', { date: day })).status, 400, '先摇签');
+  const first = await c('POST', '/api/draws/today', { date: day, question: '换工作' });
+  const uid = db.get("SELECT id FROM users WHERE username = 'jiaoer'").id;
+  const set = (status, tosses, rounds = 1) => db.run('UPDATE draws SET status = ?, tosses = ?, rounds = ? WHERE user_id = ? AND day = ?', status, JSON.stringify(tosses), rounds, uid, day);
+  const n = { sheng: 0, xiao: 0, yin: 0 };
+  for (let i = 0; i < 400; i++) {
+    set('pending', []);
+    const r = await c('POST', '/api/draws/today/toss', { date: day });
+    n[r.data.toss]++;
+    if (r.data.toss !== 'sheng') assert.equal(r.data.draw.status, 'pending', '第一次没圣杯还能接着掷');
+  }
+  assert.ok(n.sheng > 150 && n.sheng < 250 && n.xiao > 60 && n.yin > 60, '圣杯大约一半：' + JSON.stringify(n));
+  // 第三次：前两次阴杯，再掷出阴杯 → 换个问题；掷出笑杯 → 今天不再掷
+  let reask, closed;
+  for (let i = 0; i < 60 && !(reask && closed); i++) {
+    set('pending', ['yin', 'yin']);
+    const r = await c('POST', '/api/draws/today/toss', { date: day, question: '要不要换工作' });
+    if (r.data.toss === 'yin') reask = r.data.draw;
+    if (r.data.toss === 'xiao') closed = r.data.draw;
+  }
+  assert.equal(reask.status, 'reask', '三次都是阴杯：换个问题');
+  assert.equal(reask.roundsLeft, 2);
+  assert.equal(closed.status, 'closed', '三次没圣杯又不全是阴杯：不勉强');
+  assert.equal(closed.question, '要不要换工作', '笑杯后可以把问题说清楚些');
+  // 换个问题重新摇
+  set('reask', ['yin', 'yin', 'yin']);
+  assert.equal((await c('POST', '/api/draws/today', { date: day, question: '要不要换工作' })).status, 400, '要换一个问题');
+  const again = await c('POST', '/api/draws/today', { date: day, question: '这周要不要找老板谈' });
+  assert.equal(again.data.draw.status, 'pending');
+  assert.equal(again.data.draw.round, 2);
+  assert.equal(again.data.draw.tosses.length, 0);
+  assert.equal(first.data.draw.no >= 1, true);
+  set('reask', ['yin', 'yin', 'yin'], 3);
+  assert.equal((await c('POST', '/api/draws/today', { date: day, question: '别的事' })).status, 409, '一天最多三轮');
+  for (let i = 0; i < 60; i++) {
+    set('pending', ['yin', 'yin'], 3);
+    const r = await c('POST', '/api/draws/today/toss', { date: day });
+    if (r.data.toss === 'yin') { assert.equal(r.data.draw.status, 'closed', '最后一轮三次阴杯就不再换'); break; }
+  }
+  assert.equal((await c('GET', '/api/draws')).data.list.length, 0, '没确认的签不进签谱');
+  const t = await c('GET', '/api/today?date=' + day);
+  assert.equal(t.data.jiao.maxTries, 3);
+});
+
+test('解签逐项运势：每类给星数、说明和建议；从问题认出的那类排第一；签谱缺项按签等', async () => {
+  const c = client();
+  await c('POST', '/api/auth/register', { username: 'jieqian', password: '12345678', agree: true, birth });
+  const day = bjDay();
+  const uid = db.get("SELECT id FROM users WHERE username = 'jieqian'").id;
+  await c('POST', '/api/draws/today', { date: day, question: '这周的面试能过吗' });
+  const done = (no, q) => db.run(`UPDATE draws SET status = 'done', tosses = '["sheng"]', lot_no = ?, question = ? WHERE user_id = ? AND day = ?`, no, q, uid, day);
+  done(57, '这周的面试能过吗');
+  let d = (await c('GET', '/api/today?date=' + day)).data.draw;
+  assert.deepEqual(d.jieqian, ['所用谋望', '皆大欢喜', '从公用力', '如子逢娘']);
+  assert.equal(d.topics.length, 9);
+  assert.equal(d.topics[0].key, 'work', '面试 → 事业工作排第一');
+  assert.equal(d.topics[0].asked, true);
+  assert.deepEqual(d.topics[0].items.map((x) => [x.k, x.v]), [['交易', '成']]);
+  assert.equal(d.topics[0].stars, 4);
+  assert.ok(d.topics[0].say && d.topics[0].tips.length >= 2, '每类有说明和建议');
+  assert.ok(d.topics.every((t) => t.stars >= 1 && t.stars <= 5));
+  assert.equal(d.topics.find((x) => x.key === 'move').stars, 3, '移徙守旧(3)、行人阻(2) 取平均');
+  assert.match(d.topics.find((x) => x.key === 'health').note, /就医/);
+  assert.equal(d.xianji.length, 15);
+  done(57, '');
+  d = (await c('GET', '/api/today?date=' + day)).data.draw;
+  assert.ok(d.topics.every((t) => !t.asked) && d.topics[0].key === 'self', '没写问题就按默认顺序');
+  done(78, '');
+  d = (await c('GET', '/api/today?date=' + day)).data.draw;
+  assert.equal(d.topics.find((x) => x.key === 'move').stars, 5, '移徙大吉');
+  // 第86签签谱没有仙机：按签等（上签 → 4 星）
+  done(86, '');
+  d = (await c('GET', '/api/today?date=' + day)).data.draw;
+  assert.ok(d.topics.every((x) => !x.items.length && x.stars === 4 && x.say.startsWith('签谱没有单列')));
+  const list = (await c('GET', '/api/draws')).data.list;
+  assert.equal(list[0].topics.length, 9);
+});
+
 test('规则对比', async () => {
   const c = client();
   await c('POST', '/api/admin/login', { username: 'admin', password: 'adminpass123' });
@@ -625,32 +726,70 @@ test('规则对比', async () => {
   assert.equal((await c('GET', '/api/admin/compare?username=asker&y=2026&m=12')).data.who, 'asker');
 });
 
-test('祈愿与御守：基础款每月一枚，特别款付费，生日款只在生日月', async () => {
+test('转运御守：5 件善行换一枚；冥想累计 20 分钟换一枚；也可以直接买', async () => {
   const c = client();
   const bmonth = String((new Date(Date.now() + 8 * 3600000).getUTCMonth() + 1) % 12 + 1).padStart(2, '0'); // 下个月生日
   await c('POST', '/api/auth/register', { username: 'wisher', password: '12345678', agree: true, birth: { date: `1991-${bmonth}-15`, time: '08:00', gender: '女' } });
-  const g = await c('GET', '/api/amulets');
+  const g = await c('GET', '/api/luck');
   assert.equal(g.status, 200);
-  assert.equal(g.data.basicTaken, false);
-  assert.equal(g.data.birthdayMonth, false);
-  assert.ok(g.data.term && g.data.looks.term.motif && g.data.looks.basic.colors.length === 2);
-  const a = await c('POST', '/api/amulets', { wish: '事业', way: 'incense', minutes: 3, style: 'basic' });
-  assert.equal(a.status, 200);
-  assert.equal(a.data.amulet.look.element, g.data.element);
-  assert.equal((await c('POST', '/api/amulets', { wish: '平安', way: 'bowl', minutes: 1, style: 'basic' })).status, 400, '基础款每月一枚');
-  assert.equal((await c('POST', '/api/amulets', { wish: '平安', way: 'bowl', minutes: 1, style: 'birthday' })).status, 400, '不是生日月');
-  const t = await c('POST', '/api/amulets', { wish: '平安', way: 'bowl', minutes: 1, style: 'term' });
+  assert.equal(g.data.deeds.per, 5);
+  assert.equal(g.data.deeds.unused, 0);
+  assert.ok(g.data.release.steps.length >= 3 && g.data.meditate.minutes.length);
+  assert.ok(g.data.amulets.looks.term.motif && g.data.amulets.looks.deed.colors.length === 2);
+  assert.equal((await c('POST', '/api/deeds', { text: '' })).status, 400);
+  for (const text of ['给爸妈打了个电话', '帮同事看了代码', '给外卖员说了谢谢']) assert.equal((await c('POST', '/api/deeds', { text })).status, 200);
+  const four = await c('POST', '/api/deeds', { text: '让座' });
+  assert.equal(four.status, 409, '一天最多 3 件');
+  assert.equal((await c('POST', '/api/amulets/exchange', { wish: '事业' })).status, 409, '不够 5 件');
+  // 挪两件到昨天，再记两件，凑满 5 件
+  const uid = db.get("SELECT id FROM users WHERE username = 'wisher'").id;
+  db.run("UPDATE deeds SET day = '2000-01-01' WHERE user_id = ?", uid);
+  await c('POST', '/api/deeds', { text: '捐了一点钱' });
+  const d5 = await c('POST', '/api/deeds', { text: '耐心听朋友说完' });
+  assert.equal(d5.data.deeds.unused, 5);
+  assert.equal((await c('GET', '/api/today?date=' + bjDay())).data.luck.unused, 5);
+  const x = await c('POST', '/api/amulets/exchange', { wish: '事业' });
+  assert.equal(x.status, 200);
+  assert.equal(x.data.amulet.style, 'deed');
+  assert.equal(x.data.deeds.unused, 0);
+  assert.ok(x.data.deeds.list.every((r) => r.used));
+  assert.equal((await c('DELETE', '/api/deeds/' + x.data.deeds.list[0].id)).status, 400, '换过的不能删');
+  // 以前的玩法：静坐领基础款不行了（旧客户端会带 way）
+  assert.equal((await c('POST', '/api/amulets', { wish: '平安', way: 'bowl', minutes: 1, style: 'basic' })).status, 400);
+  assert.equal((await c('POST', '/api/amulets', { wish: '平安', style: 'birthday' })).status, 400, '不是生日月');
+  const t = await c('POST', '/api/amulets', { wish: '平安', style: 'term' });
   assert.equal(t.status, 402);
   assert.equal(t.data.product, 'amulet');
   const o = await c('POST', '/api/pay/orders', { product: 'amulet' });
   assert.equal(o.data.order.amountCents, 390);
   paid.add(o.data.order.outTradeNo);
   assert.equal((await c('GET', `/api/pay/orders/${o.data.order.outTradeNo}?force=1`)).data.credits.amulet, 1);
-  const t2 = await c('POST', '/api/amulets', { wish: '平安', way: 'bowl', minutes: 1, style: 'term' });
+  const t2 = await c('POST', '/api/amulets', { wish: '平安', style: 'term' });
   assert.equal(t2.status, 200);
-  assert.equal(t2.data.amulet.look.term, g.data.term);
+  assert.equal(t2.data.amulet.look.term, g.data.amulets.term);
   assert.equal((await c('GET', '/api/amulets')).data.list.length, 2);
-  assert.equal((await c('GET', '/api/today?date=' + bjDay())).data.amulet.taken, true);
+  // 提能量：冥想累计 20 分钟换一枚，释放练习每次算 3 分钟，多出来的留到下一枚
+  assert.equal((await c('POST', '/api/practices', { kind: 'meditate', minutes: 10, way: 'bowl' })).status, 200);
+  assert.equal((await c('POST', '/api/practices', { kind: 'meditate', minutes: 7 })).status, 400);
+  const r = await c('POST', '/api/practices', { kind: 'release', before: 8, after: 3, rounds: 2 });
+  assert.deepEqual(r.data.practice.week, { meditate: 1, release: 1 });
+  assert.equal(r.data.practice.have, 13);
+  assert.equal((await c('POST', '/api/practices', { kind: 'release', before: 11, after: 3 })).status, 400);
+  assert.equal((await c('POST', '/api/amulets/exchange', { wish: '平安', by: 'energy' })).status, 409, '还差 7 分钟');
+  await c('POST', '/api/practices', { kind: 'meditate', minutes: 10, way: 'incense' });
+  const e = await c('POST', '/api/amulets/exchange', { wish: '平安', by: 'energy' });
+  assert.equal(e.status, 200);
+  assert.equal(e.data.amulet.style, 'energy');
+  assert.equal(e.data.practice.have, 3, '23 分钟换掉 20，剩 3 分钟');
+  assert.equal((await c('GET', '/api/today?date=' + bjDay())).data.luck.energy, 3);
+  // 直接买一枚转运款
+  const o2 = await c('POST', '/api/pay/orders', { product: 'amulet' });
+  paid.add(o2.data.order.outTradeNo);
+  await c('GET', `/api/pay/orders/${o2.data.order.outTradeNo}?force=1`);
+  const b = await c('POST', '/api/amulets', { wish: '财运', style: 'basic' });
+  assert.equal(b.status, 200);
+  assert.equal(b.data.amulet.way, 'buy');
+  assert.equal((await c('GET', '/api/amulets')).data.list.length, 4);
 });
 
 test('农历月份表：闰月和每月天数（出生日期滚轮用）', async () => {

@@ -63,7 +63,7 @@ function check(force, manual) {
       track('pay_success', { product });
       const done = product === 'member'
         ? `<div class="amt" style="font-size:22px">开通成功</div><p class="tip">会员有效期至 ${ymdText(d.access.memberUntil)}</p><button type="button" class="btn primary block" data-close-sheet>开始使用</button>`
-        : `<div class="amt" style="font-size:22px">已到账</div><p class="tip">${product === 'ask' ? '马上接着为你起卦' : '可以去领特别款御守了'}</p><button type="button" class="btn primary block" data-close-sheet>好的</button>`;
+        : `<div class="amt" style="font-size:22px">已到账</div><p class="tip">${product === 'ask' ? '马上接着为你起卦' : '马上为你织这枚特别款御守'}</p><button type="button" class="btn primary block" data-close-sheet>好的</button>`;
       if (body) body.innerHTML = `<div class="pay"><div class="ok">✓</div>${done}</div>`;
       setTimeout(() => { if ($('#sheet .pay .ok')) dismissSheet(); }, 3000);
       paidPending = true;
