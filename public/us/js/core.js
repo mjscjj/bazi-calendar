@@ -173,3 +173,29 @@ export function maskBirthday(input) {
   });
 }
 export const birthdayValue = (date) => (date ? `${date.slice(5, 7)} / ${date.slice(8)} / ${date.slice(0, 4)}` : '');
+
+// ---------- sound: tiny sounds made on the fly (no audio files); off in Me → Settings ----------
+let AC = null;
+const ac = () => (AC = AC || new (window.AudioContext || window.webkitAudioContext)());
+export const soundOn = () => store.get('sound') !== 0;
+function noise(sec, shape) {
+  const a = ac(), n = Math.floor(a.sampleRate * sec), buf = a.createBuffer(1, n, a.sampleRate), ch = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) ch[i] = (Math.random() * 2 - 1) * shape(i / n);
+  const src = a.createBufferSource(); src.buffer = buf; return src;
+}
+export function sfx(name) {
+  if (!soundOn() || reduced()) return;
+  try {
+    const a = ac(), out = a.createGain(); out.connect(a.destination);
+    if (name === 'tear') { // paper ripping: crackly filtered noise
+      const s = noise(0.35, (k) => Math.pow(1 - k, 1.6) * (Math.random() < 0.3 ? 1 : 0.35)), f = a.createBiquadFilter();
+      f.type = 'bandpass'; f.frequency.value = 2600; f.Q.value = 0.7; out.gain.value = 0.45; s.connect(f).connect(out); s.start();
+    } else if (name === 'clack') { // two wooden blocks landing
+      [0, 0.09].forEach((t, i) => { const s = noise(0.07, (k) => Math.pow(1 - k, 4)), f = a.createBiquadFilter(), g = a.createGain();
+        f.type = 'bandpass'; f.frequency.value = 900 + i * 260; f.Q.value = 6; g.gain.value = 0.9; s.connect(f).connect(g).connect(out); s.start(a.currentTime + t); });
+    } else if (name === 'chime') { // a soft bell for collecting and readings
+      [[880, 0.22], [1320, 0.12], [1760, 0.06]].forEach(([hz, v]) => { const o = a.createOscillator(), g = a.createGain(); o.frequency.value = hz; o.type = 'sine';
+        g.gain.setValueAtTime(v, a.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 1.2); o.connect(g).connect(out); o.start(); o.stop(a.currentTime + 1.25); });
+    }
+  } catch {}
+}

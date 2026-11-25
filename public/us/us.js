@@ -3,7 +3,7 @@ import { $, $$, S, api, track, closeSheet, pillarOf, byGz, signName, art, esc, l
 import { pageLanding, pageReveal, pageSignin, pageInvite, pageReset, pageNeedBirth } from './js/onboard.js';
 import { pageToday } from './js/today.js';
 import { pageCalendar, pagePick } from './js/calendar.js';
-import { pageMe, pageCollection, pageFriends, pagePair, pageSign, applyTheme, pageLegal, pageRecap } from './js/me.js';
+import { pageMe, pageCollection, pageFriends, pagePair, pageSign, applyTheme, pageLegal, pageRecap, pageLockscreen } from './js/me.js';
 import { pageOracle } from './js/oracle.js';
 
 applyTheme();
@@ -30,7 +30,7 @@ function pageSixty() {
       <div class="nm">${signName(x)}</div><div class="sub">${x.slug === t.slug ? 'Today' : S.me?.p.slug === x.slug ? 'You' : esc(x.name)}</div></a>`).join('')}</div></div>`;
 }
 
-const TABBED = ['today', 'calendar', 'pick', 'oracle', 'friends', 'me', 'collection', 'recap'];
+const TABBED = ['today', 'calendar', 'pick', 'oracle', 'friends', 'me', 'collection', 'recap', 'lockscreen'];
 let lastPath = '';
 function render() {
   const h = location.hash.replace(/^#/, '') || '/', [path, qs] = h.split('?'), parts = path.split('/').filter(Boolean), q = new URLSearchParams(qs || '');
@@ -48,6 +48,7 @@ function render() {
   else if (page === 'friends') pageFriends();
   else if (page === 'oracle') pageOracle();
   else if (page === 'recap') pageRecap(q.get('m'));
+  else if (page === 'lockscreen') pageLockscreen();
   else if (page === 'me') pageMe();
   else if (page === 'collection') pageCollection();
   else if (page === 'reveal') pageReveal();
@@ -62,7 +63,7 @@ function render() {
   else { page = 'home'; pageLanding(); }
   document.body.classList.toggle('has-tabs', !!S.me && !['reveal', 'signin', 'i', 'reset', 'terms', 'privacy'].includes(page));
   $('#signinLink').hidden = !!S.me || ['signin', 'reveal'].includes(page);
-  const tab = page === 'pick' ? 'calendar' : ['collection', 'friends', 'recap'].includes(page) ? 'me' : page;
+  const tab = page === 'pick' ? 'calendar' : ['collection', 'friends', 'recap', 'lockscreen'].includes(page) ? 'me' : page;
   $$('.tabs a').forEach((a) => (a.dataset.tab === tab ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
   if (path !== lastPath) { scrollTo(0, 0); lastPath = path; track('us_visit', { page }); }
   if (q.get('r') === '1') { q.delete('r'); const rest = q.toString(); history.replaceState(null, '', `#/${path}${rest ? '?' + rest : ''}`); }

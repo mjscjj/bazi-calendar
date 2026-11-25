@@ -1,6 +1,6 @@
 // Me (chart, elements, cycles, settings), your collection of 60, friends and pair paintings, and the public sign page.
 import { $, $$, esc, S, api, store, track, toast, buzz, reduced, localDay, fmt, byGz, bySlug, pillarOf, signName, aSign, fullName, stemOf, elOf, art, elStyle, chipEl,
-  WX, EL, GAN, ZHI, ANIMAL, gzName, shareBase, ageOf, loading, failed, openSheet, closeSheet, readBirthday, maskBirthday, birthdayValue, countUp } from './core.js';
+  WX, EL, GAN, ZHI, ANIMAL, gzName, shareBase, ageOf, soundOn, sfx, level, loading, failed, openSheet, closeSheet, readBirthday, maskBirthday, birthdayValue, countUp } from './core.js';
 import { shareSign, sharePair, shareImage } from './share.js';
 
 const view = () => $('#view');
@@ -29,6 +29,8 @@ export async function pageMe() {
       <div class="card settings">
         <button data-act="birth"><span>Birth details</span><small>${fmt(b.date, 'long')}${b.time ? ' · ' + b.time : ''}${b.city ? ' · ' + esc(b.city) : ''}</small></button>
         <div class="setrow"><span>Appearance</span><div class="seg mini">${['light', 'dark', 'auto'].map((t) => `<button data-theme="${t}" aria-pressed="${(store.get('theme') || 'auto') === t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div></div>
+        <a href="#/lockscreen" class="setlink"><span>Living lock screen</span><small>Repainted every morning ›</small></a>
+        <div class="setrow"><span>Sounds</span><div class="seg mini">${['On', 'Off'].map((t) => `<button data-sound="${t === 'On' ? 1 : 0}" aria-pressed="${(soundOn() ? 'On' : 'Off') === t}">${t}</button>`).join('')}</div></div>
         <button data-act="fb"><span>Send feedback</span><small>Ideas, bugs, anything</small></button>
         <button data-act="out"><span>Sign out</span></button>
         <button data-act="del" class="danger"><span>Delete my account</span></button>
@@ -37,6 +39,7 @@ export async function pageMe() {
   </div>`;
   $$('[data-theme]').forEach((x) => x.addEventListener('click', () => { store.set('theme', x.dataset.theme); applyTheme(); $$('[data-theme]').forEach((y) => y.setAttribute('aria-pressed', String(y === x))); }));
   $('[data-act=birth]').addEventListener('click', birthSheet);
+  $$('[data-sound]').forEach((x) => x.addEventListener('click', () => { store.set('sound', +x.dataset.sound); $$('[data-sound]').forEach((y) => y.setAttribute('aria-pressed', String(y === x))); if (+x.dataset.sound) sfx('chime'); }));
   $('[data-act=fb]').addEventListener('click', () => {
     openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Send feedback</h2><p class="muted" style="margin:0 0 14px">We read every note. Thank you for helping shape Sixty.</p>
       <form id="fbForm"><textarea class="input" name="t" rows="5" maxlength="500" required style="height:auto;padding:12px 14px" placeholder="What should we know?"></textarea><p class="err"></p><button class="btn block" type="submit">Send</button></form>`);
@@ -153,7 +156,7 @@ export async function pageFriends() {
   try {
     const { list } = await api('GET', 'friends');
     $('#flist').innerHTML = list.length ? list.map((f) => { if (!f.pair) return ''; const e = pairEn(f.pair, stemOf(p).image, '…'); return `
-      <button class="card friend" data-f="${list.indexOf(f)}"><img src="${e.art}" alt="" width="64" height="64"><div><h3 class="h3">${esc(/[一-鿿]/.test(f.name) ? 'Friend' : f.name)}</h3><p>${esc(e.name)} · ${e.tag}</p>${f.pair.best ? `<p class="small">Best day together: ${fmt(bestDate(f.pair.best))}</p>` : ''}</div><span class="go">›</span></button>`; }).join('')
+      <button class="card friend" data-f="${list.indexOf(f)}"><img src="${e.art}" alt="" width="64" height="64"><div><h3 class="h3">${esc(/[一-鿿]/.test(f.name) ? 'Friend' : f.name)}</h3><p>${esc(e.name)} · ${e.tag}</p>${f.today ? `<p class="small today2"><b class="lv${f.today.me.k}"><i></i>You ${level(f.today.me.k).word}</b><b class="lv${f.today.them.k}"><i></i>${esc(/[\u4e00-\u9fff]/.test(f.name) ? 'Them' : f.name)} ${level(f.today.them.k).word}</b></p>` : ''}${f.pair.best ? `<p class="small">Best day together: ${fmt(bestDate(f.pair.best))}</p>` : ''}</div><span class="go">›</span></button>`; }).join('')
       : `<div class="card empty"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--ink-3)" stroke-width="1.5" style="margin:0 auto"><circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/></svg><h3 class="h3" style="margin-top:10px">No one here yet</h3><p>Friends show up here once they open your link.</p></div>`;
     $$('[data-f]').forEach((b) => b.addEventListener('click', () => friendSheet(list[+b.dataset.f])));
   } catch (e) { $('#flist').innerHTML = failed(e.message); }
@@ -276,4 +279,31 @@ async function posterOf() {
   await Promise.all(S.C.pillars.map((p, i) => new Promise((ok) => { const im = new Image(); im.onload = () => { const x = x0 + (i % cols) * (cell + gap), y = top + Math.floor(i / cols) * (cell + gap); ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, cell, cell, 14); ctx.clip(); ctx.drawImage(im, x, y, cell, cell); ctx.restore(); ok(); }; im.onerror = ok; im.src = art(p); })));
   ctx.fillStyle = '#16151A'; ctx.font = '600 26px Inter'; ctx.fillText('mindflow.zone/sixty', 60, cv.height - 60);
   return cv;
+}
+
+// ---------- the living lock screen: #/lockscreen ----------
+export async function pageLockscreen() {
+  view().innerHTML = `<div class="page lockscreen">${loading(420)}</div>`;
+  let feed;
+  try { feed = await api('GET', 'me/calendar-feed'); } catch (e) { view().innerHTML = `<div class="page">${failed(e.message)}</div>`; return; }
+  const token = feed.url.split('/').pop().replace(/\.ics$/, ''), tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const url = `${location.origin}${location.pathname.replace(/us\/(index\.html)?$/, '')}api/us/wallpaper/${token}.jpg?tz=${encodeURIComponent(tz)}`;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  view().innerHTML = `<div class="page lockscreen" style="${elStyle(elOf(S.me.p))}">
+    <p class="label" style="margin-top:6px">Living lock screen</p><h1 class="display" style="font-size:clamp(36px,10vw,52px)">Wake up to <em>your day.</em></h1>
+    <p class="lede">Every morning your lock screen becomes the day's painting, with your level and best hours. Set it up once.</p>
+    <div class="phone"><img src="${url}&v=${Date.now()}" alt="Today's lock screen"><div class="clock"><b>9:41</b><span>${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span></div></div>
+    <div class="sec"><p class="label">${ios ? 'On your iPhone (one minute)' : 'On iPhone'}</p>
+      <ol class="steps big">
+        <li>Copy your personal link<button class="btn block" id="copyWall" style="margin-top:8px">Copy my lock screen link</button></li>
+        <li>Open the <b>Shortcuts</b> app → <b>Automation</b> → <b>+</b> → <b>Time of Day</b>: 7:00 AM, <b>Daily</b>, and choose <b>Run Immediately</b>.</li>
+        <li>Add the action <b>Get Contents of URL</b> and paste your link.</li>
+        <li>Add the action <b>Set Wallpaper</b> (or <b>Set Wallpaper Photo</b>), choose <b>Lock Screen</b>, and turn off <b>Show Preview</b>.</li>
+        <li>Tap <b>Done</b>. Tomorrow at 7 your lock screen repaints itself.</li>
+      </ol></div>
+    <div class="sec"><p class="label">Android, or just today</p><a class="btn ghost block" href="${url}" download="sixty-today.jpg" id="dlWall">Download today's lock screen</a>
+      <p class="hint">Your link is private — it shows your daily reading, not your birthday. Anyone with it could see your daily level, so keep it to yourself.</p></div></div>`;
+  $('#copyWall').addEventListener('click', async () => { try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch { prompt('Copy this link', url); } track('us_lock_copy'); store.set('lsPromo', 1); });
+  $('#dlWall').addEventListener('click', () => track('us_lock_download'));
+  track('us_lock_view');
 }

@@ -1013,12 +1013,24 @@ test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；�
     const east = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Kiritimati' })).data.date, west = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Pago_Pago' })).data.date;
     assert.notEqual(east, west);
     assert.ok((await call('GET', '/api/today', null, { 'X-TZ': 'Not/AZone' })).status === 200);
+    // 会自己换的锁屏：日历订阅的 token 就是锁屏图的地址；按 tz 参数取当天
+    const feed = (await call('GET', '/api/me/calendar-feed')).data, tok = feed.url.split('/').pop().replace('.ics', '');
+    const wr = await fetch(`${B}/api/us/wallpaper/${tok}.jpg?tz=America/Los_Angeles&w=600&h=1300`);
+    assert.equal(wr.status, 200); assert.equal(wr.headers.get('content-type'), 'image/jpeg');
+    const jpg = Buffer.from(await wr.arrayBuffer()); assert.ok(jpg.length > 20000 && jpg[0] === 0xff && jpg[1] === 0xd8);
+    assert.equal((await fetch(`${B}/api/us/wallpaper/nope-nope-nope-nope-nope.jpg`)).status, 404);
     // 分享链接
     const s = await call('GET', '/s/guimao');
     assert.equal(s.status, 200); assert.match(s.data, /og:title" content="Water Rabbit — Spring Dew/); assert.match(s.data, /og:image" content="https:\/\/example.com\/sixty\/art\/pillars\/40-guimao.webp/); assert.match(s.data, /#\/sign\/guimao/);
     assert.equal((await call('GET', '/s/nope')).status, 404);
     const code = (await call('GET', '/api/me/invite')).data.code;
     const inv = await call('GET', '/i/' + code.toLowerCase());
+    // 朋友的今天：被邀请的人注册后，双方的朋友列表里有对方今天的档位和日柱（不给生日）
+    const amyCookie = cookie; cookie = '';
+    assert.equal((await call('POST', '/api/auth/register', { username: 'bo@example.com', password: 'password123', agree: true, invite: code, birth: { date: '1990-07-04' } })).status, 200);
+    const fl = (await call('GET', '/api/friends')).data.list;
+    assert.equal(fl.length, 1); assert.ok(fl[0].today.me.k >= 1 && fl[0].today.them.k >= 1); assert.equal(fl[0].sign.length, 2); assert.equal(fl[0].birth, undefined);
+    cookie = amyCookie;
     assert.match(inv.data, /Amy is an Earth Ox\. What do you two make\?/); assert.match(inv.data, new RegExp(`#/i/${code}`));
     // 重设密码
     assert.equal((await call('POST', '/api/auth/reset-request', { email: 'nobody@example.com' })).status, 200);

@@ -51,6 +51,7 @@ for (let i = 0; i < 4; i++) {
 }
 await p.waitForTimeout(2600); await shot(p, 'o5-result', true);
 console.log('oracle ended in:', (await p.$('.reading')) ? 'reading · ' + (await p.textContent('.rd-title')) + ' · asked first: ' + (await p.$eval('.topiclist .tp', (x) => x.classList.contains('asked'))) : (await p.$('#hold')) ? 'rephrase' : 'closed for today');
+step('lockscreen'); await p.goto(base + '#/lockscreen'); await p.waitForFunction(() => document.querySelector('.phone img')?.naturalWidth > 0, null, { timeout: 20000 }); await shot(p, 'f5-lockscreen', true); console.log('lock screen preview loaded');
 step('recap'); await p.goto(base + '#/recap'); await p.waitForSelector('.recap h1'); await p.waitForTimeout(900); await shot(p, 'f3-recap', true);
 await p.goto(base + '#/collection'); await p.waitForSelector('.reward'); await shot(p, 'f4-reward');
 await p.goto(base + '#/collection'); await p.waitForSelector('.wall a'); await p.waitForTimeout(800); await shot(p, 'f2-collection');
@@ -60,6 +61,7 @@ await q.type('#pday', '07041990'); await q.click('#pairForm button'); await q.wa
 await q.click('#pairSignup'); await q.fill('#signup [name=email]', ALEX); await q.fill('#signup [name=pw]', 'password123'); await q.check('#signup [name=agree]'); await q.click('#signup button[type=submit]'); await q.waitForSelector('#daycard .score');
 await q.goto(base + '#/friends'); await q.waitForSelector('.friend'); await shot(q, 'g4-friends');
 await q.click('.friend'); await q.waitForSelector('#fShare'); await shot(q, 'g5-friend');
+await q.goto(base + '#/today'); await q.waitForSelector('.people .face'); await shot(q, 'g6-people'); console.log('people today:', (await q.textContent('.people .small')).trim());
 step('dark'); await p.evaluate(() => localStorage.setItem('sixty.theme', '"dark"')); await p.goto(base + '#/today'); await p.reload(); await p.waitForSelector('#daycard .score'); await p.waitForTimeout(900); await shot(p, 'h1-dark');
 for (const pg of [p, q]) console.log('delete:', await pg.evaluate(async () => (await fetch('../api/me/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'password123' }) })).status));
 step('terms'); await p.goto(base + '#/terms'); await p.waitForSelector('.legal h3'); console.log('terms ok:', (await p.textContent('.legal h1')) === 'Terms of Use');

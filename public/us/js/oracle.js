@@ -1,7 +1,7 @@
 // Oracle: the Daily Oracle (the English Guanyin oracle). Same rules as the Chinese edition's 每日一签:
 // write what's on your mind → hold to focus → a lot jumps out of the tube → toss the moon blocks to confirm
 // (one up one down = yes; both up = ask more clearly; both down = not yet; three "not yet" = rephrase) → the reading.
-import { $, $$, esc, S, api, store, track, toast, buzz, reduced, localDay, fmt, loading, failed, elStyle, elOf, artOf, pillarOf } from './core.js';
+import { $, $$, esc, S, api, store, track, toast, buzz, sfx, reduced, localDay, fmt, loading, failed, elStyle, elOf, artOf, pillarOf } from './core.js';
 import { shareImage } from './share.js';
 
 const view = () => $('#view');
@@ -87,7 +87,7 @@ function tossView(d, fresh) {
     let r;
     try { r = await api('POST', 'draws/today/toss', { date: drawDay || localDay() }); } catch (e) { toast(e.message); busy = false; return; }
     await wait(reduced() ? 0 : 900);
-    area.classList.remove('fly'); area.innerHTML = blocks(FACES[r.toss] || ['flat', 'round']); area.classList.add('land'); buzz(r.toss === 'sheng' ? [20, 60, 20] : 25);
+    area.classList.remove('fly'); area.innerHTML = blocks(FACES[r.toss] || ['flat', 'round']); area.classList.add('land'); sfx('clack'); buzz(r.toss === 'sheng' ? [20, 60, 20] : 25);
     $('#tossRes').textContent = r.toss ? `${L[r.toss].name} — ${L[r.toss].line}` : '';
     track('us_oracle_toss', { r: r.toss });
     S.today.draw = r.draw;
@@ -120,7 +120,7 @@ function readingView(d, fresh) {
       <button class="btn ghost block" id="shareLot" style="margin-top:16px">Share this reading</button>
       <p class="hint">A new lot tomorrow. The oracle offers perspective, not predictions.</p>
     </div>`;
-  if (fresh) { buzz([10, 40, 10]); track('us_oracle_read', { no: d.no, grade: d.grade }); loadJournal(); }
+  if (fresh) { buzz([10, 40, 10]); setTimeout(() => sfx('chime'), 400); track('us_oracle_read', { no: d.no, grade: d.grade }); loadJournal(); }
   $('#shareLot').addEventListener('click', () => {
     const p = pillarOf(localDay());
     shareImage(() => import('./share.js').then((m) => m.drawCardPublic({ art: artOf(p.cn), el: elOf(S.me.p), kicker: `Daily Oracle · ${g}`, title: en.title, sub: en.keyword, meta: `Lot No. ${d.no} · ${fmt(localDay(), 'long')}`, body: en.verse.join(' / ') })), `sixty-oracle-${d.no}.jpg`, 'oracle');

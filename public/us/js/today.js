@@ -1,7 +1,7 @@
 // Today: a week strip, a swipeable card for the selected day (with "Why?"), a draggable 24-hour dial,
 // do / skip, lucky colors, tomorrow — and, on the first open of a day, pull down to tear off yesterday.
 import { shareImage, drawCardPublic } from './share.js';
-import { $, $$, esc, S, api, store, track, toast, buzz, reduced, countUp, localDay, addDays, fmt, parse, WEEK, MONTHS, byGz, signName, art, elStyle, elOf,
+import { $, $$, esc, S, api, sfx, store, track, toast, buzz, reduced, countUp, localDay, addDays, fmt, parse, WEEK, MONTHS, byGz, signName, art, elStyle, elOf,
   level, theme, toneOf, tenName, pillarOf, whyList, hourRange, hourNow, ring, loading, failed, ymd } from './core.js';
 
 const view = () => $('#view');
@@ -25,6 +25,7 @@ export async function pageToday(want) {
     if (!dayOf(sel)) { try { strip = await api('GET', 'week?date=' + sel); } catch { sel = localDay(); strip = t.strip; } }
     renderCollect(t.jiazi);
     renderWeek(); renderDay(false);
+    accuracyChip(t.rate?.summary); peopleToday();
     const firstDay = new Date(S.me.user.createdAt).toDateString() === new Date().toDateString(); // 注册当天没有「昨天」可撕
     if (t.jiazi?.fresh && t.prev && !firstDay && store.get('torn') !== t.date && !reduced()) tearOff(t);
     else if (t.jiazi?.fresh) { toast(`Collected today's painting · ${t.jiazi.n} / 60`); setTimeout(() => flyIn(t.jiazi.n), 500); }
@@ -65,8 +66,11 @@ function renderDay(animate, dir = 1) {
   $('#tdTitle').textContent = fmt(sel, 'full');
   const card = $('#daycard');
   const why = whyList(d.why);
+  // the living painting: warm and glowing in a good hour, cooler in a weak one (today only)
+  const now = sel === today ? d.hours.find((h) => h.i === hourNow()) : null;
+  const glow = now ? (now.level.k >= 4 ? ' glow' : now.level.k <= 2 ? ' dim' : '') : '';
   card.innerHTML = `
-    <div class="dc-art"><img src="${art(dp)}" alt="" width="720" height="720"><div class="tag"><span class="chip">${signName(dp)} · ${esc(dp.name)}</span></div></div>
+    <div class="dc-art${glow}"><img src="${art(dp)}" alt="" width="720" height="720"><div class="tag"><span class="chip">${signName(dp)} · ${esc(dp.name)}</span></div>${now ? `<span class="nowchip lv${now.level.k}"><i></i>Now · ${level(now.level.k).word} hour</span>` : ''}</div>
     <div class="dc-body">
       <div class="score lv${k}">${ring(d.score)}<div><div class="word">${lv.word}</div><p>${th.title}</p></div></div>
       <p class="dc-line">${th.line}</p>
@@ -181,7 +185,7 @@ function tearOff(t) {
   let y0 = null, dy = 0;
   const done = (torn) => {
     store.set('torn', t.date);
-    if (torn) { rip(); buzz(25); page.classList.add('gone'); track('us_tear'); }
+    if (torn) { sfx('tear'); buzz(25); page.classList.add('gone'); track('us_tear'); }
     el.classList.add('out');
     setTimeout(() => { el.remove(); toast(`Collected today's painting · ${t.jiazi.n} / 60`); flyIn(t.jiazi.n); }, torn ? 650 : 250);
   };
@@ -190,16 +194,6 @@ function tearOff(t) {
   page.addEventListener('pointermove', (e) => { if (y0 == null) return; dy = Math.max(0, e.clientY - y0); page.style.transform = `translateY(${dy}px) rotate(${dy / 30}deg)`; if (dy > 60) page.classList.add('ripping'); });
   page.addEventListener('pointerup', () => { if (y0 == null) return; y0 = null; page.style.transition = ''; if (dy > 110) done(true); else { page.style.transform = ''; page.classList.remove('ripping'); } });
   page.style.touchAction = 'none';
-}
-// a short paper-rip sound made from filtered noise (no audio file)
-function rip() {
-  try {
-    const ac = new (window.AudioContext || window.webkitAudioContext)(), n = ac.sampleRate * 0.35, buf = ac.createBuffer(1, n, ac.sampleRate), ch = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 1.6) * (Math.random() < 0.3 ? 1 : 0.35);
-    const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
-    f.type = 'bandpass'; f.frequency.value = 2600; f.Q.value = 0.7; g.gain.value = 0.5;
-    src.buffer = buf; src.connect(f).connect(g).connect(ac.destination); src.start();
-  } catch {}
 }
 
 // ---------- tonight: how did today go? ----------
@@ -254,7 +248,7 @@ function flyIn(n) {
   img.className = 'flyer'; Object.assign(img.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px' });
   document.body.appendChild(img);
   requestAnimationFrame(() => { Object.assign(img.style, { transform: `translate(${b.left + b.width / 2 - a.left - a.width / 2}px, ${b.top + b.height / 2 - a.top - a.height / 2}px) scale(${36 / a.width})`, opacity: '.2', borderRadius: '50%' }); });
-  setTimeout(() => { img.remove(); to.classList.remove('pop'); void to.offsetWidth; to.classList.add('pop'); buzz(12); if (n % 10 === 0) toast(n === 60 ? 'All 60 collected — the full cycle!' : `${n} of 60 — a milestone!`); }, 800);
+  setTimeout(() => { img.remove(); to.classList.remove('pop'); void to.offsetWidth; to.classList.add('pop'); buzz(12); sfx('chime'); if (n % 10 === 0) toast(n === 60 ? 'All 60 collected — the full cycle!' : `${n} of 60 — a milestone!`); }, 800);
 }
 
 // ---------- add to home screen: from the second day you visit ----------
@@ -272,4 +266,31 @@ function installCard() {
   $('#a2hs .x').addEventListener('click', () => { store.set('a2hs', 1); $('#a2hs').remove(); });
   $('#doInstall')?.addEventListener('click', async () => { installEvt.prompt(); const r = await installEvt.userChoice.catch(() => null); track('us_install', { r: r?.outcome }); store.set('a2hs', 1); $('#a2hs')?.remove(); });
   track('us_install_card');
+}
+
+// ---------- trust: how often Sixty matched your days (after 3 rated evenings) ----------
+function accuracyChip(sm) {
+  if (!sm || sm.rated < 3 || $('.acc')) return;
+  const pct = Math.round(sm.match / sm.rated * 100);
+  $('.tdhead > div').insertAdjacentHTML('beforeend', `<button class="chip acc" title="From your evening ratings">${pct}% match</button>`);
+  $('.acc').addEventListener('click', () => toast(`Sixty matched ${sm.match} of the ${sm.rated} evenings you rated this month`));
+}
+
+// ---------- your people today, and the living lock screen invite ----------
+async function peopleToday() {
+  let list = [];
+  try { list = (await api('GET', 'friends')).list.filter((f) => f.today && f.sign); } catch {}
+  const anchor = $('.daywrap');
+  if (!anchor || !$('#daycard')) return;
+  let html = '';
+  if (list.length) {
+    const strong = list.filter((f) => f.today.them.k >= 4), both = list.filter((f) => f.today.them.k >= 4 && f.today.me.k >= 4);
+    const name = (f) => (/[\u4e00-\u9fff]/.test(f.name) ? 'A friend' : f.name);
+    const line = both.length ? `A strong day for you and ${esc(name(both[0]))} — do something together.` : strong.length ? `${esc(name(strong[0]))} is having a strong day — lean on them.` : 'A quiet day all round. Check in on someone.';
+    html += `<a class="card people" href="#/friends"><div class="dial-head"><p class="label">Your people today</p><span class="go">›</span></div>
+      <div class="faces">${list.slice(0, 6).map((f) => { const p = byGz(f.sign); return `<span class="face lv${f.today.them.k}"><img src="${art(p)}" alt=""><i></i><em>${esc(name(f)).slice(0, 8)}</em></span>`; }).join('')}</div><p class="small" style="margin:10px 0 0">${line}</p></a>`;
+  }
+  if (!store.get('lsPromo')) html += `<a class="card lspromo" href="#/lockscreen"><button class="x" aria-label="Dismiss">×</button><p class="label">New</p><h3 class="h3" style="margin-top:6px">Your lock screen, repainted every morning</h3><p class="small" style="margin:4px 0 0">Set it once — each day your iPhone wakes up to the day's painting and your best hours.</p></a>`;
+  anchor.insertAdjacentHTML('afterend', `<div class="stack-gap" id="peopleWrap" style="margin-top:12px">${html}</div>`);
+  $('.lspromo .x')?.addEventListener('click', (e) => { e.preventDefault(); store.set('lsPromo', 1); $('.lspromo').remove(); });
 }

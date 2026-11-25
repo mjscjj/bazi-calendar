@@ -110,6 +110,49 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
     return L.map(fold).join('\r\n') + '\r\n';
   }
 
+  // ----- 会自己换的锁屏：iPhone 快捷指令每天早上来拿一张图设为壁纸。地址带用户的日历订阅 token 和时区 -----
+  const ZONES = new Set(Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : []);
+  let canvasMod = null;
+  async function wallpaper(u, tz, W, H) {
+    canvasMod = canvasMod || await import('@napi-rs/canvas').then((m) => {
+      for (const f of ['InstrumentSerif-400.ttf', 'InstrumentSerif-400i.ttf', 'Inter-500.ttf', 'Inter-600.ttf']) m.GlobalFonts.registerFromPath(path.join(HERE, 'fonts', f), f.startsWith('Inter') ? 'Inter' : 'Instrument Serif');
+      return m;
+    });
+    const { createCanvas, loadImage } = canvasMod;
+    const date = new Intl.DateTimeFormat('en-CA', { timeZone: ZONES.has(tz) ? tz : (env.DAY_TZ || 'America/Chicago'), year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const [y, m, d] = date.split('-').map(Number), t = Date.UTC(y, m - 1, d);
+    const c = chartOf(u), x = dayOut(c, y, m, d, true), p = pillar(x.gz);
+    const e = GAN.indexOf(x.gz[0]) >> 1, tone = c.ji.includes(e) ? 'ji' : 'xi', vs = C.themes[x.ssG][tone], th = vs[(Math.floor(t / DAY) + 17) % 60 % vs.length];
+    const h12 = (h) => h % 12 || 12, ap = (h) => (h < 12 ? 'AM' : 'PM');
+    const best = bestHours(x).top.map((h) => { const a = (h.i * 2 + 23) % 24, b = (a + 2) % 24; return ap(a) === ap(b) && b ? `${h12(a)}–${h12(b)} ${ap(b)}` : `${h12(a)} ${ap(a)}–${h12(b)} ${ap(b)}`; });
+    const img = await loadImage(path.join(HERE, '../public/art/pillars', p.art));
+    const cv = createCanvas(W, H), ctx = cv.getContext('2d');
+    // 背景：同一张画放大、虚化、压暗，铺满整屏
+    ctx.filter = 'blur(48px)'; const sc = Math.max(W, H) / 720 * 1.15; ctx.drawImage(img, (W - 720 * sc) / 2, (H - 720 * sc) / 2, 720 * sc, 720 * sc); ctx.filter = 'none';
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, 'rgba(10,10,14,.30)'); g.addColorStop(0.45, 'rgba(10,10,14,.45)'); g.addColorStop(1, 'rgba(10,10,14,.78)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // 画：屏幕中下部，上面留给锁屏时钟
+    const S = Math.round(W * 0.72), X = (W - S) / 2, Y = Math.round(H * 0.41);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 24; ctx.beginPath(); ctx.roundRect(X, Y, S, S, 44); ctx.fillStyle = '#222'; ctx.fill(); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.roundRect(X, Y, S, S, 44); ctx.clip(); ctx.drawImage(img, X, Y, S, S); ctx.restore();
+    const k = W / 1179, cx = W / 2; let ty = Y + S + 96 * k;
+    ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,.72)'; ctx.font = `600 ${30 * k}px Inter`;
+    ctx.fillText(`${new Date(t).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }).toUpperCase()}  ·  ${signName(p).toUpperCase()}`, cx, ty);
+    ty += 104 * k; ctx.fillStyle = '#fff'; ctx.font = `400 ${96 * k}px "Instrument Serif"`; ctx.fillText(`${C.levels[x.level.k].word} · ${x.score}`, cx, ty);
+    ty += 70 * k; ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.font = `italic 400 ${54 * k}px "Instrument Serif"`; ctx.fillText(th.title, cx, ty);
+    ty += 74 * k; ctx.fillStyle = 'rgba(255,255,255,.78)'; ctx.font = `500 ${34 * k}px Inter`; ctx.fillText(`Best ${best.join('  ·  ')}`, cx, ty);
+    return cv.encode('jpeg', 88);
+  }
+  route('GET', '/api/us/wallpaper/:token', async ({ params, q, ip }) => {
+    if (!limit('wall:' + ip, 60, HOUR)) throw new HttpError(429, 'Too many requests.');
+    const token = String(params.token).replace(/\.(jpe?g|png)$/, '');
+    const u = token.length > 20 && db.get("SELECT * FROM users WHERE cal_token = ? AND status = 'active'", token);
+    if (!u || !u.birth_date) throw new HttpError(404, 'This link has expired.');
+    const W = Math.min(2000, Math.max(600, parseInt(q.get('w'), 10) || 1179)), H = Math.min(4000, Math.max(1000, parseInt(q.get('h'), 10) || 2556));
+    const buf = await wallpaper(u, String(q.get('tz') || ''), W, H);
+    return { __raw: buf, __type: 'image/jpeg', __headers: { 'Cache-Control': 'no-store', 'Content-Disposition': 'inline; filename="sixty-today.jpg"' } };
+  });
+
   return {
     ics,
     page(p, req) {

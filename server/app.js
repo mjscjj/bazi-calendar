@@ -1360,7 +1360,9 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       const f = db.get("SELECT * FROM users WHERE id = ? AND status = 'active'", r.id);
       if (!f) return null;
       const fc = mine && f.birth_date ? chartOf(f) : null;
-      return { name: shownName(f), src: r.src, at: r.created_at, pair: fc ? { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) } : null };
+      // 两个人今天各自的档位（美国版「朋友的今天」用）；只给日柱，不给生日
+      const today = fc && env.US_EDITION === '1' ? (() => { const [y, m, d] = bjDay().split('-').map(Number), a = dayOut(mine, y, m, d, false), b = dayOut(fc, y, m, d, false); return { me: { k: a.level.k, score: a.score }, them: { k: b.level.k, score: b.score } }; })() : undefined;
+      return { name: shownName(f), src: r.src, at: r.created_at, sign: fc && env.US_EDITION === '1' ? fc.pillars[2] : undefined, today, pair: fc ? { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) } : null };
     }).filter(Boolean);
   }
   route('GET', '/api/friends', async ({ req }) => ({ list: friendsOf(requireUser(req)) }));
