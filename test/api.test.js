@@ -944,7 +944,7 @@ test('节气：节气那天有一张节气卡，按五行说对你意味着什�
   assert.equal((await fetch(base + '/' + t.art)).status, 200);
 });
 
-test('美国版（/us/）：页面能打开；英文内容和插画齐全；网页里的日柱算法和排盘一致；候补名单只收合法邮箱、不重复', async () => {
+test('美国版（/us/）：页面能打开；英文内容和插画齐全；网页里的日柱算法和排盘一致', async () => {
   const r = await fetch(base + '/us', { redirect: 'manual' });
   assert.equal(r.status, 301);
   assert.equal(r.headers.get('location'), '/bazi/us/');
@@ -956,7 +956,7 @@ test('美国版（/us/）：页面能打开；英文内容和插画齐全；网�
   for (const p of us.pillars) assert.ok(p.name && p.intro && art('pillars', p.art), p.cn);
   assert.equal(Object.keys(us.pairs).length, 55);
   for (const [k, p] of Object.entries(us.pairs)) assert.ok(p.name && art('pairs', p.art), k);
-  for (const k of ['same', 'feeds', 'draws', 'yields', 'tests']) assert.ok(us.days[k]?.title, k);
+  for (const k of Object.keys(us.tenGods)) assert.ok(us.themes[k]?.xi?.do.length === 2 && us.themes[k]?.ji?.dont.length === 2, k);
   // 和 public/us/us.js 的 cycleIndex 同一个算法
   const { dayGz } = await import('../server/engine.js');
   const idx = (s) => { const [y, m, d] = s.split('-').map(Number); return ((Math.floor(Date.UTC(y, m - 1, d) / 864e5) + 17) % 60 + 60) % 60; };
@@ -964,105 +964,6 @@ test('美国版（/us/）：页面能打开；英文内容和插画齐全；网�
     const s = new Date(Date.UTC(2000, 0, 1) + k * 864e5).toISOString().slice(0, 10);
     assert.equal(us.pillars[idx(s)].cn, dayGz(s), s);
   }
-  const c = client();
-  assert.equal((await c('POST', '/api/us/waitlist', { email: 'not-an-email' })).status, 400);
-  assert.equal((await c('POST', '/api/us/waitlist', { email: ' Amy@Example.com ', sign: 'guimao', ref: 'tiktok' })).status, 200);
-  assert.equal((await c('POST', '/api/us/waitlist', { email: 'amy@example.com' })).status, 200);
-  const rows = db.all('SELECT * FROM us_waitlist');
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].email, 'amy@example.com');
-  assert.equal(rows[0].sign, 'guimao');
-});
-
-test('美国版计算接口：排盘（出生地按真太阳时、填了性别才给大运）、一段日子的每日详解、挑日子；不存任何东西', async () => {
-  const c = client();
-  const plus = 'a'.repeat(48);
-  db.run("INSERT INTO us_orders(ref, token, plan, status, paid_until, created_at) VALUES('SXTtest', ?, 'yearly', 'paid', ?, ?)", plus, new Date(Date.now() + 864e7).toISOString(), new Date().toISOString());
-  const birth = { date: '1992-03-14', time: '08:30', lng: -74.006, tz: 'America/New_York' };
-  const ch = (await c('POST', '/api/us/chart', { birth, plus })).data;
-  assert.deepEqual(ch.pillars, ['壬申', '癸卯', '己丑', '戊辰']);
-  assert.equal(ch.solar.time, '08:25');
-  assert.equal(ch.luck, null);
-  assert.equal((await c('POST', '/api/us/chart', { birth: { ...birth, sex: 'f' }, plus })).data.luck.cycles.length, 8);
-  assert.equal((await c('POST', '/api/us/chart', { birth: { date: '1992-13-14' } })).status, 400);
-  assert.equal((await c('POST', '/api/us/chart', { birth: { ...birth, tz: 'Mars/Base' } })).status, 400);
-  const { days } = (await c('POST', '/api/us/days', { birth: { date: '1992-03-14' }, from: '2026-11-25', n: 31, hours: 1, plus })).data;
-  assert.equal(days.length, 31);
-  assert.equal(days[0].gz, '癸卯');
-  assert.ok(days.every((d) => d.k >= 1 && d.k <= 5 && d.hours.length === 12 && d.best.length === 2));
-  assert.equal((await c('POST', '/api/us/days', { birth: { date: '1992-03-14' }, from: '2026-11-01', n: 400, plus })).data.days.length, 42);
-  const us = JSON.parse(fs.readFileSync(new URL('../public/us/content.json', import.meta.url)));
-  for (const t of Object.keys(us.picks)) {
-    const r = (await c('POST', '/api/us/pick', { birth: { date: '1992-03-14' }, type: t, today: '2026-11-25', range: '1m', plus })).data;
-    assert.ok(r.picks.length > 0 && r.picks.every((p) => p.date > '2026-11-25' && us.themes[p.ssG]), t);
-  }
-  assert.equal((await c('POST', '/api/us/pick', { birth: { date: '1992-03-14' }, type: 'nope', today: '2026-11-25', plus })).status, 400);
-  for (const k of ['正官', '七杀', '正印', '偏印', '比肩', '劫财', '食神', '伤官', '正财', '偏财']) assert.ok(us.themes[k]?.do.length === 2, k);
-});
-
-test('美国版 Sixty Plus：下单拿 token → Gumroad Ping 首单开通 → 付费内容解锁；续费按订阅延长；license key 换设备找回；退款收回', async () => {
-  const { createHmac } = await import('node:crypto');
-  const pdb = openDb(':memory:');
-  const env = { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ASK_AI: 'fake', GUMROAD_PRODUCT_ID: 'prod1', GUMROAD_PRODUCT_URL: 'https://x.gumroad.com/l/mindflow', GUMROAD_PING_SECRET: 'sek' };
-  const srv = createServer({ db: pdb, alipay: null, env, log: { info() {}, error() {}, warn() {} } });
-  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
-  const B = `http://127.0.0.1:${srv.address().port}/bazi`;
-  const post = async (p, body) => { const r = await fetch(B + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return { status: r.status, data: await r.json() }; };
-  const ping = async (fields, secret = 'sek') => {
-    const body = new URLSearchParams({ product_id: 'prod1', resource_name: 'sale', ...fields }).toString(), t = Math.floor(Date.now() / 1000);
-    const sig = createHmac('sha256', secret).update(t + '.').update(body).digest('hex');
-    const r = await fetch(B + '/api/us/pay/ping', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Gumroad-Signature': `t=${t},v1=${sig}` }, body });
-    await new Promise((res) => setTimeout(res, 30));
-    return r.status;
-  };
-  try {
-    const birth = { date: '1992-03-14', sex: 'f' };
-    assert.equal((await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25' })).status, 402);
-    assert.equal((await post('/api/us/days', { birth, from: '2026-12-01', n: 31 })).status, 402);
-    const free = await post('/api/us/chart', { birth });
-    assert.equal(free.data.plus, false); assert.equal(free.data.force, undefined); assert.ok(free.data.xi.length);
-    const st = await post('/api/us/pay/start', { plan: 'yearly' });
-    assert.ok(st.data.ref.startsWith('SXT') && /^[a-f0-9]{48}$/.test(st.data.token));
-    assert.ok(st.data.url.includes('ref=' + st.data.ref) && st.data.url.includes('recurrence=yearly'));
-    const status = async (t) => (await fetch(`${B}/api/us/pay/status?token=${t}`)).json();
-    assert.equal((await status(st.data.token)).pending, true);
-    assert.equal(await ping({ sale_id: 's1', 'url_params[ref]': st.data.ref }, 'wrong'), 400);
-    assert.equal(await ping({ sale_id: 's1', 'url_params[ref]': st.data.ref, recurrence: 'yearly', subscription_id: 'sub1', email: 'a@b.co', license_key: 'abcd1234-efgh5678-ijkl9012' }), 200);
-    const s1 = await status(st.data.token);
-    assert.equal(s1.plus, true); assert.equal(s1.plan, 'yearly'); assert.ok(s1.until > new Date(Date.now() + 360 * 864e5).toISOString());
-    const plus = st.data.token;
-    assert.equal((await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25', plus })).status, 200);
-    assert.equal((await post('/api/us/days', { birth, from: '2026-12-01', n: 31, plus })).data.days.length, 31);
-    assert.ok((await post('/api/us/chart', { birth, plus })).data.luck.cycles.length);
-    // 同一笔再来一次不重复处理；续费延长同一张订单
-    pdb.run("UPDATE us_orders SET paid_until = ? WHERE token = ?", new Date(Date.now() + 864e5).toISOString(), plus);
-    await ping({ sale_id: 's2', recurrence: 'yearly', subscription_id: 'sub1' });
-    assert.ok((await status(plus)).until > new Date(Date.now() + 360 * 864e5).toISOString());
-    assert.equal(pdb.all('SELECT * FROM us_orders').length, 1);
-    // 换设备
-    assert.equal((await post('/api/us/pay/restore', { key: 'nope-nope-nope-nope' })).status, 404);
-    assert.equal((await post('/api/us/pay/restore', { key: ' ABCD1234-EFGH5678-IJKL9012 ' })).data.token, plus);
-    // 退款收回
-    await ping({ sale_id: 's2', resource_name: 'refund' });
-    assert.equal((await status(plus)).plus, false);
-    assert.equal((await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25', plus })).status, 402);
-  } finally { srv.close(); }
-});
-
-test('美国版测试期：US_PLUS_FOR_ALL=1 时不付款也能用全部功能', async () => {
-  const srv = createServer({ db: openDb(':memory:'), alipay: null, env: { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ASK_AI: 'fake', US_PLUS_FOR_ALL: '1' }, log: { info() {}, error() {}, warn() {} } });
-  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
-  const B = `http://127.0.0.1:${srv.address().port}/bazi`;
-  const post = async (p, body) => (await fetch(B + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).status;
-  try {
-    const st = await (await fetch(B + '/api/us/pay/status')).json();
-    assert.equal(st.plus, true); assert.equal(st.beta, true);
-    const birth = { date: '1992-03-14', sex: 'f' };
-    assert.equal(await post('/api/us/pick', { birth, type: 'interview', today: '2026-11-25' }), 200);
-    assert.equal(await post('/api/us/days', { birth, from: '2026-12-01', n: 31 }), 200);
-    const ch = await (await fetch(B + '/api/us/chart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ birth }) })).json();
-    assert.ok(ch.force && ch.luck);
-  } finally { srv.close(); }
 });
 
 test('美国版开关：邮箱当用户名、性别可以不填、按 DAY_TZ 切天、MEMBER_FOR_ALL 人人是会员；英文城市能排真太阳时', async () => {
@@ -1083,5 +984,42 @@ test('美国版开关：邮箱当用户名、性别可以不填、按 DAY_TZ 切
     assert.equal(t.card.basis.solar, true);
     assert.equal((await call('GET', '/api/calendar?y=2026&m=12')).status, 200);
     assert.equal((await call('POST', '/api/auth/login', { username: 'AMY@example.com', password: 'password123' })).status, 200);
+  } finally { srv.close(); }
+});
+
+test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；分享链接有专属预览；邮件重设密码（没配发信时链接写进日志）', async () => {
+  const logs = [];
+  const env = { BASE_PATH: '/sixty', COOKIE_SECURE: '0', ASK_AI: 'fake', US_EDITION: '1', DAY_TZ: 'America/Chicago', MEMBER_FOR_ALL: '1', GENDER_OPTIONAL: '1', PUBLIC_URL: 'https://example.com/sixty' };
+  const srv = createServer({ db: openDb(':memory:'), alipay: null, env, log: { info: (m) => logs.push(m), error() {}, warn() {} } });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const B = `http://127.0.0.1:${srv.address().port}/sixty`;
+  let cookie = '';
+  const call = async (method, p, body, headers = {}) => { const r = await fetch(B + p, { method, headers: { 'Content-Type': 'application/json', Cookie: cookie, ...headers }, body: body ? JSON.stringify(body) : undefined }); const sc = r.headers.getSetCookie(); if (sc.length) cookie = sc.map((c) => c.split(';')[0]).join('; '); const t = await r.text(); let data; try { data = JSON.parse(t); } catch { data = t; } return { status: r.status, data }; };
+  try {
+    const kid = new Date(); kid.setFullYear(kid.getFullYear() - 10);
+    const r1 = await call('POST', '/api/auth/register', { username: 'kid@example.com', password: 'password123', agree: true, birth: { date: kid.toISOString().slice(0, 10) } });
+    assert.equal(r1.status, 400); assert.match(r1.data.message, /13 and up/);
+    assert.equal((await call('POST', '/api/auth/register', { username: 'amy@example.com', password: 'password123', agree: true, nickname: 'Amy', birth: { date: '1992-03-14' } })).status, 200);
+    // 两个相差 25 小时的时区，「今天」一定不是同一天
+    const east = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Kiritimati' })).data.date, west = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Pago_Pago' })).data.date;
+    assert.notEqual(east, west);
+    assert.ok((await call('GET', '/api/today', null, { 'X-TZ': 'Not/AZone' })).status === 200);
+    // 分享链接
+    const s = await call('GET', '/s/guimao');
+    assert.equal(s.status, 200); assert.match(s.data, /og:title" content="Water Rabbit — Spring Dew/); assert.match(s.data, /og:image" content="https:\/\/example.com\/sixty\/art\/pillars\/40-guimao.webp/); assert.match(s.data, /#\/sign\/guimao/);
+    assert.equal((await call('GET', '/s/nope')).status, 404);
+    const code = (await call('GET', '/api/me/invite')).data.code;
+    const inv = await call('GET', '/i/' + code.toLowerCase());
+    assert.match(inv.data, /Amy is an Earth Ox\. What do you two make\?/); assert.match(inv.data, new RegExp(`#/i/${code}`));
+    // 重设密码
+    assert.equal((await call('POST', '/api/auth/reset-request', { email: 'nobody@example.com' })).status, 200);
+    assert.equal((await call('POST', '/api/auth/reset-request', { email: 'AMY@example.com' })).status, 200);
+    const token = (logs.find((m) => m.includes('[us-mail]')) || '').match(/#\/reset\/([\w-]+)/)?.[1];
+    assert.ok(token, 'reset link logged');
+    assert.equal((await call('POST', '/api/auth/reset', { token, password: 'short' })).status, 400);
+    assert.equal((await call('POST', '/api/auth/reset', { token, password: 'newpassword1' })).status, 200);
+    assert.equal((await call('POST', '/api/auth/reset', { token, password: 'newpassword2' })).status, 400); // 只能用一次
+    assert.equal((await call('POST', '/api/auth/login', { username: 'amy@example.com', password: 'password123' })).status, 400);
+    assert.equal((await call('POST', '/api/auth/login', { username: 'amy@example.com', password: 'newpassword1' })).status, 200);
   } finally { srv.close(); }
 });

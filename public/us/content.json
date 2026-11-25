@@ -1,5 +1,5 @@
 {
- "_about": "Sixty (US edition) copy. Pillars follow the 60-day cycle; stems give element, image and traits; days are what today means for you (today's stem vs yours); pairs are keyed by the two stems in cycle order. Art lives in ../art/. Edit freely, keep the keys.",
+ "_about": "Sixty (US) copy — edit freely, keep the keys. pillars: the 60 day signs; stems: element, image, traits; themes: what a day means, by its Ten God and tone (xi = the day's element fuels you, ji = it drains you; neutral uses xi); tenGods: [friendly name, classical name]; levels: the five day levels; seasons: the 24 solar terms; pairKinds/pairs: friend paintings; elements: colors and what fuels you. Art lives in ../art/.",
  "stems": {
   "jia": {
    "cn": "甲",
@@ -808,124 +808,264 @@
  },
  "themes": {
   "正官": {
-   "title": "A Day for Recognition",
-   "line": "Structure works for you. Rules, bosses and reputation are on your side.",
-   "do": [
-    "Show your work to someone senior",
-    "Follow the process — it pays off"
-   ],
-   "dont": [
-    "Cut corners",
-    "Pick a fight with authority"
-   ]
+   "xi": {
+    "title": "A Day for Recognition",
+    "line": "Structure works for you. Bosses, rules and reputation are on your side.",
+    "do": [
+     "Show your work to someone senior",
+     "Follow the process — it pays off"
+    ],
+    "dont": [
+     "Cut corners",
+     "Pick a fight with authority"
+    ]
+   },
+   "ji": {
+    "title": "A Day of Expectations",
+    "line": "Other people's expectations weigh more than usual. Meet them, but don't twist yourself to fit.",
+    "do": [
+     "Get the must-dos done early",
+     "Ask what's actually expected"
+    ],
+    "dont": [
+     "Overpromise to please someone",
+     "Take criticism as final"
+    ]
+   }
   },
   "七杀": {
-   "title": "A High-Pressure Day",
-   "line": "Pressure is high, and so is your output. Push hard, but pace yourself.",
-   "do": [
-    "Do the hardest task first",
-    "Set one clear boundary"
-   ],
-   "dont": [
-    "Take on everyone's problems",
-    "Decide big things while angry"
-   ]
+   "xi": {
+    "title": "A Day to Push Through",
+    "line": "Pressure turns into drive. You can move something big today.",
+    "do": [
+     "Tackle the hardest task first",
+     "Make the bold call"
+    ],
+    "dont": [
+     "Wait for permission",
+     "Waste the momentum on small stuff"
+    ]
+   },
+   "ji": {
+    "title": "A High-Pressure Day",
+    "line": "Pressure is high and patience is thin. Pace yourself and pick your battles.",
+    "do": [
+     "Set one clear boundary",
+     "Take a real break mid-day"
+    ],
+    "dont": [
+     "Take on everyone's problems",
+     "Decide big things while angry"
+    ]
+   }
   },
   "正印": {
-   "title": "A Day to Be Supported",
-   "line": "Good for learning, resting and letting people help you.",
-   "do": [
-    "Read, study or take a class",
-    "Ask a mentor for advice"
-   ],
-   "dont": [
-    "Force a tough negotiation",
-    "Skip rest to look busy"
-   ]
+   "xi": {
+    "title": "A Day to Be Supported",
+    "line": "Good for learning, resting and letting people help you.",
+    "do": [
+     "Read, study or take a class",
+     "Ask a mentor for advice"
+    ],
+    "dont": [
+     "Force a tough negotiation",
+     "Skip rest to look busy"
+    ]
+   },
+   "ji": {
+    "title": "A Slow, Heavy Day",
+    "line": "Comfort pulls at you and things move slowly. Rest is fine — just don't stall on what matters.",
+    "do": [
+     "Do one thing you've been putting off",
+     "Keep plans simple"
+    ],
+    "dont": [
+     "Hide behind research",
+     "Lean on others for everything"
+    ]
+   }
   },
   "偏印": {
-   "title": "A Day for Deep Thinking",
-   "line": "Your mind wants quiet. Good for research, strategy and time alone.",
-   "do": [
-    "Block two hours of focus time",
-    "Journal or plan next month"
-   ],
-   "dont": [
-    "Overbook your social calendar",
-    "Overthink small replies"
-   ]
+   "xi": {
+    "title": "A Day for Deep Thinking",
+    "line": "Your mind wants quiet. Good for research, strategy and time alone.",
+    "do": [
+     "Block two hours of focus time",
+     "Journal or plan next month"
+    ],
+    "dont": [
+     "Overbook your social calendar",
+     "Overthink small replies"
+    ]
+   },
+   "ji": {
+    "title": "A Restless, Inward Day",
+    "line": "You may feel out of sync with people. Keep to yourself a little, and don't read too much into things.",
+    "do": [
+     "Take a walk alone",
+     "Write it down before you say it"
+    ],
+    "dont": [
+     "Assume the worst",
+     "Make big decisions on a hunch"
+    ]
+   }
   },
   "比肩": {
-   "title": "A Day for Allies",
-   "line": "Friends and teammates have your back. Collaborate.",
-   "do": [
-    "Team up on a shared project",
-    "Reach out to an old friend"
-   ],
-   "dont": [
-    "Go it alone out of pride",
-    "Lend money casually"
-   ]
+   "xi": {
+    "title": "A Day for Allies",
+    "line": "Friends and teammates have your back. Collaborate.",
+    "do": [
+     "Team up on a shared project",
+     "Reach out to an old friend"
+    ],
+    "dont": [
+     "Go it alone out of pride",
+     "Turn down help"
+    ]
+   },
+   "ji": {
+    "title": "A Crowded Day",
+    "line": "Everyone wants a piece of the same thing. Share the credit, guard your time.",
+    "do": [
+     "Be clear about who does what",
+     "Protect one hour for yourself"
+    ],
+    "dont": [
+     "Lend money casually",
+     "Get drawn into comparisons"
+    ]
+   }
   },
   "劫财": {
-   "title": "A Competitive Day",
-   "line": "Rivalry and spending run high. Stay sharp and watch your wallet.",
-   "do": [
-    "Compete — and play fair",
-    "Double-check shared money"
-   ],
-   "dont": [
-    "Impulse-buy",
-    "Rush into joint deals"
-   ]
+   "xi": {
+    "title": "A Competitive Day",
+    "line": "A little rivalry sharpens you. Go after it — and play fair.",
+    "do": [
+     "Compete for what you want",
+     "Network with confidence"
+    ],
+    "dont": [
+     "Hold back out of politeness",
+     "Undersell yourself"
+    ]
+   },
+   "ji": {
+    "title": "A Day to Guard Your Wallet",
+    "line": "Spending and rivalry run high. Stay sharp and watch your money.",
+    "do": [
+     "Double-check shared money",
+     "Sleep on big purchases"
+    ],
+    "dont": [
+     "Impulse-buy",
+     "Rush into joint deals"
+    ]
+   }
   },
   "食神": {
-   "title": "A Day of Ease",
-   "line": "Relaxed and creative. Make something you enjoy.",
-   "do": [
-    "Cook, create or play",
-    "Say yes to a small pleasure"
-   ],
-   "dont": [
-    "Overschedule yourself",
-    "Turn fun into homework"
-   ]
+   "xi": {
+    "title": "A Day of Ease",
+    "line": "Relaxed and creative. Make something you enjoy.",
+    "do": [
+     "Cook, create or play",
+     "Say yes to a small pleasure"
+    ],
+    "dont": [
+     "Overschedule yourself",
+     "Turn fun into homework"
+    ]
+   },
+   "ji": {
+    "title": "A Lazy-Feeling Day",
+    "line": "Comfort is tempting and focus is soft. Enjoy it, but finish one real thing.",
+    "do": [
+     "Pick one task and finish it",
+     "Move your body"
+    ],
+    "dont": [
+     "Overindulge",
+     "Let the whole day drift"
+    ]
+   }
   },
   "伤官": {
-   "title": "A Day to Speak Up",
-   "line": "Ideas are flowing and you want to be heard. Mind your tone.",
-   "do": [
-    "Pitch a bold idea",
-    "Write, post or perform"
-   ],
-   "dont": [
-    "Send the angry email",
-    "Criticize anyone in public"
-   ]
+   "xi": {
+    "title": "A Day to Speak Up",
+    "line": "Ideas are flowing and you want to be heard. Go for it.",
+    "do": [
+     "Pitch a bold idea",
+     "Write, post or perform"
+    ],
+    "dont": [
+     "Hold back your best idea",
+     "Wait for perfect"
+    ]
+   },
+   "ji": {
+    "title": "A Day to Mind Your Words",
+    "line": "You'll want to say exactly what you think. Say it kindly — or sleep on it.",
+    "do": [
+     "Vent in a journal first",
+     "Choose your audience"
+    ],
+    "dont": [
+     "Send the angry email",
+     "Criticize anyone in public"
+    ]
+   }
   },
   "正财": {
-   "title": "A Payoff Day",
-   "line": "Steady effort pays off. Good for money and practical work.",
-   "do": [
-    "Handle bills, budgets and admin",
-    "Finish what you started"
-   ],
-   "dont": [
-    "Gamble on long shots",
-    "Lend without a plan"
-   ]
+   "xi": {
+    "title": "A Payoff Day",
+    "line": "Steady effort pays off. Good for money and practical work.",
+    "do": [
+     "Handle bills, budgets and admin",
+     "Finish what you started"
+    ],
+    "dont": [
+     "Gamble on long shots",
+     "Leave things half done"
+    ]
+   },
+   "ji": {
+    "title": "A Day of Small Leaks",
+    "line": "Money and time slip away in small ways. Keep a tight grip on the details.",
+    "do": [
+     "Check your accounts",
+     "Say no to one extra commitment"
+    ],
+    "dont": [
+     "Lend without a plan",
+     "Chase quick returns"
+    ]
+   }
   },
   "偏财": {
-   "title": "A Lucky-Break Day",
-   "line": "Unexpected chances and connections show up. Stay open.",
-   "do": [
-    "Network, or say yes to an invite",
-    "Try a side project"
-   ],
-   "dont": [
-    "Ignore a random opportunity",
-    "Spend the windfall before it lands"
-   ]
+   "xi": {
+    "title": "A Lucky-Break Day",
+    "line": "Unexpected chances and connections show up. Stay open.",
+    "do": [
+     "Network, or say yes to an invite",
+     "Try a side project"
+    ],
+    "dont": [
+     "Ignore a random opportunity",
+     "Overplan"
+    ]
+   },
+   "ji": {
+    "title": "A Day of Temptations",
+    "line": "Shiny offers and easy money call. Most aren't what they seem today.",
+    "do": [
+     "Ask one more question before saying yes",
+     "Keep your budget in view"
+    ],
+    "dont": [
+     "Spend the windfall before it lands",
+     "Chase every shiny thing"
+    ]
+   }
   }
  },
  "elements": {
@@ -1006,16 +1146,46 @@
   }
  },
  "tenGods": {
-  "正官": "Direct Officer",
-  "七杀": "Seven Killings",
-  "正印": "Direct Resource",
-  "偏印": "Indirect Resource",
-  "比肩": "Friend",
-  "劫财": "Rob Wealth",
-  "食神": "Eating God",
-  "伤官": "Hurting Officer",
-  "正财": "Direct Wealth",
-  "偏财": "Indirect Wealth"
+  "正官": [
+   "Structure",
+   "Direct Officer"
+  ],
+  "七杀": [
+   "Pressure",
+   "Seven Killings"
+  ],
+  "正印": [
+   "Support",
+   "Direct Resource"
+  ],
+  "偏印": [
+   "Insight",
+   "Indirect Resource"
+  ],
+  "比肩": [
+   "Allies",
+   "Friend"
+  ],
+  "劫财": [
+   "Competition",
+   "Rob Wealth"
+  ],
+  "食神": [
+   "Ease",
+   "Eating God"
+  ],
+  "伤官": [
+   "Expression",
+   "Hurting Officer"
+  ],
+  "正财": [
+   "Earnings",
+   "Direct Wealth"
+  ],
+  "偏财": [
+   "Opportunity",
+   "Indirect Wealth"
+  ]
  },
  "seasons": {
   "立春": "Start of Spring",
@@ -1068,40 +1238,6 @@
  "strength": {
   "strong": "You run strong: plenty of your own element. You do best when you spend that energy — create, earn, take on structure.",
   "weak": "You run gentle: you rely on support. You do best with rest, learning and people who have your back."
- },
- "picks": {
-  "interview": "A job interview",
-  "present": "A presentation",
-  "negotiate": "A negotiation",
-  "sign": "Signing a contract",
-  "launch": "A launch or big post",
-  "date": "A first date",
-  "travel": "A trip",
-  "move": "Moving house",
-  "open": "Opening a business",
-  "rest": "A day off"
- },
- "days": {
-  "same": {
-   "title": "A Kindred Day",
-   "line": "Today moves at your pace. Team up, back yourself, and trust your instincts."
-  },
-  "feeds": {
-   "title": "A Nourishing Day",
-   "line": "Today gives to you. Learn something, rest, and let yourself be looked after."
-  },
-  "draws": {
-   "title": "An Expressive Day",
-   "line": "Today draws something out of you. Make, write, speak up — share what you have been holding."
-  },
-  "yields": {
-   "title": "A Harvest Day",
-   "line": "Today is within your reach. Ask for what you want and collect what you have earned."
-  },
-  "tests": {
-   "title": "A Tempering Day",
-   "line": "Today pushes back. A little friction will sharpen you — stay steady and pick your battles."
-  }
  },
  "pairKinds": {
   "match": {

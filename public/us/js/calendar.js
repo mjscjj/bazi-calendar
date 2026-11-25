@@ -1,7 +1,7 @@
 // Calendar: the month colored by how each day treats you (tap a day for the short read), and the best-day finder,
 // which shows its work — every day ahead flips past, the ones set aside fade, the best three rise.
-import { $, $$, esc, S, api, track, toast, buzz, reduced, localDay, fmt, parse, ymd, WEEK, MONTHS, byGz, signName, art, elStyle, elOf,
-  level, theme, tenName, whyList, hourRange, ring, loading, failed, openSheet, closeSheet, countUp } from './core.js';
+import { $, $$, esc, S, api, track, toast, buzz, reduced, localDay, fmt, parse, ymd, WEEK, MONTHS, byGz, pillarOf, signName, art, elStyle, elOf,
+  level, theme, toneOf, tenName, whyList, hourRange, ring, loading, failed, openSheet, closeSheet, countUp } from './core.js';
 
 const view = () => $('#view');
 let month = null;
@@ -27,7 +27,7 @@ export async function pageCalendar() {
     b.classList.add('lv' + x.level.k);
     if (x.lunar?.jieqi) b.classList.add('term');
     b.setAttribute('aria-label', `${fmt(d)}: ${level(x.level.k).word}`);
-    b.addEventListener('click', () => openDay(x));
+    b.addEventListener('click', () => openDay(x, data.chart));
   }
   if (!reduced()) $('#cal').classList.add('paint');
   // the month in one line: how many strong days, and the best one
@@ -37,8 +37,8 @@ export async function pageCalendar() {
   countUp($('[data-n]'), good.length, 700);
 }
 
-function openDay(x) {
-  const d = ymd(x), dp = byGz(x.gz), th = theme(x.ssG), lv = level(x.level.k);
+function openDay(x, chart) {
+  const d = ymd(x), dp = byGz(x.gz), th = theme(x.ssG, toneOf(chart, x.gz)), lv = level(x.level.k);
   buzz(5);
   openSheet(`<button class="x" aria-label="Close">×</button><p class="label">${d === localDay() ? 'Today' : fmt(d, 'md')}</p><h2 class="h2">${fmt(d, 'full')}</h2>
     <div class="stack-gap" style="margin-top:14px">
@@ -72,7 +72,8 @@ async function run() {
   out.innerHTML = `<div class="scan"><div class="scan-grid" id="scanGrid"></div><p class="small" id="scanTxt">Scanning your days…</p></div>`;
   const t0 = performance.now();
   let r;
-  try { r = await api('POST', 'pick', { type: pick.type, range: pick.range }); } catch (e) { out.innerHTML = failed(e.message); return; }
+  let chart = S.today?.chart;
+  try { r = await api('POST', 'pick', { type: pick.type, range: pick.range }); if (!chart) chart = (await api('GET', 'today?date=' + localDay())).chart; } catch (e) { out.innerHTML = failed(e.message); return; }
   track('us_pick', { type: pick.type, range: pick.range });
   // show the scan: one tile per day; set-aside days fade, picks light up
   const n = r.days, picks = r.picks.map((p) => `${p.y}-${String(p.m).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`);
@@ -93,10 +94,10 @@ async function run() {
     $('#scanTxt').innerHTML = `<b>${n}</b> days scanned · <b>${set}</b> set aside · <b>${r.picks.length}</b> picked`;
     buzz(12);
     out.insertAdjacentHTML('beforeend', `<p class="label" style="margin:22px 0 10px">Your best days for ${esc(label.charAt(0).toLowerCase() + label.slice(1))}</p>
-      <div class="stack-gap">${r.picks.map((p, i) => { const d = picks[i], t = parse(d), th = theme(p.ssG); return `
+      <div class="stack-gap">${r.picks.map((p, i) => { const d = picks[i], t = parse(d), th = theme(p.ssG, toneOf(chart, pillarOf(d).cn)); return `
         <a class="card result lv${p.level.k} rise" style="--i:${i}" href="#/today?d=${d}"><div class="d"><span>${WEEK[t.getDay()]}</span><b>${t.getDate()}</b><span>${MONTHS[t.getMonth()].slice(0, 3)}</span></div>
           <div><p class="rank">${i === 0 ? (r.best ? 'Best pick' : 'Top pick') : `Option ${i + 1}`}</p><h3 class="h3" style="margin-top:6px">${fmt(d, 'full')}</h3>
-          <p class="muted" style="margin:4px 0 0;font-size:15px">${level(p.level.k).word} · ${th.title}${p.fit ? ` · <span class="fit">a ${tenName(p.ssG)} day suits this</span>` : ''}</p>
+          <p class="muted" style="margin:4px 0 0;font-size:15px">${level(p.level.k).word} · ${th.title}${p.fit ? ` · <span class="fit">${tenName(p.ssG)} days suit this</span>` : ''}</p>
           <div class="hours">${p.hours.map((h) => `<span class="chip good">${hourRange(h)}</span>`).join('')}</div></div></a>`; }).join('')}</div>
       <p class="hint">Days that clash with your birth month or year, or that the old almanac marks as unsuitable for this, are set aside first.</p>`);
   }, wait);

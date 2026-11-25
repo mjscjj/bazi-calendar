@@ -1,5 +1,7 @@
 // 流日历服务端：账号、资料、日历（服务端排盘）、计划、免费次数、月度会员与支付宝、反馈、管理后台。
 import http from 'node:http';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { registerUsSite, ageOf } from './us-site.js';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,7 +11,6 @@ import { makeSettings } from './settings.js';
 import { loadContent, makeContent } from './content.js';
 import { searchCities, cityByName, resolveBirth } from './solar.js';
 import { pickDays } from './pick.js';
-import { registerUs } from './us.js';
 import { buildIcs, dayEvent } from './ics.js';
 import { adminStats } from './stats.js';
 import { makeMeihua, momentOf } from './meihua.js';
@@ -30,8 +31,16 @@ const addMs = (iso, ms) => new Date(new Date(iso).getTime() + ms).toISOString();
 const DAY_MS = 86400000;
 // 北京时间的日期 YYYY-MM-DD
 // 「今天」按北京时间切；美国版用 DAY_TZ（如 America/Chicago）按当地时间切
-const DAY_FMT = process.env.DAY_TZ ? new Intl.DateTimeFormat('en-CA', { timeZone: process.env.DAY_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }) : null;
-export const bjDay = (d = new Date()) => (DAY_FMT ? DAY_FMT.format(d) : new Date(d.getTime() + 8 * 3600000).toISOString().slice(0, 10));
+// 美国版再细一层：浏览器每次请求带 X-TZ（自己的时区），这一次请求里的「今天」按它算
+const dayFmt = (tz) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+const DAY_FMT = process.env.DAY_TZ ? dayFmt(process.env.DAY_TZ) : null;
+const reqTz = new AsyncLocalStorage(), TZ_FMTS = new Map();
+function tzFmt(tz) {
+  if (!tz || TZ_FMTS.size > 400) return null;
+  if (!TZ_FMTS.has(tz)) { try { TZ_FMTS.set(tz, dayFmt(tz)); } catch { TZ_FMTS.set(tz, null); } }
+  return TZ_FMTS.get(tz);
+}
+export const bjDay = (d = new Date()) => { const f = tzFmt(reqTz.getStore()) || DAY_FMT; return f ? f.format(d) : new Date(d.getTime() + 8 * 3600000).toISOString().slice(0, 10); };
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
 const randToken = () => crypto.randomBytes(32).toString('base64url');
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -568,6 +577,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (db.get('SELECT 1 x FROM users WHERE username = ?', username)) throw bad('这个用户名已经被用了');
     // 访客先看过能量卡的，把当时填的出生信息一起带进来
     const b = body.birth ? validBirth(body.birth) : null;
+    if (env.US_EDITION === '1' && b && ageOf(b.date) < 13) throw bad('Sixty accounts are for ages 13 and up.');
     const nickname = str(body.nickname, 12, '称呼');
     const r = db.run('INSERT INTO users(username, pass_hash, nickname, birth_date, birth_time, gender, birth_cal, birth_city, birth_lng, birth_tz, birth_zhi, invite_code, created_at, last_seen_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
       username, hashPassword(password), nickname, ...(b ? birthCols(b) : [null, null, null, 'solar', null, null, null, null]), newInviteCode(), nowIso(), nowIso());
@@ -872,16 +882,6 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     return { ok: true };
   });
 
-  // 美国版候补名单：只收邮箱和日柱，生日不上传（日柱在浏览器里算）
-  route('POST', '/api/us/waitlist', async ({ body, ip }) => {
-    if (!limit('usw:' + ip, 10, 3600000)) throw new HttpError(429, 'Too many tries. Please try again later.');
-    const email = String(body.email || '').trim().toLowerCase();
-    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) throw bad('Please enter a valid email.');
-    const sign = String(body.sign || '').replace(/[^a-z]/g, '').slice(0, 12), ref = String(body.ref || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 32);
-    db.run('INSERT OR IGNORE INTO us_waitlist(email, sign, ref, created_at) VALUES(?,?,?,?)', email, sign, ref, nowIso());
-    return { ok: true };
-  });
-  registerUs({ route, limit, bad, HttpError, content: C, db, env, log });
 
   // 计划
   // 挑日子：给一件事在一段时间里挑 3 个合适的日子
@@ -1786,6 +1786,9 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     route('POST', '/api/dev/pay/:no', async ({ params }) => { alipay.fake.paid.add(params.no); return { ok: true }; });
   }
 
+  // 美国版：分享链接预览页、邮件重设密码
+  const usSite = env.US_EDITION === '1' ? registerUsSite({ route, db, env, log, limit, bad, HttpError, hashPassword, chartOf, publicBase }) : null;
+
   // ---------- 静态文件 ----------
   function serveStatic(req, res, p) {
     if (p === '/' || p === '') p = '/index.html';
@@ -1808,7 +1811,9 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   }
 
   // ---------- 处理请求 ----------
-  return async function handler(req, res) {
+  const tzOfReq = (req) => { if (!env.DAY_TZ) return null; const h = String(req.headers['x-tz'] || '').slice(0, 64); return h && tzFmt(h) ? h : env.DAY_TZ; };
+  return (req, res) => reqTz.run(tzOfReq(req), () => handle(req, res));
+  async function handle(req, res) {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'same-origin');
     const url = new URL(req.url, 'http://x');
@@ -1825,7 +1830,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
         if (req.method !== 'GET' && req.method !== 'HEAD') {
           rawBody = await readBody(req);
           const ct = String(req.headers['content-type'] || '');
-          if (p === '/api/pay/notify' || p === '/api/pay/gumroad/ping' || p === '/api/us/pay/ping') { /* 支付宝、Gumroad 的表单通知 */ } else {
+          if (p === '/api/pay/notify' || p === '/api/pay/gumroad/ping') { /* 支付宝、Gumroad 的表单通知 */ } else {
             if (!ct.includes('application/json')) throw new HttpError(415, '请求格式不对');
             try { body = rawBody ? JSON.parse(rawBody) : {}; } catch { throw bad('请求格式不对'); }
             if (!body || typeof body !== 'object') body = {};
@@ -1838,6 +1843,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
         res.end(JSON.stringify(out ?? { ok: true }));
         return;
       }
+      if (usSite && (req.method === 'GET' || req.method === 'HEAD')) { const html = usSite.page(p, req); if (html) { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }); res.end(req.method === 'HEAD' ? undefined : html); return; } }
       if ((req.method === 'GET' || req.method === 'HEAD') && serveStatic(req, res, p)) return;
       if (p === '/admin/') { res.writeHead(301, { Location: `${BASE}/admin` }); res.end(); return; }
       if (p === '/us') { res.writeHead(301, { Location: `${BASE}/us/` }); res.end(); return; }
@@ -1849,7 +1855,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       if (!res.headersSent) res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       res.end(JSON.stringify({ error: e.extra?.error || 'error', message: status === 500 ? '服务器出了点问题，请稍后再试' : e.message, ...(e.extra || {}) }));
     }
-  };
+  }
 }
 
 export function createServer(opts) {

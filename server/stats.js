@@ -69,10 +69,16 @@ export function adminStats(db, now = Date.now()) {
     weeks.push({ week: a, n: rows.length, match: rows.length ? rows.filter((r) => band(r.score) === band(r.sys_level)).length / rows.length : null });
   }
 
-  // 美国版（/us/）：只有匿名事件和候补名单
+  // 美国版（/sixty/）：近 30 天的漏斗（匿名事件 + 账号）和功能使用；中文版没有这些事件，数都是 0
   const usFrom = dayStart(addDays(today, -29));
   const usN = (name) => one('SELECT COUNT(DISTINCT anon_id) n FROM events WHERE name = ? AND created_at >= ?', name, usFrom);
-  const us = [['打开', usN('us_visit')], ['测日柱', usN('us_reveal')], ['分享图', usN('us_share')], ['发邀请', usN('us_invite')],
-    ['朋友测出两人的画', usN('us_pair')], ['留邮箱', one('SELECT COUNT(*) n FROM us_waitlist WHERE created_at >= ?', usFrom)]].map(([label, n]) => ({ label, n }));
+  const usRegs = `SELECT id FROM users WHERE created_at >= '${usFrom}'`;
+  const usOpened = (k) => one(`SELECT COUNT(*) n FROM (${usRegs}) r WHERE (SELECT COUNT(*) FROM open_days d WHERE d.user_id = r.id) >= ${k}`);
+  const pack = (rows) => rows.map(([label, n]) => ({ label, n }));
+  const us = usN('us_visit') ? {
+    funnel: pack([['打开', usN('us_visit')], ['揭晓日柱', usN('us_reveal')], ['注册', one(`SELECT COUNT(*) n FROM (${usRegs})`)], ['第 2 天再来', usOpened(2)], ['第 7 天还在', usOpened(7)],
+      ['连上朋友', one('SELECT COUNT(*) n FROM invites WHERE created_at >= ?', usFrom) + one('SELECT COUNT(*) n FROM friend_links WHERE created_at >= ?', usFrom)]]),
+    features: pack([['看 Why', usN('us_why')], ['拖表盘', usN('us_dial')], ['撕日历', usN('us_tear')], ['挑日子', usN('us_pick')], ['分享', usN('us_share')], ['发邀请', usN('us_invite')]]),
+  } : null;
   return { us, funnel7: funnel(7), funnel30: funnel(30), cohorts, northStar: { members: members.length, median }, features, share, ratings: weeks };
 }

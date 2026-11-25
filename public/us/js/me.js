@@ -1,9 +1,10 @@
 // Me (chart, elements, cycles, settings), your collection of 60, friends and pair paintings, and the public sign page.
 import { $, $$, esc, S, api, store, track, toast, buzz, reduced, localDay, fmt, byGz, bySlug, pillarOf, signName, aSign, fullName, stemOf, elOf, art, elStyle, chipEl,
-  WX, EL, GAN, ZHI, ANIMAL, gzName, loading, failed, openSheet, closeSheet, readBirthday, maskBirthday, birthdayValue, countUp } from './core.js';
+  WX, EL, GAN, ZHI, ANIMAL, gzName, shareBase, ageOf, loading, failed, openSheet, closeSheet, readBirthday, maskBirthday, birthdayValue, countUp } from './core.js';
 import { shareSign, sharePair } from './share.js';
 
 const view = () => $('#view');
+const FB_TYPE = '建议'; // 中文版的反馈分类，美国版一律记成「建议」
 const KIND = { 合: 'match', 同: 'same', 我生: 'lift', 生我: 'lifted', 我克: 'push', 克我: 'pushed' };
 // a pair from the server, in English
 export function pairEn(pr, meImage, youImage) {
@@ -28,6 +29,7 @@ export async function pageMe() {
       <div class="card settings">
         <button data-act="birth"><span>Birth details</span><small>${fmt(b.date, 'long')}${b.time ? ' · ' + b.time : ''}${b.city ? ' · ' + esc(b.city) : ''}</small></button>
         <div class="setrow"><span>Appearance</span><div class="seg mini">${['light', 'dark', 'auto'].map((t) => `<button data-theme="${t}" aria-pressed="${(store.get('theme') || 'auto') === t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div></div>
+        <button data-act="fb"><span>Send feedback</span><small>Ideas, bugs, anything</small></button>
         <button data-act="out"><span>Sign out</span></button>
         <button data-act="del" class="danger"><span>Delete my account</span></button>
       </div>
@@ -36,10 +38,26 @@ export async function pageMe() {
   $('#meShare').addEventListener('click', () => shareSign(p));
   $$('[data-theme]').forEach((x) => x.addEventListener('click', () => { store.set('theme', x.dataset.theme); applyTheme(); $$('[data-theme]').forEach((y) => y.setAttribute('aria-pressed', String(y === x))); }));
   $('[data-act=birth]').addEventListener('click', birthSheet);
+  $('[data-act=fb]').addEventListener('click', () => {
+    openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Send feedback</h2><p class="muted" style="margin:0 0 14px">We read every note. Thank you for helping shape Sixty.</p>
+      <form id="fbForm"><textarea class="input" name="t" rows="5" maxlength="500" required style="height:auto;padding:12px 14px" placeholder="What should we know?"></textarea><p class="err"></p><button class="btn block" type="submit">Send</button></form>`);
+    $('#fbForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try { await api('POST', 'feedback', { type: FB_TYPE, content: e.target.t.value.trim(), contact: S.me.user.username }); closeSheet(); toast('Thank you!'); }
+      catch (x) { e.target.querySelector('.err').textContent = x.message; }
+    });
+  });
   $('[data-act=out]').addEventListener('click', async () => { await api('POST', 'auth/logout').catch(() => {}); S.me = null; location.hash = '#/'; window.dispatchEvent(new Event('sixty:auth')); });
-  $('[data-act=del]').addEventListener('click', async () => {
-    if (!confirm('Delete your account and everything in it? This cannot be undone.')) return;
-    try { await api('POST', 'me/delete', { password: prompt('Type your password to confirm') || '' }); S.me = null; location.hash = '#/'; window.dispatchEvent(new Event('sixty:auth')); } catch (e) { toast(e.message); }
+  $('[data-act=del]').addEventListener('click', () => {
+    openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Delete your account</h2>
+      <p class="muted" style="margin:0 0 14px">This permanently deletes your account, birth details, collection, friends and history. It can't be undone.</p>
+      <form id="delForm"><label class="field"><span class="label">Type your password to confirm</span><input class="input" name="pw" type="password" autocomplete="current-password" required></label>
+      <p class="err"></p><button class="btn block danger-btn" type="submit">Delete everything</button></form>`);
+    $('#delForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try { await api('POST', 'me/delete', { password: e.target.pw.value }); closeSheet(); S.me = null; toast('Your account has been deleted'); location.hash = '#/'; window.dispatchEvent(new Event('sixty:auth')); }
+      catch (x) { e.target.querySelector('.err').textContent = x.message; }
+    });
   });
   api('GET', 'jiazi').then((j) => countUp($('#meCol'), j.n, 600)).catch(() => {});
   api('GET', 'friends').then((f) => countUp($('#meFr'), f.list.length, 600)).catch(() => {});
@@ -139,7 +157,7 @@ export async function pageFriends() {
 async function inviteSheet() {
   let code;
   try { code = (await api('GET', 'me/invite')).code; } catch (e) { toast(e.message); return; }
-  const p = S.me.p, url = `${location.origin}${location.pathname}#/i/${code}`;
+  const p = S.me.p, url = `${shareBase()}i/${code}`;
   const text = `I'm ${aSign(p)} — ${p.name}. What painting do we make together?`;
   track('us_invite', { sign: p.slug });
   if (navigator.share) { try { await navigator.share({ text, url }); return; } catch (x) { if (x.name === 'AbortError') return; } }
@@ -157,7 +175,7 @@ export function pagePair(code, reveal) {
     <div class="right after"><div class="sign-name"><p class="label">You & ${who}</p><h1 class="display" style="font-size:clamp(40px,11vw,58px)">${esc(e.name)}</h1><p class="poetic">${e.tag}</p></div>
       <p class="intro">${esc(e.text)}</p>
       ${pv.best ? `<div class="card" style="margin-top:16px"><p class="label">Best day to do something together</p><h3 class="h3" style="margin-top:6px">${fmt(pv.best.date || `${pv.best.y}-${String(pv.best.m).padStart(2, '0')}-${String(pv.best.d).padStart(2, '0')}`, 'full')}</h3></div>` : ''}
-      <div class="btns">${S.me ? '<a class="btn block" href="#/friends">See all my friends</a>' : '<button class="btn block" id="pairSignup">Save this — create your free account</button>'}
+      <div class="btns">${S.me ? '<a class="btn block" href="#/friends">See all my friends</a>' : store.get('pending')?.birth && ageOf(store.get('pending').birth.date) < 13 ? '<p class="hint">Sixty accounts are for ages 13 and up.</p>' : '<button class="btn block" id="pairSignup">Save this — create your free account</button>'}
         <button class="btn ghost block" id="pairShare">Share our painting</button></div></div></div>`;
   $('#pairSignup')?.addEventListener('click', () => import('./onboard.js').then((m) => m.signupSheet(`Save your sign and your painting with ${pv.who || 'your friend'}.`)));
   $('#pairShare').addEventListener('click', () => sharePair({ art: e.art, el: mine ? elOf(mine) : 'Earth', kicker: `Me & ${pv.who || 'a friend'}`, title: e.name, sub: e.tag, meta: mine && them ? `${signName(mine)} & ${signName(them)}` : 'Sixty', body: 'Every pair of signs makes a painting of its own. What do you make with your people?' }));
@@ -178,4 +196,27 @@ export function pageSign(slug, reveal) {
       <p class="cn-note">In the Chinese calendar this sign is <span class="cjk">${p.cn}</span> (${p.py}) — ${fullName(p)}.</p>
       <div class="btns">${mine ? '<button class="btn block" id="shareSign">Share my sign</button><a class="btn ghost block" href="#/today">Back to my day</a>' : `<a class="btn block" href="${S.me ? '#/today' : '#/'}">${S.me ? 'Back to my day' : 'Find your sign'}</a>`}</div></div></div>`;
   $('#shareSign')?.addEventListener('click', () => shareSign(p));
+}
+
+// ---------- terms and privacy ----------
+const LEGAL = {
+  terms: ['Terms of Use', `
+    <p>Sixty is a daily calendar and reflection app based on the traditional Chinese sexagenary calendar. By creating an account you agree to these terms.</p>
+    <h3 class="h3">For reflection and fun</h3><p>Readings, scores, best days and pairings are generated from calendar rules. They are not predictions and not medical, legal, financial or professional advice. Please make important decisions with your own judgment.</p>
+    <h3 class="h3">Your account</h3><p>You must be 13 or older. Keep your password private. You can delete your account at any time in Me → Settings.</p>
+    <h3 class="h3">Fair use</h3><p>Don't misuse the service, try to break it, or scrape it. We may suspend accounts that do.</p>
+    <h3 class="h3">Sixty Plus</h3><p>Paid features, when offered, are billed by Gumroad as the merchant of record. Subscriptions renew automatically until you cancel from your Gumroad receipt. During the beta, everything is free.</p>
+    <h3 class="h3">Changes</h3><p>We may update the service and these terms. If the changes are significant we will tell you in the app.</p>`],
+  privacy: ['Privacy Policy', `
+    <p>We keep this short and plain.</p>
+    <h3 class="h3">What we collect</h3><p>Your email and password (stored hashed), your birth date and optionally birth time, birth place and sex at birth, the first name you choose, and what you do in the app (like which days you open it). We also record anonymous usage events to understand which features help.</p>
+    <h3 class="h3">Why</h3><p>Only to calculate your readings, remember your collection and friends, and improve Sixty. We don't sell your data or use it for advertising.</p>
+    <h3 class="h3">Friends</h3><p>When you connect with a friend, each of you sees your sign and the painting you make together — never each other's birthday.</p>
+    <h3 class="h3">Deleting</h3><p>Delete your account any time in Me → Settings; we remove your data from our database right away (backups roll over within 14 days).</p>
+    <h3 class="h3">Children</h3><p>Sixty is not for children under 13, and we don't knowingly collect their information.</p>
+    <h3 class="h3">Contact</h3><p>Questions or requests: use the feedback option in the app.</p>`],
+};
+export function pageLegal(kind) {
+  const [title, body] = LEGAL[kind] || LEGAL.terms;
+  view().innerHTML = `<div class="page legal"><p class="label" style="margin-top:6px">Last updated November 26, 2026</p><h1 class="display">${title}</h1>${body}</div>`;
 }

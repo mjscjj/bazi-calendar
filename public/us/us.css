@@ -437,3 +437,8 @@ button.pillar { border: 0; font: inherit; color: inherit; cursor: pointer; anima
 .dial, .tpage, .tear, .week, .daycard, .theater { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .dial-center { inset: 34%; }
 .msum b.sm { font-size: 16px; line-height: 1.2; }
+
+.toplinks { display: flex; gap: 16px; align-items: center; } .toplink.strong { color: var(--ink); font-weight: 600; }
+.legal h3 { margin: 22px 0 6px; } .legal p { color: var(--ink-2); margin: 0 0 8px; }
+.danger-btn { background: #C2412D !important; border-color: #C2412D !important; color: #fff !important; }
+.check a { color: var(--ink); }

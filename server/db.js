@@ -36,31 +36,14 @@ CREATE TABLE IF NOT EXISTS open_days (
   created_at TEXT NOT NULL,
   PRIMARY KEY (user_id, day)
 );
--- 美国版（/us/）的候补名单：留邮箱，等 App 上线时通知；sign 是对方的日柱（拼音），ref 是从哪儿来的
-CREATE TABLE IF NOT EXISTS us_waitlist (
-  email TEXT PRIMARY KEY,
-  sign TEXT NOT NULL DEFAULT '',
-  ref TEXT NOT NULL DEFAULT '',
-  created_at TEXT NOT NULL
-);
--- 美国版的 Sixty Plus（不用账号）：浏览器拿 token 解锁；付款走 Gumroad，订单号 ref 以 SXT 开头。
--- 首单按 ref 开通，续费按 sub_id 延长，退款按 sale_id 收回；换设备用 Gumroad 发的 license_key 找回 token
-CREATE TABLE IF NOT EXISTS us_orders (
-  ref TEXT PRIMARY KEY,
-  token TEXT NOT NULL UNIQUE,
-  plan TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending',
-  sale_id TEXT,
-  sub_id TEXT,
-  email TEXT,
-  license_key TEXT,
-  paid_until TEXT,
+-- 美国版的邮件重设密码：链接里的 token 只存哈希，1 小时有效、用一次作废
+CREATE TABLE IF NOT EXISTS password_resets (
+  token_hash TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL,
   created_at TEXT NOT NULL,
-  paid_at TEXT,
-  raw TEXT
+  expires_at TEXT NOT NULL,
+  used_at TEXT
 );
-CREATE INDEX IF NOT EXISTS us_orders_sub ON us_orders(sub_id);
-CREATE INDEX IF NOT EXISTS us_orders_key ON us_orders(license_key);
 -- 朋友：已经注册的人点开对方的链接互相配（a < b，邀请关系在 invites 里）
 CREATE TABLE IF NOT EXISTS friend_links (
   a INTEGER NOT NULL,

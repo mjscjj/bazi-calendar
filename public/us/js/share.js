@@ -1,5 +1,5 @@
 // Share images: a 1080 × 1920 story card for a sign or a pair painting.
-import { $, S, SITE, track, toast, openSheet, signName, fullName, elOf } from './core.js';
+import { $, S, SITE, track, toast, openSheet, signName, fullName, elOf, shareBase } from './core.js';
 
 const loadImg = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
 function wrapLines(ctx, text, max) {
@@ -35,7 +35,7 @@ async function drawCard(o) {
   ctx.font = '600 28px Inter'; ctx.textAlign = 'right'; ctx.fillText(SITE, W - X, 1850); ctx.textAlign = 'left';
   return cv;
 }
-export async function shareImage(make, filename, sign) {
+export async function shareImage(make, filename, sign, link) {
   openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Your card</h2><p class="tip">Getting it ready…</p>`);
   let cv;
   try { cv = await make(); } catch { toast('Could not make the image. Please try again.'); return; }
@@ -48,10 +48,12 @@ export async function shareImage(make, filename, sign) {
     <img class="shot" src="${url}" alt="Your Sixty card">
     ${touch ? '<p class="tip">Press and hold the image to save it to Photos.</p>' : ''}
     <div class="btns">${canFiles ? '<button class="btn block" id="doShare">Share image</button>' : ''}
-    ${!touch || !canFiles ? `<a class="btn ${canFiles ? 'ghost ' : ''}block" id="doSave" href="${url}" download="${filename}">Download image</a>` : ''}</div>`);
+    ${!touch || !canFiles ? `<a class="btn ${canFiles ? 'ghost ' : ''}block" id="doSave" href="${url}" download="${filename}">Download image</a>` : ''}
+    ${link ? '<button class="btn ghost block" id="doLink">Copy link</button>' : ''}</div>`);
   track('us_share', { sign, step: 'open' });
   $('#doShare')?.addEventListener('click', async () => { try { await navigator.share({ files: [file] }); track('us_share', { sign, step: 'shared' }); } catch {} });
   $('#doSave')?.addEventListener('click', () => track('us_share', { sign, step: 'saved' }));
+  $('#doLink')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch { prompt('Copy this link', link); } track('us_share', { sign, step: 'link' }); });
 }
-export const shareSign = (p) => shareImage(() => drawCard({ art: `../art/pillars/${p.art}`, el: elOf(p), kicker: 'My sign', title: signName(p), sub: p.name, meta: `${fullName(p)} · No. ${p.no} of 60`, body: p.intro }), `sixty-${p.slug}.jpg`, p.slug);
+export const shareSign = (p) => shareImage(() => drawCard({ art: `../art/pillars/${p.art}`, el: elOf(p), kicker: 'My sign', title: signName(p), sub: p.name, meta: `${fullName(p)} · No. ${p.no} of 60`, body: p.intro }), `sixty-${p.slug}.jpg`, p.slug, `${shareBase()}s/${p.slug}`);
 export const sharePair = (o) => shareImage(() => drawCard(o), `sixty-pair.jpg`, 'pair');

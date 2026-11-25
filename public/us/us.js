@@ -1,9 +1,9 @@
 // Sixty — entry and routing. Same backend and features as the Chinese edition (流日历), in English.
 import { $, $$, S, api, track, closeSheet, pillarOf, signName, art, esc, localDay } from './js/core.js';
-import { pageLanding, pageReveal, pageSignin, pageInvite } from './js/onboard.js';
+import { pageLanding, pageReveal, pageSignin, pageInvite, pageReset } from './js/onboard.js';
 import { pageToday } from './js/today.js';
 import { pageCalendar, pagePick } from './js/calendar.js';
-import { pageMe, pageCollection, pageFriends, pagePair, pageSign, applyTheme } from './js/me.js';
+import { pageMe, pageCollection, pageFriends, pagePair, pageSign, applyTheme, pageLegal } from './js/me.js';
 
 applyTheme();
 const view = $('#view');
@@ -41,12 +41,15 @@ function render() {
   else if (page === 'collection') pageCollection();
   else if (page === 'reveal') pageReveal();
   else if (page === 'signin') pageSignin();
+  else if (page === 'reset' && parts[1]) pageReset(parts[1]);
+  else if (page === 'terms' || page === 'privacy') pageLegal(page);
   else if (page === 'i' && parts[1]) pageInvite(parts[1]);
   else if (page === 'pair' && parts[1]) pagePair(decodeURIComponent(parts[1]), reveal);
   else if (page === 'sign' && parts[1]) pageSign(parts[1], reveal);
   else if (page === 'sixty') pageSixty();
   else { page = 'home'; pageLanding(); }
-  document.body.classList.toggle('has-tabs', !!S.me && !['reveal', 'signin', 'i'].includes(page));
+  document.body.classList.toggle('has-tabs', !!S.me && !['reveal', 'signin', 'i', 'reset', 'terms', 'privacy'].includes(page));
+  $('#signinLink').hidden = !!S.me || ['signin', 'reveal'].includes(page);
   const tab = page === 'pick' ? 'calendar' : page === 'collection' ? 'me' : page;
   $$('.tabs a').forEach((a) => (a.dataset.tab === tab ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
   if (path !== lastPath) { scrollTo(0, 0); lastPath = path; track('us_visit', { page }); }

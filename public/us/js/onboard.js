@@ -1,6 +1,6 @@
 // First visit: landing → birthday → the "reading your chart" sequence → three reveal cards → save (sign up).
 // Also sign in, and the landing page for a friend's invite link.
-import { $, $$, esc, S, api, pillarOf, store, track, toast, buzz, reduced, localDay, fmt, byGz, signName, aSign, fullName, stemOf, elOf, art, elStyle, chipEl,
+import { $, $$, esc, S, api, pillarOf, ageOf, store, track, toast, buzz, reduced, localDay, fmt, byGz, signName, aSign, fullName, stemOf, elOf, art, elStyle, chipEl,
   readBirthday, maskBirthday, openSheet, closeSheet, WX, EL, anonId, countUp } from './core.js';
 import { shareSign } from './share.js';
 
@@ -117,7 +117,7 @@ export function pageReveal() {
       <section class="step"><p class="label">Your card</p><h2 class="h2" style="margin-top:6px">Keep your Sixty</h2>
         <div class="card mini-sign" style="margin-top:16px"><img src="${art(p)}" alt="" width="72" height="72"><div><b>${signName(p)}</b><span>${esc(p.name)}</span><span class="small">${s.traits.join(' · ')}</span></div></div>
         <ul class="perks" style="margin-top:18px"><li>A reading every day — energy, best hours, lucky colors</li><li>Your month at a glance and your best days ahead</li><li>Collect all 60 paintings, one each day</li><li>The painting you make with each friend</li></ul>
-        <button class="btn block" id="toSignup">Save my Sixty — it's free</button>
+        ${ageOf(pend.birth.date) < 13 ? '<div class="card"><p class="muted" style="margin:0">Sixty accounts are for ages 13 and up. You can still explore all 60 signs.</p></div><a class="btn block" href="#/sixty" style="margin-top:10px">See all 60 signs</a>' : `<button class="btn block" id="toSignup">Save my Sixty — it's free</button>`}
         <button class="btn ghost block" id="shareMine" style="margin-top:10px">Share my sign</button>
         <p class="hint" style="text-align:center">Already have an account? <a href="#/signin">Sign in</a></p>
       </section>
@@ -151,7 +151,7 @@ export function pageReveal() {
   let x0 = null;
   $('#steps').addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
   $('#steps').addEventListener('touchend', (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1)); x0 = null; });
-  $('#toSignup').addEventListener('click', () => signupSheet());
+  $('#toSignup')?.addEventListener('click', () => signupSheet());
   $('#shareMine').addEventListener('click', () => shareSign(p));
   show(0);
 }
@@ -165,7 +165,7 @@ export function signupSheet(note) {
       <label class="field"><span class="label">Email</span><input class="input" name="email" type="email" autocomplete="email" required></label>
       <label class="field"><span class="label">Password</span><input class="input" name="pw" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></label>
       <label class="field"><span class="label">First name (optional)</span><input class="input" name="name" autocomplete="given-name" maxlength="20"></label>
-      <label class="check"><input type="checkbox" name="agree" required> I understand Sixty is for reflection and fun, not advice.</label>
+      <label class="check"><input type="checkbox" name="agree" required> <span>I agree to the <a href="#/terms" target="_blank">Terms</a> and <a href="#/privacy" target="_blank">Privacy Policy</a>, and understand Sixty is for reflection and fun, not advice.</span></label>
       <p class="err"></p><button class="btn block" type="submit">Create my account</button>
     </form>`);
   $('#signup').addEventListener('submit', async (e) => {
@@ -195,13 +195,24 @@ export function pageSignin() {
     catch (x) { err.textContent = x.message; }
   });
   $('#forgot').addEventListener('click', () => {
-    openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Reset your password</h2><p class="muted" style="margin:0 0 14px">Tell us your account email. We'll email you a new password within a day.</p>
-      <form id="forgotForm"><input class="input" name="email" type="email" required placeholder="you@example.com"><p class="err"></p><button class="btn block" type="submit" style="margin-top:10px">Send</button></form>`);
+    openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Reset your password</h2><p class="muted" style="margin:0 0 14px">Enter your account email and we'll send you a link to choose a new password.</p>
+      <form id="forgotForm"><input class="input" name="email" type="email" required placeholder="you@example.com" value="${esc($('#signin [name=email]').value)}"><p class="err"></p><button class="btn block" type="submit" style="margin-top:10px">Send the link</button></form>`);
     $('#forgotForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); const em = e.target.email.value.trim();
-      try { await api('POST', 'auth/forgot', { username: em.slice(0, 20), contact: em.slice(0, 50) }); closeSheet(); toast("Got it — we'll be in touch"); }
+      e.preventDefault();
+      try { await api('POST', 'auth/reset-request', { email: e.target.email.value.trim() }); closeSheet(); toast('Check your email for the link'); track('us_reset_request'); }
       catch (x) { e.target.querySelector('.err').textContent = x.message; }
     });
+  });
+}
+// the link from the reset email: #/reset/TOKEN
+export function pageReset(token) {
+  view().innerHTML = `<div class="page"><h1 class="display" style="margin-top:10px">New password</h1>
+    <form class="card" id="resetForm" style="margin-top:20px"><label class="field"><span class="label">New password</span><input class="input" name="pw" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></label>
+      <p class="err"></p><button class="btn block" type="submit">Save and sign in</button></form></div>`;
+  $('#resetForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); const err = e.target.querySelector('.err');
+    try { await api('POST', 'auth/reset', { token, password: e.target.pw.value }); toast('Password updated — please sign in'); location.hash = '#/signin'; }
+    catch (x) { err.textContent = x.message; }
   });
 }
 

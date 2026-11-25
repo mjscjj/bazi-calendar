@@ -48,8 +48,11 @@ export const art = (p) => `../art/pillars/${p.art}`;
 export const artOf = (gz) => art(byGz(gz));
 export const elStyle = (el) => `--el:${S.C.elements[el].color};--el-tint:${S.C.elements[el].tint}`;
 export const level = (k) => S.C.levels[k];
-export const theme = (ten) => S.C.themes[ten];
-export const tenName = (ten) => S.C.tenGods[ten] || ten;
+// a day's theme depends on its Ten God and whether the day's element fuels you (xi) or drains you (ji)
+export const theme = (ten, tone) => S.C.themes[ten][tone === 'ji' ? 'ji' : 'xi'];
+export const toneOf = (chart, gz) => { const e = GAN.indexOf(gz[0]) >> 1; return chart?.xi?.includes(e) ? 'xi' : chart?.ji?.includes(e) ? 'ji' : 'neutral'; };
+export const tenName = (ten) => S.C.tenGods[ten]?.[0] || ten;
+export const tenFull = (ten) => (S.C.tenGods[ten] ? `${S.C.tenGods[ten][0]} (${S.C.tenGods[ten][1]} · ${ten})` : ten);
 
 // One reason from the engine, in English. The engine's own note ("t") stays as the small print.
 const SLOT = { 年: 'birth year', 月: 'birth month', 日: 'birth day', 时: 'birth hour' };
@@ -58,9 +61,9 @@ export function whyEn(w) {
   let m = t.match(/^(日|时)([干支])(.)（(.)）为(.{2})，属(喜用|忌神)/) || t.match(/^(日|时)([干支])(.)·(.{2})/);
   if (m && m.length === 7) {
     const part = m[2] === '干' ? 'main' : 'underlying', what = m[1] === '日' ? "Today's" : "This hour's";
-    return `${what} ${part} energy is ${WX[m[4]]} — your ${tenName(m[5])}. ${m[6] === '喜用' ? 'It fuels you.' : 'It drains you a little.'}`;
+    return `${what} ${part} energy is ${WX[m[4]]} — ${tenFull(m[5])} for you. ${m[6] === '喜用' ? 'It fuels you.' : 'It drains you a little.'}`;
   }
-  if (m) return `${m[1] === '时' ? "This hour's" : "Today's"} ${m[2] === '干' ? 'main' : 'underlying'} energy is your ${tenName(m[4])}.`;
+  if (m) return `${m[1] === '时' ? "This hour's" : "Today's"} ${m[2] === '干' ? 'main' : 'underlying'} energy: ${tenFull(m[4])}.`;
   if (/合日主/.test(t)) return 'Today’s energy pairs with yours — rapport and help come easily.';
   const slot = (t.match(/原局(.)支/) || [])[1];
   const where = slot ? ` with your ${SLOT[slot]}` : '';
@@ -87,9 +90,15 @@ export const store = {
 const ERR = [[/用户名或密码/, 'Wrong email or password.'], [/已经被用了/, 'That email already has an account. Try signing in.'], [/密码至少/, 'Use at least 8 characters for your password.'],
   [/用户名需/, 'Please enter a valid email.'], [/出生日期/, 'Please enter a valid birthday.'], [/城市/, 'Pick a birth place from the list.'], [/太频繁|稍后/, 'Too many tries. Please wait a moment.'],
   [/登录/, 'Please sign in again.'], [/邀请链接已失效/, 'This invite link has expired.']];
+// the server works out "today" in your own time zone
+const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
+// public links (with link previews): /sixty/s/<sign>, /sixty/i/<invite code>
+export const shareBase = () => location.origin + location.pathname.replace(/us\/(index\.html)?$/, '');
+export const ageOf = (date) => { const [y, m, d] = date.split('-').map(Number), n = new Date(); return n.getFullYear() - y - (n.getMonth() + 1 < m || (n.getMonth() + 1 === m && n.getDate() < d) ? 1 : 0); };
 export class ApiError extends Error { constructor(status, data) { super(ERR.find(([r]) => r.test(data?.message || ''))?.[1] || (status >= 500 ? 'Something went wrong. Please try again.' : data?.message && !/[一-鿿]/.test(data.message) ? data.message : 'Something went wrong.')); this.status = status; this.code = data?.error; } }
 export async function api(method, path, body) {
-  const r = await fetch('../api/' + path, { method, credentials: 'same-origin', headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  const headers = { 'X-TZ': TZ, ...(body ? { 'Content-Type': 'application/json' } : {}) };
+  const r = await fetch('../api/' + path, { method, credentials: 'same-origin', headers, body: body ? JSON.stringify(body) : undefined });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new ApiError(r.status, d);
   return d;

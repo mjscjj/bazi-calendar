@@ -1,7 +1,7 @@
 // Today: a week strip, a swipeable card for the selected day (with "Why?"), a draggable 24-hour dial,
 // do / skip, lucky colors, tomorrow — and, on the first open of a day, pull down to tear off yesterday.
 import { $, $$, esc, S, api, store, track, toast, buzz, reduced, countUp, localDay, addDays, fmt, parse, WEEK, MONTHS, byGz, signName, art, elStyle, elOf,
-  level, theme, tenName, pillarOf, whyList, hourRange, hourNow, ring, loading, failed, ymd } from './core.js';
+  level, theme, toneOf, tenName, pillarOf, whyList, hourRange, hourNow, ring, loading, failed, ymd } from './core.js';
 
 const view = () => $('#view');
 let strip = null, sel = null;
@@ -56,7 +56,7 @@ async function go(date, dir) {
 }
 
 function renderDay(animate, dir = 1) {
-  const x = dayOf(sel), d = x.day, k = d.level.k, th = theme(x.line?.ten || d.ssG), lv = level(k), dp = byGz(d.gz), today = localDay();
+  const x = dayOf(sel), d = x.day, k = d.level.k, th = theme(d.ssG, x.line?.tone || toneOf(S.today?.chart, d.gz)), lv = level(k), dp = byGz(d.gz), today = localDay();
   $('#tdKicker').textContent = sel === today ? 'Today' : sel === addDays(today, 1) ? 'Tomorrow' : sel === addDays(today, -1) ? 'Yesterday' : fmt(sel, 'md');
   $('#tdTitle').textContent = fmt(sel, 'full');
   const card = $('#daycard');
@@ -100,7 +100,7 @@ function swipe(card) {
 }
 
 function renderBelow(x) {
-  const d = x.day, th = theme(x.line?.ten || d.ssG), today = localDay();
+  const d = x.day, th = theme(d.ssG, x.line?.tone || toneOf(S.today?.chart, d.gz)), today = localDay();
   const best = d.hours.filter((h) => h.i >= 4 && h.i <= 10).sort((a, b) => b.score - a.score).slice(0, 2);
   const t = S.today, isToday = sel === today;
   $('#below').innerHTML = `
@@ -110,7 +110,7 @@ function renderBelow(x) {
     <div class="card dodont"><div><p class="label">Do</p><ul>${th.do.map((v) => `<li>${esc(v)}</li>`).join('')}</ul></div>
       <div class="no"><p class="label">Skip</p><ul>${th.dont.map((v) => `<li>${esc(v)}</li>`).join('')}</ul></div></div>
     ${x.luck?.length ? `<div class="card"><p class="label">Lucky colors</p><div class="swatches">${x.luck.map((c) => `<span class="sw big"><i style="background:${c.hex}"></i></span>`).join('')}</div><p class="hint">Wear one of these to tune the day in your favor.</p></div>` : ''}
-    ${isToday && t?.tomorrow ? `<button class="card daymini" id="tmr"><img src="${art(pillarOf(ymd(t.tomorrow)))}" alt="" width="56" height="56"><div><p class="label">Tomorrow</p><b>${level(t.tomorrow.level.k).word} · ${theme(t.tomorrow.ssG).title}</b><p class="small" style="margin:2px 0 0">Best ${hourRange(t.tomorrow.hours[0])}</p></div><span class="go">›</span></button>` : ''}
+    ${isToday && t?.tomorrow ? `<button class="card daymini" id="tmr"><img src="${art(pillarOf(ymd(t.tomorrow)))}" alt="" width="56" height="56"><div><p class="label">Tomorrow</p><b>${level(t.tomorrow.level.k).word} · ${theme(t.tomorrow.ssG, toneOf(t.chart, pillarOf(ymd(t.tomorrow)).cn)).title}</b><p class="small" style="margin:2px 0 0">Best ${hourRange(t.tomorrow.hours[0])}</p></div><span class="go">›</span></button>` : ''}
     <a class="btn ghost block" href="#/pick">Find your best day for…</a>`;
   wireDial(d.hours, isToday);
   $('#tmr')?.addEventListener('click', () => go(addDays(today, 1), 1));
