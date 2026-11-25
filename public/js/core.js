@@ -55,14 +55,19 @@ export function readLocal(key) { try { return JSON.parse(localStorage.getItem('l
 export function writeLocal(key, v) { try { if (v == null) localStorage.removeItem('lrl:' + key); else localStorage.setItem('lrl:' + key, JSON.stringify(v)); } catch { /* 无痕模式 */ } }
 
 // 外观：浅色（白色）/ 深色 / 跟随系统。选择存在本地，index.html 头部会在页面绘制前先套上，避免闪一下
-export const getTheme = () => readLocal('theme') || 'auto';
+// 存不住设置的浏览器（禁止网页存数据）也至少在这次打开期间记住选择
+let memTheme = null;
+export const getTheme = () => readLocal('theme') || memTheme || 'auto';
 export const isDarkNow = () => { const t = getTheme(); return t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches); };
 export function applyTheme() {
   const t = getTheme(), root = document.documentElement;
   if (t === 'light' || t === 'dark') root.dataset.theme = t; else delete root.dataset.theme;
+  // 选白色时“只用浅色”，浏览器的强制深色就不会再把页面涂黑
+  const cs = $('meta[name="color-scheme"]');
+  if (cs) cs.setAttribute('content', t === 'light' ? 'only light' : t === 'dark' ? 'dark' : 'light dark');
   $$('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', isDarkNow() ? '#111114' : '#FFFFFF'));
 }
-export function setTheme(t) { writeLocal('theme', t === 'auto' ? null : t); applyTheme(); }
+export function setTheme(t) { memTheme = t === 'auto' ? null : t; writeLocal('theme', memTheme); applyTheme(); }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
 // 底部弹层
