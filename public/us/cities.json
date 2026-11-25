@@ -1,0 +1,427 @@
+[
+{
+"name": "New York, NY",
+"lng": -74.006,
+"tz": "America/New_York"
+},
+{
+"name": "Los Angeles, CA",
+"lng": -118.244,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Chicago, IL",
+"lng": -87.63,
+"tz": "America/Chicago"
+},
+{
+"name": "Houston, TX",
+"lng": -95.37,
+"tz": "America/Chicago"
+},
+{
+"name": "Phoenix, AZ",
+"lng": -112.074,
+"tz": "America/Phoenix"
+},
+{
+"name": "Philadelphia, PA",
+"lng": -75.165,
+"tz": "America/New_York"
+},
+{
+"name": "San Antonio, TX",
+"lng": -98.494,
+"tz": "America/Chicago"
+},
+{
+"name": "San Diego, CA",
+"lng": -117.161,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Dallas, TX",
+"lng": -96.797,
+"tz": "America/Chicago"
+},
+{
+"name": "San Jose, CA",
+"lng": -121.886,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Austin, TX",
+"lng": -97.743,
+"tz": "America/Chicago"
+},
+{
+"name": "Jacksonville, FL",
+"lng": -81.656,
+"tz": "America/New_York"
+},
+{
+"name": "San Francisco, CA",
+"lng": -122.419,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Columbus, OH",
+"lng": -82.999,
+"tz": "America/New_York"
+},
+{
+"name": "Fort Worth, TX",
+"lng": -97.331,
+"tz": "America/Chicago"
+},
+{
+"name": "Indianapolis, IN",
+"lng": -86.158,
+"tz": "America/Indiana/Indianapolis"
+},
+{
+"name": "Charlotte, NC",
+"lng": -80.843,
+"tz": "America/New_York"
+},
+{
+"name": "Seattle, WA",
+"lng": -122.332,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Denver, CO",
+"lng": -104.99,
+"tz": "America/Denver"
+},
+{
+"name": "Washington, DC",
+"lng": -77.037,
+"tz": "America/New_York"
+},
+{
+"name": "Boston, MA",
+"lng": -71.059,
+"tz": "America/New_York"
+},
+{
+"name": "Nashville, TN",
+"lng": -86.781,
+"tz": "America/Chicago"
+},
+{
+"name": "Detroit, MI",
+"lng": -83.046,
+"tz": "America/Detroit"
+},
+{
+"name": "Portland, OR",
+"lng": -122.676,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Las Vegas, NV",
+"lng": -115.14,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Memphis, TN",
+"lng": -90.049,
+"tz": "America/Chicago"
+},
+{
+"name": "Louisville, KY",
+"lng": -85.759,
+"tz": "America/Kentucky/Louisville"
+},
+{
+"name": "Baltimore, MD",
+"lng": -76.612,
+"tz": "America/New_York"
+},
+{
+"name": "Milwaukee, WI",
+"lng": -87.907,
+"tz": "America/Chicago"
+},
+{
+"name": "Albuquerque, NM",
+"lng": -106.65,
+"tz": "America/Denver"
+},
+{
+"name": "Tucson, AZ",
+"lng": -110.975,
+"tz": "America/Phoenix"
+},
+{
+"name": "Fresno, CA",
+"lng": -119.787,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Sacramento, CA",
+"lng": -121.494,
+"tz": "America/Los_Angeles"
+},
+{
+"name": "Kansas City, MO",
+"lng": -94.579,
+"tz": "America/Chicago"
+},
+{
+"name": "Atlanta, GA",
+"lng": -84.388,
+"tz": "America/New_York"
+},
+{
+"name": "Miami, FL",
+"lng": -80.192,
+"tz": "America/New_York"
+},
+{
+"name": "Raleigh, NC",
+"lng": -78.639,
+"tz": "America/New_York"
+},
+{
+"name": "Omaha, NE",
+"lng": -95.935,
+"tz": "America/Chicago"
+},
+{
+"name": "Minneapolis, MN",
+"lng": -93.265,
+"tz": "America/Chicago"
+},
+{
+"name": "New Orleans, LA",
+"lng": -90.072,
+"tz": "America/Chicago"
+},
+{
+"name": "Cleveland, OH",
+"lng": -81.694,
+"tz": "America/New_York"
+},
+{
+"name": "Tampa, FL",
+"lng": -82.458,
+"tz": "America/New_York"
+},
+{
+"name": "Orlando, FL",
+"lng": -81.379,
+"tz": "America/New_York"
+},
+{
+"name": "Pittsburgh, PA",
+"lng": -79.996,
+"tz": "America/New_York"
+},
+{
+"name": "St. Louis, MO",
+"lng": -90.199,
+"tz": "America/Chicago"
+},
+{
+"name": "Salt Lake City, UT",
+"lng": -111.891,
+"tz": "America/Denver"
+},
+{
+"name": "Honolulu, HI",
+"lng": -157.858,
+"tz": "Pacific/Honolulu"
+},
+{
+"name": "Anchorage, AK",
+"lng": -149.9,
+"tz": "America/Anchorage"
+},
+{
+"name": "Oklahoma City, OK",
+"lng": -97.516,
+"tz": "America/Chicago"
+},
+{
+"name": "Cincinnati, OH",
+"lng": -84.512,
+"tz": "America/New_York"
+},
+{
+"name": "Buffalo, NY",
+"lng": -78.878,
+"tz": "America/New_York"
+},
+{
+"name": "Richmond, VA",
+"lng": -77.436,
+"tz": "America/New_York"
+},
+{
+"name": "Toronto, Canada",
+"lng": -79.383,
+"tz": "America/Toronto"
+},
+{
+"name": "Vancouver, Canada",
+"lng": -123.121,
+"tz": "America/Vancouver"
+},
+{
+"name": "Montreal, Canada",
+"lng": -73.568,
+"tz": "America/Toronto"
+},
+{
+"name": "Mexico City, Mexico",
+"lng": -99.133,
+"tz": "America/Mexico_City"
+},
+{
+"name": "London, UK",
+"lng": -0.128,
+"tz": "Europe/London"
+},
+{
+"name": "Dublin, Ireland",
+"lng": -6.26,
+"tz": "Europe/Dublin"
+},
+{
+"name": "Paris, France",
+"lng": 2.352,
+"tz": "Europe/Paris"
+},
+{
+"name": "Berlin, Germany",
+"lng": 13.405,
+"tz": "Europe/Berlin"
+},
+{
+"name": "Madrid, Spain",
+"lng": -3.704,
+"tz": "Europe/Madrid"
+},
+{
+"name": "Rome, Italy",
+"lng": 12.496,
+"tz": "Europe/Rome"
+},
+{
+"name": "Amsterdam, Netherlands",
+"lng": 4.904,
+"tz": "Europe/Amsterdam"
+},
+{
+"name": "S\u00e3o Paulo, Brazil",
+"lng": -46.633,
+"tz": "America/Sao_Paulo"
+},
+{
+"name": "Buenos Aires, Argentina",
+"lng": -58.382,
+"tz": "America/Argentina/Buenos_Aires"
+},
+{
+"name": "Sydney, Australia",
+"lng": 151.209,
+"tz": "Australia/Sydney"
+},
+{
+"name": "Melbourne, Australia",
+"lng": 144.963,
+"tz": "Australia/Melbourne"
+},
+{
+"name": "Auckland, New Zealand",
+"lng": 174.763,
+"tz": "Pacific/Auckland"
+},
+{
+"name": "Tokyo, Japan",
+"lng": 139.692,
+"tz": "Asia/Tokyo"
+},
+{
+"name": "Seoul, South Korea",
+"lng": 126.978,
+"tz": "Asia/Seoul"
+},
+{
+"name": "Beijing, China",
+"lng": 116.407,
+"tz": "Asia/Shanghai"
+},
+{
+"name": "Shanghai, China",
+"lng": 121.474,
+"tz": "Asia/Shanghai"
+},
+{
+"name": "Hong Kong",
+"lng": 114.169,
+"tz": "Asia/Hong_Kong"
+},
+{
+"name": "Taipei, Taiwan",
+"lng": 121.565,
+"tz": "Asia/Taipei"
+},
+{
+"name": "Singapore",
+"lng": 103.82,
+"tz": "Asia/Singapore"
+},
+{
+"name": "Manila, Philippines",
+"lng": 120.984,
+"tz": "Asia/Manila"
+},
+{
+"name": "Bangkok, Thailand",
+"lng": 100.502,
+"tz": "Asia/Bangkok"
+},
+{
+"name": "Ho Chi Minh City, Vietnam",
+"lng": 106.66,
+"tz": "Asia/Ho_Chi_Minh"
+},
+{
+"name": "Kuala Lumpur, Malaysia",
+"lng": 101.687,
+"tz": "Asia/Kuala_Lumpur"
+},
+{
+"name": "Jakarta, Indonesia",
+"lng": 106.846,
+"tz": "Asia/Jakarta"
+},
+{
+"name": "Mumbai, India",
+"lng": 72.878,
+"tz": "Asia/Kolkata"
+},
+{
+"name": "Delhi, India",
+"lng": 77.209,
+"tz": "Asia/Kolkata"
+},
+{
+"name": "Dubai, UAE",
+"lng": 55.27,
+"tz": "Asia/Dubai"
+},
+{
+"name": "Lagos, Nigeria",
+"lng": 3.379,
+"tz": "Africa/Lagos"
+},
+{
+"name": "Johannesburg, South Africa",
+"lng": 28.047,
+"tz": "Africa/Johannesburg"
+}
+]

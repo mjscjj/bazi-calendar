@@ -9,6 +9,7 @@ import { makeSettings } from './settings.js';
 import { loadContent, makeContent } from './content.js';
 import { searchCities, cityByName, resolveBirth } from './solar.js';
 import { pickDays } from './pick.js';
+import { registerUs } from './us.js';
 import { buildIcs, dayEvent } from './ics.js';
 import { adminStats } from './stats.js';
 import { makeMeihua } from './meihua.js';
@@ -810,6 +811,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     db.run('INSERT OR IGNORE INTO us_waitlist(email, sign, ref, created_at) VALUES(?,?,?,?)', email, sign, ref, nowIso());
     return { ok: true };
   });
+  registerUs({ route, limit, bad, HttpError, content: C });
 
   // 计划
   // 挑日子：给一件事在一段时间里挑 3 个合适的日子

@@ -784,6 +784,239 @@
    "art": "60-guihai.webp"
   }
  ],
+ "levels": {
+  "5": {
+   "word": "Excellent",
+   "line": "One of your best days. Go for it."
+  },
+  "4": {
+   "word": "Good",
+   "line": "Things flow. A good day to move forward."
+  },
+  "3": {
+   "word": "Steady",
+   "line": "An even day. Keep a normal pace."
+  },
+  "2": {
+   "word": "Careful",
+   "line": "Some friction. Double-check and go slow."
+  },
+  "1": {
+   "word": "Low-key",
+   "line": "Keep it simple. Rest and skip big moves."
+  }
+ },
+ "themes": {
+  "正官": {
+   "title": "A Day for Recognition",
+   "line": "Structure works for you. Rules, bosses and reputation are on your side.",
+   "do": [
+    "Show your work to someone senior",
+    "Follow the process — it pays off"
+   ],
+   "dont": [
+    "Cut corners",
+    "Pick a fight with authority"
+   ]
+  },
+  "七杀": {
+   "title": "A High-Pressure Day",
+   "line": "Pressure is high, and so is your output. Push hard, but pace yourself.",
+   "do": [
+    "Do the hardest task first",
+    "Set one clear boundary"
+   ],
+   "dont": [
+    "Take on everyone's problems",
+    "Decide big things while angry"
+   ]
+  },
+  "正印": {
+   "title": "A Day to Be Supported",
+   "line": "Good for learning, resting and letting people help you.",
+   "do": [
+    "Read, study or take a class",
+    "Ask a mentor for advice"
+   ],
+   "dont": [
+    "Force a tough negotiation",
+    "Skip rest to look busy"
+   ]
+  },
+  "偏印": {
+   "title": "A Day for Deep Thinking",
+   "line": "Your mind wants quiet. Good for research, strategy and time alone.",
+   "do": [
+    "Block two hours of focus time",
+    "Journal or plan next month"
+   ],
+   "dont": [
+    "Overbook your social calendar",
+    "Overthink small replies"
+   ]
+  },
+  "比肩": {
+   "title": "A Day for Allies",
+   "line": "Friends and teammates have your back. Collaborate.",
+   "do": [
+    "Team up on a shared project",
+    "Reach out to an old friend"
+   ],
+   "dont": [
+    "Go it alone out of pride",
+    "Lend money casually"
+   ]
+  },
+  "劫财": {
+   "title": "A Competitive Day",
+   "line": "Rivalry and spending run high. Stay sharp and watch your wallet.",
+   "do": [
+    "Compete — and play fair",
+    "Double-check shared money"
+   ],
+   "dont": [
+    "Impulse-buy",
+    "Rush into joint deals"
+   ]
+  },
+  "食神": {
+   "title": "A Day of Ease",
+   "line": "Relaxed and creative. Make something you enjoy.",
+   "do": [
+    "Cook, create or play",
+    "Say yes to a small pleasure"
+   ],
+   "dont": [
+    "Overschedule yourself",
+    "Turn fun into homework"
+   ]
+  },
+  "伤官": {
+   "title": "A Day to Speak Up",
+   "line": "Ideas are flowing and you want to be heard. Mind your tone.",
+   "do": [
+    "Pitch a bold idea",
+    "Write, post or perform"
+   ],
+   "dont": [
+    "Send the angry email",
+    "Criticize anyone in public"
+   ]
+  },
+  "正财": {
+   "title": "A Payoff Day",
+   "line": "Steady effort pays off. Good for money and practical work.",
+   "do": [
+    "Handle bills, budgets and admin",
+    "Finish what you started"
+   ],
+   "dont": [
+    "Gamble on long shots",
+    "Lend without a plan"
+   ]
+  },
+  "偏财": {
+   "title": "A Lucky-Break Day",
+   "line": "Unexpected chances and connections show up. Stay open.",
+   "do": [
+    "Network, or say yes to an invite",
+    "Try a side project"
+   ],
+   "dont": [
+    "Ignore a random opportunity",
+    "Spend the windfall before it lands"
+   ]
+  }
+ },
+ "elements": {
+  "Wood": {
+   "color": "#3F8F63",
+   "tint": "#E7F1EA",
+   "lucky": [
+    [
+     "Forest green",
+     "#2F7A4F"
+    ],
+    [
+     "Sage",
+     "#9DBE8F"
+    ]
+   ],
+   "fuels": "Growth and fresh starts: plants, morning walks, learning something new."
+  },
+  "Fire": {
+   "color": "#E0573E",
+   "tint": "#FBE9E4",
+   "lucky": [
+    [
+     "Coral red",
+     "#E0573E"
+    ],
+    [
+     "Plum",
+     "#8E5AA8"
+    ]
+   ],
+   "fuels": "Warmth and energy: sunlight, movement, being around people."
+  },
+  "Earth": {
+   "color": "#B8893F",
+   "tint": "#F5EEDF",
+   "lucky": [
+    [
+     "Camel",
+     "#B08A5B"
+    ],
+    [
+     "Sand",
+     "#E3CFA3"
+    ]
+   ],
+   "fuels": "Stability: routines, cooking, home, steady habits."
+  },
+  "Metal": {
+   "color": "#7D8794",
+   "tint": "#EEF0F3",
+   "lucky": [
+    [
+     "Ivory",
+     "#EDEDE6"
+    ],
+    [
+     "Silver gray",
+     "#A3A8B0"
+    ]
+   ],
+   "fuels": "Clarity: decluttering, clear rules, crisp air, finishing things."
+  },
+  "Water": {
+   "color": "#3A6FB0",
+   "tint": "#E6EEF8",
+   "lucky": [
+    [
+     "Navy",
+     "#2E4A7A"
+    ],
+    [
+     "Ink black",
+     "#22252B"
+    ]
+   ],
+   "fuels": "Rest and depth: sleep, reading, water, quiet time."
+  }
+ },
+ "picks": {
+  "interview": "A job interview",
+  "present": "A presentation",
+  "negotiate": "A negotiation",
+  "sign": "Signing a contract",
+  "launch": "A launch or big post",
+  "date": "A first date",
+  "travel": "A trip",
+  "move": "Moving house",
+  "open": "Opening a business",
+  "rest": "A day off"
+ },
  "days": {
   "same": {
    "title": "A Kindred Day",
