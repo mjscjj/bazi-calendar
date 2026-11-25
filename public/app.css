@@ -255,7 +255,6 @@ body.pro .pro-hide{display:none!important}
 .del,.link{margin-left:auto;border:0;background:none;color:var(--muted);font-size:12px;text-decoration:underline;padding:0}
 .link{margin-left:6px}
 .pd{font-size:12.5px}
-.chip.pick2{border-color:var(--glow)}
 .spbar{display:flex;gap:6px;flex-wrap:wrap}
 .sp{font-size:12px;font-weight:700;border-radius:999px;padding:1px 10px;background:var(--sunk)}
 .sp.bd,.sp.me{background:var(--glow);color:#1A1424}.sp.gr{background:#F3E2B0;color:#7A5A00}.sp.cg{background:var(--l2bg);color:var(--l2)}.sp.pl{background:var(--ink);color:var(--glow)}
@@ -596,7 +595,6 @@ h1,h2,.phead h1{text-wrap:balance}
 .notice.demo,.notice.plan{background:var(--surface);box-shadow:var(--ring)}
 .phead .back,.monthbar .nav{border:0;background:var(--surface);box-shadow:var(--ring)}
 .chip{border:0;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
-.chip.pick2{box-shadow:0 0 0 1px color-mix(in srgb,var(--cinnabar) 45%,transparent)}
 .field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--line);border-radius:12px}
 .tabbar a.on{color:var(--fg)}
 
@@ -1004,51 +1002,241 @@ html{transition:background-color .2s}
 }
 .field>span.hint{font-weight:400;color:var(--muted);font-size:12px}
 
-/* ================= 第二批：问事 ================= */
+/* ================= 第二批：问事（现代、克制的「推算仪器」：细线、等宽数字、一点强调色） ================= */
 .quota{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .quota b{color:var(--fg)}
-.askf textarea{min-height:88px}
-.nums3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
-.nums3 input{font-size:16px;text-align:center}
-.askq{display:flex;flex-direction:column;gap:4px}
-.askq b{font-size:16px;line-height:1.5}
-.askq small{font-size:12px;color:var(--muted)}
-.guacard{align-items:center;gap:12px;padding:20px 16px}
-.hexrow{display:flex;justify-content:center;align-items:center;gap:26px}
-.hex{display:flex;flex-direction:column-reverse;gap:7px;align-items:center}
-.hex i{display:block;width:76px;height:9px;border-radius:3px;background:var(--fg)}
-.hex i.yin{background:linear-gradient(90deg,var(--fg) 0 42%,transparent 42% 58%,var(--fg) 58%)}
-.hex i.mv{background:var(--cinnabar)}
-.hex i.mv.yin{background:linear-gradient(90deg,var(--cinnabar) 0 42%,transparent 42% 58%,var(--cinnabar) 58%)}
-.hex.reveal i{animation:lineIn .5s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--k) * .38s)}
-@keyframes lineIn{from{opacity:0;transform:scaleX(.3)}to{opacity:1;transform:none}}
-.guacard.fresh .tend,.guacard.fresh .gnote{animation:fadeUp .5s ease-out both;animation-delay:4.6s}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.hexn{text-align:center;font-size:12px;color:var(--muted);margin-top:10px}
-.hexn b{display:block;font-family:var(--f-display);font-size:18px;color:var(--fg);font-weight:900}
-.hexrow .arrow{font-size:20px;color:var(--muted);margin-bottom:34px}
-.tend{display:inline-block;font-weight:700;font-size:13px;border-radius:999px;padding:3px 14px;white-space:nowrap}
+.askwrap{display:flex;flex-direction:column;gap:14px;width:100%;max-width:640px;margin:0 auto;--ak:var(--glow-ink);--mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+:root[data-theme="dark"] .askwrap{--ak:var(--glow)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .askwrap{--ak:var(--glow)}}
+.t-good{--tc:var(--plus)}.t-mid{--tc:var(--l4)}.t-slow{--tc:var(--l3)}.t-bad{--tc:var(--l2)}
+.tend{display:inline-block;font-weight:700;font-size:12.5px;border-radius:999px;padding:2px 11px;white-space:nowrap}
 .tend.t-good{background:color-mix(in srgb,var(--plus) 14%,var(--surface));color:var(--plus)}
 .tend.t-mid{background:var(--l4bg);color:var(--l4)}
 .tend.t-slow{background:var(--l3bg);color:var(--l3)}
 .tend.t-bad{background:var(--l2bg);color:var(--l2)}
-.gnote{margin:0;font-size:13px;color:var(--muted);text-align:center;line-height:1.7;max-width:420px}
+.hx{overflow:visible}
+.hx .ln{fill:var(--fg)}
+.hx .ln.mv{fill:var(--ak)}
+/* 写问题 */
+.askpad{display:flex;flex-direction:column;gap:16px;padding:18px;border-radius:22px;background:var(--surface);box-shadow:var(--ring,0 0 0 1px var(--line)),0 20px 44px -32px rgba(20,20,40,.4)}
+.askin{display:flex;flex-direction:column;gap:6px}
+.askin .lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.06em}
+.askin textarea{font:inherit;font-size:21px;font-weight:650;line-height:1.45;color:var(--fg);background:none;border:0;border-bottom:1.5px solid var(--line);border-radius:0;padding:4px 0 10px;min-height:68px;resize:none;transition:border-color .2s}
+.askin textarea::placeholder{color:var(--muted);opacity:.6;font-weight:500}
+.askin textarea:focus{outline:none;border-color:var(--ak)}
+.askin .cnt{align-self:flex-end;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.acats{display:flex;flex-wrap:wrap;gap:6px}
+.acats button{font:inherit;font-size:13.5px;padding:7px 15px;border-radius:999px;border:0;background:var(--sunk);color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
+.acats button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.akms{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.akm{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:12px;border-radius:16px;border:0;background:var(--sunk);color:var(--fg);font:inherit;text-align:left;cursor:pointer;box-shadow:inset 0 0 0 1.5px transparent;transition:box-shadow .2s,background .2s}
+.akm[aria-pressed="true"]{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--fg)}
+.akm-t{display:flex;align-items:center;gap:6px;width:100%;font-size:13.5px;font-weight:700}
+.akm-t em{margin-left:auto;font-style:normal;font-weight:500;font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.akm-t .aklive{width:6px;height:6px;border-radius:50%;background:var(--plus);animation:live 1.6s infinite}
+@keyframes live{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--plus) 55%,transparent)}100%{box-shadow:0 0 0 7px transparent}}
+.akm-n{display:flex;gap:4px;width:100%}
+.akm-n span{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 1px;border-radius:9px;background:var(--bg)}
+.akm-n b{font-family:var(--mono);font-size:15px;font-weight:600;line-height:1.25;font-variant-numeric:tabular-nums}
+.akm-n small{font-size:10px;color:var(--muted);white-space:nowrap}
+.akm-x{font-size:11.5px;color:var(--muted);line-height:1.5}
+.nums3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nums3 input{font-family:var(--mono);font-size:20px;text-align:center}
+.askpad .err:empty{display:none}
+/* 按住起卦：按住时进度从左往右走满 */
+.akhold{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border:0;border-radius:16px;background:var(--fg);color:var(--bg);font:inherit;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .2s}
+.akhold .fill{position:absolute;inset:0;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,color-mix(in srgb,var(--ak) 55%,var(--fg)),var(--ak));transition:transform .25s ease-out}
+.akhold.holding .fill,.akhold.fired .fill{transform:scaleX(1);transition:transform 1s linear}
+.akhold.holding{transform:scale(.985)}
+.akhold.fired{animation:holdPop .45s ease-out}
+.akhold .hlbl{position:relative;display:flex;align-items:baseline;gap:10px}
+.akhold b{font-size:16px;font-weight:700;letter-spacing:.04em}
+.akhold small{font-family:var(--mono);font-size:12px;opacity:.7}
+.akhold:disabled{opacity:.5;cursor:default}
+.akhold:disabled.fired{opacity:1}
+.akhold.nudge{animation:nudge .36s}
+@keyframes holdPop{40%{transform:scale(1.02)}}
+@keyframes nudge{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.holdtip{margin:-8px 0 0;text-align:center;font-size:12px;color:var(--muted)}
+.holdtip.flash{animation:fadeUp .3s ease-out}
+/* 推演：全屏深色，像一台推算仪器 */
+.cast{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;gap:14px;padding:max(16px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow:hidden;background:radial-gradient(120% 70% at 50% 38%,#1C1C26,#09090D 72%);color:#ECEAF2;--ak:#FFB061;--muted:#8E8C99;--mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;animation:castIn .35s ease-out both}
+.cast.out{animation:castOut .4s ease-in both}
+@keyframes castIn{from{opacity:0}}
+@keyframes castOut{to{opacity:0;transform:scale(1.03)}}
+.cast-grid{position:absolute;inset:0;max-width:none!important;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:28px 28px;-webkit-mask-image:radial-gradient(70% 55% at 50% 42%,#000,transparent);mask-image:radial-gradient(70% 55% at 50% 42%,#000,transparent)}
+.cast>*{position:relative;width:100%;max-width:420px}
+.cast>.cast-grid{position:absolute}
+.ctop{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cskip{flex:none;font:inherit;font-family:inherit;font-size:12.5px;color:#ECEAF2;background:rgba(255,255,255,.09);border:0;border-radius:999px;padding:6px 14px;cursor:pointer}
+.ctop .cskip{font-family:-apple-system,system-ui,sans-serif}
+.cq{margin:0;font-size:17px;font-weight:700;line-height:1.5;text-align:center;text-wrap:balance}
+.cins{display:flex;gap:8px;justify-content:center}
+.cins span{flex:1;max-width:84px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:12px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:fadeUp .35s ease-out both;animation-delay:calc(.15s + var(--k) * .2s)}
+.cins b{font-family:var(--mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.cins small{font-size:11px;color:var(--muted)}
+.cstage{flex:none;max-width:290px!important;aspect-ratio:1}
+.cring{display:block;width:100%;height:100%;overflow:visible}
+.cring .c1{fill:none;stroke:rgba(255,255,255,.16)}
+.cring .c2{fill:rgba(255,255,255,.025);stroke:rgba(255,255,255,.08)}
+.cring .ticks line{stroke:rgba(255,255,255,.24)}
+.cring .rg{transition:transform 1.3s cubic-bezier(.12,.68,.18,1),opacity .6s}
+.cring .ticks{transition:opacity .6s}
+.cring .rt rect{fill:rgba(236,234,242,.5);transition:fill .3s}
+.cring .rt text{fill:var(--muted);font-size:10px;transition:fill .3s}
+.cring .rt.on rect{fill:var(--ak)}
+.cring .rt.on text{fill:#fff;font-weight:700}
+.cring .ptr{fill:var(--ak)}
+.cast.ringoff .rg,.cast.ringoff .ticks{opacity:.28}
+.cbuild{position:absolute;inset:0;max-width:none!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none}
+.cbuild .hxbox{position:relative;width:30%}
+.cbuild .hx{display:block;width:100%;height:auto}
+.cbuild .hx.skel{position:absolute;inset:0;transition:opacity .5s}
+.cbuild .hx.skel .ln{fill:none;stroke:rgba(255,255,255,.2);stroke-width:1;stroke-dasharray:3 3}
+.cbuild.named .hx.skel{opacity:0}
+.cbuild .hx .ln{fill:#ECEAF2;opacity:0;transform-box:fill-box;transform-origin:center}
+.cbuild .hx .ln.in{opacity:1;animation:lnDrop .45s cubic-bezier(.2,1.4,.4,1) both}
+.cbuild .hx .ln.in:nth-child(3n+2){animation-delay:.09s}
+.cbuild .hx .ln.in:nth-child(3n){animation-delay:.18s}
+.cbuild .hx .ln.flash{fill:var(--ak);filter:drop-shadow(0 0 6px var(--ak));animation:lnPulse .5s ease-in-out 2}
+.cbuild .hx .ln.squeeze{animation:lnSq .2s ease-in both}
+.cbuild .hx .ln.unsqueeze{animation:lnSq .25s ease-out reverse both}
+@keyframes lnDrop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes lnPulse{50%{opacity:.35}}
+@keyframes lnSq{to{transform:scaleY(0)}}
+.cname{margin:0;display:flex;align-items:baseline;gap:8px;font-size:15px;white-space:nowrap;opacity:0;transform:translateY(4px);transition:opacity .4s,transform .4s}
+.cbuild.named .cname{opacity:1;transform:none}
+.cname b{font-weight:800;letter-spacing:.04em}
+.cname span{color:var(--ak);font-weight:800;opacity:0;transform:translateX(-6px);transition:opacity .4s,transform .4s}
+.cname span::before{content:"→ ";color:var(--muted)}
+.cbuild.changed .cname span{opacity:1;transform:none}
+.crows{display:flex;flex-direction:column;gap:7px}
+.crow{display:grid;grid-template-columns:32px 1fr auto auto;align-items:baseline;gap:10px;font-family:var(--mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+.crow.on{opacity:1;transform:none}
+.crow .ck{font-family:-apple-system,system-ui,sans-serif;font-weight:600}
+.crow b{color:#ECEAF2;font-weight:600}
+.crow small{font-size:10.5px}
+.crow .cr{color:var(--ak);font-family:-apple-system,system-ui,sans-serif;font-weight:700;opacity:0;transition:opacity .3s}
+.crow.done .cr{opacity:1}
+.cend{display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;pointer-events:none}
+.cast.st-end .cend{opacity:1;transform:none;pointer-events:auto}
+.crel{display:flex;align-items:center;justify-content:center;gap:8px}
+.crel>span{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.07);font-size:13.5px;font-weight:700;color:#ECEAF2;white-space:nowrap}
+.crel small{font-weight:400;font-size:11px;color:var(--muted)}
+.crel em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--ak);white-space:nowrap}
+.crel i,.aknd i{width:8px;height:8px;border-radius:50%;flex:none;background:currentColor}
+.crel .w0 i,.aknd.w0 i{background:var(--wood)}.crel .w1 i,.aknd.w1 i{background:var(--fire)}.crel .w2 i,.aknd.w2 i{background:var(--earth)}.crel .w3 i,.aknd.w3 i{background:var(--metal)}.crel .w4 i,.aknd.w4 i{background:var(--water)}
+.cast .t-good{--tc:#5CC487}.cast .t-mid{--tc:#E8A56A}.cast .t-slow{--tc:#B9B6C0}.cast .t-bad{--tc:#93AECF}
+.ctend{margin:0;display:flex;flex-direction:column;align-items:center;opacity:0;transform:scale(.8);transition:transform .5s cubic-bezier(.2,1.5,.4,1),opacity .3s}
+.cast.st-tend .ctend{opacity:1;transform:none}
+.ctend small{font-size:12px;color:var(--muted);letter-spacing:.12em}
+.ctend b{font-size:54px;font-weight:900;line-height:1.1;color:var(--tc);text-shadow:0 0 40px color-mix(in srgb,var(--tc) 55%,transparent)}
+.cast .btn.primary{min-width:180px;background:#ECEAF2;color:#111114}
+@media (max-height:740px){.cstage{max-width:220px!important}.cq{font-size:15px}.cins b{font-size:18px}.cast{gap:10px}}
+/* 结果：倾向和走势 */
+.askq{display:flex;flex-direction:column;gap:6px;padding:0 2px}
+.askq b{font-size:20px;font-weight:750;line-height:1.45}
+.askq small{font-size:12px;color:var(--muted)}
+.gx{position:relative;gap:10px;padding:18px 16px 12px;overflow:hidden}
+.gx::before{content:"";position:absolute;top:-45%;right:-25%;width:75%;aspect-ratio:1;background:radial-gradient(closest-side,color-mix(in srgb,var(--tc) 20%,transparent),transparent);pointer-events:none}
+.gxhead{position:relative;display:flex;align-items:flex-end;gap:14px}
+.gxt{display:flex;flex-direction:column;gap:3px;flex:none}
+.gxt small{font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+.gxt b{font-size:40px;font-weight:900;line-height:1;color:var(--tc)}
+.gxhead p{margin:0 0 3px;font-size:13.5px;color:var(--muted);line-height:1.6}
+.trend{display:block;width:100%;height:auto;color:var(--tc);overflow:visible}
+.trend .gl{stroke:var(--line);stroke-dasharray:2 4}
+.trend .ax{font-size:10px;fill:var(--muted)}
+.trend .area{fill:url(#tg);opacity:0;transition:opacity .8s .6s}
+.trend .curve{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.trend .pt{fill:var(--surface);stroke:currentColor;stroke-width:2.4;opacity:0;transition:opacity .3s .1s}
+.trend .pt.now{fill:currentColor;transition-delay:1.15s}
+.trend .halo{fill:currentColor;opacity:0;transform-box:fill-box;transform-origin:center}
+.gx.go .trend .curve{stroke-dashoffset:0}
+.gx.go .trend .area,.gx.go .trend .pt{opacity:1}
+.gx.go .trend .halo{animation:halo 2.4s 1.3s ease-out infinite}
+@keyframes halo{0%{opacity:.45;transform:none}100%{opacity:0;transform:scale(3.6)}}
+.gxcols{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:-2px}
+.gx .trend,.gx .gxcols{width:100%;max-width:460px;margin-left:auto;margin-right:auto}
+.gxcols>div{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;min-width:0;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
+.gxcols>div:nth-child(2){transition-delay:.15s}.gxcols>div:nth-child(3){transition-delay:.3s}
+.gx.go .gxcols>div{opacity:1;transform:none}
+.gxcols small{font-size:11px;color:var(--muted);letter-spacing:.04em}
+.gxcols .hx{width:50px;height:auto;margin:3px 0}
+.gxcols b{font-size:15px;font-weight:750}
+.gxcols span{font-size:12px;color:var(--muted);line-height:1.5}
+.gxfoot{display:flex;justify-content:center;gap:22px;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.gxfoot .tbtn{font-size:13px}
 .aitag{font-size:11px;font-weight:600;letter-spacing:0;color:var(--muted);background:var(--sunk);border-radius:6px;padding:1px 6px;margin-left:8px}
-.reading .rbody{display:flex;flex-direction:column;gap:8px}
+.reading .rbody{display:flex;flex-direction:column;gap:10px}
 .reading .rbody.appear{animation:fadeUp .4s ease-out both}
-.reading p{margin:0;font-size:14.5px;line-height:1.8}
-.reading .hl{font-family:var(--f-display);font-weight:900;font-size:18px;line-height:1.5}
-.reading .adv{background:var(--sunk);border-radius:12px;padding:10px 12px;font-size:14px}
-.reading .adv b{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
-.writing{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--muted);line-height:1.7}
-.writing span{display:flex;gap:4px;padding-top:9px}
-.writing span i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite both}
-.writing span i:nth-child(2){animation-delay:.2s}.writing span i:nth-child(3){animation-delay:.4s}
+.reading p{margin:0;font-size:14.5px;line-height:1.85}
+.reading .hl{font-size:19px;font-weight:800;line-height:1.5}
+.askwrap .adv{padding:12px 14px 12px 16px;border-radius:14px;background:color-mix(in srgb,var(--ak) 9%,var(--surface));box-shadow:inset 3px 0 0 var(--ak)}
+.askwrap .adv small{display:block;font-size:11.5px;font-weight:700;color:var(--ak);letter-spacing:.06em;margin-bottom:2px}
+.askwrap .adv p{margin:0;font-size:14.5px;line-height:1.7}
+/* 等解读：进度条和三步 */
+.writing{display:flex;flex-direction:column;gap:12px}
+.writing>small{font-size:12.5px;color:var(--muted);line-height:1.6}
+.wbar{height:3px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.wbar i{display:block;height:100%;transform-origin:left;background:linear-gradient(90deg,var(--ak),color-mix(in srgb,var(--ak) 35%,var(--fg)));animation:wfill 36s cubic-bezier(.1,.6,.3,1) both;animation-delay:calc(var(--gone,0s) * -1)}
+.writing.short .wbar i{animation-duration:14s}
+@keyframes wfill{from{transform:scaleX(.04)}to{transform:scaleX(.94)}}
+.writing ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.writing li{display:flex;align-items:center;gap:9px;color:var(--muted)}
+.writing li::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line)}
+.writing li.on{color:var(--fg)}
+.writing li.on::before{box-shadow:inset 0 0 0 1.5px var(--line);border:1.5px solid transparent;border-top-color:var(--ak);width:9px;height:9px;animation:spin .8s linear infinite}
+.writing li.done{color:var(--fg)}
+.writing li.done::before{background:var(--plus);box-shadow:none;-webkit-mask:radial-gradient(circle,#000 62%,transparent 64%);mask:radial-gradient(circle,#000 62%,transparent 64%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* 为什么这样判断：体用生克、时令 */
+.awhy{gap:12px}
+.akw{display:grid;grid-template-columns:34px 1fr;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.awhy h3 + .akw{padding-top:0;border-top:0}
+.akw-k{font-size:12px;font-weight:700;color:var(--muted);padding-top:7px}
+.akw-b{display:flex;flex-direction:column;gap:7px;min-width:0}
+.akw-b p{margin:0;font-size:13px;color:var(--muted);line-height:1.6}
+.akrel{display:flex;align-items:center}
+.aknd{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--sunk);font-size:13px;font-weight:700;color:var(--fg);white-space:nowrap}
+.aknd small{font-weight:500;font-size:11px;color:var(--muted)}
+.aklk{position:relative;flex:1;min-width:40px;height:2px;margin:0 4px;background:repeating-linear-gradient(90deg,var(--ak) 0 6px,transparent 6px 10px);animation:flowR 1s linear infinite}
+.akrel.in .aklk{animation-name:flowL}
+.akrel.eq .aklk{height:7px;background:none;border-top:2px solid var(--ak);border-bottom:2px solid var(--ak);animation:none}
+@keyframes flowR{to{background-position:20px 0}}
+@keyframes flowL{to{background-position:-20px 0}}
+.aklk em{position:absolute;left:50%;top:-19px;transform:translateX(-50%);padding:0 4px;font-style:normal;font-family:var(--mono);font-size:11px;color:var(--ak);white-space:nowrap;background:var(--surface)}
+.akrel.eq .aklk em{top:-21px}
+.akmeter{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.akmeter span{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);text-align:center}
+.akmeter i{height:6px;border-radius:3px;background:var(--sunk)}
+.akmeter .on i{background:color-mix(in srgb,var(--ak) 45%,var(--sunk))}
+.akmeter .cur i{background:var(--ak)}
+.akmeter .cur{color:var(--fg);font-weight:700}
+/* 两个好日子 */
+.adays{gap:12px}
+.dtiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dtile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px;border:0;border-radius:14px;background:var(--sunk);color:var(--fg);font:inherit;text-align:left;cursor:pointer;transition:transform .15s}
+.dtile:active{transform:scale(.98)}
+.dtile b{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.dtile span{font-size:12.5px;color:var(--muted)}
+.dtile small{font-family:var(--mono);font-size:12px;color:var(--ak)}
+/* 问事记录：每一卦一张卡 */
+.aglist{display:flex;flex-direction:column;gap:8px}
+.aglist .arow{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;width:100%;padding:14px;border:0;border-radius:16px;background:var(--surface);box-shadow:var(--ring,0 0 0 1px var(--line));color:var(--fg);font:inherit;text-align:left;cursor:pointer;transition:transform .15s}
+.aglist .arow:active{transform:scale(.99)}
+.aglist .hx{width:30px;height:auto}
+.aglist .q{display:block;min-width:0;font-size:14.5px;font-weight:650;line-height:1.45}
+.aglist .q small{display:block;margin-top:3px;font-weight:400;font-size:12px;color:var(--muted)}
+.aglist .at{display:flex;flex-direction:column;align-items:flex-end;gap:5px;color:var(--tc)}
+.spark{width:40px;height:20px;overflow:visible}
+.spark path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.spark circle{fill:currentColor}
+@media (min-width:760px){.aglist{display:grid;grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion: reduce){.akm-t .aklive,.aklk,.gx .trend .halo{animation:none!important}.trend .curve,.gxcols>div{transition:none!important}}
+@keyframes lineIn{from{opacity:0;transform:scaleX(.3)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
-.alist .arow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:13px 16px;text-align:left;color:var(--fg)}
-.alist .arow:first-child{border-top:0}
-.alist .q{font-size:14.5px;font-weight:600;min-width:0}
-.alist .q small{display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:2px}
 .askentry{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:12px;color:var(--fg);text-decoration:none}
 .askentry b{display:block;font-size:14.5px}
 .askentry small{font-size:12.5px;color:var(--muted)}
@@ -1142,12 +1330,11 @@ body.in-ritual{overflow:hidden}
 .plist.demo .prow{cursor:pointer}
 .plist.demo .cd{color:var(--muted)}
 .guadet{width:100%;border-top:1px solid var(--line);padding-top:10px}
-.guadet summary{font-size:13px;color:var(--muted);text-align:center}
+.guadet summary{font-size:13px;color:var(--muted);cursor:pointer}
 .guadet dl{margin:10px 0 0;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.7}
 .guadet dl div{display:grid;grid-template-columns:40px 1fr;gap:8px}
 .guadet dt{color:var(--muted)}
 .guadet dd{margin:0}
-.chip.pick2{cursor:pointer;font:inherit;font-size:12.5px;padding:5px 12px;color:var(--fg)}
 
 /* ================= 第一步借鉴：此刻、明天、回看、所问、分张翻开 ================= */
 /* 今日一句：先一句行动话，再一句为什么 */
@@ -1211,10 +1398,8 @@ body.in-ritual{overflow:hidden}
 .follows .fitem{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
 .follows h3 + .fitem{padding-top:0;border-top:0}
 .follows .fq{margin:0;font-weight:700;font-size:14.5px;line-height:1.6}
-.follows .fq::before{content:"追问";font-size:11px;font-weight:600;color:var(--cinnabar);margin-right:8px;letter-spacing:.06em}
+.follows .fq::before{content:"追问";font-size:11px;font-weight:600;color:var(--ak);margin-right:8px;letter-spacing:.06em}
 .follows .fa{margin:0;font-size:14.5px;line-height:1.8}
-.follows .adv{margin:0;background:var(--sunk);border-radius:12px;padding:10px 12px;font-size:14px}
-.follows .adv b{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
 .followf{display:flex;gap:8px}
 .followf input,.rvnote{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
 .followf input:focus,.rvnote:focus{outline:none;border-color:var(--accent)}
@@ -1230,7 +1415,7 @@ body.in-ritual{overflow:hidden}
 .rvsaid b{font-family:var(--f-display);font-size:17px}
 .rvsaid span{font-size:14px;color:var(--muted)}
 .opills button{padding:7px 14px}
-.alist em.due{font-style:normal;color:var(--cinnabar);font-weight:600}
+.aglist em.due{font-style:normal;color:var(--ak);font-weight:600}
 
 /* ================= 心情便签（原每晚自评） ================= */
 .moodbox{background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}

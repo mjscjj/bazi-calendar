@@ -33,12 +33,17 @@ export function momentOf(ms) {
   const d = new Date(ms + 8 * 3600000);
   const l = Solar.fromYmdHms(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), 0).getLunar();
   const y = ZHI.indexOf(l.getYearZhi()) + 1, h = ZHI.indexOf(l.getTimeZhi()) + 1;
+  const lm = Math.abs(l.getMonth()), ld = l.getDay();
   return {
-    y, m: Math.abs(l.getMonth()), d: l.getDay(), h,
+    y, m: lm, d: ld, h,
     monthZhi: l.getMonthZhiExact(),
     text: `${l.getYearInGanZhi()}年${l.getMonthInChinese()}月${l.getDayInChinese()} ${l.getTimeZhi()}时`,
+    // 起卦用到的四个数，以及它们从哪来（给页面演推算用）
+    inputs: [{ label: l.getYearZhi() + '年', n: y }, { label: l.getMonthInChinese() + '月', n: lm }, { label: l.getDayInChinese(), n: ld }, { label: l.getTimeZhi() + '时', n: h }],
   };
 }
+// 一步推算：几个数相加，再除以 div 取余（余 0 当 div）
+const step = (parts, div) => { const sum = parts.reduce((a, b) => a + b, 0); return { parts, sum, div, r: mod(sum, div) }; };
 
 export function makeMeihua(c) {
   const T = c.trigrams, H = c.hexagrams;
@@ -68,12 +73,14 @@ export function makeMeihua(c) {
     // 时间起卦：(年+月+日)÷8 余数为上卦，再加时为下卦，总数÷6 余数为动爻
     byTime(ms) {
       const t = momentOf(ms), s = t.y + t.m + t.d;
-      return { ...build(mod(s, 8), mod(s + t.h, 8), mod(s + t.h, 6), t.monthZhi), cast: { method: 'time', text: t.text } };
+      const calc = { inputs: t.inputs, up: step([t.y, t.m, t.d], 8), low: step([s, t.h], 8), mv: step([s, t.h], 6) };
+      return { ...build(calc.up.r, calc.low.r, calc.mv.r, t.monthZhi), cast: { method: 'time', text: t.text, calc } };
     },
     // 报三个数：第一个数定上卦，第二个数定下卦，三数之和定动爻
     byNums([a, b, n3], ms) {
       const t = momentOf(ms);
-      return { ...build(mod(a, 8), mod(b, 8), mod(a + b + n3, 6), t.monthZhi), cast: { method: 'nums', nums: [a, b, n3], text: t.text } };
+      const calc = { inputs: [{ label: '第一个数', n: a }, { label: '第二个数', n: b }, { label: '第三个数', n: n3 }], up: step([a], 8), low: step([b], 8), mv: step([a, b, n3], 6) };
+      return { ...build(calc.up.r, calc.low.r, calc.mv.r, t.monthZhi), cast: { method: 'nums', nums: [a, b, n3], text: t.text, calc } };
     },
   };
 }

@@ -459,6 +459,7 @@ test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、�
   let q = await c('GET', '/api/asks/quota');
   assert.equal(q.data.free, 1);
   assert.equal(q.data.ready, true);
+  assert.equal(q.data.moment.inputs.length, 4, '写问题时就显示此刻要用的年、月、日、时四个数');
   const refused = await c('POST', '/api/asks', { question: '我这个手术能成功吗', category: '其他' });
   assert.equal(refused.status, 400);
   assert.equal(refused.data.error, 'refused');
@@ -468,6 +469,15 @@ test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、�
   assert.equal(r.status, 200);
   const g = r.data.ask.gua;
   assert.ok(g.ben.name && g.bian.name && g.hu.name && ['顺', '先阻后顺', '宜缓', '有阻'].includes(g.tendency));
+  // 推演演的就是实际算的：年+月+日除 8 余数定上卦，再加时定下卦和动爻（余 0 当除数）
+  const k = g.cast.calc, [y, m, d, h] = k.inputs.map((x) => x.n), md = (n, by) => (n % by) || by;
+  assert.deepEqual([k.up.sum, k.low.sum, k.mv.sum], [y + m + d, y + m + d + h, y + m + d + h]);
+  assert.deepEqual([k.up.r, k.low.r, k.mv.r], [md(y + m + d, 8), md(y + m + d + h, 8), md(y + m + d + h, 6)]);
+  assert.equal(g.moving, k.mv.r);
+  const detail = await c('GET', '/api/asks/' + r.data.ask.id);
+  assert.deepEqual(detail.data.trigrams.map((t) => t.name).join(''), '乾兑离震巽坎艮坤', '八卦环按先天数排');
+  assert.equal(detail.data.trigrams[k.up.r - 1].name, g.ben.up);
+  assert.equal(detail.data.trigrams[k.low.r - 1].name, g.ben.low);
   assert.equal(r.data.ask.days.length, 2, '事业类给两个适合的日子');
   let a;
   for (let i = 0; i < 30; i++) { a = (await c('GET', '/api/asks/' + r.data.ask.id)).data.ask; if (a.status !== 'pending') break; await new Promise((x) => setTimeout(x, 100)); }
@@ -491,9 +501,13 @@ test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、�
   const n2 = await c('POST', '/api/asks', { question: '下个月去成都出差顺利吗', category: '出行', method: 'nums', nums: [3, 8, 21] });
   assert.equal(n2.status, 200);
   assert.deepEqual(n2.data.ask.gua.cast.nums, [3, 8, 21]);
+  const k2 = n2.data.ask.gua.cast.calc;
+  assert.deepEqual([k2.up.r, k2.low.r, k2.mv.r], [3, 8, 2], '报数：第一个数定上卦，第二个定下卦，三数之和定动爻');
   q = await c('GET', '/api/asks/quota');
   assert.equal(q.data.credits, 0);
-  assert.equal((await c('GET', '/api/asks')).data.list.length, 2);
+  const list = (await c('GET', '/api/asks')).data.list;
+  assert.equal(list.length, 2);
+  assert.ok(list[0].lines.length === 6 && list[0].trend.length === 2, '问事记录带卦象和走势');
   assert.equal((await c('GET', '/api/membership')).data.orders[0].productName, '问事 1 次');
 });
 

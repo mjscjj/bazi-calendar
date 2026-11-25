@@ -11,7 +11,7 @@ import { searchCities, cityByName, resolveBirth } from './solar.js';
 import { pickDays } from './pick.js';
 import { buildIcs, dayEvent } from './ics.js';
 import { adminStats } from './stats.js';
-import { makeMeihua } from './meihua.js';
+import { makeMeihua, momentOf } from './meihua.js';
 import { makeAi, checkReading, checkFollow } from './ai.js';
 import { THEME, bestHours, hhShort } from '../public/js/data.js';
 
@@ -922,6 +922,8 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   const qkeyOf = (q) => q.replace(/[\s\p{P}\p{S}]/gu, '').toLowerCase();
   // 追问和回看：次数、天数、回看选项都在 content/ask.json 的 follow 里
   const FO = C.ask.follow;
+  // 八卦按先天数排好（页面演推算时转的那个八卦环）
+  const TRIS = Object.entries(C.ask.trigrams).sort((x, y) => x[1].num - y[1].num).map(([name, t]) => ({ name, num: t.num, lines: t.lines, image: t.image, wx: t.wx }));
   const bjAfter = (iso, days) => bjDay(new Date(Date.parse(iso) + days * DAY_MS));
   const outcomeOf = (key) => C.ask.follow.outcomes.find((o) => o.key === key) || null;
   function reviewOf(a) {
@@ -1026,11 +1028,11 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
 
   route('GET', '/api/asks/quota', async ({ req }) => {
     const u = requireUser(req);
-    return { ...askQuota(u), categories: C.ask.categories.map((x) => x.name) };
+    return { ...askQuota(u), categories: C.ask.categories.map((x) => x.name), moment: (({ text, inputs }) => ({ text, inputs }))(momentOf(Date.now())) };
   });
   route('GET', '/api/asks', async ({ req }) => {
     const u = requireUser(req);
-    return { list: db.all('SELECT * FROM asks WHERE user_id = ? ORDER BY id DESC LIMIT 50', u.id).map((a) => { const o = askOut(a); return { id: o.id, question: o.question, category: o.category, tendency: o.gua.tendency, ben: o.gua.ben.name, status: o.status, createdAt: o.createdAt, outcome: o.review.outcome, remind: o.review.remind }; }) };
+    return { list: db.all('SELECT * FROM asks WHERE user_id = ? ORDER BY id DESC LIMIT 50', u.id).map((a) => { const o = askOut(a); return { id: o.id, question: o.question, category: o.category, tendency: o.gua.tendency, ben: o.gua.ben.name, lines: o.gua.ben.lines, moving: o.gua.moving, trend: [o.gua.now.rel, o.gua.later.rel], status: o.status, createdAt: o.createdAt, outcome: o.review.outcome, remind: o.review.remind }; }) };
   });
   route('GET', '/api/asks/:id', async ({ req, params }) => {
     const u = requireUser(req);
@@ -1042,7 +1044,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       runAsk(a.id);
       a = db.get('SELECT * FROM asks WHERE id = ?', a.id);
     }
-    return { ask: askDetail(a), outcomes: FO.outcomes.map(({ key, text, hint }) => ({ key, text, hint })) };
+    return { ask: askDetail(a), outcomes: FO.outcomes.map(({ key, text, hint }) => ({ key, text, hint })), trigrams: TRIS };
   });
   // 追问：同一卦里再问细节，不重新起卦、不另收费；起卦后 FO.days 天内最多 FO.max 次
   route('POST', '/api/asks/:id/follows', async ({ req, body, params }) => {

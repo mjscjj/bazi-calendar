@@ -45,3 +45,13 @@ export async function drawLot(p, question = '', { real = false } = {}) {
   }
   return false;
 }
+
+// 问事：按住「按住起卦」1.2 秒（像真人一样按住不放），起卦后跳过推演
+export async function holdToCast(p, { skip = true } = {}) {
+  const b = await (await p.$('#askForm [data-hold]')).boundingBox();
+  await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await p.mouse.down(); await p.waitForTimeout(1200); await p.mouse.up();
+  if (!skip) return;
+  await p.waitForSelector('#cast, #sheet .pay', { timeout: 10000 });
+  if (await p.$('#cast')) { await p.click('#cast .ctop [data-cast-skip]'); await p.waitForSelector('#cast', { state: 'detached' }); }
+}
