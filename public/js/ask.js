@@ -115,13 +115,23 @@ onClick('[data-amethod]', (el) => {
   if (draft.method === 'nums') $('.nums3 input').focus();
 });
 // 键盘弹起时，底部的「按住起卦」贴在键盘上方：iOS 和新版安卓的键盘都只缩可视区域，不缩页面
-function liftBar() {
+// fit：键盘刚弹起或换了输入框时，顺便把正在输入的框推到底部条上面；用户自己滚动时不管，免得拽着页面不让滚
+function liftBar(fit) {
   const bar = $('.akbar'), vv = window.visualViewport;
   if (!bar || !vv) return;
   const off = Math.round(window.innerHeight - vv.height - vv.offsetTop);
   bar.style.transform = off > 1 ? `translateY(${-off}px)` : '';
+  const el = document.activeElement;
+  if (fit === true && off > 1 && el && el.matches && el.matches('#askForm textarea, #askForm input')) {
+    const top = vv.offsetTop + vv.height - bar.offsetHeight - 8, r = el.getBoundingClientRect();
+    if (r.bottom > top) window.scrollBy(0, Math.ceil(r.bottom - top));
+  }
 }
-if (window.visualViewport) { visualViewport.addEventListener('resize', liftBar); visualViewport.addEventListener('scroll', liftBar); }
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', () => liftBar(true));
+  visualViewport.addEventListener('scroll', () => liftBar(false));
+  document.addEventListener('focusin', (e) => { if (e.target.closest && e.target.closest('#askForm')) setTimeout(() => liftBar(true), 50); });
+}
 // 起卦前先检查：问题写具体、报的数在范围里
 function draftOk() {
   const f = $('#askForm'), err = $('#askErr');
@@ -154,15 +164,16 @@ let hold = null;
 const HOLD_MS = 1000;
 document.addEventListener('pointerdown', (e) => {
   const b = e.target.closest('#askForm [data-hold]');
-  if (!b || b.disabled || e.button > 0) return;
+  if (!b || b.disabled || e.button > 0 || hold) return; // 两根手指同时按，只算一次
   if (!draftOk()) { b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge'); return; }
   e.preventDefault();
   try { b.setPointerCapture(e.pointerId); } catch { /* 没关系 */ }
   audioOn(); vib(8);
-  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   b.classList.add('holding'); $('b', b).textContent = '想着这件事…';
-  hold = { b, fired: false, t: setTimeout(() => { hold.fired = true; b.classList.add('fired'); vib([10, 40, 16]); tick(); submitAsk(); }, HOLD_MS) };
+  // 按满才收键盘：按住时键盘一收，底部条就会从手指下面滑走
+  hold = { b, fired: false, t: setTimeout(() => { hold.fired = true; b.classList.add('fired'); vib([10, 40, 16]); tick(); blurField(); submitAsk(); }, HOLD_MS) };
 });
+const blurField = () => { const el = document.activeElement; if (el && el.matches && el.matches('#askForm textarea, #askForm input')) el.blur(); };
 function release() {
   if (!hold) return;
   const { b, fired, t } = hold;
@@ -179,7 +190,7 @@ document.addEventListener('keydown', (e) => {
   const b = e.target.closest && e.target.closest('#askForm [data-hold]');
   if (!b || b.disabled || (e.key !== 'Enter' && e.key !== ' ')) return;
   e.preventDefault();
-  if (draftOk()) { audioOn(); b.classList.add('fired'); submitAsk(); }
+  if (draftOk()) { audioOn(); b.classList.add('fired'); blurField(); submitAsk(); }
 });
 document.addEventListener('submit', (e) => { if (e.target.id === 'askForm') e.preventDefault(); });
 
@@ -203,7 +214,7 @@ function castHtml(a, tris) {
   const ring = tris.map((t, i) => `<g class="rt" data-n="${t.num}" transform="rotate(${i * 45})"><g transform="translate(0 -101)">${triSvg(t.lines)}</g><text y="-72" text-anchor="middle">${esc(t.name)}</text></g>`).join('');
   const ticks = Array.from({ length: 72 }, (_, i) => `<line x1="0" y1="${i % 9 ? -126 : -132}" x2="0" y2="-120" transform="rotate(${i * 5})"/>`).join('');
   const now = rel(g.now.rel), dirTxt = { in: '←', out: '→', eq: '=' }[now.dir];
-  return `<div class="cast" id="cast" role="dialog" aria-label="起卦推演"><div class="cast-grid" aria-hidden="true"></div>`
+  return `<div class="cast" id="cast" role="dialog" aria-modal="true" aria-label="起卦推演"><div class="cast-grid" aria-hidden="true"></div>`
     + `<div class="ctop"><span>起卦推演 · ${g.cast.method === 'time' ? '此刻' : '报数'} · ${esc(g.cast.text)}</span><button type="button" class="cskip" data-cast-skip>跳过</button></div>`
     + `<p class="cq">${esc(a.question)}</p>`
     + `<div class="cins">${c.inputs.map((x, i) => `<span style="--k:${i}"><b data-to="${x.n}">0</b><small>${esc(x.label)}</small></span>`).join('')}</div>`
@@ -226,6 +237,7 @@ function playCast(a, tris) {
   castT.forEach(clearTimeout); castT = [];
   document.body.insertAdjacentHTML('beforeend', castHtml(a, tris));
   const c = $('#cast'), g = a.gua, calc = g.cast.calc, rg = $('.rg', c), lines = $$('.cbuild .hx:not(.skel) .ln', c);
+  $('.cskip', c).focus({ preventScroll: true }); // 用键盘的人回车就能跳过
   const rows = { up: $('[data-row="up"]', c), low: $('[data-row="low"]', c), mv: $('[data-row="mv"]', c) };
   $$('.cins b', c).forEach((b, i) => later(250 + i * 200, () => rollTo(b, +b.getAttribute('data-to'))));
   let rot = 0;
