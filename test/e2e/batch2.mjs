@@ -146,6 +146,17 @@ await ap.click('#sheet [data-close-sheet]'); await ap.waitForSelector('#sheet', 
   await ap.goto(base + '/#/me'); await ap.goto(base + '/#/invite'); await ap.waitForSelector('.frlist');
   check('对方那边也多了这位朋友', (await ap.textContent('.frlist')).includes('老周'));
   await lctx.close();
+  // 在朋友链接的落地页登录（比如微信里没登录）：登录后也连上，弹出你们俩的画
+  const gctx = await browser.newContext(iphone); const gp = await gctx.newPage(); watch(gp, 'login-link');
+  await gp.goto(`${base}/?i=${code}`); await gp.waitForSelector('.invban');
+  await gp.evaluate(() => localStorage.setItem('lrl:guide', '1'));
+  await gp.goto(base + '/#/login'); await gp.waitForSelector('#authForm');
+  await gp.fill('input[name=username]', 'lk' + suffix); await gp.fill('input[name=password]', 'link12345');
+  await gp.click('#authForm button[type=submit]');
+  await gp.waitForSelector('#sheet .pairc', { timeout: 8000 });
+  check('在朋友链接的落地页登录，登录后也弹出你们俩的画', (await gp.textContent('#sheet .pairc small')).includes('阿杰'));
+  check('登录后清掉本地的邀请信息', !(await gp.evaluate(() => localStorage.getItem('lrl:invite'))));
+  await gctx.close();
 }
 check('邀请记录显示已生效', (await ap.textContent('.ilist')).includes('已生效'));
 await ap.screenshot({ path: `${out}/b11-invite-done.png`, fullPage: true });

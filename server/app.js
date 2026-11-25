@@ -1090,17 +1090,20 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     const byId = new Map();
     for (const r of rows) if (!byId.has(r.id)) byId.set(r.id, r);
     const mine = u.birth_date ? chartOf(u) : null;
-    return [...byId.values()].map((r) => {
+    // 每位朋友都要排盘、算两周，只取最近的 100 位
+    return [...byId.values()].sort((x, y) => (x.created_at < y.created_at ? 1 : -1)).slice(0, 100).map((r) => {
       const f = db.get("SELECT * FROM users WHERE id = ? AND status = 'active'", r.id);
       if (!f) return null;
       const fc = mine && f.birth_date ? chartOf(f) : null;
       return { name: shownName(f), src: r.src, at: r.created_at, pair: fc ? { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) } : null };
-    }).filter(Boolean).sort((x, y) => (x.at < y.at ? 1 : -1));
+    }).filter(Boolean);
   }
   route('GET', '/api/friends', async ({ req }) => ({ list: friendsOf(requireUser(req)) }));
   // 已经注册的人打开朋友的邀请链接：两人连上，互相看到你们俩的画（不算邀请奖励）
   route('POST', '/api/friends/link', async ({ req, body }) => {
     const u = requireUser(req);
+    // 限次数：免得有人试邀请码，把自己挂到陌生人的朋友里
+    if (!limit('link:' + u.id, 20, DAY_MS)) throw new HttpError(429, '今天连得有点多了，明天再来吧');
     const f = db.get("SELECT * FROM users WHERE invite_code = ? AND status = 'active'", String(body.code || '').toUpperCase());
     if (!f || f.id === u.id) throw new HttpError(404, '链接已失效');
     db.run('INSERT OR IGNORE INTO friend_links(a, b, created_at) VALUES(?,?,?)', Math.min(u.id, f.id), Math.max(u.id, f.id), nowIso());

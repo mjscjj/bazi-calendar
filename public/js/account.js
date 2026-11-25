@@ -5,6 +5,7 @@ import { S } from './state.js';
 import { footHtml } from './today.js';
 import { birthFields, readBirth, wireBirth, checkBirth, cardArt, cardTitle } from './onboard.js';
 import { resetCard } from './me.js';
+import { linkFriend } from './growth.js';
 
 const phead = (title) => `<div class="phead"><button type="button" class="back" data-back aria-label="返回">‹</button><h1>${title}</h1></div>`;
 
@@ -46,7 +47,13 @@ export function pageAuth(r) {
           return api('PUT', 'me/profile', { nickname: p.nickname || S.me.nickname, bio: S.me.bio || '', birth: p.birth }).then((x) => { S.me = x.user; });
         }
       })
-      .then(() => { if (p) writeLocal('pending', null); if (reg) writeLocal('invite', null); location.hash = S.me.birth ? '#/' : '#/welcome'; })
+      .then(() => {
+        if (p) writeLocal('pending', null);
+        // 在朋友的邀请落地页登录（比如微信里点开链接）：登录后两人连上，弹出你们俩的画
+        if (!reg && inv && inv.code && Date.now() - (inv.at || 0) < 30 * 86400000) linkFriend(inv.code);
+        if (inv) writeLocal('invite', null);
+        location.hash = S.me.birth ? '#/' : '#/welcome';
+      })
       .catch((e2) => { btn.disabled = false; err.textContent = e2.message; });
   });
 }

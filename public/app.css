@@ -1563,4 +1563,5 @@ body.in-ritual{overflow:hidden}
 .frrow small{font-size:12px;color:var(--muted)}
 .frrow i{font-style:normal;color:var(--muted)}
 .frrow:disabled{opacity:1;cursor:default}
-.lockart{margin:0 0 14px;text-decoration:none}
+/* 锁住的页面上画扁一点，小屏上「开通会员」也要在第一屏 */
+.dart.lockart{aspect-ratio:3/1;margin:0 0 14px;text-decoration:none}

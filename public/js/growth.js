@@ -17,18 +17,20 @@ export function catchInvite() {
   if (!/^[A-Z0-9]{5}$/.test(code)) return Promise.resolve();
   sp.delete('i');
   history.replaceState(history.state, '', location.pathname + (sp.toString() ? '?' + sp : '') + location.hash);
-  // 已经注册的人打开朋友的链接：两人连上，弹出你们俩的画（不算邀请奖励）
-  if (S.me) {
-    S.linking = true;
-    return api('POST', 'friends/link', { code }).then((d) => {
-      track('friend_link', { pair: !!d.pair });
-      setTimeout(() => openSheet('你们俩的画', d.pair
-        ? pairHtml(d.pair, d.best, d.name, '你们已经连上，在「我的 › 邀请好友」里随时能看。')
-        : `<p style="margin:0;line-height:1.8">你和${esc(d.name)}已经连上。你们俩都测完能量卡后，就能在「我的 › 邀请好友」里看到你们俩的画。</p>`), 400);
-    }, () => {});
-  }
+  if (S.me) return linkFriend(code);
   track('landing', { from: 'invite' });
   return api('GET', 'invite/' + code).then((d) => writeLocal('invite', { code, name: d.name, days: d.days, card: d.card, at: Date.now() }), () => {});
+}
+// 已经注册的人打开朋友的链接（或在落地页登录）：两人连上，弹出你们俩的画（不算邀请奖励）。
+// 这一次打开不弹收画提示，免得压在弹出的画上
+export function linkFriend(code) {
+  S.linking = true;
+  return api('POST', 'friends/link', { code }).then((d) => {
+    track('friend_link', { pair: !!d.pair });
+    setTimeout(() => openSheet('你们俩的画', d.pair
+      ? pairHtml(d.pair, d.best, d.name, '你们已经连上，在「我的 › 邀请好友」里随时能看。')
+      : `<p style="margin:0;line-height:1.8">你和${esc(d.name)}已经连上。你们俩都测完能量卡后，就能在「我的 › 邀请好友」里看到你们俩的画。</p>`), 400);
+  }, () => { S.linking = false; });
 }
 export const pendingInvite = () => { const v = readLocal('invite'); return v && Date.now() - (v.at || 0) < 30 * 86400000 ? v : null; };
 
