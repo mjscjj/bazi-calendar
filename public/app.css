@@ -490,13 +490,11 @@ body.has-tabs .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .tcard .line{margin:-2px 0 0;font-size:14.5px;line-height:1.7;color:var(--cardfg);background:rgba(255,255,255,.06);border-radius:12px;padding:10px 12px}
 .notice.plan{background:var(--surface);border-color:color-mix(in srgb,var(--glow) 45%,var(--line))}
 
-/* 每日一签、穿搭色两张小卡 */
+/* 今天页右边的小卡：每日一签、问一件事、转运御守 */
 .minis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mini{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;min-width:0}
 .mini .mk{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center}
 .mini .mk.lot{background:linear-gradient(160deg,var(--ink2),var(--ink));color:var(--glow);font-family:var(--f-display);font-weight:900;font-size:17px}
-.mini .mk.sw2{display:flex;gap:3px;padding:6px;background:var(--sunk)}
-.mini .mk.sw2 i{flex:1;height:100%;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
 .mini .mt{display:flex;flex-direction:column;gap:1px;min-width:0}
 .mini .mt b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mini .mt small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -520,11 +518,12 @@ body.has-tabs .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .kw{font-size:13px;color:var(--muted);text-align:center}
 .kw b{color:var(--fg)}
 
-/* 穿搭色 */
+/* 今日幸运色弹层 */
 .outfit{display:flex;flex-direction:column;gap:12px}
-.outfit .sws{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.outfit .sws div{height:120px;border-radius:16px;display:flex;align-items:flex-end;padding:10px 12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
-.outfit .sws span{font-size:13px;font-weight:700;background:rgba(255,255,255,.88);color:#1C2230;border-radius:999px;padding:2px 10px}
+.outfit .sws{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 0 2px}
+.outfit .sws div{display:flex;flex-direction:column;align-items:center;gap:10px}
+.outfit .sws i{width:min(116px,80%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.55),rgba(255,255,255,0) 46%),var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.1),0 14px 28px -14px var(--c)}
+.outfit .sws b{font-family:var(--f-display);font-weight:900;font-size:18px;letter-spacing:.08em}
 .outfit p{margin:0;font-size:14px;line-height:1.7}
 .outfit .acc b{color:var(--fg)}
 
@@ -646,7 +645,6 @@ h1,h2,.phead h1{text-wrap:balance}
 /* 两张小卡 */
 .mini{border:0;box-shadow:var(--ring);border-radius:18px;padding:14px}
 .mini .mk.lot{border-radius:10px;width:36px;height:44px;font-size:16px}
-.mini .mk.sw2{width:44px;height:44px;border-radius:12px}
 
 /* 未来 7 天：不加框，只用小色点表示档位 */
 .week2{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
@@ -782,7 +780,6 @@ html,body{overscroll-behavior-x:none}
   .minis{grid-template-columns:1fr;gap:12px}
   .mini{padding:18px 20px;align-items:flex-start}
   .mini .mk.lot{width:44px;height:54px;font-size:19px}
-  .mini .mk.sw2{width:54px;height:54px}
   .mini .mt b{font-size:16px}
   .mini .mt small{font-size:13px}
   .mini .mx{display:block;margin-top:6px;font-size:13.5px;color:var(--fg);opacity:.75;white-space:normal;font-family:var(--f-display)}
@@ -1792,3 +1789,30 @@ body.in-ritual{overflow:hidden}
 .hcap b{color:var(--cardfg);font-weight:600}
 @media (min-width:960px){.hring{width:164px;height:164px}}
 @media (prefers-reduced-motion: reduce){.hring .glow{animation:none}}
+
+/* ================= 今日幸运色：今天卡片里主题下面的一行，底色、能量环、光晕都是这两个颜色 ================= */
+.tluck{--bead-gap:rgba(255,255,255,.9);display:flex;flex-wrap:wrap;align-items:center;column-gap:10px;row-gap:4px;width:100%;margin:-2px 0 0;padding:9px 12px;border:0;border-radius:14px;font:inherit;text-align:left;color:var(--cardfg);
+  background:color-mix(in srgb,var(--lk,var(--glow)) 11%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--lk,var(--glow)) 26%,transparent)}
+button.tluck{cursor:pointer}
+.tluck .beads{display:flex;flex:none}
+.tluck .beads i{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.6),rgba(255,255,255,0) 45%),var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 2px var(--bead-gap)}
+.tluck .beads i+i{margin-left:-5px}
+.tluck small{font-size:12px;color:var(--cardmuted);letter-spacing:.06em;white-space:nowrap}
+.tluck b{font-family:var(--f-display);font-weight:900;font-size:15.5px;letter-spacing:.04em;white-space:nowrap}
+.tluck em{font-style:normal;font-size:12.5px;color:var(--cardmuted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tluck .go{margin-left:auto;font-style:normal;color:var(--cardmuted)}
+.tluck .why{display:none}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tluck{--bead-gap:rgba(30,27,34,.9)} }
+:root[data-theme="dark"] .tluck{--bead-gap:rgba(30,27,34,.9)}
+.tluck + .dart{margin-top:0}
+/* 320 宽的小屏：三个字的主题和能量环放一行 */
+@media (max-width:340px){.hero3 .theme b{font-size:46px}}
+/* 右边小卡剩三张：手机上每日一签占一整行 */
+.minis > :first-child{grid-column:1 / -1}
+@media (min-width:960px){
+  .tluck{padding:11px 16px;column-gap:12px}
+  .tluck .beads i{width:24px;height:24px}
+  .tluck b{font-size:17px}
+  .tluck small,.tluck em{font-size:13.5px}
+  .tluck .why{display:block;flex-basis:100%;padding-left:55px;font-size:13.5px;line-height:1.6;color:var(--cardmuted)}
+}

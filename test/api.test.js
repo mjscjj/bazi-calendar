@@ -237,7 +237,7 @@ test('访客看能量卡、注册时带上出生信息', async () => {
   assert.equal(card.data.card.symbol, '烛');
 });
 
-test('今天页：大家的今天、今日一句、穿搭、签当天固定', async () => {
+test('今天页：大家的今天、今日一句、幸运色、签当天固定', async () => {
   const c = client();
   await c('POST', '/api/auth/register', { username: 'erin_1', password: 'erinpass1', agree: true, birth });
   const today = bjDay();

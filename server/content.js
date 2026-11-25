@@ -1,4 +1,4 @@
-// 内容库：能量卡、今日一句、穿搭色、观音灵签。文案都在 content/ 目录，启动时加载并校验，缺字段直接启动失败。
+// 内容库：能量卡、今日一句、幸运色、观音灵签。文案都在 content/ 目录，启动时加载并校验，缺字段直接启动失败。
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -61,9 +61,9 @@ export function loadContent(dir = DIR) {
   const outfit = read(dir, 'outfit.json');
   for (const w of WX) {
     const e = outfit.elements?.[w];
-    need(e && e.colors?.length >= 2 && e.accessories?.length && e.mood, `穿搭缺少五行 ${w}`);
+    need(e && e.colors?.length >= 2 && e.accessories?.length && e.mood, `幸运色缺少五行 ${w}`);
   }
-  for (const k of ['follow', 'balance', 'neutral']) need(outfit.lines?.[k], `穿搭缺少文案 ${k}`);
+  for (const k of ['follow', 'balance', 'neutral']) need(outfit.lines?.[k], `幸运色缺少文案 ${k}`);
   const lots = read(dir, 'lots.json').lots;
   need(Array.isArray(lots) && lots.length === 100, '观音灵签需要 100 签');
   lots.forEach((l, i) => {
@@ -195,7 +195,7 @@ export function makeContent(c) {
     tomorrowPrep(day, theme, hour) {
       return pick(c.line.tomorrow[day.level.k], dayNum(day)).replace(/\{theme\}/g, theme).replace(/\{hour\}/g, hour || '好时段');
     },
-    // 今日穿搭色：今天的五行是幸运元素就顺着穿，否则穿第一幸运元素来平衡
+    // 今日幸运色：今天的五行是幸运元素就顺着它，否则用第一幸运元素来平衡
     outfit(chart, day) {
       const dw = gwx(day.gz[0]);
       const follow = chart.xi.includes(dw);

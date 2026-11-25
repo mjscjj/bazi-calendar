@@ -95,7 +95,7 @@ await shot('09-share-lot');
 await closeSheet();
 const lot1 = await page.textContent('[data-draw] b');
 
-step('穿搭色、大家的今天、今天详情');
+step('幸运色、大家的今天、今天详情');
 await page.click('[data-outfit]'); await page.waitForSelector('#sheet .outfit'); await shot('10-outfit'); await closeSheet();
 await page.click('[data-almanac]'); await page.waitForSelector('#sheet .almbig'); await shot('11-almanac'); await closeSheet();
 await page.click('[data-today-detail]'); await page.waitForSelector('#sheet .hours'); await shot('12-day-detail'); await closeSheet();

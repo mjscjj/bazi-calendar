@@ -1,5 +1,5 @@
 // 今天页，从上往下：本周 7 天（能量趋势和你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天）
-// → 每日一签（默念所求、摇签、掷筊、解签）、穿搭色、问一件事、转运御守 → 记录此刻 → 明天寄语。
+// → 每日一签（默念所求、摇签、掷筊、解签）、问一件事、转运御守 → 记录此刻 → 明天寄语。
 import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath } from './core.js';
 import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, HOUR_TIP } from './data.js';
 import { S, isDemo } from './state.js';
@@ -170,6 +170,18 @@ function dialHtml(x, isToday, top, worst) {
   const center = c ? `<text class="cn" y="-2">${c.name}</text><text class="cs" y="13">${isToday ? '此刻' : '最佳'} · ${c.level.p}</text>` : '';
   return `<svg class="hring" viewBox="-74 -74 148 148" role="img" aria-label="十二时辰：${top.map((u) => u.name).join('、')}最好">${segs}${hand}${center}</svg>`;
 }
+// 今日幸运色：卡片的光晕和能量环就是这两个颜色，这一行把它说出来；
+// 今天的可以点开看为什么、配什么，别的日子只说是哪两个颜色（配饰和理由只算了今天的）
+function luckyHtml(t, isToday) {
+  const o = t.outfit;
+  if (!o || !o.colors || o.colors.length < 2) return '';
+  const [a, b] = o.colors;
+  const beads = `<span class="beads" aria-hidden="true"><i style="--c:${a.hex}"></i><i style="--c:${b.hex}"></i></span>`;
+  const names = `<b>${esc(a.name)} · ${esc(b.name)}</b>`;
+  if (!isToday) return `<div class="tluck">${beads}<small>幸运色</small>${names}</div>`;
+  return `<button type="button" class="tluck" data-outfit>${beads}<small>今日幸运色</small>${names}<em>配${esc(o.accessory)}</em>`
+    + `<i class="go" aria-hidden="true">›</i><span class="why">${esc(o.text)}</span></button>`;
+}
 function youHtml(t) {
   const x = t.day, isToday = t.date === localToday();
   const { dos, donts } = dosDonts(x, false);
@@ -187,6 +199,7 @@ function youHtml(t) {
     + `<div class="th"><span class="eyebrow">${who}</span><span class="thr">${isToday ? '<button type="button" class="ic" data-share="today" aria-label="分享你的今天">分享</button>' : '<button type="button" class="ic" data-day-go="today">回到今天</button>'}${nav}</span></div>`
     + `<div class="hero3"><div class="theme"><small>${isToday ? '今天' : REL[diff] || '这天'}是你的</small><b>${THEME[x.ssG][0]}</b></div>`
     + `<div class="ring" style="--p:${x.score}" role="img" aria-label="能量 ${x.score}，${x.level.p}"><b>${x.score}</b><small>${x.level.p}</small></div></div>`
+    + luckyHtml(t, isToday)
     + dayArtHtml(t, isToday)
     + `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`
     + `<dl class="yj2"><div><dt>宜</dt><dd>${short(dos.slice(0, 3))}</dd></div><div><dt>忌</dt><dd>${short(donts.slice(0, 2))}</dd></div></dl>`
@@ -366,7 +379,7 @@ onClick('[data-demo-tip]', (el, e) => { e.preventDefault(); guestAsk(el.getAttri
 onClick('[data-dismiss-go]', (el) => { const n = el.closest('[data-notice]'); if (n) mark(n.getAttribute('data-notice')); });
 
 function minisHtml(t) {
-  const d = t.draw, o = t.outfit;
+  const d = t.draw;
   const draw = d && d.status === 'done'
     ? `<button type="button" class="mini" data-draw><span class="mk lot">${d.no}</span><span class="mt"><b>${esc(d.keyword)}</b><small>${esc(d.title)}</small><span class="mx">${esc(d.poem[0])}，${esc(d.poem[1])}</span></span></button>`
     : d && d.status === 'pending'
@@ -376,13 +389,12 @@ function minisHtml(t) {
       : d && d.status === 'closed'
         ? '<button type="button" class="mini" data-draw><span class="mk lot">签</span><span class="mt"><b>每日一签</b><small>今天时机未到</small><span class="mx">改日再来，明天再摇一支</span></span></button>'
         : '<button type="button" class="mini" data-draw><span class="mk lot">签</span><span class="mt"><b>每日一签</b><small>摇签、掷筊、解签</small><span class="mx">观音灵签 · 每人每天一支</span></span></button>';
-  const outfit = `<button type="button" class="mini" data-outfit><span class="mk sw2"><i style="background:${o.colors[0].hex}"></i><i style="background:${o.colors[1].hex}"></i></span><span class="mt"><b>今日穿搭色</b><small>${o.colors[0].name} · ${o.colors[1].name}</small><span class="mx">配饰：${esc(o.accessory)}</span></span></button>`;
   // 问一件事、转运御守：访客点了提示先测能量卡
   const demo = t.demo, lk = t.luck || { unused: 0, per: 5 }, n = Math.min(lk.unused, lk.per);
   const ask = `<a class="mini askmini" href="#/ask"${demo ? ' data-demo-tip="问事"' : ''}><span class="mk ask">问</span><span class="mt"><b>问一件事</b><small>拿不准就起一卦</small><span class="mx">梅花易数起卦，白话解读，再帮你挑两个适合去做的日子</span></span></a>`;
   const ready = lk.unused >= lk.per || (lk.energy || 0) >= (lk.energyPer || 20);
   const om = `<a class="mini ommini" href="#/luck"${demo ? ' data-demo-tip="做好事换御守"' : ''}><span class="mk om">守</span><span class="mt"><b>转运御守</b><small>${ready ? '可以换一枚了' : `善行 ${n}/${lk.per} · 冥想 ${Math.min(lk.energy || 0, lk.energyPer || 20)}/${lk.energyPer || 20} 分钟`}</small><span class="mx">做好事、提能量都能换一枚御守，也可以直接买</span></span></a>`;
-  return `<div class="minis">${draw}${outfit}${ask}${om}</div>`;
+  return `<div class="minis">${draw}${ask}${om}</div>`;
 }
 
 export function renderToday() {
@@ -564,10 +576,10 @@ onClick('[data-jiao-read]', () => { const b = jbox(); if (b) { b.innerHTML = dra
 function outfitSheet() {
   const o = S.today.outfit;
   track('outfit_open');
-  openSheet('今日穿搭色', `<div class="outfit"><div class="sws">${o.colors.map((c) => `<div style="background:${c.hex}"><span>${c.name}</span></div>`).join('')}</div>`
+  openSheet('今日幸运色', `<div class="outfit"><div class="sws">${o.colors.map((c) => `<div><i style="--c:${c.hex}"></i><b>${esc(c.name)}</b></div>`).join('')}</div>`
     + `<p>${esc(o.text)}</p><p class="acc">配饰：<b>${esc(o.accessory)}</b></p>`
-    + '<button type="button" class="btn ghost block" data-share="outfit">分享穿搭色</button>'
-    + `<p class="note" style="margin:0">按你的幸运元素（${o.element}）和今天的能量搭配。</p></div>`);
+    + '<button type="button" class="btn ghost block" data-share="outfit">分享幸运色</button>'
+    + `<p class="note" style="margin:0">按你的幸运元素（${o.element}）和今天当家的五行选的，穿的、戴的、随身用的都算。</p></div>`);
 }
 
 onClick('[data-almanac]', () => {

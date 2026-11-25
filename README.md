@@ -15,7 +15,7 @@ ALIPAY_FAKE=1 ASK_AI=fake JIAO_FAKE=xiao,sheng COOKIE_SECURE=0 DB_PATH=./data/de
 # 浏览器打开 http://127.0.0.1:3210/bazi/
 ```
 
-- **改文案、签文、能量卡、穿搭色、挑日子规则**：只改 `content/` 里的 JSON，保存后重启服务就能看到。服务启动时会检查字段，少了会直接报错并指出是哪一条。
+- **改文案、签文、能量卡、幸运色、挑日子规则**：只改 `content/` 里的 JSON，保存后重启服务就能看到。服务启动时会检查字段，少了会直接报错并指出是哪一条。
 - **改页面**：在 `public/js/` 和 `public/app.css` 里改，不需要构建，刷新浏览器即可。界面有白色和深色两套主题（顶栏的太阳 / 月亮按钮或「我的 · 外观」切换），颜色都在 `public/app.css` 顶部的变量里；唯一的强调色是朱砂红，层级靠留白和字重，不加边框。
 - 本地付款是模拟的，不会真扣钱：下单后打开 `POST /bazi/api/dev/pay/<订单号>` 就算付款成功。
 - 改完跑一下 `npm test`，然后提交、推送；发布到线上见下面「线上」一节。
@@ -24,9 +24,9 @@ ALIPAY_FAKE=1 ASK_AI=fake JIAO_FAKE=xiao,sheng COOKIE_SECURE=0 DB_PATH=./data/de
 
 | 路径 | 内容 |
 |---|---|
-| `content/` | **文案和内容，产品发起人可以直接改**：能量卡（`energy-cards.json`）、日柱图鉴（`day-pillars.json`：60 个日柱的称号、介绍和身强身弱各一句，插画在 `public/art/pillars/`，用 Codex 生成的水墨图，换图时文件名对上即可）、二十四节气（`terms.json`：每个节气一句话和当令的五行，插画在 `public/art/terms/`）、两个人的画（`pairs.json`：55 种日干组合的画名和六种关系的说法，插画在 `public/art/pairs/`）、今日一句（`daily-line.json`：按档位的行动话 + 为什么）、穿搭色映射（`outfit.json`）、观音灵签 100 签（`lots.json`，含每签的解曰四句和 15 项仙机断语）、解签逐项运势的分类、星数规则、每类 1–5 星的说明和建议（`lot-topics.json`）、挑日子的事项与黄历宜忌对照（`pick.json`）、问事的八卦和 64 卦、拒答词（`ask.json`）和给 AI 的提示词（`ask-prompt.md`）、追问的提示词（`ask-follow-prompt.md`）、追问次数和回看选项（`ask.json` 的 `follow`）、御守的心愿、颜色、节气图案和冥想时长（`amulets.json`）、转运御守的善行件数和例子、冥想换御守的分钟数、释放练习每一步的话（`luck.json`）、心情便签的心情词、对应分数和纸色（`moods.json`）。服务启动时检查字段，缺了直接启动失败 |
+| `content/` | **文案和内容，产品发起人可以直接改**：能量卡（`energy-cards.json`）、日柱图鉴（`day-pillars.json`：60 个日柱的称号、介绍和身强身弱各一句，插画在 `public/art/pillars/`，用 Codex 生成的水墨图，换图时文件名对上即可）、二十四节气（`terms.json`：每个节气一句话和当令的五行，插画在 `public/art/terms/`）、两个人的画（`pairs.json`：55 种日干组合的画名和六种关系的说法，插画在 `public/art/pairs/`）、今日一句（`daily-line.json`：按档位的行动话 + 为什么）、幸运色映射（`outfit.json`）、观音灵签 100 签（`lots.json`，含每签的解曰四句和 15 项仙机断语）、解签逐项运势的分类、星数规则、每类 1–5 星的说明和建议（`lot-topics.json`）、挑日子的事项与黄历宜忌对照（`pick.json`）、问事的八卦和 64 卦、拒答词（`ask.json`）和给 AI 的提示词（`ask-prompt.md`）、追问的提示词（`ask-follow-prompt.md`）、追问次数和回看选项（`ask.json` 的 `follow`）、御守的心愿、颜色、节气图案和冥想时长（`amulets.json`）、转运御守的善行件数和例子、冥想换御守的分钟数、释放练习每一步的话（`luck.json`）、心情便签的心情词、对应分数和纸色（`moods.json`）。服务启动时检查字段，缺了直接启动失败 |
 | `server/engine.js` | 排盘与流日、时辰打分（规则为假设，可调）、通用黄历 |
-| `server/content.js` | 读取 `content/`，算能量卡、今日一句、穿搭色、每日一签 |
+| `server/content.js` | 读取 `content/`，算能量卡、今日一句、幸运色、每日一签 |
 | `server/solar.js`、`server/cities.json` | 出生城市（392 个，含海外）和真太阳时换算（夏令时、经度时差、均时差），时辰交界判断 |
 | `server/pick.js` | 挑日子：排除黄历忌、月破岁破、本命冲，排序取前 3 天和 7–21 点里的好时段 |
 | `server/ics.js` | 订阅到手机日历（iCalendar）：未来 60 天每天一条，定了时段的计划带提醒 |
@@ -47,7 +47,7 @@ ALIPAY_FAKE=1 ASK_AI=fake JIAO_FAKE=xiao,sheng COOKIE_SECURE=0 DB_PATH=./data/de
 
 日历由服务端算好再返回，没有免费次数也没有会员时接口返回 402（今天页仍带着“大家的今天”），页面拿不到个人数据。
 
-页面结构：底部三个页签「今天 / 日历 / 我的」。今天页从上往下：本周 7 天（能量趋势线、你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天，滑出本周取 `/api/week`）→ 每日一签（默念所求 → 摇签 → 掷筊 → 解签，`jiao.json`；解签给逐项运势，每类星数 + 说明 + 建议，问的那类排第一，`lot-topics.json`）、穿搭色、问一件事、转运御守 → 记录此刻 → 明天寄语（`daily-line.json` 的 `tomorrow`）。访客先看示例的今天，点“测测我的”填出生信息就能看到能量卡（不用注册），点“保存并看我的今天”才注册。
+页面结构：底部三个页签「今天 / 日历 / 我的」。今天页从上往下：本周 7 天（能量趋势线、你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天，滑出本周取 `/api/week`；主题下面一行是这一天的幸运色，卡片的光晕和能量环也用这两个颜色，点开看为什么和配饰）→ 每日一签（默念所求 → 摇签 → 掷筊 → 解签，`jiao.json`；解签给逐项运势，每类星数 + 说明 + 建议，问的那类排第一，`lot-topics.json`）、问一件事、转运御守 → 记录此刻 → 明天寄语（`daily-line.json` 的 `tomorrow`）。访客先看示例的今天，点“测测我的”填出生信息就能看到能量卡（不用注册），点“保存并看我的今天”才注册。
 
 ## 本地开发
 

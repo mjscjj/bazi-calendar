@@ -1,8 +1,8 @@
-// 分享图：能量卡、你的今天、每日一签、穿搭色、邀请海报五种竖版图片（1080×1920），底部带二维码。浏览器里用画布绘制。
+// 分享图：能量卡、你的今天、每日一签、幸运色、邀请海报五种竖版图片（1080×1920），底部带二维码。浏览器里用画布绘制。
 // 另有「今日锁屏」：按手机屏幕比例（1170×2532），上面留给锁屏时钟，下面是今天的画和你的主题。
 // 跟随当前的白色 / 深色主题，预览时也能手动换；登录用户的二维码都带着自己的邀请码。
 import { $, esc, openSheet, onClick, toast, track, IS_MOBILE, IS_WECHAT, isDarkNow } from './core.js';
-import { THEME, hhmm, bestHours, HOUR_TIP } from './data.js';
+import { THEME, hhmm, hhShort, bestHours, HOUR_TIP } from './data.js';
 import { S } from './state.js';
 
 const W = 1080, H = 1920;
@@ -142,10 +142,10 @@ const DRAW = {
     text(ctx, `今天的关键词 · ${d.keyword}`, W / 2, 1520, { size: 46, weight: 700, color: glowText() });
   },
   outfit(ctx, o) {
-    text(ctx, '今日穿搭色', W / 2, 260, { size: 72, font: SERIF, weight: 900 });
+    text(ctx, '今日幸运色', W / 2, 260, { size: 72, font: SERIF, weight: 900 });
     o.colors.forEach((c, i) => {
       const cx = W / 2 + (i ? 210 : -210);
-      ctx.fillStyle = c.hex; ctx.beginPath(); ctx.arc(cx, 640, 190, 0, Math.PI * 2); ctx.fill();
+      bead(ctx, c.hex, cx, 640, 190);
       ctx.strokeStyle = P.ring; ctx.lineWidth = 4; ctx.stroke();
       text(ctx, c.name, cx, 900, { size: 56, weight: 700 });
     });
@@ -228,6 +228,13 @@ function drawCover(ctx, img, x, y, w, h, py = 0.62) {
   ctx.drawImage(img, (sw - cw) / 2, (sh - ch) * py, cw, ch, x, y, w, h);
 }
 // 「我的今天」带今天的画：上面一幅这一天日柱的画，下面是主题、分数、今日一句、最好的时段
+// 一颗色珠：底色加左上角一点高光，和今天卡片里的幸运色一个样子
+function bead(ctx, hex, cx, cy, r) {
+  ctx.fillStyle = hex; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  const g = ctx.createRadialGradient(cx - r * 0.36, cy - r * 0.44, 0, cx - r * 0.36, cy - r * 0.44, r * 0.95);
+  g.addColorStop(0, 'rgba(255,255,255,.55)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fill();
+}
 function todayWithArt(ctx, t, art) {
   const x = t.day, a = t.almanac, bx = 120, by = 250, bw = W - 240, bh = 420;
   text(ctx, `${a.m}月${a.d}日 · 周${'日一二三四五六'[a.week]} · 农历${a.lunar.monthCn}月${a.lunar.dayCn}`, W / 2, 200, { size: 38, color: P.muted });
@@ -250,10 +257,23 @@ function todayWithArt(ctx, t, art) {
   const y2 = wrap(ctx, head, W / 2, 1196, evenW(head, 48, 860), 66, 2, { size: 48, font: SERIF, weight: 900 });
   if (t.line.why) wrap(ctx, t.line.why, W / 2, y2 + 12, evenW(t.line.why, 34, 860), 50, 2, { size: 34, color: P.muted });
   const { top } = bestHours(x);
+  const o = t.outfit && t.outfit.colors && t.outfit.colors.length >= 2 ? t.outfit : null;
+  if (!top[0] && !o) return;
+  ctx.fillStyle = P.box; roundRect(ctx, 120, 1420, W - 240, 150, 26); ctx.fill();
+  // 有幸运色时框分两半：左边最佳时段，右边幸运色
+  const hx = o && top[0] ? 120 + (W - 240) / 4 : W / 2, lx = o && top[0] ? 120 + (W - 240) * 3 / 4 : W / 2;
   if (top[0]) {
-    ctx.fillStyle = P.box; roundRect(ctx, 120, 1420, W - 240, 150, 26); ctx.fill();
-    text(ctx, '最佳时段', W / 2, 1474, { size: 32, color: P.muted });
-    text(ctx, hhmm(top[0].i), W / 2, 1544, { size: 60, weight: 700 });
+    text(ctx, '最佳时段', hx, 1474, { size: 32, color: P.muted });
+    text(ctx, o ? hhShort(top[0].i) : hhmm(top[0].i), hx, 1544, { size: o ? 54 : 60, weight: 700 });
+  }
+  if (o) {
+    if (top[0]) { ctx.fillStyle = P.track; ctx.fillRect(W / 2 - 1, 1450, 2, 90); }
+    text(ctx, '幸运色', lx, 1474, { size: 32, color: P.muted });
+    const name = `${o.colors[0].name} · ${o.colors[1].name}`;
+    ctx.font = `700 46px ${SANS}`;
+    const w = 70 + 18 + ctx.measureText(name).width, x0 = lx - w / 2;
+    bead(ctx, o.colors[0].hex, x0 + 22, 1527, 22); bead(ctx, o.colors[1].hex, x0 + 48, 1527, 22);
+    text(ctx, name, x0 + 88, 1544, { size: 46, weight: 700, align: 'left' });
   }
 }
 
@@ -268,7 +288,7 @@ function render(kind, data, theme) {
   return cv;
 }
 
-const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日穿搭色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾', term: '节气海报' };
+const NAMES = { card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日幸运色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾', term: '节气海报' };
 const SLUG = { card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper', recap: 'recap', term: 'solar-term' };
 // 分享图用 JPG：手机相册、微信都当照片处理（PNG 动辄两三兆，常被当成一个文件）
 const jpg = (cv) => cv.toDataURL('image/jpeg', 0.92);

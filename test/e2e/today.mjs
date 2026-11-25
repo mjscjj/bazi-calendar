@@ -39,6 +39,12 @@ const order = await p.evaluate(() => [...document.querySelectorAll('.wstrip, #da
 check('从上往下：本周、卡片、小卡、记录此刻、明天寄语', order.join(',') === 'wstrip,dayswipe,minis,moodbox,tmrw', order.join(','));
 check('本周 7 天，选中的是今天', (await p.$$('.wstrip .wc')).length === 7 && (await p.getAttribute('.wstrip .wc.on', 'class')).includes('today'));
 check('有趋势线', (await p.$$('.wtrend .ed')).length === 7);
+// 幸运色并进了今天的卡片：主题下面一行，点开看为什么和配饰；右边小卡不再单独放
+check('今天的卡片里有幸运色', (await p.$$('.dslot.cur .tluck .beads i')).length === 2 && (await p.textContent('.dslot.cur .tluck')).includes('今日幸运色'));
+check('小卡剩三张，没有单独的穿搭色', (await p.$$('.minis > *')).length === 3 && !(await p.$('.minis [data-outfit]')));
+await p.click('.dslot.cur .tluck'); await p.waitForSelector('#sheet .outfit');
+check('点开是今日幸运色', (await p.textContent('#sheet .sh b')).includes('今日幸运色') && (await p.textContent('#sheet .outfit')).includes('配饰'));
+await p.click('#sheet [data-close-sheet]'); await p.waitForSelector('#sheet', { state: 'detached' });
 check('明天寄语有一句准备的话', (await p.textContent('.tmrw .th2')).length > 8);
 await p.screenshot({ path: `${out}/t01-top-light.png` });
 await p.screenshot({ path: `${out}/t02-full-light.png`, fullPage: true });
@@ -93,6 +99,7 @@ const next = await p.getAttribute('.wstrip .wc.on', 'data-sel-day');
 check('往左滑到后一天', next > today, `${today} → ${next}`);
 check('别的日子显示「回到今天」', await p.isVisible('.cur [data-day-go]'));
 check('后一天不显示记录此刻', !(await p.$('.moodbox')));
+check('后一天的卡片写那天的幸运色，不能点', (await p.$eval('.dslot.cur .tluck', (e) => e.tagName)) === 'DIV' && !(await p.textContent('.dslot.cur .tluck')).includes('配'));
 await p.screenshot({ path: `${out}/t05-next-day-light.png` });
 await swipe(160); await swipe(160);
 const prev = await p.getAttribute('.wstrip .wc.on', 'data-sel-day');

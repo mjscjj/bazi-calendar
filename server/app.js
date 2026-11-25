@@ -449,7 +449,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (isNaN(t) || Math.abs(t - Date.now()) > 2.5 * DAY_MS) throw bad('日期不对');
     return d;
   }
-  // 今天页一次拿全：大家的今天、你的今天、今日一句、穿搭、签、今天的计划、未来 7 天
+  // 今天页一次拿全：大家的今天、你的今天、今日一句、幸运色、签、今天的计划、未来 7 天
   // 今天页顶上的一周（周一到周日）：每天的完整数据、今日一句、通用黄历，用来滑动看前后几天
   const ymd = (dt) => dt.toISOString().slice(0, 10);
   function weekStrip(c, date) {
