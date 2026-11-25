@@ -7,6 +7,7 @@ import { shareImage } from './share.js';
 const view = () => $('#view');
 const O = () => S.C.oracle;
 const lotEn = (no) => O().lots[String(no)];
+let drawDay = null; // the day today's lot was drawn (a toss right after midnight still belongs to it)
 const topicKey = () => store.get('oracleTopic')?.day === localDay() ? store.get('oracleTopic').key : null;
 
 export async function pageOracle() {
@@ -18,9 +19,10 @@ export async function pageOracle() {
   </div>`;
   try {
     const t = S.today && S.today.date === localDay() ? S.today : await api('GET', 'today?date=' + localDay());
-    S.today = t;
+    if (!$('#orc')) return;
+    S.today = t; drawDay = t.date;
     render(t.draw);
-  } catch (e) { $('#orc').innerHTML = failed(e.message); }
+  } catch (e) { $('#orc') && ($('#orc').innerHTML = failed(e.message)); }
   loadJournal();
 }
 
@@ -51,11 +53,13 @@ function askView(d, note) {
     store.set('oracleTopic', { day: localDay(), key: k });
     $('#tube').classList.add('shake'); buzz(30);
     try {
-      const r = await api('POST', 'draws/today', { date: localDay(), question: q || undefined });
+      drawDay = localDay();
+      const r = await api('POST', 'draws/today', { date: drawDay, question: q || undefined });
       track('us_oracle_draw', { topic: k, q: !!q });
       await wait(reduced() ? 0 : 1300);
+      if (!$('#orc')) return;
       S.today.draw = r.draw; render(r.draw, true);
-    } catch (e) { $('#tube')?.classList.remove('shake'); toast(e.message); }
+    } catch (e) { $('#tube')?.classList.remove('shake'); toast(e.message); return false; } // false: the hold button resets
   });
 }
 
@@ -81,14 +85,14 @@ function tossView(d, fresh) {
     const area = $('#tossArea'); area.innerHTML = blocks(['flat', 'round']); area.classList.remove('land'); void area.offsetWidth; area.classList.add('fly');
     buzz(15);
     let r;
-    try { r = await api('POST', 'draws/today/toss', { date: localDay() }); } catch (e) { toast(e.message); busy = false; return; }
+    try { r = await api('POST', 'draws/today/toss', { date: drawDay || localDay() }); } catch (e) { toast(e.message); busy = false; return; }
     await wait(reduced() ? 0 : 900);
     area.classList.remove('fly'); area.innerHTML = blocks(FACES[r.toss] || ['flat', 'round']); area.classList.add('land'); buzz(r.toss === 'sheng' ? [20, 60, 20] : 25);
     $('#tossRes').textContent = r.toss ? `${L[r.toss].name} — ${L[r.toss].line}` : '';
     track('us_oracle_toss', { r: r.toss });
     S.today.draw = r.draw;
     await wait(reduced() ? 0 : 1300);
-    render(r.draw, true);
+    if ($('#orc')) render(r.draw, true);
   };
   $('#toss').addEventListener('click', go);
   // flick up on the blocks to toss
@@ -144,9 +148,11 @@ function holdButton(btn, ms, done) {
   const arc = btn.querySelector('.fill'), c = 2 * Math.PI * 46;
   arc.style.strokeDasharray = `0 ${c}`;
   let t0 = 0, raf = 0, fired = false;
-  const step = (t) => { const k = Math.min(1, (t - t0) / ms); arc.style.strokeDasharray = `${c * k} ${c}`; if (k >= 1) { fired = true; btn.classList.add('done'); done(); return; } if (Math.round(k * 10) !== Math.round((k - 0.02) * 10)) buzz(3); raf = requestAnimationFrame(step); };
+  const reset = () => { fired = false; btn.classList.remove('on', 'done'); arc.style.strokeDasharray = `0 ${c}`; };
+  const fire = () => { fired = true; btn.classList.add('done'); Promise.resolve(done()).then((ok) => { if (ok === false) reset(); }); };
+  const step = (t) => { const k = Math.min(1, (t - t0) / ms); arc.style.strokeDasharray = `${c * k} ${c}`; if (k >= 1) { fire(); return; } if (Math.round(k * 10) !== Math.round((k - 0.02) * 10)) buzz(3); raf = requestAnimationFrame(step); };
   const start = (e) => { e.preventDefault(); if (fired) return; t0 = performance.now(); btn.classList.add('on'); raf = requestAnimationFrame(step); };
   const stop = () => { if (fired) return; cancelAnimationFrame(raf); btn.classList.remove('on'); arc.style.strokeDasharray = `0 ${c}`; };
   btn.addEventListener('pointerdown', start); btn.addEventListener('pointerup', stop); btn.addEventListener('pointerleave', stop); btn.addEventListener('pointercancel', stop);
-  btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { fired = true; done(); } });
+  btn.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !fired) fire(); });
 }

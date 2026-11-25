@@ -160,11 +160,11 @@ export function pageReveal() {
 export function signupSheet(note) {
   const pend = store.get('pending');
   openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Save your Sixty</h2>
-    <p class="muted" style="margin:0 0 16px">${note || 'Free. Your readings, collection and friends stay with you on any device.'}</p>
+    <p class="muted" style="margin:0 0 16px">${esc(note || 'Free. Your readings, collection and friends stay with you on any device.')}</p>
     <form id="signup">
       <label class="field"><span class="label">Email</span><input class="input" name="email" type="email" autocomplete="email" required></label>
       <label class="field"><span class="label">Password</span><input class="input" name="pw" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></label>
-      <label class="field"><span class="label">First name (optional)</span><input class="input" name="name" autocomplete="given-name" maxlength="20"></label>
+      <label class="field"><span class="label">First name (optional)</span><input class="input" name="name" autocomplete="given-name" maxlength="12"></label>
       <label class="check"><input type="checkbox" name="agree" required> <span>I agree to the <a href="#/terms" target="_blank">Terms</a> and <a href="#/privacy" target="_blank">Privacy Policy</a>, and understand Sixty is for reflection and fun, not advice.</span></label>
       <p class="err"></p><button class="btn block" type="submit">Create my account</button>
     </form>`);
@@ -176,7 +176,7 @@ export function signupSheet(note) {
       await api('POST', 'auth/register', { username: f.email.value.trim(), password: f.pw.value, nickname: f.name.value.trim() || undefined, agree: true,
         birth: pend?.birth, invite: pend?.invite || undefined, anonId: anonId() });
       track('us_signup', { invite: !!pend?.invite });
-      store.del('pending'); closeSheet(); toast('Welcome to Sixty'); location.hash = '#/today'; window.dispatchEvent(new Event('sixty:auth'));
+      store.del('pending'); store.del('pairPreview'); closeSheet(); toast('Welcome to Sixty'); location.hash = '#/today'; window.dispatchEvent(new Event('sixty:auth'));
     } catch (x) { err.textContent = x.message; btn.disabled = false; }
   });
 }
@@ -249,4 +249,20 @@ export async function pageInvite(code) {
       location.hash = `#/pair/${encodeURIComponent(code)}?r=1`;
     } catch (x) { f.querySelector('.err').textContent = x.message; }
   });
+}
+
+// signed in, but no birthday on the account yet (e.g. an account made without one): ask for it before anything else
+export function pageNeedBirth() {
+  view().innerHTML = `<div class="page"><h1 class="display" style="margin-top:10px">One more thing</h1><p class="lede">Your sign comes from your birthday. Add it to see your days.</p>
+    <form class="card" id="nbForm" style="margin-top:18px"><label class="label" for="nbday" style="display:block;margin-bottom:8px">Your birthday</label>
+      <div class="row"><input class="input" id="nbday" type="text" inputmode="numeric" autocomplete="bday" placeholder="MM / DD / YYYY" maxlength="14"><button class="btn" type="submit">Continue</button></div><p class="err"></p></form>
+    <p class="hint" style="text-align:center"><a href="#/" id="nbOut">Sign out</a></p></div>`;
+  const f = $('#nbForm'), input = $('#nbday'); maskBirthday(input);
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const r = readBirthday(input.value); if (r.err) { f.querySelector('.err').textContent = r.err; return; }
+    try { await api('PUT', 'me/profile', { nickname: '', bio: '', birth: { date: r.date } }); location.hash = '#/today'; window.dispatchEvent(new Event('sixty:auth')); }
+    catch (x) { f.querySelector('.err').textContent = x.message; }
+  });
+  $('#nbOut').addEventListener('click', async (e) => { e.preventDefault(); await api('POST', 'auth/logout').catch(() => {}); location.hash = '#/'; window.dispatchEvent(new Event('sixty:auth')); });
 }

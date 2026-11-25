@@ -25,8 +25,9 @@ export async function pageCalendar() {
   $$('[data-feed]').forEach((b) => b.addEventListener('click', () => addFeed(b.dataset.feed)));
   $$('[data-mv]').forEach((b) => b.addEventListener('click', () => { const t = new Date(y, m - 1 + +b.dataset.mv, 1); month = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`; buzz(5); pageCalendar(); }));
   let data;
+  const asked = month;
   try { data = await api('GET', `calendar?y=${y}&m=${m}`); } catch (e) { $('#monthSum') && ($('#monthSum').innerHTML = failed(e.message)); return; }
-  if (!$('#cal')) return; // left the page while loading
+  if (!$('#cal') || asked !== month) return; // left the page, or moved to another month, while loading
   const byDate = Object.fromEntries(data.days.map((d) => [ymd(d), d]));
   for (const [d, x] of Object.entries(byDate)) {
     const b = $(`#cal button[data-d="${d}"]`); if (!b) continue;
@@ -86,14 +87,16 @@ export function pagePick() {
   $$('[data-r]').forEach((b) => b.addEventListener('click', () => { pick.range = b.dataset.r; $$('[data-r]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); if (pick.type) run(); }));
   if (pick.type) run();
 }
+let runId = 0;
 async function run() {
-  const out = $('#pickOut'), label = S.C.pickTypes[pick.type];
+  const id = ++runId, type = pick.type, range = pick.range, out = $('#pickOut'), label = S.C.pickTypes[type];
   out.innerHTML = `<div class="scan"><div class="scan-grid" id="scanGrid"></div><p class="small" id="scanTxt">Scanning your days…</p></div>`;
   const t0 = performance.now();
   let r;
   let chart = S.today?.chart;
-  try { r = await api('POST', 'pick', { type: pick.type, range: pick.range }); if (!chart) chart = (await api('GET', 'today?date=' + localDay())).chart; } catch (e) { out.innerHTML = failed(e.message); return; }
-  track('us_pick', { type: pick.type, range: pick.range });
+  try { r = await api('POST', 'pick', { type, range }); if (!chart) chart = (await api('GET', 'today?date=' + localDay())).chart; } catch (e) { if (id === runId && $('#pickOut')) out.innerHTML = failed(e.message); return; }
+  if (id !== runId) return; // a newer choice replaced this one
+  track('us_pick', { type, range });
   // show the scan: one tile per day; set-aside days fade, picks light up
   const n = r.days, picks = r.picks.map((p) => `${p.y}-${String(p.m).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`);
   const start = new Date(); start.setDate(start.getDate() + 1);
@@ -110,7 +113,7 @@ async function run() {
     others.sort(() => Math.random() - 0.5).slice(0, set).forEach((x) => x.classList.add('out'));
   }
   setTimeout(() => {
-    if (!$('#scanTxt')) return;
+    if (!$('#scanTxt') || id !== runId) return;
     $('#scanTxt').innerHTML = `<b>${n}</b> days scanned · <b>${set}</b> set aside · <b>${r.picks.length}</b> picked`;
     buzz(12);
     out.insertAdjacentHTML('beforeend', `<p class="label" style="margin:22px 0 10px">Your best days for ${esc(label.charAt(0).toLowerCase() + label.slice(1))}</p>
@@ -123,7 +126,7 @@ async function run() {
       <p class="hint">Days that clash with your birth month or year, or that the old almanac marks as unsuitable for this, are set aside first.</p>`);
     $$('[data-save]').forEach((b) => b.addEventListener('click', async (e) => {
       e.preventDefault(); e.stopPropagation();
-      try { await api('POST', 'plans', { name: label, type: pick.type, date: b.dataset.save, hour: +b.dataset.h, reason: '' }); b.textContent = 'Saved ✓'; b.disabled = true; buzz(10); track('us_plan_save', { type: pick.type }); toast('Saved — it shows in your calendar'); }
+      try { await api('POST', 'plans', { name: label, type, date: b.dataset.save, hour: +b.dataset.h, reason: '' }); b.textContent = 'Saved ✓'; b.disabled = true; buzz(10); track('us_plan_save', { type }); toast('Saved — it shows in your calendar'); }
       catch (x) { toast(x.message); }
     }));
   }, wait);

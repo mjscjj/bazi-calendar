@@ -57,7 +57,8 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
     if (!r || r.used_at || r.expires_at < new Date().toISOString()) throw bad('This link has expired. Please ask for a new one.');
     db.tx(() => {
       db.run('UPDATE users SET pass_hash = ? WHERE id = ?', hashPassword(pw), r.user_id);
-      db.run('UPDATE password_resets SET used_at = ? WHERE token_hash = ?', new Date().toISOString(), r.token_hash);
+      db.run('UPDATE password_resets SET used_at = ? WHERE user_id = ? AND used_at IS NULL', new Date().toISOString(), r.user_id); // 这个人其他没用的链接也作废
+      db.run('UPDATE users SET failed_logins = 0, locked_until = NULL WHERE id = ?', r.user_id);
       db.run("DELETE FROM sessions WHERE kind = 'user' AND user_id = ?", r.user_id); // 其他设备上的登录一并退出
     });
     return { ok: true };

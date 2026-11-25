@@ -994,7 +994,8 @@ test('美国版开关：邮箱当用户名、性别可以不填、按 DAY_TZ 切
 test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；分享链接有专属预览；邮件重设密码（没配发信时链接写进日志）', async () => {
   const logs = [];
   const env = { BASE_PATH: '/sixty', COOKIE_SECURE: '0', ASK_AI: 'fake', US_EDITION: '1', DAY_TZ: 'America/Chicago', MEMBER_FOR_ALL: '1', GENDER_OPTIONAL: '1', PUBLIC_URL: 'https://example.com/sixty' };
-  const srv = createServer({ db: openDb(':memory:'), alipay: null, env, log: { info: (m) => logs.push(m), error() {}, warn() {} } });
+  const sdb = openDb(':memory:');
+  const srv = createServer({ db: sdb, alipay: null, env, log: { info: (m) => logs.push(m), error() {}, warn() {} } });
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
   const B = `http://127.0.0.1:${srv.address().port}/sixty`;
   let cookie = '';
@@ -1004,6 +1005,10 @@ test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；�
     const r1 = await call('POST', '/api/auth/register', { username: 'kid@example.com', password: 'password123', agree: true, birth: { date: kid.toISOString().slice(0, 10) } });
     assert.equal(r1.status, 400); assert.match(r1.data.message, /13 and up/);
     assert.equal((await call('POST', '/api/auth/register', { username: 'amy@example.com', password: 'password123', agree: true, nickname: 'Amy', birth: { date: '1992-03-14' } })).status, 200);
+    // 乱填的时区头不能把缓存撑满、影响别人
+    for (let k = 0; k < 410; k++) await call('GET', '/api/health', null, { 'X-TZ': 'Junk/Zone' + k });
+    // 没填性别：不知道大运方向，每日分数里不计大运
+    assert.ok(!(await call('GET', '/api/today')).data.day.why.some((w) => /大运/.test(w.t)));
     // 两个相差 25 小时的时区，「今天」一定不是同一天
     const east = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Kiritimati' })).data.date, west = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Pago_Pago' })).data.date;
     assert.notEqual(east, west);
@@ -1018,11 +1023,15 @@ test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；�
     // 重设密码
     assert.equal((await call('POST', '/api/auth/reset-request', { email: 'nobody@example.com' })).status, 200);
     assert.equal((await call('POST', '/api/auth/reset-request', { email: 'AMY@example.com' })).status, 200);
-    const token = (logs.find((m) => m.includes('[us-mail]')) || '').match(/#\/reset\/([\w-]+)/)?.[1];
+    assert.equal((await call('POST', '/api/auth/reset-request', { email: 'amy@example.com' })).status, 200);
+    const links = logs.filter((m) => m.includes('[us-mail]')).map((m) => m.match(/#\/reset\/([\w-]+)/)?.[1]);
+    const token = links[0], other = links[1];
+    sdb.run("UPDATE users SET failed_logins = 9, locked_until = ? WHERE username = 'amy@example.com'", new Date(Date.now() + 9e5).toISOString());
     assert.ok(token, 'reset link logged');
     assert.equal((await call('POST', '/api/auth/reset', { token, password: 'short' })).status, 400);
     assert.equal((await call('POST', '/api/auth/reset', { token, password: 'newpassword1' })).status, 200);
     assert.equal((await call('POST', '/api/auth/reset', { token, password: 'newpassword2' })).status, 400); // 只能用一次
+    assert.equal((await call('POST', '/api/auth/reset', { token: other, password: 'newpassword3' })).status, 400); // 同一个人的其他链接也作废
     assert.equal((await call('POST', '/api/auth/login', { username: 'amy@example.com', password: 'password123' })).status, 400);
     assert.equal((await call('POST', '/api/auth/login', { username: 'amy@example.com', password: 'newpassword1' })).status, 200);
   } finally { srv.close(); }

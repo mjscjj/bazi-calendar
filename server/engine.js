@@ -184,7 +184,8 @@ export function rawDayV2(c, y, m, d) {
   const mAdj = Math.round(wxScore(c, gwx(mgz[0]), 2) + wxScore(c, zwx(mgz[1]), 2));
   if (mAdj) add(mAdj, '流月' + mgz + (mAdj > 0 ? '整体偏顺' : '整体偏逆'), mAdj > 0 ? '这个月整体顺风' : '这个月整体逆风');
   // 底色：所在大运和流年对你是喜是忌
-  const dy = c.dayuns.find((x) => y >= x.startYear && y <= x.endYear);
+  // 没填性别（美国版可以不填）就不知道大运往哪个方向排，这一项不计
+  const dy = c.gender ? c.dayuns.find((x) => y >= x.startYear && y <= x.endYear) : null;
   if (dy) {
     const v = wxScore(c, gwx(dy.gz[0]), 3) + wxScore(c, zwx(dy.gz[1]), 2);
     add(v, '大运' + dy.gz + (v > 0 ? '偏喜' : '偏忌'), v > 0 ? '这几年的大运在帮你' : '这几年的大运有些消耗');

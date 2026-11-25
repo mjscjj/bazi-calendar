@@ -1,6 +1,6 @@
 // Sixty — entry and routing. Same backend and features as the Chinese edition (流日历), in English.
-import { $, $$, S, api, track, closeSheet, pillarOf, signName, art, esc, localDay } from './js/core.js';
-import { pageLanding, pageReveal, pageSignin, pageInvite, pageReset } from './js/onboard.js';
+import { $, $$, S, api, track, closeSheet, pillarOf, byGz, signName, art, esc, localDay } from './js/core.js';
+import { pageLanding, pageReveal, pageSignin, pageInvite, pageReset, pageNeedBirth } from './js/onboard.js';
 import { pageToday } from './js/today.js';
 import { pageCalendar, pagePick } from './js/calendar.js';
 import { pageMe, pageCollection, pageFriends, pagePair, pageSign, applyTheme, pageLegal, pageRecap } from './js/me.js';
@@ -9,11 +9,16 @@ import { pageOracle } from './js/oracle.js';
 applyTheme();
 const view = $('#view');
 
+// who is signed in. Called after content.json is loaded; clears the previous person's cached day.
 async function loadMe() {
+  S.today = null; S.noBirth = false;
   try {
     const m = await api('GET', 'me');
     const date = m.user?.birth?.date;
-    S.me = date ? { ...m, p: S.C ? pillarOf(date) : null } : null;
+    if (m.user && !date) { S.me = null; S.noBirth = true; return; }
+    S.me = date ? { ...m, p: pillarOf(date) } : null;
+    // the real day pillar can differ from the date when birth time and place move it past midnight (true solar time)
+    if (S.me && m.user.birth.time) { try { const { card } = await api('GET', 'me/card'); S.me.p = byGz(card.pillar.gz) || S.me.p; } catch {} }
   } catch { S.me = null; }
 }
 
@@ -33,7 +38,10 @@ function render() {
   document.querySelectorAll('.tear, .theater').forEach((x) => x.remove());
   const reveal = q.get('r') === '1' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   let page = parts[0] || (S.me ? 'today' : 'home');
-  if (TABBED.includes(page) && !S.me) page = 'home';
+  if (S.noBirth && !['terms', 'privacy'].includes(page)) page = 'needbirth';
+  else if (TABBED.includes(page) && !S.me) page = 'home';
+  let code = parts[1] || '';
+  try { code = decodeURIComponent(code); } catch {}
   if (page === 'today') pageToday(q.get('d'));
   else if (page === 'calendar') pageCalendar();
   else if (page === 'pick') pagePick();
@@ -47,7 +55,8 @@ function render() {
   else if (page === 'reset' && parts[1]) pageReset(parts[1]);
   else if (page === 'terms' || page === 'privacy') pageLegal(page);
   else if (page === 'i' && parts[1]) pageInvite(parts[1]);
-  else if (page === 'pair' && parts[1]) pagePair(decodeURIComponent(parts[1]), reveal);
+  else if (page === 'pair' && parts[1]) pagePair(code, reveal);
+  else if (page === 'needbirth') pageNeedBirth();
   else if (page === 'sign' && parts[1]) pageSign(parts[1], reveal);
   else if (page === 'sixty') pageSixty();
   else { page = 'home'; pageLanding(); }
@@ -59,9 +68,14 @@ function render() {
   if (q.get('r') === '1') { q.delete('r'); const rest = q.toString(); history.replaceState(null, '', `#/${path}${rest ? '?' + rest : ''}`); }
 }
 addEventListener('hashchange', render);
+// tapping the tab you're already on refreshes it (back to today on Today)
+$$('.tabs a').forEach((a) => a.addEventListener('click', () => { if (location.hash === a.getAttribute('href')) render(); }));
+// coming back to an app left open overnight: move to the new day
+let openedOn = localDay();
+addEventListener('visibilitychange', () => { if (document.hidden || localDay() === openedOn) return; openedOn = localDay(); if (S.me) { S.today = null; render(); } });
 // signing in or out, or changing birth details: reload who I am, then redraw
 addEventListener('sixty:auth', async () => { await loadMe(); render(); });
 
-Promise.all([fetch('content.json').then((r) => r.json()), loadMe()])
-  .then(([c]) => { S.C = c; if (S.me) S.me.p = pillarOf(S.me.user.birth.date); render(); })
+fetch('content.json').then((r) => r.json())
+  .then(async (c) => { S.C = c; await loadMe(); render(); })
   .catch((e) => { console.error(e); view.innerHTML = '<div class="page"><p class="intro">Sixty could not load. Please refresh.</p></div>'; });

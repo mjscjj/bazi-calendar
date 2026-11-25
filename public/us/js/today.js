@@ -9,7 +9,7 @@ let strip = null, sel = null;
 
 export async function pageToday(want) {
   const me = S.me.p;
-  sel = want || (sel && Math.abs(parse(sel) - parse(localDay())) < 864e5 * 60 ? sel : localDay());
+  sel = want && Math.abs(parse(want) - parse(localDay())) < 864e5 * 300 ? want : localDay(); // without ?d= Today always opens on today
   view().innerHTML = `<div class="page today" style="${elStyle(elOf(me))}">
     <div class="tdhead"><div><p class="label" id="tdKicker">Today</p><h1 class="h2" id="tdTitle">${fmt(sel, 'full')}</h1></div>
       <a class="collect" href="#/collection" aria-label="Your collection"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--soft)" stroke-width="4"/><circle id="colArc" cx="18" cy="18" r="15" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 95" transform="rotate(-90 18 18)"/></svg><b id="colN">·</b><span>/60</span></a></div>
@@ -19,6 +19,7 @@ export async function pageToday(want) {
   </div>`;
   try {
     const t = await api('GET', 'today?date=' + localDay());
+    if (!$('#daycard')) return; // left the page while loading
     S.today = t; strip = t.strip;
     S.me.p = byGz(t.chart.pillars[2]) || S.me.p; // 真太阳时可能把出生日挪到前后一天
     if (!dayOf(sel)) { try { strip = await api('GET', 'week?date=' + sel); } catch { sel = localDay(); strip = t.strip; } }
@@ -146,9 +147,10 @@ function wireDial(hours, isToday) {
     hand.setAttribute('transform', `rotate(${deg} ${CX} ${CX})`);
     const h = (deg / 15 + 24) % 24, i = Math.floor(((h + 1) % 24) / 2);
     if (i === cur) return; cur = i;
-    const x = hours.find((y) => y.i === i), w = whyList(x.why, 1)[0];
+    const x = hours.find((y) => y.i === i), w = (x.why || []).find((y) => /^时干/.test(y.t || '')) || null;
     $('#dhRange').textContent = hourRange(i); $('#dhWord').textContent = level(x.level.k).word; $('#dhWord').className = 'lv' + x.level.k;
-    $('#dhWhy').textContent = w ? w.en : '';
+    // short line in the middle of the dial: the hour's Ten God, and whether it fuels you; the full story is in "Why?"
+    $('#dhWhy').textContent = x.ss ? `${tenName(x.ss)} · ${w && w.v >= 0 ? 'fuels you' : 'drains you'}` : '';
     $$('#dial .seg').forEach((s) => s.classList.toggle('on', +s.dataset.i === i));
     if (fromUser) buzz(4);
   };

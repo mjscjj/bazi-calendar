@@ -90,7 +90,8 @@ export const store = {
 // The server speaks Chinese in its error messages; the common ones get an English line here.
 const ERR = [[/用户名或密码/, 'Wrong email or password.'], [/已经被用了/, 'That email already has an account. Try signing in.'], [/密码至少/, 'Use at least 8 characters for your password.'],
   [/用户名需/, 'Please enter a valid email.'], [/出生日期/, 'Please enter a valid birthday.'], [/城市/, 'Pick a birth place from the list.'], [/太频繁|稍后/, 'Too many tries. Please wait a moment.'],
-  [/登录/, 'Please sign in again.'], [/邀请链接已失效/, 'This invite link has expired.']];
+  [/登录/, 'Please sign in again.'], [/邀请链接已失效|链接已失效/, 'This link has expired.'], [/称呼/, 'Please use a shorter name (12 characters or fewer).'],
+  [/连得有点多|提交得有点多|今天.*多了/, "That's a lot for one day — please try again tomorrow."], [/先摇一支签/, 'Draw a lot first.'], [/日期不对/, 'That date is out of range.']];
 // the server works out "today" in your own time zone
 const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
 // public links (with link previews): /sixty/s/<sign>, /sixty/i/<invite code>

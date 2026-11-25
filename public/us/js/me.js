@@ -172,6 +172,7 @@ async function inviteSheet() {
 export function pagePair(code, reveal) {
   const pv = store.get('pairPreview');
   if (!pv || pv.code !== code) { location.hash = S.me ? '#/friends' : '#/'; return; }
+  if (!S.me && !store.get('pending')?.birth) { location.hash = `#/i/${encodeURIComponent(code)}`; return; } // no birthday to sign up with: start from the invite
   const mineGz = S.me?.p?.cn || store.get('pending')?.gz, mine = mineGz ? byGz(mineGz) : null, them = pv.them ? byGz(pv.them) : null;
   const e = pairEn(pv.pair, mine ? stemOf(mine).image : 'you', them ? stemOf(them).image : 'them'), who = esc(pv.who || 'Your friend');
   view().innerHTML = `<div class="page wide${reveal ? ' reveal merge' : ''}">

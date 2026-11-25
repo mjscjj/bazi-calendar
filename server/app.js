@@ -34,10 +34,11 @@ const DAY_MS = 86400000;
 // 美国版再细一层：浏览器每次请求带 X-TZ（自己的时区），这一次请求里的「今天」按它算
 const dayFmt = (tz) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
 const DAY_FMT = process.env.DAY_TZ ? dayFmt(process.env.DAY_TZ) : null;
-const reqTz = new AsyncLocalStorage(), TZ_FMTS = new Map();
+// 只认系统时区表里的名字，缓存最多就是这几百个，乱填的头既不缓存也不生效
+const reqTz = new AsyncLocalStorage(), TZ_FMTS = new Map(), ZONES = new Set(Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : []);
 function tzFmt(tz) {
-  if (!tz || TZ_FMTS.size > 400) return null;
-  if (!TZ_FMTS.has(tz)) { try { TZ_FMTS.set(tz, dayFmt(tz)); } catch { TZ_FMTS.set(tz, null); } }
+  if (!tz || !ZONES.has(tz)) return null;
+  if (!TZ_FMTS.has(tz)) TZ_FMTS.set(tz, dayFmt(tz));
   return TZ_FMTS.get(tz);
 }
 export const bjDay = (d = new Date()) => { const f = tzFmt(reqTz.getStore()) || DAY_FMT; return f ? f.format(d) : new Date(d.getTime() + 8 * 3600000).toISOString().slice(0, 10); };
