@@ -36,6 +36,13 @@ CREATE TABLE IF NOT EXISTS open_days (
   created_at TEXT NOT NULL,
   PRIMARY KEY (user_id, day)
 );
+-- 美国版（/us/）的候补名单：留邮箱，等 App 上线时通知；sign 是对方的日柱（拼音），ref 是从哪儿来的
+CREATE TABLE IF NOT EXISTS us_waitlist (
+  email TEXT PRIMARY KEY,
+  sign TEXT NOT NULL DEFAULT '',
+  ref TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
 -- 朋友：已经注册的人点开对方的链接互相配（a < b，邀请关系在 invites 里）
 CREATE TABLE IF NOT EXISTS friend_links (
   a INTEGER NOT NULL,

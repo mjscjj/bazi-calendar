@@ -41,6 +41,7 @@ ALIPAY_FAKE=1 ASK_AI=fake JIAO_FAKE=xiao,sheng COOKIE_SECURE=0 DB_PATH=./data/de
 | `public/js/` | 前台模块（无构建）：`mood.js` 心情便签（今天页心情板、月历小纸片、当日详情），`main.js` 路由和页签，`today.js` 今天页（本周、跟手滑动的每日卡片、明天寄语；每日一签：默念所求、摇签、掷筊、解签），`calendar.js` 日历，`me.js` 我的和能量档案，`onboard.js` 出生信息表单（日期、时间用 `wheel.js` 的滚轮一次选完，公历农历可切）、能量卡揭晓、引导和加到主屏，`account.js` 登录注册与资料等页面，`pay.js` 支付，`share.js` 分享图（跟随白色 / 深色），`growth.js` 邀请好友和日历订阅，`day.js` 当日详情，`data.js` 展示用常量，`core.js` 公共工具 |
 | `public/sw.js`、`manifest.webmanifest`、`icons/` | 可安装到主屏、离线时显示上一次的今天 |
 | `public/admin.*` | 管理后台 |
+| `public/us/` | **美国版「Sixty」**（https://mindflow.zone/bazi/us/ ，英文、给美国用户验证用）：落地页（今天的画）→ 填生日 → 画卷展开、盖印 → 你的日柱和今天 / 明天对你意味着什么 → 竖版分享图 → 发链接给朋友看「两个人的画」→ 留邮箱进候补名单；另有 60 张画的图鉴页。日柱在浏览器里按日期算（`us.js` 的 `cycleIndex`，测试里和排盘逐日核对），生日不上传；英文文案在 `content.json`（60 个日柱、5 种「今天对你」、55 种组合和 6 种关系），插画直接用 `public/art/`；字体 Cormorant + Inter 自托管在 `fonts/`（SIL OFL）。服务端只有候补名单接口 `/api/us/waitlist`（`us_waitlist` 表），埋点用 `us_` 开头的事件，后台看板有一块「美国版」漏斗 |
 | `scripts/backup.mjs` | SQLite 一致性备份，保留 14 份 |
 | `deploy/` | systemd 服务与每日备份定时器 |
 

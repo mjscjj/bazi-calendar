@@ -69,5 +69,10 @@ export function adminStats(db, now = Date.now()) {
     weeks.push({ week: a, n: rows.length, match: rows.length ? rows.filter((r) => band(r.score) === band(r.sys_level)).length / rows.length : null });
   }
 
-  return { funnel7: funnel(7), funnel30: funnel(30), cohorts, northStar: { members: members.length, median }, features, share, ratings: weeks };
+  // 美国版（/us/）：只有匿名事件和候补名单
+  const usFrom = dayStart(addDays(today, -29));
+  const usN = (name) => one('SELECT COUNT(DISTINCT anon_id) n FROM events WHERE name = ? AND created_at >= ?', name, usFrom);
+  const us = [['打开', usN('us_visit')], ['测日柱', usN('us_reveal')], ['分享图', usN('us_share')], ['发邀请', usN('us_invite')],
+    ['朋友测出两人的画', usN('us_pair')], ['留邮箱', one('SELECT COUNT(*) n FROM us_waitlist WHERE created_at >= ?', usFrom)]].map(([label, n]) => ({ label, n }));
+  return { us, funnel7: funnel(7), funnel30: funnel(30), cohorts, northStar: { members: members.length, median }, features, share, ratings: weeks };
 }

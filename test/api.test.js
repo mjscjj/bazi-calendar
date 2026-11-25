@@ -923,3 +923,33 @@ test('节气：节气那天有一张节气卡，按五行说对你意味着什�
   assert.equal(t.kind, c.xi.includes(4) ? 'xi' : c.ji.includes(4) ? 'ji' : 'neutral');
   assert.equal((await fetch(base + '/' + t.art)).status, 200);
 });
+
+test('美国版（/us/）：页面能打开；英文内容和插画齐全；网页里的日柱算法和排盘一致；候补名单只收合法邮箱、不重复', async () => {
+  const r = await fetch(base + '/us', { redirect: 'manual' });
+  assert.equal(r.status, 301);
+  assert.equal(r.headers.get('location'), '/bazi/us/');
+  const html = await (await fetch(base + '/us/')).text();
+  assert.ok(html.includes('<title>Sixty'));
+  const us = JSON.parse(fs.readFileSync(new URL('../public/us/content.json', import.meta.url)));
+  assert.equal(us.pillars.length, 60);
+  const art = (dir, f) => fs.existsSync(new URL(`../public/art/${dir}/${f}`, import.meta.url));
+  for (const p of us.pillars) assert.ok(p.name && p.intro && art('pillars', p.art), p.cn);
+  assert.equal(Object.keys(us.pairs).length, 55);
+  for (const [k, p] of Object.entries(us.pairs)) assert.ok(p.name && art('pairs', p.art), k);
+  for (const k of ['same', 'feeds', 'draws', 'yields', 'tests']) assert.ok(us.days[k]?.title, k);
+  // 和 public/us/us.js 的 cycleIndex 同一个算法
+  const { dayGz } = await import('../server/engine.js');
+  const idx = (s) => { const [y, m, d] = s.split('-').map(Number); return ((Math.floor(Date.UTC(y, m - 1, d) / 864e5) + 17) % 60 + 60) % 60; };
+  for (let k = -40000; k < 40000; k += 37) {
+    const s = new Date(Date.UTC(2000, 0, 1) + k * 864e5).toISOString().slice(0, 10);
+    assert.equal(us.pillars[idx(s)].cn, dayGz(s), s);
+  }
+  const c = client();
+  assert.equal((await c('POST', '/api/us/waitlist', { email: 'not-an-email' })).status, 400);
+  assert.equal((await c('POST', '/api/us/waitlist', { email: ' Amy@Example.com ', sign: 'guimao', ref: 'tiktok' })).status, 200);
+  assert.equal((await c('POST', '/api/us/waitlist', { email: 'amy@example.com' })).status, 200);
+  const rows = db.all('SELECT * FROM us_waitlist');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].email, 'amy@example.com');
+  assert.equal(rows[0].sign, 'guimao');
+});

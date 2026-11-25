@@ -93,7 +93,7 @@ const str = (v, max, name) => {
   return s;
 };
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.woff2': 'font/woff2' };
 
 // ---------- 应用 ----------
 export function createApp({ db, alipay, env = process.env, log = console, content, ai }) {
@@ -798,6 +798,16 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       if (!/^[a-z][a-z0-9_]{1,39}$/.test(name)) continue;
       db.run('INSERT INTO events(user_id, anon_id, name, props, created_at) VALUES(?,?,?,?,?)', u ? u.id : null, anon, name, JSON.stringify(e.props && typeof e.props === 'object' ? e.props : {}).slice(0, 1000), nowIso());
     }
+    return { ok: true };
+  });
+
+  // 美国版候补名单：只收邮箱和日柱，生日不上传（日柱在浏览器里算）
+  route('POST', '/api/us/waitlist', async ({ body, ip }) => {
+    if (!limit('usw:' + ip, 10, 3600000)) throw new HttpError(429, 'Too many tries. Please try again later.');
+    const email = String(body.email || '').trim().toLowerCase();
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) throw bad('Please enter a valid email.');
+    const sign = String(body.sign || '').replace(/[^a-z]/g, '').slice(0, 12), ref = String(body.ref || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 32);
+    db.run('INSERT OR IGNORE INTO us_waitlist(email, sign, ref, created_at) VALUES(?,?,?,?)', email, sign, ref, nowIso());
     return { ok: true };
   });
 
@@ -1686,6 +1696,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
   function serveStatic(req, res, p) {
     if (p === '/' || p === '') p = '/index.html';
     if (p === '/admin') p = '/admin.html';
+    if (p.endsWith('/')) p += 'index.html';
     const file = path.join(PUBLIC_DIR, path.normalize(p).replace(/^(\.\.[/\\])+/, ''));
     if (!file.startsWith(PUBLIC_DIR)) return false;
     let st;
@@ -1696,7 +1707,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
     res.writeHead(200, {
       'Content-Type': MIME[path.extname(file)] || 'application/octet-stream',
       // 插画不常换，缓存一天；页面和脚本每次协商，保证总是最新
-      'Cache-Control': p.startsWith('/art/') ? 'public, max-age=86400' : 'no-cache', ETag: etag,
+      'Cache-Control': p.startsWith('/art/') ? 'public, max-age=86400' : p.startsWith('/us/fonts/') ? 'public, max-age=31536000, immutable' : 'no-cache', ETag: etag,
     });
     fs.createReadStream(file).pipe(res);
     return true;
@@ -1735,6 +1746,7 @@ export function createApp({ db, alipay, env = process.env, log = console, conten
       }
       if ((req.method === 'GET' || req.method === 'HEAD') && serveStatic(req, res, p)) return;
       if (p === '/admin/') { res.writeHead(301, { Location: `${BASE}/admin` }); res.end(); return; }
+      if (p === '/us') { res.writeHead(301, { Location: `${BASE}/us/` }); res.end(); return; }
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('Not Found');
     } catch (e) {

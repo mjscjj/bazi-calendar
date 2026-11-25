@@ -97,6 +97,7 @@ function statsHtml(st) {
   return '<div class="grp">北极星</div><div class="kpis">' + kpi('付费会员一周打开天数（中位数）', ns.median == null ? '—' : ns.median + ' 天', '目标 ≥ 4 天 · 付费会员 ' + ns.members + ' 人')
     + kpi('近 7 天生成分享图', st.share.makers + ' 人', '带来打开 ' + st.share.opens + ' 次') + kpi('近 7 天邀请注册', st.share.invitedSignups, '已生效 ' + st.share.invitesDone) + kpi('日历订阅在用', (st.features.filter(function (f) { return f.key === 'ics_fetch'; })[0] || {}).users || 0, '近 7 天同步过') + '</div>'
     + '<div class="grp">转化漏斗</div><div class="charts">' + funnelHtml('近 7 天', st.funnel7) + funnelHtml('近 30 天', st.funnel30) + '</div>'
+    + (st.us ? '<div class="grp">美国版（/us/）</div><div class="charts">' + funnelHtml('近 30 天', st.us) + '</div>' : '')
     + '<p class="sub2" style="margin:0">「打开」「测能量卡」按设备计（「打开」从这次更新上线起记录），其余按注册账号计，所以比例可能超过 100%；「第 2 天再来」= 注册后至少用过两个不同的日子。</p>'
     + '<div class="grp">留存（按注册日）</div><div class="tbl"><table><tr><th>注册日</th><th class="num">人数</th><th class="num">第 1 天</th><th class="num">第 3 天</th><th class="num">第 7 天</th><th class="num">第 14 天</th></tr>'
     + (st.cohorts.some(function (c) { return c.size; }) ? '' : '<tr><td colspan="6" class="sub2" style="text-align:center;padding:20px">近 14 天没有新注册</td></tr>')

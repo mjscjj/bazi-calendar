@@ -1,0 +1,1057 @@
+{
+ "_about": "Sixty (US edition) copy. Pillars follow the 60-day cycle; stems give element, image and traits; days are what today means for you (today's stem vs yours); pairs are keyed by the two stems in cycle order. Art lives in ../art/. Edit freely, keep the keys.",
+ "stems": {
+  "jia": {
+   "cn": "甲",
+   "py": "Jiǎ",
+   "element": "Wood",
+   "polarity": "Yang",
+   "image": "Oak",
+   "traits": [
+    "Upright",
+    "Self-directed",
+    "Always growing"
+   ]
+  },
+  "yi": {
+   "cn": "乙",
+   "py": "Yǐ",
+   "element": "Wood",
+   "polarity": "Yin",
+   "image": "Vine",
+   "traits": [
+    "Adaptable",
+    "Graceful",
+    "Quietly persistent"
+   ]
+  },
+  "bing": {
+   "cn": "丙",
+   "py": "Bǐng",
+   "element": "Fire",
+   "polarity": "Yang",
+   "image": "Sun",
+   "traits": [
+    "Warm",
+    "Generous",
+    "Hard to ignore"
+   ]
+  },
+  "ding": {
+   "cn": "丁",
+   "py": "Dīng",
+   "element": "Fire",
+   "polarity": "Yin",
+   "image": "Candle",
+   "traits": [
+    "Attentive",
+    "Intuitive",
+    "A steady glow"
+   ]
+  },
+  "wu": {
+   "cn": "戊",
+   "py": "Wù",
+   "element": "Earth",
+   "polarity": "Yang",
+   "image": "Mountain",
+   "traits": [
+    "Steady",
+    "Dependable",
+    "Big-hearted"
+   ]
+  },
+  "ji": {
+   "cn": "己",
+   "py": "Jǐ",
+   "element": "Earth",
+   "polarity": "Yin",
+   "image": "Field",
+   "traits": [
+    "Nurturing",
+    "Practical",
+    "Patient"
+   ]
+  },
+  "geng": {
+   "cn": "庚",
+   "py": "Gēng",
+   "element": "Metal",
+   "polarity": "Yang",
+   "image": "Sword",
+   "traits": [
+    "Decisive",
+    "Principled",
+    "Brave"
+   ]
+  },
+  "xin": {
+   "cn": "辛",
+   "py": "Xīn",
+   "element": "Metal",
+   "polarity": "Yin",
+   "image": "Jewel",
+   "traits": [
+    "Refined",
+    "Discerning",
+    "Quietly proud"
+   ]
+  },
+  "ren": {
+   "cn": "壬",
+   "py": "Rén",
+   "element": "Water",
+   "polarity": "Yang",
+   "image": "Ocean",
+   "traits": [
+    "Bold",
+    "Free-thinking",
+    "Restless"
+   ]
+  },
+  "gui": {
+   "cn": "癸",
+   "py": "Guǐ",
+   "element": "Water",
+   "polarity": "Yin",
+   "image": "Rain",
+   "traits": [
+    "Gentle",
+    "Perceptive",
+    "Deep"
+   ]
+  }
+ },
+ "pillars": [
+  {
+   "no": 1,
+   "cn": "甲子",
+   "slug": "jiazi",
+   "py": "Jiǎ Zǐ",
+   "stem": "jia",
+   "animal": "Rat",
+   "name": "Oak by Winter Water",
+   "intro": "Bookish and easy to like. Every new thing you learn makes you surer of yourself.",
+   "art": "01-jiazi.webp"
+  },
+  {
+   "no": 2,
+   "cn": "乙丑",
+   "slug": "yichou",
+   "py": "Yǐ Chǒu",
+   "stem": "yi",
+   "animal": "Ox",
+   "name": "Plum Blossom in Snow",
+   "intro": "Tough, patient and practical. You bloom in the cold, when everyone else has gone quiet.",
+   "art": "02-yichou.webp"
+  },
+  {
+   "no": 3,
+   "cn": "丙寅",
+   "slug": "bingyin",
+   "py": "Bǐng Yín",
+   "stem": "bing",
+   "animal": "Tiger",
+   "name": "Sunrise in the Spring Woods",
+   "intro": "Curious, upbeat and full of energy. You bring the morning with you wherever you go.",
+   "art": "03-bingyin.webp"
+  },
+  {
+   "no": 4,
+   "cn": "丁卯",
+   "slug": "dingmao",
+   "py": "Dīng Mǎo",
+   "stem": "ding",
+   "animal": "Rabbit",
+   "name": "Lantern on a Flowering Branch",
+   "intro": "Imaginative, with a look all your own. Even when you're quiet, you give off light.",
+   "art": "04-dingmao.webp"
+  },
+  {
+   "no": 5,
+   "cn": "戊辰",
+   "slug": "wuchen",
+   "py": "Wù Chén",
+   "stem": "wu",
+   "animal": "Dragon",
+   "name": "Mountain with a Hidden Spring",
+   "intro": "Steady and generous. You can hold a lot — problems, secrets, people — and keep it all safe.",
+   "art": "05-wuchen.webp"
+  },
+  {
+   "no": 6,
+   "cn": "己巳",
+   "slug": "jisi",
+   "py": "Jǐ Sì",
+   "stem": "ji",
+   "animal": "Snake",
+   "name": "Sunny Fields in Early Summer",
+   "intro": "Warm, lively and resourceful. You meet things head-on and usually find a way.",
+   "art": "06-jisi.webp"
+  },
+  {
+   "no": 7,
+   "cn": "庚午",
+   "slug": "gengwu",
+   "py": "Gēng Wǔ",
+   "stem": "geng",
+   "animal": "Horse",
+   "name": "Sword Tempered in Summer Fire",
+   "intro": "Polished and principled. You keep your standards, and pressure only makes you sharper.",
+   "art": "07-gengwu.webp"
+  },
+  {
+   "no": 8,
+   "cn": "辛未",
+   "slug": "xinwei",
+   "py": "Xīn Wèi",
+   "stem": "xin",
+   "animal": "Goat",
+   "name": "Gem in the Sand",
+   "intro": "Calm and seasoned on the outside, finely tuned on the inside. You notice everything.",
+   "art": "08-xinwei.webp"
+  },
+  {
+   "no": 9,
+   "cn": "壬申",
+   "slug": "renshen",
+   "py": "Rén Shēn",
+   "stem": "ren",
+   "animal": "Monkey",
+   "name": "River Rushing from Autumn Hills",
+   "intro": "Quick-minded with real staying power. You learn fast, and your world keeps getting wider.",
+   "art": "09-renshen.webp"
+  },
+  {
+   "no": 10,
+   "cn": "癸酉",
+   "slug": "guiyou",
+   "py": "Guǐ Yǒu",
+   "stem": "gui",
+   "animal": "Rooster",
+   "name": "Dew on an Autumn Morning",
+   "intro": "Clear-headed with sharp instincts. You get things done cleanly, without fuss.",
+   "art": "10-guiyou.webp"
+  },
+  {
+   "no": 11,
+   "cn": "甲戌",
+   "slug": "jiaxu",
+   "py": "Jiǎ Xū",
+   "stem": "jia",
+   "animal": "Dog",
+   "name": "Tree on an Autumn Ridge",
+   "intro": "Down-to-earth and low-key, with deep reserves. People feel safe around you.",
+   "art": "11-jiaxu.webp"
+  },
+  {
+   "no": 12,
+   "cn": "乙亥",
+   "slug": "yihai",
+   "py": "Yǐ Hài",
+   "stem": "yi",
+   "animal": "Pig",
+   "name": "Blossoms on a Winter Lake",
+   "intro": "Kind, intuitive and calm inside. You never push, and you still carry weight.",
+   "art": "12-yihai.webp"
+  },
+  {
+   "no": 13,
+   "cn": "丙子",
+   "slug": "bingzi",
+   "py": "Bǐng Zǐ",
+   "stem": "bing",
+   "animal": "Rat",
+   "name": "Sunrise over a Frozen Lake",
+   "intro": "Upright and gracious. You play fair — and you can warm up the coldest room.",
+   "art": "13-bingzi.webp"
+  },
+  {
+   "no": 14,
+   "cn": "丁丑",
+   "slug": "dingchou",
+   "py": "Dīng Chǒu",
+   "stem": "ding",
+   "animal": "Ox",
+   "name": "Lamplight in a Snowy Window",
+   "intro": "Unflashy, with a plan you keep to yourself. Your life runs on quiet good judgment.",
+   "art": "14-dingchou.webp"
+  },
+  {
+   "no": 15,
+   "cn": "戊寅",
+   "slug": "wuyin",
+   "py": "Wù Yín",
+   "stem": "wu",
+   "animal": "Tiger",
+   "name": "Mountain in the Spring Forest",
+   "intro": "A commanding presence, born to lead. When it counts, you make the call.",
+   "art": "15-wuyin.webp"
+  },
+  {
+   "no": 16,
+   "cn": "己卯",
+   "slug": "jimao",
+   "py": "Jǐ Mǎo",
+   "stem": "ji",
+   "animal": "Rabbit",
+   "name": "Field of Spring Sprouts",
+   "intro": "Busy on the surface, calm underneath. The more there is to do, the more organized you get.",
+   "art": "16-jimao.webp"
+  },
+  {
+   "no": 17,
+   "cn": "庚辰",
+   "slug": "gengchen",
+   "py": "Gēng Chén",
+   "stem": "geng",
+   "animal": "Dragon",
+   "name": "Sword Rising from a Spring Lake",
+   "intro": "Strong presence, a mind of your own. The harder it gets, the more you want to win.",
+   "art": "17-gengchen.webp"
+  },
+  {
+   "no": 18,
+   "cn": "辛巳",
+   "slug": "xinsi",
+   "py": "Xīn Sì",
+   "stem": "xin",
+   "animal": "Snake",
+   "name": "Gem on a Sun-Warmed Stone",
+   "intro": "Gracious and easy to like. You weigh things carefully — sometimes twice, sometimes ten times.",
+   "art": "18-xinsi.webp"
+  },
+  {
+   "no": 19,
+   "cn": "壬午",
+   "slug": "renwu",
+   "py": "Rén Wǔ",
+   "stem": "ren",
+   "animal": "Horse",
+   "name": "Lake Holding the Summer Sky",
+   "intro": "Bright and easygoing. You know how to build a good life, and everyone around you feels it.",
+   "art": "19-renwu.webp"
+  },
+  {
+   "no": 20,
+   "cn": "癸未",
+   "slug": "guiwei",
+   "py": "Guǐ Wèi",
+   "stem": "gui",
+   "animal": "Goat",
+   "name": "Rain on Dry Ground",
+   "intro": "Big-hearted and giving. When you help, you help exactly where it matters.",
+   "art": "20-guiwei.webp"
+  },
+  {
+   "no": 21,
+   "cn": "甲申",
+   "slug": "jiashen",
+   "py": "Jiǎ Shēn",
+   "stem": "jia",
+   "animal": "Monkey",
+   "name": "Tree on a Windy Cliff",
+   "intro": "Disciplined and decisive. Pressure makes you better — you stand tall and hold your ground.",
+   "art": "21-jiashen.webp"
+  },
+  {
+   "no": 22,
+   "cn": "乙酉",
+   "slug": "yiyou",
+   "py": "Yǐ Yǒu",
+   "stem": "yi",
+   "animal": "Rooster",
+   "name": "Osmanthus under the Autumn Moon",
+   "intro": "Precise and composed. Your craft shows in the details.",
+   "art": "22-yiyou.webp"
+  },
+  {
+   "no": 23,
+   "cn": "丙戌",
+   "slug": "bingxu",
+   "py": "Bǐng Xū",
+   "stem": "bing",
+   "animal": "Dog",
+   "name": "Sun Setting into Autumn Hills",
+   "intro": "Grounded and deep. Your warmth shows up in what you do, not in what you say.",
+   "art": "23-bingxu.webp"
+  },
+  {
+   "no": 24,
+   "cn": "丁亥",
+   "slug": "dinghai",
+   "py": "Dīng Hài",
+   "stem": "ding",
+   "animal": "Pig",
+   "name": "Lantern on a Winter River",
+   "intro": "Honest and reserved. You're quiet, and people trust you anyway — instantly.",
+   "art": "24-dinghai.webp"
+  },
+  {
+   "no": 25,
+   "cn": "戊子",
+   "slug": "wuzi",
+   "py": "Wù Zǐ",
+   "stem": "wu",
+   "animal": "Rat",
+   "name": "Mountain on a Snowy Night",
+   "intro": "Practical, steady, smart with money. The higher the stakes, the more reliable you get.",
+   "art": "25-wuzi.webp"
+  },
+  {
+   "no": 26,
+   "cn": "己丑",
+   "slug": "jichou",
+   "py": "Jǐ Chǒu",
+   "stem": "ji",
+   "animal": "Ox",
+   "name": "Field Resting in Winter",
+   "intro": "Humble and practical, a natural at living well. You know what's worth keeping.",
+   "art": "26-jichou.webp"
+  },
+  {
+   "no": 27,
+   "cn": "庚寅",
+   "slug": "gengyin",
+   "py": "Gēng Yín",
+   "stem": "geng",
+   "animal": "Tiger",
+   "name": "Sword in Stone, Spring Woods",
+   "intro": "A sharp eye for opportunity. Once you see it, you move.",
+   "art": "27-gengyin.webp"
+  },
+  {
+   "no": 28,
+   "cn": "辛卯",
+   "slug": "xinmao",
+   "py": "Xīn Mǎo",
+   "stem": "xin",
+   "animal": "Rabbit",
+   "name": "Jade Hairpin among Flowers",
+   "intro": "Elegant and nimble-minded. You're always first to spot an opening.",
+   "art": "28-xinmao.webp"
+  },
+  {
+   "no": 29,
+   "cn": "壬辰",
+   "slug": "renchen",
+   "py": "Rén Chén",
+   "stem": "ren",
+   "animal": "Dragon",
+   "name": "Ocean at Spring Tide",
+   "intro": "Big presence, big ambitions. Rough water just gets you going.",
+   "art": "29-renchen.webp"
+  },
+  {
+   "no": 30,
+   "cn": "癸巳",
+   "slug": "guisi",
+   "py": "Guǐ Sì",
+   "stem": "gui",
+   "animal": "Snake",
+   "name": "Sunshower in Early Summer",
+   "intro": "Gentle and thoughtful. People are drawn to you, and you're easy to be around.",
+   "art": "30-guisi.webp"
+  },
+  {
+   "no": 31,
+   "cn": "甲午",
+   "slug": "jiawu",
+   "py": "Jiǎ Wǔ",
+   "stem": "jia",
+   "animal": "Horse",
+   "name": "Tree on a Summer Plain",
+   "intro": "Clever and magnetic. People notice you, and your ideas are usually a step ahead.",
+   "art": "31-jiawu.webp"
+  },
+  {
+   "no": 32,
+   "cn": "乙未",
+   "slug": "yiwei",
+   "py": "Yǐ Wèi",
+   "stem": "yi",
+   "animal": "Goat",
+   "name": "Vine on Late-Summer Earth",
+   "intro": "Grounded and results-minded. You can put down roots anywhere.",
+   "art": "32-yiwei.webp"
+  },
+  {
+   "no": 33,
+   "cn": "丙申",
+   "slug": "bingshen",
+   "py": "Bǐng Shēn",
+   "stem": "bing",
+   "animal": "Monkey",
+   "name": "Sun on an Autumn Evening",
+   "intro": "Quick and perceptive. You read the room, and you're funny without overstepping.",
+   "art": "33-bingshen.webp"
+  },
+  {
+   "no": 34,
+   "cn": "丁酉",
+   "slug": "dingyou",
+   "py": "Dīng Yǒu",
+   "stem": "ding",
+   "animal": "Rooster",
+   "name": "Candle in an Autumn Window",
+   "intro": "Refined taste and a nose for opportunity. You know how to live.",
+   "art": "34-dingyou.webp"
+  },
+  {
+   "no": 35,
+   "cn": "戊戌",
+   "slug": "wuxu",
+   "py": "Wù Xū",
+   "stem": "wu",
+   "animal": "Dog",
+   "name": "Mountain in Late Autumn",
+   "intro": "Solid and quiet. You keep your word — you're the one everyone counts on.",
+   "art": "35-wuxu.webp"
+  },
+  {
+   "no": 36,
+   "cn": "己亥",
+   "slug": "jihai",
+   "py": "Jǐ Hài",
+   "stem": "ji",
+   "animal": "Pig",
+   "name": "Field by Early Winter Water",
+   "intro": "Steady and fair, with a fine sense of proportion. You can adapt to almost anything.",
+   "art": "36-jihai.webp"
+  },
+  {
+   "no": 37,
+   "cn": "庚子",
+   "slug": "gengzi",
+   "py": "Gēng Zǐ",
+   "stem": "geng",
+   "animal": "Rat",
+   "name": "Sword in a Cold Spring",
+   "intro": "Bright and lively. There's a spark in how you talk and work, and new ideas keep coming.",
+   "art": "37-gengzi.webp"
+  },
+  {
+   "no": 38,
+   "cn": "辛丑",
+   "slug": "xinchou",
+   "py": "Xīn Chǒu",
+   "stem": "xin",
+   "animal": "Ox",
+   "name": "Uncut Jade in Winter Earth",
+   "intro": "You don't say much, but you see deep — into people, and into things.",
+   "art": "38-xinchou.webp"
+  },
+  {
+   "no": 39,
+   "cn": "壬寅",
+   "slug": "renyin",
+   "py": "Rén Yín",
+   "stem": "ren",
+   "animal": "Tiger",
+   "name": "River through the Spring Woods",
+   "intro": "Talented and fun-loving. You know how to enjoy life, and the ideas never stop.",
+   "art": "39-renyin.webp"
+  },
+  {
+   "no": 40,
+   "cn": "癸卯",
+   "slug": "guimao",
+   "py": "Guǐ Mǎo",
+   "stem": "gui",
+   "animal": "Rabbit",
+   "name": "Spring Dew",
+   "intro": "Fresh and quick-witted. Your talent hides in the details, and you always know where the line is.",
+   "art": "40-guimao.webp"
+  },
+  {
+   "no": 41,
+   "cn": "甲辰",
+   "slug": "jiachen",
+   "py": "Jiǎ Chén",
+   "stem": "jia",
+   "animal": "Dragon",
+   "name": "Oak on a Rainy Riverbank",
+   "intro": "You think big and give freely. Every year, you stand on firmer ground.",
+   "art": "41-jiachen.webp"
+  },
+  {
+   "no": 42,
+   "cn": "乙巳",
+   "slug": "yisi",
+   "py": "Yǐ Sì",
+   "stem": "yi",
+   "animal": "Snake",
+   "name": "Flower Climbing the Rocks",
+   "intro": "Bright and expressive. Walk into a room, and you're seen.",
+   "art": "42-yisi.webp"
+  },
+  {
+   "no": 43,
+   "cn": "丙午",
+   "slug": "bingwu",
+   "py": "Bǐng Wǔ",
+   "stem": "bing",
+   "animal": "Horse",
+   "name": "Midsummer Noon Sun",
+   "intro": "Warm, bold and quick to act. Your energy fills the place.",
+   "art": "43-bingwu.webp"
+  },
+  {
+   "no": 44,
+   "cn": "丁未",
+   "slug": "dingwei",
+   "py": "Dīng Wèi",
+   "stem": "ding",
+   "animal": "Goat",
+   "name": "Lamp on a Country Path",
+   "intro": "Reliable and steady. If you say it, you'll do it.",
+   "art": "44-dingwei.webp"
+  },
+  {
+   "no": 45,
+   "cn": "戊申",
+   "slug": "wushen",
+   "py": "Wù Shēn",
+   "stem": "wu",
+   "animal": "Monkey",
+   "name": "Autumn Hill with a Clear Spring",
+   "intro": "Witty and playful, with a real gift for enjoying life.",
+   "art": "45-wushen.webp"
+  },
+  {
+   "no": 46,
+   "cn": "己酉",
+   "slug": "jiyou",
+   "py": "Jǐ Yǒu",
+   "stem": "ji",
+   "animal": "Rooster",
+   "name": "Fields at Harvest",
+   "intro": "You know good things when you see them. Your life has real flavor.",
+   "art": "46-jiyou.webp"
+  },
+  {
+   "no": 47,
+   "cn": "庚戌",
+   "slug": "gengxu",
+   "py": "Gēng Xū",
+   "stem": "geng",
+   "animal": "Dog",
+   "name": "Old Sword in the Autumn Hills",
+   "intro": "Plain-spoken and quiet, with principles you won't bend. People rely on you.",
+   "art": "47-gengxu.webp"
+  },
+  {
+   "no": 48,
+   "cn": "辛亥",
+   "slug": "xinhai",
+   "py": "Xīn Hài",
+   "stem": "xin",
+   "animal": "Pig",
+   "name": "Pearl in a Winter Lake",
+   "intro": "Graceful and perceptive, with a real creative streak.",
+   "art": "48-xinhai.webp"
+  },
+  {
+   "no": 49,
+   "cn": "壬子",
+   "slug": "renzi",
+   "py": "Rén Zǐ",
+   "stem": "ren",
+   "animal": "Rat",
+   "name": "Ocean Rising on a Winter Night",
+   "intro": "Bold and fearless, and loyal to the core.",
+   "art": "49-renzi.webp"
+  },
+  {
+   "no": 50,
+   "cn": "癸丑",
+   "slug": "guichou",
+   "py": "Guǐ Chǒu",
+   "stem": "gui",
+   "animal": "Ox",
+   "name": "Drizzle on Winter Fields",
+   "intro": "Quiet and low-key, with a mind firmly your own. You carry weight without making noise.",
+   "art": "50-guichou.webp"
+  },
+  {
+   "no": 51,
+   "cn": "甲寅",
+   "slug": "jiayin",
+   "py": "Jiǎ Yín",
+   "stem": "jia",
+   "animal": "Tiger",
+   "name": "Great Tree in the Early Spring Forest",
+   "intro": "Confident and sure of yourself. You were made to grow upward.",
+   "art": "51-jiayin.webp"
+  },
+  {
+   "no": 52,
+   "cn": "乙卯",
+   "slug": "yimao",
+   "py": "Yǐ Mǎo",
+   "stem": "yi",
+   "animal": "Rabbit",
+   "name": "Orchid after Spring Rain",
+   "intro": "Fresh, lovely and easy to be around. People are simply drawn to you.",
+   "art": "52-yimao.webp"
+  },
+  {
+   "no": 53,
+   "cn": "丙辰",
+   "slug": "bingchen",
+   "py": "Bǐng Chén",
+   "stem": "bing",
+   "animal": "Dragon",
+   "name": "Sun Breaking through Rain Clouds",
+   "intro": "Gentle and cultured, with a head full of wonderful ideas.",
+   "art": "53-bingchen.webp"
+  },
+  {
+   "no": 54,
+   "cn": "丁巳",
+   "slug": "dingsi",
+   "py": "Dīng Sì",
+   "stem": "ding",
+   "animal": "Snake",
+   "name": "Kiln Fire in Early Summer",
+   "intro": "You don't give up, and your drive is contagious.",
+   "art": "54-dingsi.webp"
+  },
+  {
+   "no": 55,
+   "cn": "戊午",
+   "slug": "wuwu",
+   "py": "Wù Wǔ",
+   "stem": "wu",
+   "animal": "Horse",
+   "name": "High Mountain under Blazing Sun",
+   "intro": "Passionate and strong under pressure. You stand out wherever you go.",
+   "art": "55-wuwu.webp"
+  },
+  {
+   "no": 56,
+   "cn": "己未",
+   "slug": "jiwei",
+   "py": "Jǐ Wèi",
+   "stem": "ji",
+   "animal": "Goat",
+   "name": "Golden Wheat in Late Summer",
+   "intro": "Hardworking and never one to quit. Step by step, you build a full life.",
+   "art": "56-jiwei.webp"
+  },
+  {
+   "no": 57,
+   "cn": "庚申",
+   "slug": "gengshen",
+   "py": "Gēng Shēn",
+   "stem": "geng",
+   "animal": "Monkey",
+   "name": "Sword on an Autumn Cliff",
+   "intro": "Direct, unbreakable, and fiercely loyal.",
+   "art": "57-gengshen.webp"
+  },
+  {
+   "no": 58,
+   "cn": "辛酉",
+   "slug": "xinyou",
+   "py": "Xīn Yǒu",
+   "stem": "xin",
+   "animal": "Rooster",
+   "name": "Diamond under the Autumn Moon",
+   "intro": "Exacting, with high standards — and fiercely loyal to your people.",
+   "art": "58-xinyou.webp"
+  },
+  {
+   "no": 59,
+   "cn": "壬戌",
+   "slug": "renxu",
+   "py": "Rén Xū",
+   "stem": "ren",
+   "animal": "Dog",
+   "name": "Lake Ringed by Autumn Hills",
+   "intro": "Kind-hearted, intuitive, and very good with money.",
+   "art": "59-renxu.webp"
+  },
+  {
+   "no": 60,
+   "cn": "癸亥",
+   "slug": "guihai",
+   "py": "Guǐ Hài",
+   "stem": "gui",
+   "animal": "Pig",
+   "name": "Fine Rain on a Winter Lake",
+   "intro": "Calm on the surface, with real depth of heart and vision.",
+   "art": "60-guihai.webp"
+  }
+ ],
+ "days": {
+  "same": {
+   "title": "A Kindred Day",
+   "line": "Today moves at your pace. Team up, back yourself, and trust your instincts."
+  },
+  "feeds": {
+   "title": "A Nourishing Day",
+   "line": "Today gives to you. Learn something, rest, and let yourself be looked after."
+  },
+  "draws": {
+   "title": "An Expressive Day",
+   "line": "Today draws something out of you. Make, write, speak up — share what you have been holding."
+  },
+  "yields": {
+   "title": "A Harvest Day",
+   "line": "Today is within your reach. Ask for what you want and collect what you have earned."
+  },
+  "tests": {
+   "title": "A Tempering Day",
+   "line": "Today pushes back. A little friction will sharpen you — stay steady and pick your battles."
+  }
+ },
+ "pairKinds": {
+  "match": {
+   "tag": "Made to Match",
+   "text": "You are the {me}, they are the {you}. Your signs combine — together, you both feel more like yourselves."
+  },
+  "same": {
+   "tag": "Side by Side",
+   "text": "You are both the {me}. Same instincts, same rhythm — the kind of pair that goes the distance."
+  },
+  "lift": {
+   "tag": "You Lift Them",
+   "text": "You are the {me}, they are the {you}. You hold them up, and they give your care somewhere to go."
+  },
+  "lifted": {
+   "tag": "They Lift You",
+   "text": "You are the {me}, they are the {you}. They hold you up — around them, you stand a little taller."
+  },
+  "push": {
+   "tag": "You Push Them",
+   "text": "You are the {me}, they are the {you}. You push them forward. When it grinds, give them room."
+  },
+  "pushed": {
+   "tag": "They Push You",
+   "text": "You are the {me}, they are the {you}. They push you forward. Get through the friction, and no one will know you better."
+  }
+ },
+ "pairs": {
+  "jia-jia": {
+   "name": "Twin Oaks",
+   "art": "jia-jia.webp"
+  },
+  "jia-yi": {
+   "name": "Vine around the Oak",
+   "art": "jia-yi.webp"
+  },
+  "jia-bing": {
+   "name": "Oak toward the Sun",
+   "art": "jia-bing.webp"
+  },
+  "jia-ding": {
+   "name": "Lantern beneath the Oak",
+   "art": "jia-ding.webp"
+  },
+  "jia-wu": {
+   "name": "Pine on the Mountain",
+   "art": "jia-wu.webp"
+  },
+  "jia-ji": {
+   "name": "Oak by the Field",
+   "art": "jia-ji.webp"
+  },
+  "jia-geng": {
+   "name": "Sword against the Oak",
+   "art": "jia-geng.webp"
+  },
+  "jia-xin": {
+   "name": "Jade on a Branch",
+   "art": "jia-xin.webp"
+  },
+  "jia-ren": {
+   "name": "Oak by the River",
+   "art": "jia-ren.webp"
+  },
+  "jia-gui": {
+   "name": "Oak in the Rain",
+   "art": "jia-gui.webp"
+  },
+  "yi-yi": {
+   "name": "Twined Vines",
+   "art": "yi-yi.webp"
+  },
+  "yi-bing": {
+   "name": "Flower Facing the Sun",
+   "art": "yi-bing.webp"
+  },
+  "yi-ding": {
+   "name": "Lantern among Flowers",
+   "art": "yi-ding.webp"
+  },
+  "yi-wu": {
+   "name": "Flowers on the Hillside",
+   "art": "yi-wu.webp"
+  },
+  "yi-ji": {
+   "name": "Flowers in the Garden",
+   "art": "yi-ji.webp"
+  },
+  "yi-geng": {
+   "name": "Sword Wrapped in Blossoms",
+   "art": "yi-geng.webp"
+  },
+  "yi-xin": {
+   "name": "Petals and Jade",
+   "art": "yi-xin.webp"
+  },
+  "yi-ren": {
+   "name": "Lotus on the River",
+   "art": "yi-ren.webp"
+  },
+  "yi-gui": {
+   "name": "Flower with Dew",
+   "art": "yi-gui.webp"
+  },
+  "bing-bing": {
+   "name": "Sun and Its Reflection",
+   "art": "bing-bing.webp"
+  },
+  "bing-ding": {
+   "name": "Sunset, Lamps Lit",
+   "art": "bing-ding.webp"
+  },
+  "bing-wu": {
+   "name": "Sunrise over the Peaks",
+   "art": "bing-wu.webp"
+  },
+  "bing-ji": {
+   "name": "Grain Drying in the Sun",
+   "art": "bing-ji.webp"
+  },
+  "bing-geng": {
+   "name": "Sunlight on a Blade",
+   "art": "bing-geng.webp"
+  },
+  "bing-xin": {
+   "name": "Gem in the Sunlight",
+   "art": "bing-xin.webp"
+  },
+  "bing-ren": {
+   "name": "Sunrise over the Sea",
+   "art": "bing-ren.webp"
+  },
+  "bing-gui": {
+   "name": "Rainbow after Rain",
+   "art": "bing-gui.webp"
+  },
+  "ding-ding": {
+   "name": "A Pair of Lanterns",
+   "art": "ding-ding.webp"
+  },
+  "ding-wu": {
+   "name": "Lamp in the Mountains",
+   "art": "ding-wu.webp"
+  },
+  "ding-ji": {
+   "name": "Farmhouse Lamp",
+   "art": "ding-ji.webp"
+  },
+  "ding-geng": {
+   "name": "Forge and Sword",
+   "art": "ding-geng.webp"
+  },
+  "ding-xin": {
+   "name": "Jewels by Candlelight",
+   "art": "ding-xin.webp"
+  },
+  "ding-ren": {
+   "name": "Lantern Boat on the River",
+   "art": "ding-ren.webp"
+  },
+  "ding-gui": {
+   "name": "Lamp on a Rainy Night",
+   "art": "ding-gui.webp"
+  },
+  "wu-wu": {
+   "name": "Twin Peaks",
+   "art": "wu-wu.webp"
+  },
+  "wu-ji": {
+   "name": "Fields below the Mountain",
+   "art": "wu-ji.webp"
+  },
+  "wu-geng": {
+   "name": "Sword Hidden in the Mountain",
+   "art": "wu-geng.webp"
+  },
+  "wu-xin": {
+   "name": "Jade in the Mountain",
+   "art": "wu-xin.webp"
+  },
+  "wu-ren": {
+   "name": "Mountain Facing the Sea",
+   "art": "wu-ren.webp"
+  },
+  "wu-gui": {
+   "name": "Green Hills after Rain",
+   "art": "wu-gui.webp"
+  },
+  "ji-ji": {
+   "name": "Terraced Fields",
+   "art": "ji-ji.webp"
+  },
+  "ji-geng": {
+   "name": "Gold in the Field",
+   "art": "ji-geng.webp"
+  },
+  "ji-xin": {
+   "name": "Pearl in the Earth",
+   "art": "ji-xin.webp"
+  },
+  "ji-ren": {
+   "name": "River through the Fields",
+   "art": "ji-ren.webp"
+  },
+  "ji-gui": {
+   "name": "Spring Rain on the Fields",
+   "art": "ji-gui.webp"
+  },
+  "geng-geng": {
+   "name": "Crossed Swords",
+   "art": "geng-geng.webp"
+  },
+  "geng-xin": {
+   "name": "Jade-Set Sword",
+   "art": "geng-xin.webp"
+  },
+  "geng-ren": {
+   "name": "Sword by the River",
+   "art": "geng-ren.webp"
+  },
+  "geng-gui": {
+   "name": "Sword in the Rain",
+   "art": "geng-gui.webp"
+  },
+  "xin-xin": {
+   "name": "A Pair of Pearls",
+   "art": "xin-xin.webp"
+  },
+  "xin-ren": {
+   "name": "Pearl in the Sea",
+   "art": "xin-ren.webp"
+  },
+  "xin-gui": {
+   "name": "Gem in the Rain",
+   "art": "xin-gui.webp"
+  },
+  "ren-ren": {
+   "name": "Rivers Meeting",
+   "art": "ren-ren.webp"
+  },
+  "ren-gui": {
+   "name": "Rain into the Sea",
+   "art": "ren-gui.webp"
+  },
+  "gui-gui": {
+   "name": "Twin Streams in Drizzle",
+   "art": "gui-gui.webp"
+  }
+ }
+}

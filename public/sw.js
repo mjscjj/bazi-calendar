@@ -14,6 +14,7 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
+  if (url.pathname.includes('/us/')) return; // 美国版是另一个页面，不走这里的离线缓存
   const isApi = url.pathname.includes('/api/');
   if (isApi && !OFFLINE_API.test(url.pathname + url.search)) return;
   e.respondWith(fetch(req).then((res) => {
