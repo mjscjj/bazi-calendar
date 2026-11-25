@@ -1,21 +1,11 @@
 // 浏览器端到端走查：node test/e2e/flow.mjs <baseUrl> <dbPath> <outDir>
 // 需要环境变量 PLAYWRIGHT_MODULE、CHROME；服务端以 ALIPAY_FAKE=1 启动。
 import { DatabaseSync } from 'node:sqlite';
-import { setBirth } from './helpers.mjs';
+import { setBirth, drawLot } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out] = process.argv.slice(2);
 const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA busy_timeout = 5000'); // 服务也在写，撞上时等一等，别直接报 database is locked
-// 掷筊直到圣杯再解签（服务端用 JIAO_FAKE=xiao,sheng 启动时第 2 次是圣杯）
-async function tossToLot(pg) {
-  await pg.waitForSelector('#sheet [data-toss]', { timeout: 8000 });
-  for (let i = 0; i < 3; i++) {
-    await pg.click('#sheet [data-toss]');
-    await pg.waitForSelector('#sheet [data-jiao-read], #sheet [data-toss]:not([disabled]), #sheet .jdone', { timeout: 8000 });
-    if (await pg.$('#sheet [data-jiao-read]')) { await pg.click('#sheet [data-jiao-read]'); return; }
-    if (await pg.$('#sheet .jdone')) throw new Error('掷筊没求成（服务端启动时加 JIAO_FAKE=xiao,sheng）');
-  }
-}
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
 const errors = [];
 const iphone = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' };
@@ -79,15 +69,10 @@ await shot('06-today-full', true);
 
 step('每日一签（完整仪式）');
 await page.click('[data-draw]');
-await page.waitForSelector('#drawForm'); await shot('07a-draw-ask');
-await page.fill('#drawForm input[name=q]', '这周的面试');
-await page.click('#drawForm button[type=submit]');
-await page.waitForSelector('#sheet .shake');
-await shot('07-shake');
-await page.waitForSelector('#sheet [data-toss]', { timeout: 6000 }); await shot('07b-drawn');
-await tossToLot(page);
-await page.waitForSelector('#sheet .lot', { timeout: 5000 });
-if (!(await page.textContent('#sheet .lotq')).includes('这周的面试')) errors.push('签上没带着所问之事');
+await page.waitForSelector('#drawForm'); await page.waitForTimeout(500); await shot('07a-draw-ask');
+await drawLot(page, '这周的面试');
+if (!(await page.textContent('#sheet .rans .q')).includes('这周的面试')) errors.push('签上没带着所问之事');
+await page.waitForTimeout(4500);
 await shot('08-lot');
 await page.click('#sheet [data-share="lot"]');
 await page.waitForSelector('.sharepv img');

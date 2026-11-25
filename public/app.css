@@ -500,11 +500,6 @@ body.has-tabs .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .mini .mt small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* 签 */
-.shake{display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 0 20px}
-.tube{position:relative;width:84px;height:120px;border-radius:12px 12px 18px 18px;background:linear-gradient(160deg,var(--ink2),var(--ink));display:flex;justify-content:center;gap:5px;padding-top:6px;animation:shake .32s ease-in-out infinite alternate;transform-origin:50% 100%}
-.tube i{width:6px;height:46px;border-radius:3px;background:var(--glow);margin-top:-30px;opacity:.9}
-.tube i:nth-child(2){height:56px;margin-top:-40px}.tube i:nth-child(4){height:52px;margin-top:-36px}
-@keyframes shake{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
 .lot{display:flex;flex-direction:column;gap:12px;align-items:stretch}
 .lothead{display:flex;justify-content:center;align-items:center;gap:10px}
 .lothead .no{font-size:13px;color:var(--muted);letter-spacing:.1em}
@@ -579,7 +574,7 @@ body.has-tabs .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 /* 分享预览 */
 .sharepv{display:flex;flex-direction:column;gap:12px}
 .sharepv img{width:min(100%,300px);align-self:center;border-radius:16px;box-shadow:0 14px 40px rgba(10,12,20,.25)}
-@media (prefers-reduced-motion: reduce){.ecard,.tube{animation:none!important}}
+@media (prefers-reduced-motion: reduce){.ecard{animation:none!important}}
 
 /* ================= 打磨：宣纸 · 墨 · 朱砂印 =================
    层级靠留白、字重和明暗，不靠边框；卡片统一用一圈很淡的阴影（--ring）。
@@ -1187,13 +1182,6 @@ body.in-ritual{overflow:hidden}
 .myrate{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);background:var(--sunk);border-radius:12px;padding:8px 12px}
 .myrate b{color:var(--fg)}
 @media (min-width:960px){.c2 .rmark{top:12px;right:10px}}
-/* 求签先写所问 */
-.tube.still{animation:none}
-/* 每日一签：写所问、换个问题的表单 */
-.drawf{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:18px 0 6px}
-.drawf .tube{align-self:center;margin-bottom:6px}
-.drawf .tip{margin:0;text-align:center;color:var(--muted);font-size:14px}
-.drawf input{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
 .lot .lotq{margin:0;text-align:center;font-size:13px;color:var(--muted)}
 /* 签谱 */
 .lotlist .lrow{display:flex;align-items:center;gap:12px;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:12px 16px;text-align:left;color:var(--fg)}
@@ -1606,62 +1594,6 @@ body.in-ritual{overflow:hidden}
 .lbuy small{font-size:12.5px;color:var(--muted)}
 .lbuy .btn{flex:none}
 
-/* ================= 每日一签：默念所求 → 摇签 → 掷筊 → 解签 ================= */
-.jiao{display:flex;flex-direction:column;gap:14px}
-.jsteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
-.jsteps li{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);position:relative}
-.jsteps li::before{content:"";position:absolute;top:11px;left:-50%;right:50%;height:1.5px;background:var(--line)}
-.jsteps li:first-child::before{display:none}
-.jsteps li i{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11.5px;font-weight:700;background:var(--sunk);color:var(--muted)}
-.jsteps li.done i{background:color-mix(in srgb,var(--cinnabar) 18%,var(--surface));color:var(--cinnabar)}
-.jsteps li.done::before,.jsteps li.on::before{background:var(--cinnabar)}
-.jsteps li.on i{background:var(--cinnabar);color:#fff}
-.jsteps li.on{color:var(--fg);font-weight:600}
-.jdrawn{display:flex;gap:18px;align-items:center;padding:6px 4px}
-.jside{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.jno{margin:0;font-size:15px}
-.jno b{font-family:var(--f-display);font-size:22px;color:var(--cinnabar)}
-/* 签：一支木签，上面写着签号 */
-.jstick{flex:none;width:34px;height:150px;border-radius:17px 17px 4px 4px;background:linear-gradient(90deg,#B65A2E,#D9824F 45%,#B05328);box-shadow:0 8px 18px -8px rgba(120,50,20,.6);position:relative;animation:stickUp .6s cubic-bezier(.2,.9,.3,1.2) both}
-.jstick span{position:absolute;top:22px;left:0;right:0;text-align:center;font-family:var(--f-display);font-weight:900;font-size:15px;color:#2B160B}
-@keyframes stickUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-/* 筊杯：两块月牙，正面浅（平的一面），反面深（鼓的一面） */
-.jstage{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:120px;justify-content:center}
-.jpair{display:flex;gap:22px;justify-content:center;align-items:flex-end;height:108px}
-.jb{display:flex;flex-direction:column;align-items:center;gap:4px}
-.jb svg{width:50px;height:78px;overflow:visible}
-.jb .body{fill:#7E2418;stroke:#5A160D;stroke-width:1.5}
-.jb .shine{fill:none;stroke:rgba(255,255,255,.22);stroke-width:3;stroke-linecap:round}
-.jb.up .body{fill:#E9A06F;stroke:#B0532A}
-.jb .face{fill:none;stroke:rgba(120,50,20,.35);stroke-width:1.5}
-.jb.flip svg{transform:scaleX(-1)}
-.jb em{font-style:normal;font-size:12px;color:var(--muted)}
-.jpair.rest .jb em,.jpair.tossing .jb em{visibility:hidden}
-.jpair.tossing .jb svg{animation:jToss 1.1s cubic-bezier(.3,.6,.4,1) infinite}
-.jpair.tossing .jb.flip svg{animation-name:jTossR;animation-delay:.08s}
-.jpair.land .jb svg{animation:jLand .35s ease-out both}
-@keyframes jToss{0%{transform:translateY(0) rotate(0)}45%{transform:translateY(-60px) rotate(300deg)}100%{transform:translateY(0) rotate(720deg)}}
-@keyframes jTossR{0%{transform:scaleX(-1) translateY(0) rotate(0)}45%{transform:scaleX(-1) translateY(-54px) rotate(-280deg)}100%{transform:scaleX(-1) translateY(0) rotate(-720deg)}}
-@keyframes jLand{0%{transform:translateY(-10px)}60%{transform:translateY(2px)}100%{transform:none}}
-.jpair.land .jb.flip svg{animation:none;transform:scaleX(-1)}
-.jres{margin:0;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
-.jside .jres{align-items:flex-start;text-align:left}
-.jres b{font-family:var(--f-display);font-size:22px;font-weight:900}
-.jres small{font-size:12.5px;color:var(--muted)}
-.jres.sheng b{color:var(--cinnabar)}
-.jres.yin b{color:var(--muted)}
-.jqin{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.jqin:focus{outline:none;border-color:var(--accent)}
-.jrules{text-align:center;line-height:1.7}
-.jdone{display:flex;flex-direction:column;gap:12px;align-items:stretch}
-:root[data-theme="dark"] .jb .body{fill:#9C3422;stroke:#C2593C}
-:root[data-theme="dark"] .jb.up .body{fill:#ECAA80;stroke:#F0B48F}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .jb .body{fill:#9C3422;stroke:#C2593C}:root:not([data-theme="light"]) .jb.up .body{fill:#ECAA80;stroke:#F0B48F}}
-@media (prefers-reduced-motion: reduce){.jpair .jb svg,.jstick{animation:none!important}}
-.jhist{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.jhist span{font-size:12px;border-radius:999px;padding:3px 10px;background:var(--sunk);color:var(--muted)}
-.jhist span.sheng{color:var(--cinnabar)}
-.jhist span.yin{color:var(--fg)}
 /* ---------- 解签：逐项运势 ---------- */
 .lot .jieyue{margin:0;text-align:center;font-family:var(--f-display);font-size:15px;letter-spacing:.1em;line-height:1.8}
 .lot .jieyue small{display:block;font-family:inherit;font-size:11px;color:var(--muted);letter-spacing:.2em}
@@ -1817,3 +1749,147 @@ button.tluck{cursor:pointer}
   .tluck small,.tluck em{font-size:13.5px}
   .tluck .why{display:block;flex-basis:100%;padding-left:55px;font-size:13.5px;line-height:1.6;color:var(--cardmuted)}
 }
+
+/* ================= 每日一签：全屏仪式。深色，不跟白色 / 深色主题走；点缀色是今天的幸运色（--lk），圣杯是金色 ================= */
+.sheet-bg.lotrite{background:rgba(3,3,6,.9)}
+.sheet.lotrite{--rfg:#EDEBE7;--rmut:#8E8B93;--gold:#E2BC72;--rease:cubic-bezier(.2,.9,.25,1);--rh:100dvh;display:block;max-width:440px;height:var(--rh);max-height:none;padding:0;border-radius:0;color:var(--rfg);background:#09090C;overflow-x:hidden}
+.sheet.lotrite .grab{display:none}
+.sheet.lotrite .sh{top:0;box-sizing:border-box;height:calc(env(safe-area-inset-top,0px) + 50px);padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 8px 20px;background:transparent;z-index:8;transition:background .4s}
+.sheet.lotrite.inlot .sh{background:rgba(9,9,12,.8);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.sheet.lotrite .sh b{flex:1;font-size:15px;font-weight:600}
+.sheet.lotrite .close{background:rgba(255,255,255,.08);color:var(--rmut)}
+.rsnd{height:30px;padding:0 11px;border:0;border-radius:15px;background:rgba(255,255,255,.07);color:var(--rmut);font:inherit;font-size:12px;cursor:pointer}
+@media (min-width:700px){.sheet-bg.lotrite{align-items:center}.sheet.lotrite{--rh:min(100dvh - 48px,880px);border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.55)}}
+.rit{--lk:#57C2A3;--D:max(220px,min(80vw,340px,calc(var(--rh) - 410px)));--dt:44px;--tt:calc(var(--dt) + var(--D) * .42 + 6px);--th:min(230px,27dvh);
+  position:relative;height:calc(var(--rh) - env(safe-area-inset-top,0px) - 50px);overflow:hidden;color:var(--rfg);
+  background:radial-gradient(90% 55% at 50% 26%,#17171D 0%,#09090C 72%);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.rdust{position:absolute;left:0;top:0;width:100%;pointer-events:none}
+.rbloom{position:absolute;left:50%;top:calc(var(--tt) + var(--th) - 60px);width:900px;height:900px;margin:-450px 0 0 -450px;border-radius:50%;pointer-events:none;opacity:0;transform:scale(.25);
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--gold) 60%,transparent),color-mix(in srgb,var(--lk) 16%,transparent) 46%,transparent 72%);transition:opacity 1.6s ease,transform 2.2s cubic-bezier(.16,1,.3,1)}
+.rit.blessed .rbloom{opacity:.5;transform:scale(1)}
+.rit.p-lot .rbloom{top:140px;opacity:.12;transform:scale(1.2)}
+.rsteps{position:absolute;top:0;left:20px;right:20px;margin:0;padding:0;list-style:none;display:flex;gap:6px;z-index:5}
+.rsteps li{flex:1;font-size:10px;letter-spacing:.14em;color:rgba(255,255,255,.28);transition:color .5s;white-space:nowrap}
+.rsteps i{display:block;height:2px;border-radius:2px;background:rgba(255,255,255,.1);margin-bottom:7px;overflow:hidden;position:relative}
+.rsteps i::after{content:"";position:absolute;inset:0;background:var(--rfg);transform:scaleX(0);transform-origin:left;transition:transform .8s var(--rease)}
+.rsteps .done i::after,.rsteps .on i::after{transform:scaleX(1)}
+.rsteps .on{color:var(--rfg)}
+/* 星盘 */
+.rdial{position:absolute;left:50%;top:var(--dt);width:var(--D);height:var(--D);margin-left:calc(var(--D) / -2);transform-origin:50% 0;z-index:2;touch-action:none;cursor:pointer;transition:transform 1.1s var(--rease),opacity 1.2s ease}
+.rdin{position:absolute;inset:0}
+.rhalo{position:absolute;inset:-18%;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--lk) 34%,transparent),transparent 70%);opacity:var(--hp,0);pointer-events:none}
+.rdial svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.rrl{fill:none;stroke:rgba(255,255,255,.13);stroke-width:.8}.rrl.dash{stroke-dasharray:1 5;stroke:rgba(255,255,255,.3)}
+.rsep{stroke:rgba(255,255,255,.1);stroke-width:.8}
+.rgl{fill:rgba(237,235,231,.46);font-family:var(--f-display);font-size:15px;transition:fill .6s}.rgl.hit{fill:var(--lk)}
+.rtk{stroke:rgba(255,255,255,.2);stroke-width:.8}.rtk.l{stroke:rgba(255,255,255,.5);stroke-width:1}
+.rnm{fill:rgba(237,235,231,.36);font-size:8.5px;font-family:var(--f-body)}.rnm.hit{fill:var(--lk);font-size:13px;font-weight:700}
+.rpr{fill:none;stroke:var(--lk);stroke-width:1.8;stroke-linecap:round}
+.rmer{stroke:var(--lk);stroke-width:1;opacity:0;transition:opacity .8s}.rit.locked .rmer{opacity:.55}
+.rmk{fill:var(--rfg);transition:fill .6s}.rit.locked .rmk{fill:var(--lk)}
+.rcore{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none;transition:opacity .6s}
+.rcore b{display:block;font-family:var(--f-display);font-size:calc(var(--D) * .11);font-weight:700;letter-spacing:.06em;line-height:1;font-variant-numeric:tabular-nums}
+.rcore small{display:block;margin-top:9px;font-size:10px;letter-spacing:.24em;color:var(--rmut)}
+.rcore b.pop{animation:rpop 1s var(--rease) both;text-shadow:0 0 24px color-mix(in srgb,var(--lk) 70%,transparent)}
+.p-toss .rdial,.p-blessed .rdial,.p-reask .rdial,.p-closed .rdial{transform:translateY(-8px) scale(.42)}
+.p-lot .rdial{transform:translateY(90px) scale(1.8);opacity:.07;pointer-events:none}
+.p-lot .rcore{opacity:0}
+/* 说明 */
+.rcap{position:absolute;left:24px;right:24px;top:calc(var(--dt) + var(--D) + 20px);text-align:center;z-index:3;transition:opacity .5s,transform .5s var(--rease)}
+.rcap p{margin:0;font-family:var(--f-display);font-size:19px;font-weight:600;letter-spacing:.08em}
+.rcap small{display:block;margin-top:8px;font-size:13px;color:var(--rmut);line-height:1.6}
+.rit .sw{opacity:0!important;transform:translateY(5px)!important}
+.p-toss .rcap,.p-blessed .rcap,.p-reask .rcap,.p-closed .rcap{opacity:0;pointer-events:none}
+/* 掷筊 */
+.rtable{position:absolute;left:0;right:0;top:var(--tt);height:var(--th);perspective:720px;z-index:3;touch-action:none;opacity:0;pointer-events:none;transition:opacity .9s .25s;cursor:grab}
+.p-toss .rtable,.p-blessed .rtable,.p-reask .rtable,.p-closed .rtable{opacity:1;pointer-events:auto}
+.rfloor{position:absolute;left:4%;right:4%;bottom:-6px;height:150px;background:radial-gradient(closest-side,rgba(255,255,255,.07),transparent);pointer-events:none}
+.rhint{position:absolute;left:0;right:0;top:2px;margin:0;text-align:center;font-size:12px;letter-spacing:.14em;color:var(--rmut);transition:opacity .4s}
+.rjb{position:absolute;left:50%;bottom:44px;width:100px;height:50px;pointer-events:none}
+.rsh{position:absolute;left:6%;right:6%;bottom:-13px;height:18px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.75),transparent)}
+.rbd{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.rjf{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.rjf svg{width:100%;height:100%;overflow:visible}.rjf.cv{transform:rotateX(180deg)}
+.rres{position:absolute;left:24px;right:24px;top:calc(var(--tt) + var(--th) + 4px);text-align:center;z-index:3;opacity:0;transition:opacity .5s}
+.p-toss .rres,.p-blessed .rres,.p-reask .rres,.p-closed .rres{opacity:1}
+.rres b{display:block;font-family:var(--f-display);font-size:38px;font-weight:700;letter-spacing:.18em;min-height:46px;line-height:46px}
+.rres b.w{animation:rtrack 1.3s var(--rease) both}
+.rres b.sheng{color:var(--gold);text-shadow:0 0 30px color-mix(in srgb,var(--gold) 55%,transparent)}
+.rres b.yin{color:var(--rmut)}
+.rres small{display:block;margin-top:6px;font-size:13px;color:var(--rmut);line-height:1.6}
+.rtries{display:flex;gap:7px;justify-content:center;margin-top:10px}
+.rtries i{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.3);transition:all .4s}
+.rtries i.xiao,.rtries i.yin{background:rgba(255,255,255,.6);border-color:transparent}
+.rtries i.sheng{background:var(--gold);border-color:transparent;box-shadow:0 0 10px var(--gold)}
+/* 底部操作 */
+.rctl{position:absolute;left:20px;right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;flex-direction:column;gap:10px;z-index:4;transition:opacity .3s,transform .4s var(--rease)}
+.rform{display:flex;flex-direction:column;gap:10px}
+.rq{height:48px;border-radius:24px;border:0;padding:0 20px;background:rgba(255,255,255,.07);color:var(--rfg);font:inherit;font-size:16px;text-align:center;outline:none;-webkit-user-select:text;user-select:text}
+.rq::placeholder{color:rgba(237,235,231,.36)}
+.rq:focus{background:rgba(255,255,255,.11)}
+.rbtn{position:relative;height:54px;border-radius:27px;border:0;background:var(--rfg);color:#0B0B0E;font:inherit;font-size:16px;font-weight:600;letter-spacing:.06em;overflow:hidden;cursor:pointer;transition:transform .12s ease-out,opacity .3s}
+.rbtn:active{transform:scale(.97)}
+.rbtn:disabled{opacity:.45}
+.rbtn.ghost{background:rgba(255,255,255,.08);color:var(--rfg)}
+.rbtn.hold{touch-action:none}
+.rbtn .fill{position:absolute;inset:0;background:var(--lk);transform:scaleX(var(--hp,0));transform-origin:left}
+.rbtn .lb{position:relative}
+.rsub{margin:0;text-align:center;font-size:12px;color:var(--rmut)}
+.rrules{text-align:center;font-size:12px;color:var(--rmut)}
+.rrules summary{list-style:none;cursor:pointer;padding:4px}
+.rrules summary::-webkit-details-marker{display:none}
+.rrules p{margin:6px 0 0;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);line-height:1.7;text-align:left}
+/* 解签：弹层整体变成可以往下滚的一页 */
+.rit.p-lot{height:auto;min-height:calc(var(--rh) - env(safe-area-inset-top,0px) - 50px);overflow:visible}
+.p-lot .rtable,.p-lot .rres,.p-lot .rcap,.p-lot .rctl{display:none}
+.rlot{display:none;position:relative;z-index:4;padding:30px 24px calc(env(safe-area-inset-bottom,0px) + 36px)}
+.p-lot .rlot{display:block}
+.rlh{display:flex;justify-content:center;align-items:center;gap:10px;font-size:11px;letter-spacing:.22em;color:var(--rmut)}
+.rlh em{font-style:normal;padding:3px 11px;border-radius:20px;border:1px solid currentColor;letter-spacing:.12em;color:var(--rfg)}
+.rlh em.g5{color:var(--gold)}.rlh em.g4{color:var(--lk)}.rlh em.g2{color:#93AECF}
+.rtitle{margin:16px 0 0;text-align:center;font-family:var(--f-display);font-size:40px;font-weight:700;letter-spacing:.16em}
+.rpoem{margin:22px 0 0;text-align:center;font-family:var(--f-display);font-size:19px;line-height:2.2;letter-spacing:.26em}
+.rpoem p{margin:0}
+.rv span{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(8px) scale(1.08);animation:rpop 1.1s var(--rease) forwards;animation-delay:var(--d)}
+.rcard{opacity:0;transform:translateY(20px);animation:rrise 1s var(--rease) forwards;animation-delay:var(--d)}
+.rlot.fast .rv span,.rlot.fast .rcard{animation-delay:0s!important;animation-duration:.35s!important}
+.rhl{margin:22px 0 0;text-align:center;font-size:13px;line-height:1.7;color:var(--rmut)}
+.rans{margin-top:22px;padding:20px;border-radius:22px;background:linear-gradient(160deg,color-mix(in srgb,var(--lk) 20%,#141418),#141418 72%);box-shadow:0 0 0 1px rgba(255,255,255,.07)}
+.rans .q{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--rmut);letter-spacing:.04em}
+.rans .q em{flex:none;font-style:normal;color:var(--lk)}
+.rans h3{margin:10px 0 0;font-size:18px;font-weight:600;line-height:1.5}
+.rdots{display:inline-flex;gap:4px;margin-left:8px;vertical-align:3px}
+.rdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.16)}
+.rdots i.f{background:var(--lk);box-shadow:0 0 6px color-mix(in srgb,var(--lk) 70%,transparent)}
+.ritems{margin:8px 0 0;font-size:12px;line-height:1.6;color:var(--rmut)}
+.radv{margin:10px 0 0;font-size:14px;line-height:1.7;color:#B9B6BE}
+.radv b{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:8px;background:rgba(255,255,255,.08);font-size:12px;font-weight:500;color:var(--rfg)}
+.rtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.rtiles button{padding:11px 0 9px;border-radius:14px;border:0;background:rgba(255,255,255,.05);font:inherit;font-size:12px;color:#B9B6BE;cursor:pointer;transition:background .2s}
+.rtiles button.on{background:rgba(255,255,255,.12);color:var(--rfg)}
+.rtiles .rdots{display:flex;justify-content:center;margin:7px 0 0;gap:3px}.rtiles .rdots i{width:4px;height:4px}
+.rtdet{display:none;margin-top:10px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.05);font-size:13px;line-height:1.7;color:#B9B6BE}
+.rtdet.on{display:block;animation:rrise .45s var(--rease)}
+.rtdet h4{margin:0;font-size:14px;color:var(--rfg)}
+.rtdet p{margin:6px 0 0}
+.rmore{margin-top:12px;border-radius:16px;background:rgba(255,255,255,.04)}
+.rmore summary{list-style:none;display:flex;justify-content:space-between;padding:15px 16px;font-size:14px;cursor:pointer}
+.rmore summary::-webkit-details-marker{display:none}
+.rmore summary::after{content:"›";color:var(--rmut);transition:transform .3s}
+.rmore[open] summary::after{transform:rotate(90deg)}
+.rmore>div{padding:0 16px 16px;font-size:13px;line-height:1.8;color:#B9B6BE}
+.rmore b{display:block;margin-top:10px;font-size:11px;font-weight:500;letter-spacing:.2em;color:var(--rmut)}
+.rmore p{margin:2px 0 0}
+.rxj{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+.rxj span{padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.05);font-size:12px;color:var(--rfg)}
+.rxj small{display:block;font-size:10px;color:var(--rmut)}
+.racts{display:flex;gap:10px;margin-top:20px}.racts .rbtn{flex:1}
+.racts .sq{flex:0 0 54px;padding:0;background:rgba(255,255,255,.08);color:var(--rfg);font-size:18px}
+.rlinks{display:flex;justify-content:center;gap:22px;margin-top:16px}
+.rlinks a{font-size:12px;letter-spacing:.06em;color:var(--rmut);text-decoration:none}
+.rchip{position:fixed;z-index:60;width:120px;padding:6px 0;border-radius:16px;background:#EDEBE7;color:#0B0B0E;text-align:center;font-family:var(--f-display);font-size:15px;font-weight:700;letter-spacing:.1em;pointer-events:none;transition:transform .85s cubic-bezier(.2,.9,.25,1),opacity .85s ease}
+@keyframes rpop{from{opacity:0;filter:blur(10px);transform:translateY(8px) scale(1.08)}to{opacity:1;filter:blur(0);transform:none}}
+@keyframes rrise{to{opacity:1;transform:none}}
+@keyframes rtrack{from{opacity:0;letter-spacing:.8em;filter:blur(12px)}to{opacity:1;letter-spacing:.18em;filter:blur(0)}}
+@media (max-height:700px){.rit{--dt:36px;--th:min(200px,25dvh)}.rres b{font-size:32px;min-height:40px;line-height:40px}.rcap{top:calc(var(--dt) + var(--D) + 12px)}}
+@media (prefers-reduced-motion:reduce){.rv span,.rcard{animation-duration:.01s!important;animation-delay:0s!important}.rdial,.rcap,.rbloom{transition-duration:.25s!important}}

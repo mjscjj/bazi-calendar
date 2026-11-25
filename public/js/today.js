@@ -1,12 +1,13 @@
 // 今天页，从上往下：本周 7 天（能量趋势和你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天）
 // → 每日一签（默念所求、摇签、掷筊、解签）、问一件事、转运御守 → 记录此刻 → 明天寄语。
 import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath } from './core.js';
-import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, HOUR_TIP } from './data.js';
+import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, HOUR_TIP, GRADE_CLS } from './data.js';
 import { S, isDemo } from './state.js';
 import { openDay } from './day.js';
 import { recordHtml, onMoodChange, moodScore, cellStickers } from './mood.js';
 import { cardArt, cardTitle } from './onboard.js';
 import { shouldTear, showTear } from './tear.js';
+import { openRite } from './rite.js';
 
 export function loadToday() {
   S.todayErr = null;
@@ -455,7 +456,6 @@ function almanacSheet(a, isToday = true) {
     + '<p class="note" style="margin:0">这是所有人都一样的通用黄历。你的今天，按你的出生信息单独算。</p>');
 }
 
-const GRADE_CLS = (g) => (/上上|大吉/.test(g) ? 'g5' : /上|吉/.test(g) ? 'g4' : /中/.test(g) ? 'g3' : 'g2');
 // 解签：签诗 → 解曰 → 白话 → 逐项运势（星数 + 断语 + 说明 + 建议；问的那类排第一）→ 签谱原文仙机
 const starsHtml = (n) => `<span class="lstars" role="img" aria-label="${n} 颗星">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? 'on' : ''}">★</i>`).join('')}</span>`;
 function lotTopicsHtml(d) {
@@ -482,97 +482,6 @@ export function lotHtml(d, hist) {
       + '<a class="askentry" href="#/ask" data-close-sheet><span><b>想问一件具体的事？</b><small>心里拿不准的事，用梅花易数起一卦</small></span><i aria-hidden="true">›</i></a>')
     + '</div>';
 }
-// ---------- 每日一签：默念所求 → 摇签 → 掷筊 → 解签 ----------
-// 摇出来先只知道签号；掷筊（服务器定结果）：圣杯看签文，笑杯可以把问题说清楚些再掷，阴杯或三次没圣杯今天就到这里。
-const JFACE = { sheng: [1, 0], xiao: [1, 1], yin: [0, 0] };
-const jsteps = (k) => { const st = (S.today.jiao || {}).steps || ['默念所求', '摇签', '掷筊', '解签']; return `<ol class="jsteps">${st.map((x, i) => `<li class="${i < k ? 'done' : i === k ? 'on' : ''}"><i>${i + 1}</i><span>${esc(x)}</span></li>`).join('')}</ol>`; };
-// 一块筊杯：月牙形，正面（平的一面）浅，反面（鼓的一面）深
-const jblock = (up, flip) => `<span class="jb${up ? ' up' : ''}${flip ? ' flip' : ''}"><svg viewBox="0 0 64 100" aria-hidden="true"><path class="body" d="M18 4C60 14 64 86 18 96C34 74 36 26 18 4Z"/>${up ? '<path class="face" d="M21 12C33 32 33 68 21 88"/>' : '<path class="shine" d="M28 14C46 28 48 70 30 86"/>'}</svg><em>${up ? '正' : '反'}</em></span>`;
-const jpair = (faces, cls = '') => `<div class="jpair ${cls}">${jblock(faces[0], false)}${jblock(faces[1], true)}</div>`;
-const stickHtml = (no) => `<div class="jstick" aria-hidden="true"><span>${no}</span></div>`;
-function drawStage(t) {
-  const d = t.draw, J = t.jiao, R = J.results;
-  if (!d) {
-    return '<form class="drawf" id="drawForm">' + jsteps(0) + '<div class="tube still"><i></i><i></i><i></i><i></i><i></i></div>'
-      + `<p class="tip">${esc(J.intro)}</p><input name="q" maxlength="30" placeholder="想问哪件事？比如：这周的面试（可以不写）" enterkeyhint="go">`
-      + '<button type="submit" class="btn primary block">摇签筒</button><p class="note" style="margin:0;text-align:center">观音灵签 · 每人每天一支，当天不变</p></form>';
-  }
-  if (d.status === 'done') return jsteps(3) + lotHtml(d);
-  const last = d.tosses[d.tosses.length - 1];
-  const history = d.tosses.length ? `<div class="jhist">${d.tosses.map((x, i) => `<span class="${x}">第 ${i + 1} 次 · ${esc(R[x].name)}</span>`).join('')}</div>` : '';
-  if (d.status === 'reask') {
-    // 三次都是阴杯：换个问题，重新摇一支
-    return jsteps(2) + `<div class="jdone">${jpair(JFACE.yin, 'land')}${history}<p class="tip">${esc(J.reask)}</p>`
-      + `<form class="drawf" id="reaskForm"><input name="q" maxlength="30" placeholder="换一个想问的事" aria-label="换一个想问的事" required>`
-      + `<button type="submit" class="btn primary block">换个问题，重新摇签</button></form>`
-      + `<p class="note" style="margin:0;text-align:center">今天还能换 ${d.roundsLeft} 次问题</p></div>`;
-  }
-  if (d.status === 'closed') {
-    const allYin = d.tosses.every((x) => x === 'yin');
-    return jsteps(2) + `<div class="jdone">${jpair(JFACE[last] || JFACE.yin, 'land')}${history}`
-      + `<p class="tip">${esc(allYin ? J.roundsOut : J.giveUp)}</p><p class="note" style="margin:0;text-align:center">第 ${d.no} 签今天没有求成。明天再来摇一支。</p><button type="button" class="btn ghost block" data-close-sheet>好的，改日再来</button></div>`;
-  }
-  // pending：摇出了签，等掷筊
-  const tried = d.tosses.length, left = J.maxTries - tried;
-  return jsteps(2) + `<div class="jdrawn">${stickHtml(d.no)}<div class="jside"><p class="jno">你摇到 <b>第 ${d.no} 签</b></p>${d.question ? `<p class="lotq">所问 · ${esc(d.question)}</p>` : ''}`
-    + (last ? `<p class="jres ${last}"><b>${esc(R[last].name)}</b><small>${esc(R[last].face)}</small></p><p class="tip">${esc(R[last].text)}</p>` : `<p class="tip">${esc(J.drawn)}</p>`)
-    + '</div></div>'
-    + `<div class="jstage" id="jStage">${jpair(last ? JFACE[last] : [1, 0], last ? 'land' : 'rest')}${history}</div>`
-    + (last === 'xiao' ? `<input class="jqin" id="jQuestion" maxlength="30" value="${esc(d.question)}" placeholder="把问题说得更清楚些（可以不改）" aria-label="所问之事">` : '')
-    + `<button type="button" class="btn primary block" data-toss>${last ? `再掷一次（第 ${tried + 1}/${J.maxTries} 次）` : '掷筊'}</button>`
-    + `<p class="note jrules" style="margin:0">${esc(J.rules)}${tried ? ` 还能掷 ${left} 次。` : ''}</p>`;
-}
-function drawSheet() {
-  const t = S.today;
-  openSheet('每日一签', `<div class="jiao" id="jiaoBox">${drawStage(t)}</div>`);
-}
-const jbox = () => $('#jiaoBox');
-document.addEventListener('submit', (e) => {
-  if (e.target.id !== 'drawForm' && e.target.id !== 'reaskForm') return;
-  e.preventDefault();
-  const q = e.target.elements.q.value.trim();
-  if (e.target.id === 'reaskForm') {
-    if (!q || q === S.today.draw.question) { toast('换一个想问的事'); return; }
-    track('draw_reask', { round: S.today.draw.round + 1 });
-  }
-  shakeLot(q);
-});
-function shakeLot(question) {
-  const t = S.today, box = jbox();
-  box.innerHTML = jsteps(1) + `<div class="shake"><div class="tube"><i></i><i></i><i></i><i></i><i></i></div><p class="tip">${question ? esc('默念着「' + question + '」……') : '诚心想着那件事……'}</p></div>`;
-  const started = Date.now();
-  api('POST', 'draws/today', { date: t.date, question }).then((d) => {
-    t.draw = d.draw;
-    track('draw_shake', { no: d.draw.no, q: !!question });
-    if (navigator.vibrate) navigator.vibrate(18);
-    setTimeout(() => { if (jbox() && $('.shake', jbox())) { jbox().innerHTML = drawStage(t); renderToday(); } }, Math.max(0, 1300 - (Date.now() - started)));
-  }, (e) => { box.innerHTML = `<p class="tip">${esc(e.message)}</p>`; });
-}
-onClick('[data-toss]', (el) => {
-  const t = S.today, stage = $('#jStage'), q = $('#jQuestion');
-  el.disabled = true;
-  if (stage) stage.innerHTML = jpair([1, 0], 'tossing');
-  const started = Date.now();
-  api('POST', 'draws/today/toss', { date: t.date, ...(q ? { question: q.value.trim() } : {}) }).then((d) => {
-    const show = () => {
-      if (!jbox()) return;
-      t.draw = d.draw;
-      track('draw_toss', { toss: d.toss, n: d.draw.tosses.length });
-      if (d.draw.status === 'done') track('draw', { no: d.draw.no, tries: d.draw.tosses.length });
-      if (navigator.vibrate) navigator.vibrate(d.toss === 'sheng' ? [20, 60, 20] : 15);
-      const R = t.jiao.results;
-      if (d.toss === 'sheng') {
-        // 先停在圣杯上，再进解签
-        jbox().innerHTML = jsteps(2) + `<div class="jdrawn">${stickHtml(d.draw.no)}<div class="jside"><p class="jno">你摇到 <b>第 ${d.draw.no} 签</b></p>${d.draw.question ? `<p class="lotq">所问 · ${esc(d.draw.question)}</p>` : ''}</div></div>`
-          + `<div class="jstage">${jpair(JFACE.sheng, 'land')}<p class="jres sheng"><b>${esc(R.sheng.name)}</b><small>${esc(R.sheng.face)} · ${esc(R.sheng.text)}</small></p></div>`
-          + '<button type="button" class="btn primary block" data-jiao-read>解签</button>';
-      } else jbox().innerHTML = drawStage(t);
-      renderToday();
-    };
-    setTimeout(show, Math.max(0, 1300 - (Date.now() - started)));
-  }, (e) => { el.disabled = false; toast(e.message); if (stage) stage.innerHTML = jpair([1, 0], 'rest'); });
-});
-onClick('[data-jiao-read]', () => { const b = jbox(); if (b) { b.innerHTML = drawStage(S.today); b.scrollIntoView({ block: 'start' }); } });
 function outfitSheet() {
   const o = S.today.outfit;
   track('outfit_open');
@@ -589,7 +498,7 @@ onClick('[data-almanac]', () => {
 });
 onClick('[data-draw]', () => {
   if (isDemo()) { guestAsk('每天抽一支属于你的签'); return; }
-  drawSheet();
+  openRite(renderToday);
 });
 onClick('[data-outfit]', outfitSheet);
 onClick('[data-day-art]', (el) => {

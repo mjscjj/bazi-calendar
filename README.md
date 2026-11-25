@@ -39,7 +39,7 @@ ALIPAY_FAKE=1 ASK_AI=fake JIAO_FAKE=xiao,sheng COOKIE_SECURE=0 DB_PATH=./data/de
 | `server/gumroad.js` | Gumroad 海外付款：结账链接、Ping 验签、回查订单 |
 | `server/db.js` | SQLite（Node 自带 `node:sqlite`）建表 |
 | `server/settings.js` | 后台可改的价格、免费次数、订单名称、协议文本默认值 |
-| `public/js/` | 前台模块（无构建）：`mood.js` 心情便签（今天页心情板、月历小纸片、当日详情），`main.js` 路由和页签，`today.js` 今天页（本周、跟手滑动的每日卡片、明天寄语；每日一签：默念所求、摇签、掷筊、解签），`calendar.js` 日历，`me.js` 我的和能量档案，`onboard.js` 出生信息表单（日期、时间用 `wheel.js` 的滚轮一次选完，公历农历可切）、能量卡揭晓、引导和加到主屏，`account.js` 登录注册与资料等页面，`pay.js` 支付，`share.js` 分享图（跟随白色 / 深色），`growth.js` 邀请好友和日历订阅，`day.js` 当日详情，`data.js` 展示用常量，`core.js` 公共工具 |
+| `public/js/` | 前台模块（无构建）：`mood.js` 心情便签（今天页心情板、月历小纸片、当日详情），`main.js` 路由和页签，`today.js` 今天页（本周、跟手滑动的每日卡片、明天寄语），`rite.js` 每日一签的全屏仪式（默念、摇签、星盘起签、掷筊、解签），`calendar.js` 日历，`me.js` 我的和能量档案，`onboard.js` 出生信息表单（日期、时间用 `wheel.js` 的滚轮一次选完，公历农历可切）、能量卡揭晓、引导和加到主屏，`account.js` 登录注册与资料等页面，`pay.js` 支付，`share.js` 分享图（跟随白色 / 深色），`growth.js` 邀请好友和日历订阅，`day.js` 当日详情，`data.js` 展示用常量，`core.js` 公共工具 |
 | `public/sw.js`、`manifest.webmanifest`、`icons/` | 可安装到主屏、离线时显示上一次的今天 |
 | `public/admin.*` | 管理后台 |
 | `scripts/backup.mjs` | SQLite 一致性备份，保留 14 份 |
@@ -47,7 +47,7 @@ ALIPAY_FAKE=1 ASK_AI=fake JIAO_FAKE=xiao,sheng COOKIE_SECURE=0 DB_PATH=./data/de
 
 日历由服务端算好再返回，没有免费次数也没有会员时接口返回 402（今天页仍带着“大家的今天”），页面拿不到个人数据。
 
-页面结构：底部三个页签「今天 / 日历 / 我的」。今天页从上往下：本周 7 天（能量趋势线、你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天，滑出本周取 `/api/week`；主题下面一行是这一天的幸运色，卡片的光晕和能量环也用这两个颜色，点开看为什么和配饰）→ 每日一签（默念所求 → 摇签 → 掷筊 → 解签，`jiao.json`；解签给逐项运势，每类星数 + 说明 + 建议，问的那类排第一，`lot-topics.json`）、问一件事、转运御守 → 记录此刻 → 明天寄语（`daily-line.json` 的 `tomorrow`）。访客先看示例的今天，点“测测我的”填出生信息就能看到能量卡（不用注册），点“保存并看我的今天”才注册。
+页面结构：底部三个页签「今天 / 日历 / 我的」。今天页从上往下：本周 7 天（能量趋势线、你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天，滑出本周取 `/api/week`；主题下面一行是这一天的幸运色，卡片的光晕和能量环也用这两个颜色，点开看为什么和配饰）→ 每日一签（全屏深色仪式，点缀色是今天的幸运色：按住三秒默念 → 摇手机摇签 → 星盘的天干地支停在今天、最外一圈停在这一支 → 按住筊杯往上抛 → 签名和签诗逐字浮现；签号和掷筊结果都由服务端定，`jiao.json`；解签先回答问的那一类，其余几类收成小格点开看，每类星数 + 说明 + 建议，`lot-topics.json`）、问一件事、转运御守 → 记录此刻 → 明天寄语（`daily-line.json` 的 `tomorrow`）。访客先看示例的今天，点“测测我的”填出生信息就能看到能量卡（不用注册），点“保存并看我的今天”才注册。
 
 ## 本地开发
 
@@ -62,7 +62,7 @@ PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/flow.mjs http://127.0.0.1:3210/ba
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/admin.mjs http://127.0.0.1:3210/bazi /tmp/lrl/shots dev
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/ask.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots dev   # 服务端加 ASK_AI=fake
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/wish.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots
-PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/lot.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots   # 每日一签：摇签、掷筊（服务端要 JIAO_FAKE=xiao,sheng）
+PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/lot.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots   # 每日一签：按住默念、摇签、起签、往上抛筊、解签（服务端要 JIAO_FAKE=xiao,sheng）
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/today.mjs http://127.0.0.1:3210/bazi /tmp/lrl/shots                  # 今天页：本周、滑动卡片、小卡、记录此刻、明天寄语
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/mood.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots     # 心情便签
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/follow.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots   # 追问和回看，服务端加 ASK_AI=fake

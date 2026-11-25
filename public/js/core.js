@@ -93,8 +93,8 @@ export function openSheet(title, html, opts = {}) {
   const replacing = !!$('#sheet');
   removeSheet(true);
   const el = document.createElement('div');
-  el.className = 'sheet-bg'; el.id = 'sheet';
-  el.innerHTML = `<div class="sheet${opts.dark ? ' dark' : ''}${opts.wide ? ' wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><div class="sh"><b>${esc(title)}</b><button type="button" class="close" data-close-sheet aria-label="关闭">✕</button></div><div class="sbody">${html}</div></div>`;
+  el.className = 'sheet-bg' + (opts.cls ? ' ' + opts.cls : ''); el.id = 'sheet';
+  el.innerHTML = `<div class="sheet${opts.dark ? ' dark' : ''}${opts.wide ? ' wide' : ''}${opts.cls ? ' ' + opts.cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><div class="sh"><b>${esc(title)}</b><button type="button" class="close" data-close-sheet aria-label="关闭">✕</button></div><div class="sbody">${html}</div></div>`;
   el.addEventListener('click', (e) => { if (e.target === el) dismissSheet(); });
   $('#layer').appendChild(el);
   enableDrag(el);
@@ -131,8 +131,8 @@ function enableDrag(bg) {
   const sheet = $('.sheet', bg);
   let y0 = null, dy = 0, t0 = 0;
   sheet.addEventListener('touchstart', (e) => {
-    // 滚轮自己上下滚；分享图要长按保存，手指一动就拖弹层会把长按打断
-    if (e.target.closest('.wheels, .sharepv img')) return;
+    // 滚轮自己上下滚；分享图要长按保存，手指一动就拖弹层会把长按打断；求签的星盘要按住、筊杯要往上抛，也不拖弹层
+    if (e.target.closest('.wheels, .sharepv img, [data-nodrag]')) return;
     if (!e.target.closest('.grab,.sh') && sheet.scrollTop > 0) return;
     y0 = e.touches[0].clientY; dy = 0; t0 = Date.now();
     sheet.style.transition = 'none';

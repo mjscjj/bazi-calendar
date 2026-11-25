@@ -2,20 +2,11 @@
 // 抽签弹层进入 → 写问题 → 起卦（卦象一爻一爻显出）→ 解读 → 问事记录 → 再问要付费（模拟付款后自动接着起卦）
 // → 用这件事去挑日子 → 电脑端今天页侧栏入口 → 后台规则对比。服务端以 ALIPAY_FAKE=1、ASK_AI=fake 启动。
 import { DatabaseSync } from 'node:sqlite';
+import { drawLot } from './helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out, adminPw] = process.argv.slice(2);
 const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA busy_timeout = 5000'); // 服务也在写，撞上时等一等，别直接报 database is locked
-// 掷筊直到圣杯再解签（服务端用 JIAO_FAKE=xiao,sheng 启动时第 2 次是圣杯）
-async function tossToLot(pg) {
-  await pg.waitForSelector('#sheet [data-toss]', { timeout: 8000 });
-  for (let i = 0; i < 3; i++) {
-    await pg.click('#sheet [data-toss]');
-    await pg.waitForSelector('#sheet [data-jiao-read], #sheet [data-toss]:not([disabled]), #sheet .jdone', { timeout: 8000 });
-    if (await pg.$('#sheet [data-jiao-read]')) { await pg.click('#sheet [data-jiao-read]'); return; }
-    if (await pg.$('#sheet .jdone')) throw new Error('掷筊没求成（服务端启动时加 JIAO_FAKE=xiao,sheng）');
-  }
-}
 const browser = await chromium.launch({ executablePath: process.env.CHROME });
 const errors = [], results = [];
 const check = (name, ok, detail = '') => { results.push(`${ok ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); if (!ok) errors.push(name); };
@@ -34,9 +25,9 @@ await p.evaluate(async (u) => {
 }, user);
 await p.reload(); await p.waitForSelector('.tcard');
 check('手机今天页的小卡里有问事和御守', await p.isVisible('.minis .askmini') && await p.isVisible('.minis .ommini'));
-await p.click('[data-draw]'); await p.waitForSelector('#drawForm'); await p.click('#drawForm button[type=submit]'); await tossToLot(p); await p.waitForSelector('#sheet .askentry', { timeout: 8000 });
+await p.click('[data-draw]'); await drawLot(p); await p.waitForTimeout(4500);
 await p.screenshot({ path: `${out}/a01-lot-entry.png` });
-await p.click('#sheet .askentry'); await p.waitForSelector('#askForm');
+await p.click('#sheet .rlinks a[href="#/ask"]'); await p.waitForSelector('#askForm');
 check('从签弹层进入问事', !(await p.$('#sheet')));
 await p.fill('#askForm textarea', '这周找老板谈加薪合适吗？');
 await p.click('[data-acat-v="事业"]');

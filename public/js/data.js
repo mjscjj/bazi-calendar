@@ -46,6 +46,8 @@ export function luckVars(colors) {
   return `--lk:${css(glow)};--lk-ink:${css(ink)};--lk2:${css(two)}`;
 }
 export const WEEK = '日一二三四五六';
+// 签的等级：上上、大吉 g5；上、吉 g4；中 g3；其余 g2
+export const GRADE_CLS = (g) => (/上上|大吉/.test(g) ? 'g5' : /上|吉/.test(g) ? 'g4' : /中/.test(g) ? 'g3' : 'g2');
 const DISHI_START = { 甲: 11, 丙: 2, 戊: 2, 庚: 5, 壬: 8, 乙: 6, 丁: 9, 己: 9, 辛: 0, 癸: 3 };
 const DS = ['长生', '沐浴', '冠带', '临官', '帝旺', '衰', '病', '死', '墓', '绝', '胎', '养'];
 
