@@ -284,10 +284,11 @@ async function posterOf() {
 // ---------- the living lock screen: #/lockscreen ----------
 export async function pageLockscreen() {
   view().innerHTML = `<div class="page lockscreen">${loading(420)}</div>`;
-  let feed;
-  try { feed = await api('GET', 'me/calendar-feed'); } catch (e) { view().innerHTML = `<div class="page">${failed(e.message)}</div>`; return; }
-  const token = feed.url.split('/').pop().replace(/\.ics$/, ''), tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const url = `${location.origin}${location.pathname.replace(/us\/(index\.html)?$/, '')}api/us/wallpaper/${token}.jpg?tz=${encodeURIComponent(tz)}`;
+  let token;
+  try { token = (await api('GET', 'us/wallpaper-link')).token; } catch (e) { view().innerHTML = `<div class="page">${failed(e.message)}</div>`; return; }
+  store.set('lsPromo', 1);
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const url = `${location.origin}${location.pathname.replace(/us\/(index\.html)?$/, '')}api/us/wallpaper/${token}.jpg?tz=${encodeURIComponent(tz)}&w=${Math.round(screen.width * (devicePixelRatio || 1))}&h=${Math.round(screen.height * (devicePixelRatio || 1))}`; // sized to this phone's screen
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   view().innerHTML = `<div class="page lockscreen" style="${elStyle(elOf(S.me.p))}">
     <p class="label" style="margin-top:6px">Living lock screen</p><h1 class="display" style="font-size:clamp(36px,10vw,52px)">Wake up to <em>your day.</em></h1>
@@ -302,8 +303,13 @@ export async function pageLockscreen() {
         <li>Tap <b>Done</b>. Tomorrow at 7 your lock screen repaints itself.</li>
       </ol></div>
     <div class="sec"><p class="label">Android, or just today</p><a class="btn ghost block" href="${url}" download="sixty-today.jpg" id="dlWall">Download today's lock screen</a>
-      <p class="hint">Your link is private — it shows your daily reading, not your birthday. Anyone with it could see your daily level, so keep it to yourself.</p></div></div>`;
+      <p class="hint">Your link only opens this daily image — never your birthday, calendar or plans. It's set to your time zone (${esc(tz)}); if you move or travel for a while, copy it again.</p>
+      <button class="linkbtn" id="resetWall">Reset my link</button></div></div>`;
   $('#copyWall').addEventListener('click', async () => { try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch { prompt('Copy this link', url); } track('us_lock_copy'); store.set('lsPromo', 1); });
   $('#dlWall').addEventListener('click', () => track('us_lock_download'));
+  $('#resetWall').addEventListener('click', async () => {
+    if (!confirm('Make a new link? The old one stops working, so you will need to update your Shortcut.')) return;
+    try { await api('POST', 'us/wallpaper-link/reset'); toast('New link ready — copy it into your Shortcut'); pageLockscreen(); } catch (e) { toast(e.message); }
+  });
   track('us_lock_view');
 }

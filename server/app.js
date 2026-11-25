@@ -34,12 +34,14 @@ const DAY_MS = 86400000;
 // 美国版再细一层：浏览器每次请求带 X-TZ（自己的时区），这一次请求里的「今天」按它算
 const dayFmt = (tz) => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
 const DAY_FMT = process.env.DAY_TZ ? dayFmt(process.env.DAY_TZ) : null;
-// 只认系统时区表里的名字，缓存最多就是这几百个，乱填的头既不缓存也不生效
-const reqTz = new AsyncLocalStorage(), TZ_FMTS = new Map(), ZONES = new Set(Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : []);
-function tzFmt(tz) {
-  if (!tz || !ZONES.has(tz)) return null;
-  if (!TZ_FMTS.has(tz)) TZ_FMTS.set(tz, dayFmt(tz));
-  return TZ_FMTS.get(tz);
+// 时区名交给 Intl 判断（Asia/Kolkata、UTC 这类别名也认）；只缓存合法的，乱填的头不缓存也不生效
+const reqTz = new AsyncLocalStorage(), TZ_FMTS = new Map();
+export function tzFmt(tz) {
+  if (!tz || typeof tz !== 'string' || tz.length > 64) return null;
+  if (TZ_FMTS.has(tz)) return TZ_FMTS.get(tz);
+  let f; try { f = dayFmt(tz); } catch { return null; }
+  if (TZ_FMTS.size < 1000) TZ_FMTS.set(tz, f);
+  return f;
 }
 export const bjDay = (d = new Date()) => { const f = tzFmt(reqTz.getStore()) || DAY_FMT; return f ? f.format(d) : new Date(d.getTime() + 8 * 3600000).toISOString().slice(0, 10); };
 const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -1348,24 +1350,25 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     return { name: inv.nickname || '你的朋友', pair: C.pair(me.dm, you.dm), best: pairBest(me, you) };
   });
   // 朋友的画：通过链接连上的人——你邀请的、邀请你的、已经注册后点链接互相配的。双方只看到对方的日干形象和这张画
-  function friendsOf(u) {
+  function friendsOf(u, brief = false) {
     const rows = db.all(`SELECT invitee_id id, created_at, 'invited' src FROM invites WHERE inviter_id = ?
       UNION ALL SELECT inviter_id, created_at, 'inviter' FROM invites WHERE invitee_id = ?
       UNION ALL SELECT CASE WHEN a = ? THEN b ELSE a END, created_at, 'link' FROM friend_links WHERE a = ? OR b = ?`, u.id, u.id, u.id, u.id, u.id);
     const byId = new Map();
     for (const r of rows) if (!byId.has(r.id)) byId.set(r.id, r);
     const mine = u.birth_date ? chartOf(u) : null;
-    // 每位朋友都要排盘、算两周，只取最近的 100 位
-    return [...byId.values()].sort((x, y) => (x.created_at < y.created_at ? 1 : -1)).slice(0, 100).map((r) => {
+    const usToday = env.US_EDITION === '1' && mine ? (() => { const [y, m, d] = bjDay().split('-').map(Number); return { y, m, d, me: dayOut(mine, y, m, d, false).level.k }; })() : null;
+    // 每位朋友都要排盘、算两周，只取最近的 100 位；brief（美国版今天页）只取 6 位、不算一起做事的日子
+    return [...byId.values()].sort((x, y) => (x.created_at < y.created_at ? 1 : -1)).slice(0, brief ? 6 : 100).map((r) => {
       const f = db.get("SELECT * FROM users WHERE id = ? AND status = 'active'", r.id);
       if (!f) return null;
       const fc = mine && f.birth_date ? chartOf(f) : null;
-      // 两个人今天各自的档位（美国版「朋友的今天」用）；只给日柱，不给生日
-      const today = fc && env.US_EDITION === '1' ? (() => { const [y, m, d] = bjDay().split('-').map(Number), a = dayOut(mine, y, m, d, false), b = dayOut(fc, y, m, d, false); return { me: { k: a.level.k, score: a.score }, them: { k: b.level.k, score: b.score } }; })() : undefined;
-      return { name: shownName(f), src: r.src, at: r.created_at, sign: fc && env.US_EDITION === '1' ? fc.pillars[2] : undefined, today, pair: fc ? { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) } : null };
+      // 两个人今天各自的档位（美国版「朋友的今天」）：只给 1–5 档，不给精确分数和日柱，免得被拼出生日
+      const today = fc && usToday ? { me: { k: usToday.me }, them: { k: dayOut(fc, usToday.y, usToday.m, usToday.d, false).level.k } } : undefined;
+      return { name: shownName(f), src: r.src, at: r.created_at, today, pair: fc ? { ...C.pair(mine.dm, fc.dm), ...(brief ? {} : { best: pairBest(mine, fc) }) } : null };
     }).filter(Boolean);
   }
-  route('GET', '/api/friends', async ({ req }) => ({ list: friendsOf(requireUser(req)) }));
+  route('GET', '/api/friends', async ({ req, q }) => ({ list: friendsOf(requireUser(req), q.get('brief') === '1') }));
   // 已经注册的人打开朋友的邀请链接：两人连上，互相看到你们俩的画（不算邀请奖励）
   route('POST', '/api/friends/link', async ({ req, body }) => {
     const u = requireUser(req);
@@ -1434,7 +1437,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     const u = requireUser(req);
     if (!checkPassword(String(body.password || ''), u.pass_hash)) throw bad('密码不对');
     db.tx(() => {
-      for (const t of ['sessions', 'usage_days', 'open_days', 'plans', 'draws', 'feedback', 'ratings', 'events', 'asks', 'ask_follows', 'amulets', 'moods', 'deeds', 'practices']) db.run(`DELETE FROM ${t} WHERE user_id = ?`, u.id);
+      for (const t of ['sessions', 'usage_days', 'open_days', 'plans', 'draws', 'feedback', 'ratings', 'events', 'asks', 'ask_follows', 'amulets', 'moods', 'deeds', 'practices', 'password_resets', 'wall_tokens']) db.run(`DELETE FROM ${t} WHERE user_id = ?`, u.id);
       db.run('DELETE FROM friend_links WHERE a = ? OR b = ?', u.id, u.id);
       db.run('DELETE FROM invites WHERE inviter_id = ? OR invitee_id = ?', u.id, u.id);
       db.run("UPDATE orders SET status = 'closed', closed_at = ? WHERE user_id = ? AND status = 'pending'", nowIso(), u.id);
@@ -1788,7 +1791,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   }
 
   // 美国版：分享链接预览页、邮件重设密码
-  const usSite = env.US_EDITION === '1' ? registerUsSite({ route, db, env, log, limit, bad, HttpError, hashPassword, chartOf, publicBase }) : null;
+  const usSite = env.US_EDITION === '1' ? registerUsSite({ route, db, env, log, limit, bad, HttpError, hashPassword, chartOf, publicBase, requireUser, access }) : null;
 
   // ---------- 静态文件 ----------
   function serveStatic(req, res, p) {

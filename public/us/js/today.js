@@ -66,8 +66,9 @@ function renderDay(animate, dir = 1) {
   $('#tdTitle').textContent = fmt(sel, 'full');
   const card = $('#daycard');
   const why = whyList(d.why);
-  // the living painting: warm and glowing in a good hour, cooler in a weak one (today only)
-  const now = sel === today ? d.hours.find((h) => h.i === hourNow()) : null;
+  // the living painting: warm and glowing in a good hour, cooler in a weak one (today only).
+  // From 11 PM the hour that starts is tomorrow's first one.
+  const now = sel === today ? nowHour(d) : null;
   const glow = now ? (now.level.k >= 4 ? ' glow' : now.level.k <= 2 ? ' dim' : '') : '';
   card.innerHTML = `
     <div class="dc-art${glow}"><img src="${art(dp)}" alt="" width="720" height="720"><div class="tag"><span class="chip">${signName(dp)} · ${esc(dp.name)}</span></div>${now ? `<span class="nowchip lv${now.level.k}"><i></i>Now · ${level(now.level.k).word} hour</span>` : ''}</div>
@@ -277,20 +278,36 @@ function accuracyChip(sm) {
 }
 
 // ---------- your people today, and the living lock screen invite ----------
+let peopleRun = 0;
 async function peopleToday() {
+  const run = ++peopleRun;
   let list = [];
-  try { list = (await api('GET', 'friends')).list.filter((f) => f.today && f.sign); } catch {}
+  try { list = (await api('GET', 'friends?brief=1')).list.filter((f) => f.today && f.pair); } catch {}
   const anchor = $('.daywrap');
-  if (!anchor || !$('#daycard')) return;
+  if (!anchor || !$('#daycard') || run !== peopleRun) return; // left the page, or a newer Today render took over
+  $('#peopleWrap')?.remove();
   let html = '';
   if (list.length) {
     const strong = list.filter((f) => f.today.them.k >= 4), both = list.filter((f) => f.today.them.k >= 4 && f.today.me.k >= 4);
     const name = (f) => (/[\u4e00-\u9fff]/.test(f.name) ? 'A friend' : f.name);
     const line = both.length ? `A strong day for you and ${esc(name(both[0]))} — do something together.` : strong.length ? `${esc(name(strong[0]))} is having a strong day — lean on them.` : 'A quiet day all round. Check in on someone.';
     html += `<a class="card people" href="#/friends"><div class="dial-head"><p class="label">Your people today</p><span class="go">›</span></div>
-      <div class="faces">${list.slice(0, 6).map((f) => { const p = byGz(f.sign); return `<span class="face lv${f.today.them.k}"><img src="${art(p)}" alt=""><i></i><em>${esc(name(f)).slice(0, 8)}</em></span>`; }).join('')}</div><p class="small" style="margin:10px 0 0">${line}</p></a>`;
+      <div class="faces">${list.slice(0, 6).map((f) => `<span class="face lv${f.today.them.k}"><img src="../${f.pair.art}" alt=""><i></i><em>${esc(name(f).slice(0, 8))}</em></span>`).join('')}</div><p class="small" style="margin:10px 0 0">${line}</p></a>`;
   }
-  if (!store.get('lsPromo')) html += `<a class="card lspromo" href="#/lockscreen"><button class="x" aria-label="Dismiss">×</button><p class="label">New</p><h3 class="h3" style="margin-top:6px">Your lock screen, repainted every morning</h3><p class="small" style="margin:4px 0 0">Set it once — each day your iPhone wakes up to the day's painting and your best hours.</p></a>`;
+  if (!store.get('lsPromo')) html += `<a class="card lspromo" href="#/lockscreen"><button class="x" aria-label="Dismiss">×</button><p class="label">New</p><h3 class="h3" style="margin-top:6px">Your lock screen, repainted every morning</h3><p class="small" style="margin:4px 0 0">Set it once — each morning your phone wakes up to the day's painting and your best hours.</p></a>`;
   anchor.insertAdjacentHTML('afterend', `<div class="stack-gap" id="peopleWrap" style="margin-top:12px">${html}</div>`);
   $('.lspromo .x')?.addEventListener('click', (e) => { e.preventDefault(); store.set('lsPromo', 1); $('.lspromo').remove(); });
 }
+
+// the two-hour slot happening now; after 11 PM that's tomorrow's first slot
+function nowHour(d) {
+  if (new Date().getHours() === 23) { const t = dayOf(addDays(localDay(), 1)); if (t) return t.day.hours.find((h) => h.i === 0); }
+  return d.hours.find((h) => h.i === hourNow());
+}
+// keep the living painting in step with the clock while Today is open
+let lastSlot = hourNow();
+setInterval(() => {
+  const s = new Date().getHours() === 23 ? 'late' : hourNow();
+  if (s === lastSlot) return; lastSlot = s;
+  if ($('#daycard') && sel === localDay() && dayOf(sel)) renderDay(false);
+}, 60000);

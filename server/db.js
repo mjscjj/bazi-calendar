@@ -44,6 +44,12 @@ CREATE TABLE IF NOT EXISTS password_resets (
   expires_at TEXT NOT NULL,
   used_at TEXT
 );
+-- 美国版会自己换的锁屏：每人一个独立的图片凭证（和日历订阅分开，可以单独重置）
+CREATE TABLE IF NOT EXISTS wall_tokens (
+  user_id INTEGER PRIMARY KEY,
+  token TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL
+);
 -- 朋友：已经注册的人点开对方的链接互相配（a < b，邀请关系在 invites 里）
 CREATE TABLE IF NOT EXISTS friend_links (
   a INTEGER NOT NULL,

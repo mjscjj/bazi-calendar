@@ -178,6 +178,8 @@ export const birthdayValue = (date) => (date ? `${date.slice(5, 7)} / ${date.sli
 let AC = null;
 const ac = () => (AC = AC || new (window.AudioContext || window.webkitAudioContext)());
 export const soundOn = () => store.get('sound') !== 0;
+// browsers only allow sound after a tap: unlock the audio on the first touch
+addEventListener('pointerdown', () => { try { if (soundOn()) { const a = ac(); if (a.state === 'suspended') a.resume(); } } catch {} }, { passive: true });
 function noise(sec, shape) {
   const a = ac(), n = Math.floor(a.sampleRate * sec), buf = a.createBuffer(1, n, a.sampleRate), ch = buf.getChannelData(0);
   for (let i = 0; i < n; i++) ch[i] = (Math.random() * 2 - 1) * shape(i / n);
@@ -187,6 +189,7 @@ export function sfx(name) {
   if (!soundOn() || reduced()) return;
   try {
     const a = ac(), out = a.createGain(); out.connect(a.destination);
+    if (a.state === 'suspended') a.resume().catch(() => {});
     if (name === 'tear') { // paper ripping: crackly filtered noise
       const s = noise(0.35, (k) => Math.pow(1 - k, 1.6) * (Math.random() < 0.3 ? 1 : 0.35)), f = a.createBiquadFilter();
       f.type = 'bandpass'; f.frequency.value = 2600; f.Q.value = 0.7; out.gain.value = 0.45; s.connect(f).connect(out); s.start();

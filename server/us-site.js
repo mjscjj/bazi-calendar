@@ -26,7 +26,7 @@ function makeMailer(env, log) {
   };
 }
 
-export function registerUsSite({ route, db, env, log, limit, bad, HttpError, hashPassword, chartOf, publicBase }) {
+export function registerUsSite({ route, db, env, log, limit, bad, HttpError, hashPassword, chartOf, publicBase, requireUser, access }) {
   const C = JSON.parse(fs.readFileSync(path.join(HERE, '../public/us/content.json'), 'utf8'));
   const pillar = (gz) => C.pillars.find((p) => p.cn === gz);
   const signName = (p) => `${C.stems[p.stem].element} ${p.animal}`;
@@ -111,7 +111,7 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
   }
 
   // ----- 会自己换的锁屏：iPhone 快捷指令每天早上来拿一张图设为壁纸。地址带用户的日历订阅 token 和时区 -----
-  const ZONES = new Set(Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : []);
+  const validTz = (tz) => { if (!tz || tz.length > 64) return null; try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); return tz; } catch { return null; } };
   let canvasMod = null;
   async function wallpaper(u, tz, W, H) {
     canvasMod = canvasMod || await import('@napi-rs/canvas').then((m) => {
@@ -119,7 +119,7 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
       return m;
     });
     const { createCanvas, loadImage } = canvasMod;
-    const date = new Intl.DateTimeFormat('en-CA', { timeZone: ZONES.has(tz) ? tz : (env.DAY_TZ || 'America/Chicago'), year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const date = new Intl.DateTimeFormat('en-CA', { timeZone: validTz(tz) || env.DAY_TZ || 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
     const [y, m, d] = date.split('-').map(Number), t = Date.UTC(y, m - 1, d);
     const c = chartOf(u), x = dayOut(c, y, m, d, true), p = pillar(x.gz);
     const e = GAN.indexOf(x.gz[0]) >> 1, tone = c.ji.includes(e) ? 'ji' : 'xi', vs = C.themes[x.ssG][tone], th = vs[(Math.floor(t / DAY) + 17) % 60 % vs.length];
@@ -132,7 +132,10 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
     const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, 'rgba(10,10,14,.30)'); g.addColorStop(0.45, 'rgba(10,10,14,.45)'); g.addColorStop(1, 'rgba(10,10,14,.78)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     // 画：屏幕中下部，上面留给锁屏时钟
-    const S = Math.round(W * 0.72), X = (W - S) / 2, Y = Math.round(H * 0.41);
+    // 版式按屏幕比例自适应：上面约 33% 留给锁屏时钟，底部留 9%，剩下的放画和四行字
+    const k0 = W / 1179, textH = 400 * k0, top = Math.round(H * 0.33), bottom = Math.round(H * 0.09);
+    const S = Math.round(Math.min(W * 0.72, H - top - bottom - textH)), X = (W - S) / 2;
+    const Y = top + Math.max(0, Math.round((H - top - bottom - textH - S) / 2));
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 24; ctx.beginPath(); ctx.roundRect(X, Y, S, S, 44); ctx.fillStyle = '#222'; ctx.fill(); ctx.restore();
     ctx.save(); ctx.beginPath(); ctx.roundRect(X, Y, S, S, 44); ctx.clip(); ctx.drawImage(img, X, Y, S, S); ctx.restore();
     const k = W / 1179, cx = W / 2; let ty = Y + S + 96 * k;
@@ -143,14 +146,51 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
     ty += 74 * k; ctx.fillStyle = 'rgba(255,255,255,.78)'; ctx.font = `500 ${34 * k}px Inter`; ctx.fillText(`Best ${best.join('  ·  ')}`, cx, ty);
     return cv.encode('jpeg', 88);
   }
-  route('GET', '/api/us/wallpaper/:token', async ({ params, q, ip }) => {
-    if (!limit('wall:' + ip, 60, HOUR)) throw new HttpError(429, 'Too many requests.');
+  // 锁屏有自己的凭证（和日历订阅分开），拿到链接的人只能看到这张图
+  const wallTokenOf = (u, fresh) => {
+    const row = !fresh && db.get('SELECT token FROM wall_tokens WHERE user_id = ?', u.id);
+    if (row) return row.token;
+    const token = crypto.randomBytes(24).toString('base64url');
+    db.run('INSERT INTO wall_tokens(user_id, token, created_at) VALUES(?,?,?) ON CONFLICT(user_id) DO UPDATE SET token = excluded.token, created_at = excluded.created_at', u.id, token, new Date().toISOString());
+    return token;
+  };
+  route('GET', '/api/us/wallpaper-link', async ({ req }) => ({ token: wallTokenOf(requireUser(req), false) }));
+  route('POST', '/api/us/wallpaper-link/reset', async ({ req }) => ({ token: wallTokenOf(requireUser(req), true) }));
+
+  // 出图：同一人同一天同一尺寸只画一次；同时最多画 2 张，其余排队（早上 7 点大家一起来拿）
+  const cache = new Map(), MAXC = 300;
+  let busy = 0; const waiters = [];
+  const slot = () => (busy < 2 ? (busy++, Promise.resolve()) : new Promise((r) => waiters.push(r)));
+  const free = () => { const w = waiters.shift(); if (w) w(); else busy--; };
+  async function endedImage(W, H) {
+    const { createCanvas } = canvasMod || await import('@napi-rs/canvas').then((m) => (canvasMod = m));
+    const cv = createCanvas(W, H), ctx = cv.getContext('2d'), k = W / 1179;
+    ctx.fillStyle = '#16151A'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#F2F1EE'; ctx.textAlign = 'center';
+    ctx.font = `400 ${72 * k}px "Instrument Serif"`; ctx.fillText('Sixty Plus has ended', W / 2, H * 0.6);
+    ctx.font = `500 ${32 * k}px Inter`; ctx.fillStyle = 'rgba(242,241,238,.7)'; ctx.fillText('Renew to bring your daily lock screen back.', W / 2, H * 0.6 + 70 * k);
+    return cv.encode('jpeg', 85);
+  }
+  route('GET', '/api/us/wallpaper/:token', async ({ req, params, q, ip }) => {
+    if (!limit('wall:' + ip, 600, HOUR)) throw new HttpError(429, 'Too many requests.');
     const token = String(params.token).replace(/\.(jpe?g|png)$/, '');
-    const u = token.length > 20 && db.get("SELECT * FROM users WHERE cal_token = ? AND status = 'active'", token);
+    const u = token.length > 20 && db.get("SELECT u.* FROM wall_tokens w JOIN users u ON u.id = w.user_id WHERE w.token = ? AND u.status = 'active'", token);
     if (!u || !u.birth_date) throw new HttpError(404, 'This link has expired.');
-    const W = Math.min(2000, Math.max(600, parseInt(q.get('w'), 10) || 1179)), H = Math.min(4000, Math.max(1000, parseInt(q.get('h'), 10) || 2556));
-    const buf = await wallpaper(u, String(q.get('tz') || ''), W, H);
-    return { __raw: buf, __type: 'image/jpeg', __headers: { 'Cache-Control': 'no-store', 'Content-Disposition': 'inline; filename="sixty-today.jpg"' } };
+    if (!limit('wallt:' + token, 30, HOUR)) throw new HttpError(429, 'Too many requests.');
+    const headers = { 'Cache-Control': 'no-store', 'Content-Disposition': 'inline; filename="sixty-today.jpg"' };
+    if (req.method === 'HEAD') return { __raw: Buffer.alloc(0), __type: 'image/jpeg', __headers: headers };
+    // 尺寸：宽 600–2000；高宽比不在手机常见范围（1.5–2.4）时按 2556/1179 出
+    const W = Math.min(2000, Math.max(600, parseInt(q.get('w'), 10) || 1179)); let H = parseInt(q.get('h'), 10) || 2556;
+    if (!(H / W >= 1.5 && H / W <= 2.4)) H = Math.round(W * 2556 / 1179);
+    const tz = validTz(String(q.get('tz') || '')) || env.DAY_TZ || 'America/Chicago';
+    const day = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    const blocked = access(u).mode === 'blocked', key = `${u.id}:${day}:${W}x${H}:${blocked ? 0 : 1}:${u.birth_date}:${u.birth_time || ''}:${u.birth_lng ?? ''}:${u.gender || ''}`;
+    let buf = cache.get(key);
+    if (!buf) {
+      await slot();
+      try { buf = blocked ? await endedImage(W, H) : await wallpaper(u, tz, W, H); } finally { free(); }
+      cache.set(key, buf); if (cache.size > MAXC) cache.delete(cache.keys().next().value);
+    }
+    return { __raw: buf, __type: 'image/jpeg', __headers: headers };
   });
 
   return {

@@ -1013,11 +1013,18 @@ test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；�
     const east = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Kiritimati' })).data.date, west = (await call('GET', '/api/today', null, { 'X-TZ': 'Pacific/Pago_Pago' })).data.date;
     assert.notEqual(east, west);
     assert.ok((await call('GET', '/api/today', null, { 'X-TZ': 'Not/AZone' })).status === 200);
-    // 会自己换的锁屏：日历订阅的 token 就是锁屏图的地址；按 tz 参数取当天
-    const feed = (await call('GET', '/api/me/calendar-feed')).data, tok = feed.url.split('/').pop().replace('.ics', '');
-    const wr = await fetch(`${B}/api/us/wallpaper/${tok}.jpg?tz=America/Los_Angeles&w=600&h=1300`);
+    // 会自己换的锁屏：有自己的凭证，和日历订阅互不相通；可以重置；按 tz 取当天（Asia/Kolkata 这类别名也认）
+    const feed = (await call('GET', '/api/me/calendar-feed')).data, calTok = feed.url.split('/').pop().replace('.ics', '');
+    assert.equal((await fetch(`${B}/api/us/wallpaper/${calTok}.jpg`)).status, 404); // 日历的凭证拿不到图
+    const tok = (await call('GET', '/api/us/wallpaper-link')).data.token;
+    assert.equal((await call('GET', '/api/us/wallpaper-link')).data.token, tok);
+    assert.equal((await fetch(`${B}/api/ics/${tok}.ics`)).status, 404); // 锁屏的凭证打不开日历
+    const wr = await fetch(`${B}/api/us/wallpaper/${tok}.jpg?tz=Asia/Kolkata&w=600&h=1300`);
     assert.equal(wr.status, 200); assert.equal(wr.headers.get('content-type'), 'image/jpeg');
     const jpg = Buffer.from(await wr.arrayBuffer()); assert.ok(jpg.length > 20000 && jpg[0] === 0xff && jpg[1] === 0xd8);
+    const odd = await fetch(`${B}/api/us/wallpaper/${tok}.jpg?w=2000&h=1000`); assert.equal(odd.status, 200); // 比例不对按标准比例出
+    const tok2 = (await call('POST', '/api/us/wallpaper-link/reset')).data.token;
+    assert.notEqual(tok2, tok); assert.equal((await fetch(`${B}/api/us/wallpaper/${tok}.jpg`)).status, 404);
     assert.equal((await fetch(`${B}/api/us/wallpaper/nope-nope-nope-nope-nope.jpg`)).status, 404);
     // 分享链接
     const s = await call('GET', '/s/guimao');
@@ -1029,7 +1036,9 @@ test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；�
     const amyCookie = cookie; cookie = '';
     assert.equal((await call('POST', '/api/auth/register', { username: 'bo@example.com', password: 'password123', agree: true, invite: code, birth: { date: '1990-07-04' } })).status, 200);
     const fl = (await call('GET', '/api/friends')).data.list;
-    assert.equal(fl.length, 1); assert.ok(fl[0].today.me.k >= 1 && fl[0].today.them.k >= 1); assert.equal(fl[0].sign.length, 2); assert.equal(fl[0].birth, undefined);
+    assert.equal(fl.length, 1); assert.ok(fl[0].today.me.k >= 1 && fl[0].today.them.k >= 1);
+    assert.equal(fl[0].today.them.score, undefined); assert.equal(fl[0].sign, undefined); assert.equal(fl[0].birth, undefined); // 不给精确分数、日柱和生日
+    const brief = (await call('GET', '/api/friends?brief=1')).data.list; assert.equal(brief[0].pair.best, undefined);
     cookie = amyCookie;
     assert.match(inv.data, /Amy is an Earth Ox\. What do you two make\?/); assert.match(inv.data, new RegExp(`#/i/${code}`));
     // 重设密码
