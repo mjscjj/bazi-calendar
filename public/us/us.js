@@ -8,7 +8,7 @@ const BRANCHES = 'zi chou yin mao chen si wu wei shen you xu hai'.split(' ');
 const MONTHS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
 const WEEK = 'Sun Mon Tue Wed Thu Fri Sat'.split(' ');
 const HE = ['0-5', '1-6', '2-7', '3-8', '4-9'];
-const SITE = 'mindflow.zone/bazi/us';
+const SITE = 'mindflow.zone/sixty';
 const view = $('#view');
 let C; // content.json
 

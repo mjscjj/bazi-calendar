@@ -1,0 +1,7 @@
+[Unit]
+Description=Sixty 美国版数据库每日备份（候补名单和埋点）
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/apps/bazi-us
+ExecStart=/usr/local/bin/node --disable-warning=ExperimentalWarning scripts/backup.mjs /root/apps/bazi-us/data/app.db /root/backups/bazi-us

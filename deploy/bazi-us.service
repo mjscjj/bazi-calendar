@@ -1,0 +1,13 @@
+[Unit]
+Description=Sixty 美国版 (mindflow.zone/sixty，us-mvp 分支)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/root/apps/bazi-us
+EnvironmentFile=/etc/bazi-us.env
+ExecStart=/usr/local/bin/node --disable-warning=ExperimentalWarning server/index.js
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

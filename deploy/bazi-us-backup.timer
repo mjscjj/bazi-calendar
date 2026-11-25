@@ -1,0 +1,9 @@
+[Unit]
+Description=Sixty 美国版数据库每日 04:40 备份
+
+[Timer]
+OnCalendar=*-*-* 04:40:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
