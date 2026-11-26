@@ -1071,7 +1071,8 @@ test('美国版访客：不注册也能拿今天、本周、月历和挑日子�
     assert.equal(t.status, 200);
     assert.equal(t.data.chart.pillars.length, 4); assert.ok(t.data.day.score > 0 && t.data.strip.days.length === 7 && t.data.tomorrow && t.data.moodKit);
     assert.ok(!t.data.jiazi && !t.data.draw, '访客没有收画和签');
-    const w = await call('/api/us/guest/week', { birth, date: '2026-12-10' });
+    const later = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
+    const w = await call('/api/us/guest/week', { birth, date: later });
     assert.equal(w.status, 200); assert.equal(w.data.days.length, 7);
     const [y, m] = today.split('-').map(Number);
     const c = await call('/api/us/guest/calendar', { birth, y, m, today });
@@ -1080,7 +1081,7 @@ test('美国版访客：不注册也能拿今天、本周、月历和挑日子�
     assert.equal(p.status, 200); assert.ok(p.data.picks.length >= 1 && p.data.days > 0);
     assert.equal((await call('/api/us/guest/pick', { birth, type: 'nope', today })).status, 400);
     assert.equal((await call('/api/us/guest/today', { birth: { date: '2999-01-01' }, date: today })).status, 400);
-    assert.equal(sdb.get('SELECT COUNT(*) n FROM users').n, 0, '访客什么都不存');
+    for (const t of ['users', 'events', 'moods', 'ratings', 'plans', 'draws']) assert.equal(sdb.get(`SELECT COUNT(*) n FROM ${t}`).n, 0, `访客什么都不存：${t}`);
   } finally { srv.close(); }
   // 中文版没有访客接口
   const cn = createServer({ db: openDb(':memory:'), alipay: null, env: { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ASK_AI: 'fake' }, log: { info() {}, error() {}, warn() {} } });

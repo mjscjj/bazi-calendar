@@ -131,7 +131,7 @@ export function pageReveal() {
     if (t === null) return;
     const birth = { date: r.birth.date };
     if (t) { birth.time = t; const c = await pickCity(r.birth.city || ''); if (c) birth.city = c; }
-    try { await startReveal(birth, { quick: true, stay: true, invite: r.invite }); pageReveal(); toast(t ? 'Updated with your birth time' : 'Birth time removed'); track('us_reveal_time', { place: !!birth.city }); }
+    try { await startReveal(birth, { quick: true, stay: true, invite: r.invite }); if (!location.hash.startsWith('#/reveal')) return; pageReveal(); toast(t ? 'Updated with your birth time' : 'Birth time removed'); track('us_reveal_time', { place: !!birth.city }); }
     catch (x) { toast(x.message); }
   });
   forYou(p);

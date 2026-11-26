@@ -69,7 +69,7 @@ function render() {
   const tab = page === 'pair' ? 'friends' : page;
   $$('.tabs a').forEach((a) => (a.dataset.tab === tab ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
   if (path !== lastPath) { scrollTo(0, 0); lastPath = path; track('us_visit', { page, guest: !S.me && !!S.guest }); }
-  if (q.get('r') === '1') { q.delete('r'); const rest = q.toString(); history.replaceState(null, '', `#/${path}${rest ? '?' + rest : ''}`); }
+  if (q.get('r') === '1') { q.delete('r'); const rest = q.toString(); history.replaceState(null, '', `#${path}${rest ? '?' + rest : ''}`); }
 }
 // top right: your avatar (opens You); "Sign in" for anyone without an account
 function topRight(page) {

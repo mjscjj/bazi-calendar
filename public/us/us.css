@@ -603,7 +603,7 @@ body.has-tabs .tabs { display: flex; }
   .grid { grid-template-columns: repeat(6, 1fr); }
   .elems { grid-template-columns: 1fr 1fr; }
   .decades { margin: 0; padding: 2px 0 4px; }
-  .tabs { top: 0; bottom: auto; left: 50%; right: auto; transform: translateX(-50%); width: auto; gap: 4px; border: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 14px 0 0; z-index: 31; }
+  .tabs { position: absolute; top: 0; bottom: auto; left: 50%; right: auto; transform: translateX(-50%); width: auto; gap: 4px; border: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 14px 0 0; z-index: 31; }
   body.has-tabs { --tabs: 0px; }
   .tabs a { flex-direction: row; gap: 6px; font-size: 14px; padding: 8px 14px; border-radius: 99px; max-width: none; }
   .tabs a svg { width: 17px; height: 17px; }
@@ -624,3 +624,10 @@ body.has-tabs .tabs { display: flex; }
 @media (max-width: 959px) { .landing .ask .row { flex-direction: column; } .landing .ask .row .btn { width: 100%; } }
 .pickfield { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 a.card.act { display: grid; }
+/* dark mode: element tints are made for light pages; mix the element color into the dark card instead */
+[data-theme=dark] .chip.el, [data-theme=dark] .chip.kw, [data-theme=dark] .answer, [data-theme=dark] .pillar.day { background: color-mix(in srgb, var(--el) 22%, var(--card)); }
+[data-theme=dark] .chip.el, [data-theme=dark] .chip.kw, [data-theme=dark] .answer .label { color: color-mix(in srgb, var(--el) 55%, #fff); }
+/* the smallest phones: a shorter painting band so the numbers come up sooner; the legend may wrap */
+@media (max-width: 359px), (max-height: 600px) { .dc-art { height: 92px; } }
+@media (max-width: 380px) { .legend { flex-wrap: wrap; gap: 4px 10px; } }
+.panel:focus { outline: none; }

@@ -6,15 +6,18 @@ import { $, $$, esc, S, api, data, track, toast, buzz, reduced, localDay, fmt, p
 import { needAccount } from './onboard.js';
 
 const view = () => $('#view');
-let month = null, selDay = null, act = null, range = '1m', picks = null, cal = null;
+let month = null, selDay = null, act = null, range = '1m', picks = null, cal = null, owner = '';
 // "A job interview" → "Job interview"
 const short = (v) => { const s = v.replace(/^(A|An) /, ''); return s.charAt(0).toUpperCase() + s.slice(1); };
 const iso3 = (p) => `${p.y}-${String(p.m).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`;
 
 // #/calendar?t=面试 opens with an activity already chosen (from the Oracle or Today)
 export function pageCalendar(want) {
-  if (want && S.C.pickTypes[want] && want !== act) { act = want; picks = null; }
   const today = localDay();
+  // picks and the open month belong to one birthday on one day: a new person, birthday or day starts fresh
+  const who = JSON.stringify([S.me?.user.id || 'guest', S.me?.user.birth || S.guest?.birth, today]);
+  if (who !== owner) { owner = who; month = null; selDay = null; picks = null; }
+  if (want && S.C.pickTypes[want] && want !== act) { act = want; picks = null; }
   month = month || today.slice(0, 7);
   view().innerHTML = `<div class="page split" style="${elStyle(elOf(you()))}">
     <div class="cols"><div class="sticky">

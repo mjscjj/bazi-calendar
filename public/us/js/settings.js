@@ -1,6 +1,6 @@
 // Settings: birth details (all picked, none typed), name, appearance, sounds, lock screen, calendar app, help and account.
 // Works for guests too: their birth details stay on this phone.
-import { $, $$, esc, S, api, store, track, toast, closeSheet, openSheet, soundOn, sfx, fmt } from './core.js';
+import { $, $$, esc, S, api, store, track, toast, closeSheet, openSheet, soundOn, sfx, fmt, ageOf } from './core.js';
 import { pickDate, pickTime, pickCity, timeLabel } from './pickers.js';
 import { needAccount, setGuest } from './onboard.js';
 import { applyTheme } from './me.js';
@@ -69,6 +69,7 @@ export async function editBirth(field) {
 }
 async function saveBirth(b) {
   const birth = { date: b.date, time: b.time || null, city: b.time && b.city ? b.city : null, gender: b.gender || null };
+  if (ageOf(birth.date) < 13) { toast('Flow Day is for ages 13 and up.'); return; }
   try {
     if (S.me) {
       await api('PUT', 'me/profile', { nickname: S.me.user.nickname || '', bio: S.me.user.bio || '', birth });

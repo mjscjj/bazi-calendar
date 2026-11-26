@@ -13,6 +13,7 @@ const mk = async () => { const c = await b.newContext(VP); const p = await c.new
 const p = await mk();
 const shot = (pg, n, full) => pg.screenshot({ path: `${out}/${n}.png`, fullPage: !!full });
 const step = (s) => console.log('—', s);
+const check = (ok, what) => { console.log(ok ? '  ✓' : '  ✗', what); if (!ok) errs.push('check failed: ' + what); };
 // turn the wheels of the open date picker to a date
 const wheelTo = async (pg, y, m, d) => {
   await pg.waitForSelector('.wheels'); await pg.waitForTimeout(350);
@@ -37,10 +38,17 @@ await p.click('.band'); await p.waitForSelector('#dial'); await p.waitForTimeout
 await shot(p, 'd3-dial'); await p.click('#sheet .x');
 await p.click('#week button:nth-child(6)'); await p.waitForTimeout(600); await shot(p, 'd4-otherday');
 await p.click('.moodrow button, #backToday').catch(() => {}); await p.goto(base + '#/today'); await p.waitForSelector('.moodrow'); await p.click('.moodrow button');
-await p.waitForSelector('#signup'); console.log('guest mood asks for an account: yes'); await shot(p, 'd5-gate'); await p.click('#sheet .x');
+check(!!(await p.waitForSelector('#signup', { timeout: 5000 }).catch(() => null)), 'guest mood asks for an account'); await shot(p, 'd5-gate'); await p.click('#sheet .x');
 step('guest calendar'); await p.click('.tabs a[data-tab=calendar]'); await p.waitForSelector('#cal button.lv1, #cal button.lv2, #cal button.lv3, #cal button.lv4, #cal button.lv5'); await p.waitForTimeout(1000); await shot(p, 'e1-cal', true);
 await p.click('#cal button[data-d$="-20"]'); await p.waitForTimeout(400); console.log('day panel:', (await p.textContent('#dayPanel .title')).trim());
 await p.click('#acts [data-t="面试"]'); await p.waitForSelector('#cal .badge'); await p.waitForTimeout(1200); await shot(p, 'e2-pick', true); console.log('picks marked:', (await p.$$('#cal .badge')).length || 'in another month');
+const picksOf = () => p.$$eval('#bestBox [data-go]', (xs) => xs.map((x) => x.dataset.go).join(','));
+const before = await picksOf();
+await p.goto(base + '#/settings'); await p.click('[data-e=date]'); await wheelTo(p, 1985, 8, 2); await p.waitForTimeout(1500);
+await p.goto(base + '#/calendar?t=' + encodeURIComponent('面试')); await p.waitForSelector('#bestBox [data-go]'); await p.waitForTimeout(800);
+const server = await p.evaluate(async () => { const g = JSON.parse(localStorage.getItem('sixty.guest')); const r = await (await fetch('../api/us/guest/pick', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ birth: g.birth, type: '面试', range: '1m', today: new Date().toLocaleDateString('en-CA') }) })).json(); return r.picks.map((x) => `${x.y}-${String(x.m).padStart(2, '0')}-${String(x.d).padStart(2, '0')}`).join(','); });
+check(await picksOf() === server && server !== before, 'best days recalculated after the birthday changed');
+await p.goto(base + '#/settings'); await p.click('[data-e=date]'); await wheelTo(p, 1992, 3, 14); await p.waitForTimeout(1500);
 step('guest oracle'); await p.click('.tabs a[data-tab=oracle]'); await p.waitForSelector('#hold'); await p.click('.suggest button'); await shot(p, 'o0-guest', true);
 step('guest friends'); await p.click('.tabs a[data-tab=friends]'); await p.waitForSelector('.sample'); await shot(p, 'g0-guest');
 step('guest you'); await p.click('.avatar'); await p.waitForSelector('.pillars'); await p.waitForTimeout(800); await shot(p, 'f0-guest', true);
@@ -49,17 +57,17 @@ await p.goto(base + '#/settings'); await p.waitForSelector('[data-e=date]'); awa
 step('signup'); await p.goto(base + '#/today'); await p.waitForSelector('#tipSave'); await p.click('#tipSave');
 await p.fill('#signup [name=email]', AMY); await p.fill('#signup [name=pw]', 'password123'); await p.check('#signup [name=agree]'); await shot(p, 'h0-signup'); await p.click('#signup button[type=submit]');
 await p.waitForFunction(() => !document.querySelector('#signup')); await p.waitForSelector('#daycard .scoreline'); await p.waitForTimeout(900);
-console.log('signed in; tear on signup day (should be false):', !!(await p.$('#leaf')));
+check(!(await p.$('#leaf')), 'nothing to tear on the day you sign up');
 await p.click('.moodrow button[data-m=calm]'); await p.waitForSelector('.moodrow button.on'); console.log('mood logged');
 if (dbPath) {
   const { DatabaseSync } = await import('node:sqlite'); const db = new DatabaseSync(dbPath); const u = db.prepare('SELECT id FROM users WHERE username = ?').get(AMY);
   db.prepare('UPDATE users SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 3 * 864e5).toISOString(), u.id); db.prepare('DELETE FROM open_days WHERE user_id = ?').run(u.id); db.close();
   await p.evaluate(() => localStorage.removeItem('sixty.torn')); await p.reload(); await p.waitForSelector('#daycard .scoreline'); await p.waitForTimeout(700);
-  console.log('yesterday page waiting:', !!(await p.$('#leaf'))); await shot(p, 'h1-leaf');
-  if (await p.$('#leaf')) { const bx = await (await p.$('#leaf')).boundingBox(); await p.mouse.move(bx.x + bx.width / 2, bx.y + 20); await p.mouse.down(); for (let i = 1; i <= 6; i++) { await p.mouse.move(bx.x + bx.width / 2, bx.y + 20 + i * 18); await p.waitForTimeout(16); } await p.mouse.up(); await p.waitForTimeout(1400); console.log('torn:', !(await p.$('#leaf'))); }
+  check(!!(await p.$('#leaf')), "yesterday's page waits to be torn off"); await shot(p, 'h1-leaf');
+  if (await p.$('#leaf')) { const bx = await (await p.$('#leaf')).boundingBox(); await p.mouse.move(bx.x + bx.width / 2, bx.y + 20); await p.mouse.down(); for (let i = 1; i <= 6; i++) { await p.mouse.move(bx.x + bx.width / 2, bx.y + 20 + i * 18); await p.waitForTimeout(16); } await p.mouse.up(); await p.waitForTimeout(1400); check(!(await p.$('#leaf')), 'torn off'); }
 }
 await shot(p, 'h2-today-signed', true);
-step('plan'); await p.goto(base + '#/calendar?t=' + encodeURIComponent('面试')); await p.waitForSelector('#cal .badge, #bestBox .item'); await p.waitForSelector('#savePlan'); await p.click('#savePlan'); await p.waitForFunction(() => document.querySelector('#savePlan')?.disabled); console.log('plan saved');
+step('plan'); await p.goto(base + '#/calendar?t=' + encodeURIComponent('面试')); await p.waitForSelector('#cal .badge, #bestBox .item'); await p.waitForSelector('#savePlan'); await p.click('#savePlan'); check(!!(await p.waitForFunction(() => document.querySelector('#savePlan')?.disabled, null, { timeout: 8000 }).catch(() => null)), 'plan saved');
 await p.waitForSelector('#plans .item'); await shot(p, 'e3-plans', true);
 step('oracle'); await p.click('.tabs a[data-tab=oracle]'); await p.waitForSelector('#hold'); await p.fill('#q', 'Should I take the new job?'); await p.click('.topics .pill[data-k=work]'); await shot(p, 'o1-ask');
 { const h = await (await p.$('#hold')).boundingBox(); await p.mouse.move(h.x + h.width / 2, h.y + h.height / 2); await p.mouse.down(); await p.waitForTimeout(1500); await p.mouse.up(); }
@@ -88,8 +96,11 @@ await q.waitForFunction(() => !document.querySelector('#signup'));
 await q.goto(base + '#/friends'); await q.waitForSelector('.friend'); await shot(q, 'g4-friends', true);
 await q.click('.friend'); await q.waitForSelector('#fShare'); await shot(q, 'g5-friend');
 await q.goto(base + '#/today'); await q.waitForSelector('.people .face'); await shot(q, 'g6-people', true); console.log('people today:', (await q.textContent('.people .small')).trim());
+step('sign out'); await q.goto(base + '#/settings'); await q.click('[data-a=out]'); await q.waitForTimeout(1500);
+check(await q.evaluate(async () => (await fetch('../api/me')).status === 401 || !(await (await fetch('../api/me')).json()).user), 'signed out on the server'); check(!!(await q.$('#birthForm')), 'back on the landing page');
+await q.goto(base + '#/signin'); await q.fill('#signin [name=email]', ALEX); await q.fill('#signin [name=pw]', 'password123'); await q.click('#signin button[type=submit]'); await q.waitForSelector('#daycard .scoreline');
 step('dark'); await p.evaluate(() => localStorage.setItem('sixty.theme', '"dark"')); await p.goto(base + '#/today'); await p.reload(); await p.waitForSelector('#daycard .scoreline'); await p.waitForTimeout(900); await shot(p, 'h3-dark');
 for (const pg of [p, q]) console.log('delete:', await pg.evaluate(async () => (await fetch('../api/me/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'password123' }) })).status));
-step('terms'); await p.goto(base + '#/terms'); await p.waitForSelector('.legal h3'); console.log('terms ok:', (await p.textContent('.legal h1')) === 'Terms of Use');
+step('terms'); await p.goto(base + '#/terms'); await p.waitForSelector('.legal h3'); check((await p.textContent('.legal h1')) === 'Terms of Use', 'terms page');
 console.log(errs.length ? 'ERRORS: ' + JSON.stringify(errs) : 'ERRORS: none');
 await b.close();

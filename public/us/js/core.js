@@ -129,6 +129,7 @@ export const shareBase = () => location.origin + location.pathname.replace(/us\/
 export const ageOf = (date) => { const [y, m, d] = date.split('-').map(Number), n = new Date(); return n.getFullYear() - y - (n.getMonth() + 1 < m || (n.getMonth() + 1 === m && n.getDate() < d) ? 1 : 0); };
 export class ApiError extends Error { constructor(status, data) { super(ERR.find(([r]) => r.test(data?.message || ''))?.[1] || (status >= 500 ? 'Something went wrong. Please try again.' : data?.message && !/[一-鿿]/.test(data.message) ? data.message : 'Something went wrong.')); this.status = status; this.code = data?.error; } }
 export async function api(method, path, body) {
+  if (method !== 'GET' && !body) body = {}; // the server only takes JSON on writes (sign out, reset link…)
   const headers = { 'X-TZ': TZ, ...(body ? { 'Content-Type': 'application/json' } : {}) };
   const r = await fetch('../api/' + path, { method, credentials: 'same-origin', headers, body: body ? JSON.stringify(body) : undefined });
   const d = await r.json().catch(() => ({}));
@@ -164,20 +165,35 @@ export function countUp(el, to, ms = 900) {
 }
 
 // ---------- sheet ----------
-let onSheetClose = null;
+let onSheetClose = null, sheetOpener = null;
 export function openSheet(html, cls = '', onClose = null) {
   const prev = onSheetClose; onSheetClose = null; prev?.();
-  const s = $('#sheet'); s.innerHTML = `<div class="panel ${cls}" role="dialog" aria-modal="true">${html}</div>`; s.hidden = false;
+  const s = $('#sheet');
+  if (s.hidden) sheetOpener = document.activeElement;
+  s.innerHTML = `<div class="panel ${cls}" role="dialog" aria-modal="true" tabindex="-1">${html}</div>`; s.hidden = false;
   document.body.style.overflow = 'hidden';
   s.querySelector('.x')?.addEventListener('click', () => closeSheet());
   onSheetClose = onClose;
-  return s.querySelector('.panel');
+  // move focus into the sheet: the first control on a computer; the sheet itself on a phone (no keyboard popping up)
+  const panel = s.querySelector('.panel'), first = panel.querySelector('.wcol, input:not([type=checkbox]), textarea, button:not(.x), a[href]');
+  (matchMedia('(pointer: coarse)').matches || !first ? panel : first).focus({ preventScroll: true });
+  return panel;
 }
 export function closeSheet() {
   const s = $('#sheet'); if (s.hidden) return;
   s.hidden = true; s.innerHTML = ''; document.body.style.overflow = '';
   const f = onSheetClose; onSheetClose = null; f?.();
+  if (sheetOpener && document.contains(sheetOpener)) sheetOpener.focus({ preventScroll: true });
+  sheetOpener = null;
 }
+// keep Tab inside an open sheet
+addEventListener('keydown', (e) => {
+  const s = $('#sheet'); if (e.key !== 'Tab' || s.hidden) return;
+  const els = [...s.querySelectorAll('button, a[href], input, textarea, select, [tabindex="0"]')].filter((x) => !x.disabled && x.offsetParent);
+  if (!els.length) return;
+  const i = els.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0) { e.preventDefault(); els[els.length - 1].focus(); } else if (!e.shiftKey && i === els.length - 1) { e.preventDefault(); els[0].focus(); }
+});
 $('#sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet') closeSheet(); });
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 

@@ -61,10 +61,18 @@ function renderWeek() {
   $$('#week button').forEach((b) => b.addEventListener('click', () => go(b.dataset.d, b.dataset.d > sel ? 1 : -1)));
 }
 
+let goId = 0;
 async function go(date, dir) {
+  const id = ++goId; // a newer move cancels a week still loading
   if (date === sel) return;
-  sel = date; buzz(6);
-  if (!dayOf(date)) { try { strip = await data.week(date); } catch (e) { toast(e.message); return; } }
+  buzz(6);
+  if (!dayOf(date)) {
+    let w;
+    try { w = await data.week(date); } catch (e) { if (id === goId) toast(e.message); return; }
+    if (id !== goId || !$('#daycard')) return;
+    strip = w;
+  }
+  sel = date;
   renderWeek(); renderDay(true, dir);
 }
 
@@ -315,7 +323,7 @@ async function extras() {
     [S.me && !standalone && days.size >= 2, 'a2hs', `<div class="card promo" data-tip="a2hs"><button class="x" aria-label="Dismiss">×</button><h3 class="h3">Add Flow Day to your Home Screen</h3><p class="muted" style="margin:4px 0 0;font-size:14px">Open your day in one tap, like an app.</p>
       ${installEvt ? '<button class="btn sm" id="doInstall" style="margin-top:10px">Add to Home Screen</button>' : ios ? '<ol class="steps"><li>Tap <b>Share</b> in Safari</li><li>Choose <b>Add to Home Screen</b></li></ol>' : '<p class="small" style="margin:6px 0 0">Browser menu → <b>Install app</b> or <b>Add to Home screen</b>.</p>'}</div>`],
     [S.me && days.size >= 3 && !store.get('lsPromo'), 'lock', `<a class="card promo dark" data-tip="lock" href="#/lockscreen"><button class="x" aria-label="Dismiss">×</button><h3 class="h3">Your lock screen, repainted every morning</h3><p class="muted" style="margin:4px 0 0;font-size:14px">Set it once — your phone wakes up to the day's painting and your best hours.</p></a>`],
-    [S.me && !list.length, 'invite', `<button class="card promo" data-tip="invite"><span class="x" role="button" aria-label="Dismiss">×</span><h3 class="h3">See the painting you make with a friend</h3><p class="muted" style="margin:4px 0 0;font-size:14px">Every pair of signs has its own. Send your link — you both see yours.</p></button>`],
+    [S.me && !list.length, 'invite', `<div class="card promo" data-tip="invite"><button class="x" aria-label="Dismiss">×</button><h3 class="h3">See the painting you make with a friend</h3><p class="muted" style="margin:4px 0 10px;font-size:14px">Every pair of signs has its own. Send your link — you both see yours.</p><a class="btn sm ghost" href="#/friends">Invite a friend</a></div>`],
   ].filter(([ok, key]) => ok && off[key] !== localDay() && !(key !== 'save' && off[key] === 'never'));
   extrasHtml = { people, promo: tips[0]?.[2] || '' };
   if ($('#peopleSlot')) { $('#peopleSlot').innerHTML = extrasHtml.people; $('#promoSlot').innerHTML = extrasHtml.promo; wireExtras(); }
@@ -326,7 +334,6 @@ function wireExtras() {
   tip.querySelector('.x').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const off = store.get('tipOff') || {}; off[key] = key === 'save' ? localDay() : 'never'; store.set('tipOff', off); if (key === 'lock') store.set('lsPromo', 1); tip.remove(); });
   $('#tipSave')?.addEventListener('click', () => needAccount());
   $('#doInstall')?.addEventListener('click', async () => { installEvt.prompt(); const r = await installEvt.userChoice.catch(() => null); track('us_install', { r: r?.outcome }); tip.remove(); });
-  if (key === 'invite') tip.addEventListener('click', () => { location.hash = '#/friends'; });
   track('us_tip', { key });
 }
 

@@ -4,7 +4,7 @@ import { $, $$, esc, openSheet, closeSheet, MONTHS, iso, localDay } from './core
 
 const ROW = 40;
 const itemsHtml = (items) => '<div class="wpad"></div>' + items.map((it) => `<div class="witem" data-v="${esc(it.v)}">${esc(it.label)}</div>`).join('') + '<div class="wpad"></div>';
-const wheelsHtml = (cols) => `<div class="wheels">${cols.map((c, i) => `<div class="wcol" data-wcol="${i}" style="flex:${c.flex || 1}" role="listbox" aria-label="${esc(c.name || '')}">${itemsHtml(c.items)}</div>`).join('')}<i class="wband" aria-hidden="true"></i></div>`;
+const wheelsHtml = (cols) => `<div class="wheels">${cols.map((c, i) => `<div class="wcol" data-wcol="${i}" style="flex:${c.flex || 1}" role="listbox" tabindex="0" aria-label="${esc(c.name || '')}">${itemsHtml(c.items)}</div>`).join('')}<i class="wband" aria-hidden="true"></i></div>`;
 
 // cols: [{ items: [{ v, label }], index }]; onChange(column, index)
 function mountWheels(root, cols, onChange) {
@@ -16,6 +16,13 @@ function mountWheels(root, cols, onChange) {
     mark(el, cols[i].index);
     last[i] = cols[i].index;
     el.addEventListener('scroll', () => { clearTimeout(timers[i]); timers[i] = setTimeout(() => settle(i), 90); }, { passive: true });
+    // keyboard: up and down arrows move one row
+    el.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      const k = Math.max(0, Math.min(count(el) - 1, Math.round(el.scrollTop / ROW) + (e.key === 'ArrowDown' ? 1 : -1)));
+      el.scrollTop = k * ROW;
+    });
     el.addEventListener('click', (e) => {
       const it = e.target.closest('.witem'); if (!it) return;
       el.scrollTo({ top: [...el.querySelectorAll('.witem')].indexOf(it) * ROW, behavior: 'smooth' });
