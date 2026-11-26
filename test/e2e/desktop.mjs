@@ -56,7 +56,7 @@ await shot('d6-today');
 
 await page.click('.topnav a[href="#/calendar"]');
 await page.waitForSelector('.grid .c2');
-await page.waitForSelector('#dayPanel .hours');
+await page.waitForSelector('#dayPanel .detail-theme');
 check('日历右侧有当日详情面板', await page.isVisible('#dayPanel'));
 const before = await page.textContent('#dayPanel .ph2');
 await page.click('.grid [data-d="15"]');

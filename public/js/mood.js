@@ -2,6 +2,7 @@
 // 心情词、默认纸色、分数都在 content/moods.json。
 import { $, esc, api, toast, onClick, track, localToday, openSheet, dismissSheet, guestAsk } from './core.js';
 import { S, isDemo } from './state.js';
+import { todosHtml } from './todos.js';
 
 export const kitOf = () => (S.today && S.today.moodKit) || (S.cal && S.cal.moodKit) || null;
 const moodOf = (kit, key) => kit.moods.find((m) => m.key === key) || null;
@@ -37,18 +38,28 @@ export const moodWords = (list, kit) => list.map((m) => (moodOf(kit, m.mood) || 
 // ---------- 今天页：记录此刻 ----------
 // 今天和前两天可以记；更早的只看；以后的日子不显示
 const canRecord = (date) => { const t = localToday(); return date <= t && date >= addDays(t, -2); };
-const chip = (kit, m, attr, on) => `<button type="button" class="mchip" ${attr}="${m.key}"${on == null ? '' : ` aria-pressed="${on}"`}><i style="${paper(colorOf(kit, m.color))}">${esc(m.char)}</i><span>${esc(m.word)}</span></button>`;
+const chip = (kit, m, attr, on) => `<button type="button" class="mchip" style="${paper(colorOf(kit, m.color))}" ${attr}="${m.key}"${on == null ? '' : ` aria-pressed="${on}"`}><i class="mood-dot" aria-hidden="true"></i>${esc(m.word)}</button>`;
+
+function moodRow(m, kit, remove) {
+  const mood = moodOf(kit, m.mood), note = m.note?.trim();
+  return `<li class="mood-entry${mood ? '' : ' ev'}" style="${paper(colorOf(kit, m.color))}"><button type="button" class="mood-read" data-stk-open="${m.id}"><time datetime="${esc(m.createdAt)}">${hm(m.createdAt)}</time><i class="mood-dot" aria-hidden="true"></i><span class="mood-copy">`
+    + `<span>${esc(mood?.word || note || '记事')}</span>`
+    + (mood && note && note !== mood.word ? `<small>${esc(note)}</small>` : '')
+    + '</span></button>'
+    + (remove ? `<button type="button" class="x" data-unstick="${m.id}" data-unstick-day="${m.day}" aria-label="删除 ${hm(m.createdAt)} 的记录">×</button>` : '') + '</li>';
+}
 export function recordHtml(entry, kit) {
   if (!kit || !entry) return '';
-  const today = localToday(), list = entry.moods || [], can = canRecord(entry.date) || isDemo();
-  if (!can && !list.length) return '';
-  const isToday = entry.date === today;
-  const title = isToday ? '今天有什么要记录的？' : '这一天的记录';
+  const list = entry.moods || [], can = canRecord(entry.date);
+  const isToday = entry.date === localToday();
+  const [, month, day] = entry.date.split('-').map(Number);
   const sm = S.today && S.today.rate && S.today.rate.summary;
-  return `<section class="moodbox" aria-label="${title}"><div class="q"><b>${title}</b>${list.length ? `<small>记了 ${list.length} 条</small>` : ''}</div>`
-    + (can ? `<button type="button" class="mwrite" data-mood-rec><span aria-hidden="true">✎</span>${isToday ? '记一笔：今天发生了什么' : '补记一笔'}</button>`
-      + `<div class="mlab">顺手记个心情</div><div class="mchips" role="group" aria-label="顺手记个心情">${kit.moods.map((m) => chip(kit, m, 'data-mood-quick')).join('')}</div>` : '')
-    + (list.length ? `<div class="board">${list.map((m) => stickerHtml(m, kit, { remove: can && !isDemo() })).join('')}</div>` : '')
+  const title = isToday ? '今日待办和心情' : `${month}月${day}日待办${can || list.length ? '和心情' : ''}`;
+  return `<section class="moodbox" aria-label="${title}">`
+    + todosHtml(entry.date, entry.todos, title)
+    + (can || list.length ? `<div class="mood-heading"><h3>心情记录</h3>${can ? `<button type="button" class="mwrite" data-mood-rec>${isToday ? '写一笔' : '补记一笔'} ›</button>` : ''}</div>` : '')
+    + (can ? `<div class="mchips" role="group" aria-label="记个心情">${kit.moods.map((m) => chip(kit, m, 'data-mood-quick')).join('')}</div>` : '')
+    + (list.length ? `<ul class="mood-log" aria-label="当天的心情记录">${[...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id - a.id).map(m => moodRow(m, kit, can && !isDemo())).join('')}</ul>` : '')
     + (isToday && sm && sm.rated ? `<p class="mfoot">这个月有 ${sm.rated} 天记了心情，其中 <b>${sm.match} 天</b>和系统的判断差不多。只用来帮你观察自己，不代表准不准。</p>` : '')
     + '</section>';
 }

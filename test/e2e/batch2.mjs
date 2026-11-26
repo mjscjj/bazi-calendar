@@ -179,24 +179,24 @@ await rp.fill('input[name=password]', 'friend1234');
 await rp.click('#authForm button[type=submit]');
 await rp.waitForSelector('.tcard');
 await rp.waitForSelector('.moodbox [data-mood-rec]');
-check('问今天有什么要记录的', (await rp.textContent('.moodbox .q')).includes('今天有什么要记录的'));
+check('待办与心情记录区', (await rp.textContent('.moodbox .q')).includes('今日待办和心情'));
 await rp.screenshot({ path: `${out}/b12-mood-ask.png`, fullPage: true });
 await rp.click('[data-mood-rec]'); await rp.waitForSelector('#moodForm');
 await rp.click('[data-mood-pick="full"]'); await rp.click('[data-mood-color="sage"]');
 await rp.fill('#moodForm textarea', '面试聊得不错');
 await rp.click('#moodForm button[type=submit]');
-await rp.waitForSelector('.moodbox .board .stk');
-check('记下一张心情便签', (await rp.textContent('.moodbox .board')).includes('面试聊得不错'));
+await rp.waitForSelector('.moodbox .mood-entry');
+check('记下一张心情便签', (await rp.textContent('.moodbox .mood-log')).includes('面试聊得不错'));
 check('记完显示本月小结', (await rp.textContent('.moodbox .mfoot')).includes('有 1 天记了心情'));
 await rp.screenshot({ path: `${out}/b13-mood-done.png`, fullPage: true });
 check('心情换算成分数写进自评', db.prepare('SELECT score, src FROM ratings WHERE user_id = ?').get(fid).score === 4);
 check('最下面是明天寄语', await rp.isVisible('section.tmrw'));
-check('今天卡片上有「此刻」', (await rp.textContent('#nowline')).includes('此刻'));
+check('今天的时辰轴有当前时间标记', (await rp.$$('.cur .hour-now')).length === 1);
 await rp.click('[data-mood-quick="tired"]'); await rp.waitForSelector('#moodForm'); await rp.click('#moodForm button[type=submit]');
-await rp.waitForFunction(() => document.querySelectorAll('.moodbox .board .stk').length === 2);
+await rp.waitForFunction(() => document.querySelectorAll('.moodbox .mood-entry').length === 2);
 check('一天可以贴第二张', true);
 await rp.reload(); await rp.waitForSelector('.tcard');
-check('刷新后便签还在', (await rp.$$('.moodbox .board .stk')).length === 2);
+check('刷新后便签还在', (await rp.$$('.moodbox .mood-entry')).length === 2);
 await rp.screenshot({ path: `${out}/b13b-tomorrow.png`, fullPage: true });
 await rp.goto(base + '/#/calendar'); await rp.waitForSelector('.grid .c2 .mstk');
 check('月历上贴着心情小纸片', (await rp.$$('.grid .c2.today .mstk i')).length === 2);
@@ -303,14 +303,14 @@ check('注销后回到示例页', !db.prepare('SELECT 1 FROM users WHERE id = ?'
     await route.fulfill({ response: r, json: j });
   });
   await sp.goto(base + '/?r=3#/'); await sp.waitForSelector('.termc img');
-  check('节气那天今天页最上面有节气卡', (await sp.textContent('.termc b')) === '大雪');
+  check('节气那天今天页有节气卡', (await sp.textContent('.termc b')) === '大雪');
   await sp.click('[data-term]'); await sp.click('#sheet [data-share="term"]'); await sp.waitForSelector('#sheet .sharepv img');
   check('节气卡能存成海报', (await sp.textContent('#sheet .sh b')).includes('节气海报'));
   await sp.click('#sheet [data-close-sheet]'); await sp.waitForSelector('#sheet', { state: 'detached' });
-  // 十二时辰盘：十二格，点哪一格，下面就说那个时辰
-  check('十二时辰盘有十二格', (await sp.$$('.dslot.cur .hring .hs')).length === 12);
-  const hs = sp.locator('.dslot.cur .hring .hs.worst'); await hs.scrollIntoViewIfNeeded(); await hs.click();
-  check('点一格，下面说那个时辰适合做什么', /时 \d+–\d+ 点/.test(await sp.textContent('.dslot.cur .hcap')), await sp.textContent('.dslot.cur .hcap'));
+  // 时辰轴：八个白天时段，点哪一格，下面就说那个时辰
+  check('时辰轴有八个白天时段', (await sp.$$('.dslot.cur .hour-seg')).length === 8);
+  const hs = sp.locator('.dslot.cur .hour-seg.best'); await hs.scrollIntoViewIfNeeded(); await hs.click();
+  check('点一格，下面显示该时段的时间和解读', /\d{2}:00–\d{2}:00/.test(await sp.textContent('.dslot.cur .hcap')), await sp.textContent('.dslot.cur .hcap'));
   await sctx.close();
 }
 

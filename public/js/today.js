@@ -1,10 +1,9 @@
-// 今天页，从上往下：本周 7 天（能量趋势和你记的心情、大家的这一天）→ 每天的卡片（左右滑看前后一天）
-// → 每日一签（默念所求、摇签、掷筊、解签）、问一件事、转运御守 → 记录此刻 → 明天寄语。
+// 今天页：本周趋势 → 每日卡片（公共与个人宜忌、时辰）→ 记录与工具。
 import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath } from './core.js';
-import { THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, HOUR_TIP, GRADE_CLS } from './data.js';
+import { pillarArtSrc, THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, GRADE_CLS } from './data.js';
 import { S, isDemo } from './state.js';
-import { openDay } from './day.js';
-import { recordHtml, onMoodChange, moodScore, cellStickers } from './mood.js';
+import { openHours, timelineHtml } from './day.js';
+import { recordHtml, onMoodChange, cellStickers } from './mood.js';
 import { cardArt, cardTitle } from './onboard.js';
 import { shouldTear, showTear } from './tear.js';
 import { openRite } from './rite.js';
@@ -50,7 +49,6 @@ function noticesHtml() {
     const p = readLocal('pending'), inv = readLocal('invite');
     if (p) h += `<div class="notice demo"><p>你的能量卡（${esc(cardTitle(p.card))}）已经测好了。保存后，每天给你算今天${inv && inv.name ? `；注册后你和${esc(inv.name)}各得 ${inv.days || 7} 天会员` : ''}。</p><a class="btn sm primary" href="#/card">去保存</a></div>`;
     else if (inv && inv.name) h += inviteBanner(inv);
-    else h += `<div class="notice demo"><p>这是示例（${esc(t ? t.name : '小满')}）的今天。测测你自己的能量卡，不用注册。</p><a class="btn sm primary" href="#/start">测测我的</a></div>`;
     return h;
   }
   // 系统提示同时只放一条，按重要程度：邀请到账 > 体验最后一天 / 会员快到期 > 补出生城市 > 加到主屏
@@ -69,7 +67,7 @@ function noticesHtml() {
   return h;
 }
 
-// 节气那天：今天页最上面一张节气卡，点开看大图和这个节气对你意味着什么，可以存成海报
+// 节气那天可以点开看大图和这个节气对你意味着什么，也可以存成海报
 function termHtml(t) {
   const x = t && t.term;
   if (!x) return '';
@@ -89,7 +87,7 @@ function lockArtHtml(L) {
   if (!L.art) return '';
   const j = L.jiazi, day = localToday(), fresh = j && j.fresh && !seen('stamp:' + day);
   if (fresh) setTimeout(() => mark('stamp:' + day), 1500);
-  return `<a class="dart lockart" href="#/jiazi" aria-label="${L.art.gz}日的画：${esc(L.art.name)}，去我的一甲子"><img src="${L.art.art}" alt="" width="600" height="600" decoding="async">`
+  return `<a class="dart lockart" href="#/jiazi" aria-label="${L.art.gz}日的画：${esc(L.art.name)}，去我的一甲子"><img src="${esc(pillarArtSrc(L.art.art))}" alt="" width="600" height="600" decoding="async">`
     + `<span class="cap"><b>${L.art.gz}日</b>${esc(L.art.name)}</span>${j && j.has ? `<i class="seal${fresh ? ' fresh' : ''}" aria-hidden="true">收</i>` : ''}</a>`;
 }
 function lockHtml(L) {
@@ -112,114 +110,77 @@ export function memberLockHtml(what) {
     + `<button type="button" class="btn primary block" data-pay>${a.expired ? '续费会员' : '开通月度会员'}</button></div></div>`;
 }
 
-// 此刻：现在是哪个时辰、对你怎么样、还剩多久，下一个好时段在几点
-function nowText(x) {
-  const t = new Date(), mins = t.getHours() * 60 + t.getMinutes();
-  if (!x.hours || mins < 5 * 60) return '<i class="dot"></i><span>夜深了，好好休息</span>';
-  const i = Math.floor(((mins + 60) % 1440) / 120), h = x.hours[i];
-  const end = ((i * 2 + 1) % 24) * 60, left = (end - mins + 1440) % 1440 || 120;
-  const { top, worst } = bestHours(x);
-  const label = top[0] && top[0].i === i ? '最佳时段' : top[1] && top[1].i === i ? '次佳时段' : worst && worst.i === i ? '尽量避开' : h.level.p;
-  const next = top.filter((u) => ((u.i * 2 + 23) % 24) * 60 > mins).sort((a, b) => a.i - b.i)[0];
-  const tail = next ? `；下一个好时段 ${hhShort(next.i)}` : mins >= 21 * 60 ? '；今天的好时段过去了，早点休息' : '';
-  const cls = /最佳|次佳/.test(label) ? 'good' : label === '尽量避开' ? 'bad' : '';
-  return `<i class="dot ${cls}"></i><span>此刻${h.name} · <b>${label}</b>，还剩 ${left} 分钟${tail}</span>`;
-}
-setInterval(() => { const el = document.getElementById('nowline'); if (el && S.today && S.today.date === localToday()) el.innerHTML = nowText(S.today.day); }, 60000);
-
-const short = (items) => items.map((x) => x.split(/[、，]/)[0]).join(' · ');
-function greeting() {
-  const h = new Date().getHours();
-  return h < 5 ? '夜深了' : h < 11 ? '早上好' : h < 13 ? '中午好' : h < 18 ? '下午好' : '晚上好';
-}
+const short = (item) => item.split(/[、，]/)[0];
 const REL = { '-2': '前天', '-1': '昨天', 1: '明天', 2: '后天' };
-// 这一天的画：每一天也有自己的日柱，60 天一轮，大家看到的是同一张；右下角是你自己的那张小画。
-// 今天这张收进了「我的一甲子」时盖一枚「收」字小印，当天第一次打开时印是盖下去的。
-// 放在主题和分数下面：小屏上先看到今天是什么日子
-function dayArtHtml(t, isToday) {
-  const a = t.arts && t.arts[t.day.gz], me = t.card && t.card.pillar;
-  if (!a) return '';
+// 日柱画作为卡片底图，详情和收画状态留在看画入口。
+function dayArtButtonHtml(t, art, isToday) {
   const fresh = isToday && t.jiazi && t.jiazi.fresh && !seen('stamp:' + t.date);
   if (fresh) setTimeout(() => mark('stamp:' + t.date), 1500);
-  const seal = isToday && t.jiazi && t.jiazi.has ? `<i class="seal${fresh ? ' fresh' : ''}" aria-hidden="true">收</i>` : '';
-  return `<button type="button" class="dart" data-day-art="${t.day.gz}" data-day-date="${t.date}" aria-label="${t.day.gz}日的画：${esc(a.name)}"><img src="${a.art}" alt="" width="600" height="600" decoding="async">`
-    + `<span class="cap"><b>${t.day.gz}日</b>${esc(a.name)}</span>${seal}${me ? `<span class="me"><img src="${me.art}" alt=""></span>` : ''}</button>`;
+  const collected = isToday && t.jiazi?.has;
+  const seal = collected ? `<i class="seal${fresh ? ' fresh' : ''}" aria-hidden="true">收</i>` : '';
+  return `<button type="button" class="more day-art-link" data-day-art="${t.day.gz}" data-day-date="${t.date}" aria-label="看画 · ${esc(art.name)}${collected ? '（已收录）' : ''}">${seal}看画 <span aria-hidden="true">›</span></button>`;
 }
-// 十二时辰盘：一圈 24 小时，子时在最上面；十二格按好坏上色，夜里的几格淡一些；
-// 今天有一根指针指着现在，现在正是好时辰时那一格微微发亮；点哪一格，下面说那个时辰适合做什么
-const nowZhi = () => { const d = new Date(); return Math.floor((d.getHours() + 1) / 2) % 12; };
-const hourCap = (u, isNow) => (u ? `<b>${isNow ? '此刻 · ' : ''}${u.name} ${u.range.replace('-', '–')} 点</b> · ${HOUR_TIP[u.ss] || ''} · ${u.level.p} ${u.score}` : '');
-function dialHtml(x, isToday, top, worst) {
-  if (!x.hours || x.hours.length < 12) return '';
-  const R1 = 54, R0 = 38, pt = (r, a) => `${(r * Math.sin(a)).toFixed(2)} ${(-r * Math.cos(a)).toFixed(2)}`;
-  const best = new Set(top.map((u) => u.i)), now = nowZhi();
-  const segs = x.hours.map((u) => {
-    const a0 = ((2 * u.i - 1) / 24) * 2 * Math.PI + 0.018, a1 = ((2 * u.i + 1) / 24) * 2 * Math.PI - 0.018;
-    const d = `M${pt(R1, a0)} A${R1} ${R1} 0 0 1 ${pt(R1, a1)} L${pt(R0, a1)} A${R0} ${R0} 0 0 0 ${pt(R0, a0)}Z`;
-    const cls = `hs k${u.level.k}${u.night ? ' night' : ''}${best.has(u.i) ? ' best' : ''}${worst && worst.i === u.i ? ' worst' : ''}${isToday && u.i === now ? ' now' : ''}${isToday && u.i === now && best.has(u.i) ? ' glow' : ''}`;
-    const lab = ((2 * u.i) / 24) * 2 * Math.PI;
-    return `<path class="${cls}" d="${d}" data-hour="${u.i}" data-cap="${esc(hourCap(u, isToday && u.i === now))}"><title>${u.name} ${u.range} 点</title></path>`
-      + `<text x="${(64 * Math.sin(lab)).toFixed(1)}" y="${(-64 * Math.cos(lab) + 3.5).toFixed(1)}">${u.name[0]}</text>`;
-  }).join('');
-  let hand = '';
-  if (isToday) {
-    const d = new Date(), a = ((d.getHours() + d.getMinutes() / 60) / 24) * 2 * Math.PI;
-    // 指针只画在圆环上那一截，不挡中间的字
-    hand = `<line class="hand" x1="${(30 * Math.sin(a)).toFixed(2)}" y1="${(-30 * Math.cos(a)).toFixed(2)}" x2="${(58 * Math.sin(a)).toFixed(2)}" y2="${(-58 * Math.cos(a)).toFixed(2)}"/>`;
-  }
-  const c = isToday ? x.hours[now] : top[0];
-  const center = c ? `<text class="cn" y="-2">${c.name}</text><text class="cs" y="13">${isToday ? '此刻' : '最佳'} · ${c.level.p}</text>` : '';
-  return `<svg class="hring" viewBox="-74 -74 148 148" role="img" aria-label="十二时辰：${top.map((u) => u.name).join('、')}最好">${segs}${hand}${center}</svg>`;
+function yjHtml(yi, ji) {
+  return `<dl class="yj2"><div><dt>宜</dt><dd>${esc(yi.join(' · '))}</dd></div><div><dt>忌</dt><dd>${esc(ji.join(' · '))}</dd></div></dl>`;
 }
-// 今日幸运色：卡片的光晕和能量环就是这两个颜色，这一行把它说出来；
-// 今天的可以点开看为什么、配什么，别的日子只说是哪两个颜色（配饰和理由只算了今天的）
+
+function comparisonHtml(t, dos, donts) {
+  const a = t.almanac;
+  const generic = a ? `<section class="day-public"><div class="day-yj-head"><h2>公共黄历</h2><button type="button" data-almanac aria-label="查看公共黄历详情">详情 <span aria-hidden="true">›</span></button></div>`
+    + yjHtml(a.yi.slice(0, 2), a.ji.slice(0, 2)) + '</section>' : '';
+  const showStart = t.demo && !readLocal('pending') && !readLocal('invite')?.name;
+  return `<div class="day-compare">${generic}<section class="day-personal"><div class="day-yj-head"><h2>我的日历</h2>`
+    + (t.demo ? `<span>${esc(t.name || '小满')}示例</span>` : '')
+    + (showStart ? '<a class="day-start" href="#/start">测测我的 <span aria-hidden="true">›</span></a>' : '')
+    + '</div>' + yjHtml(dos.slice(0, 3).map(short), donts.slice(0, 2).map(short)) + '</section></div>';
+}
+function luckFields(o) {
+  const colors = o.colors.map((c) => `<span class="luck-color"><i style="--c:${c.hex}" aria-hidden="true"></i>${esc(c.name)}</span>`).join(' ');
+  return `<span class="luck-field"><small>幸运色</small><b class="luck-colors">${colors}</b></span>`
+    + (o.accessory ? `<span class="luck-field"><small>幸运配饰</small><b>${esc(o.accessory)}</b></span>` : '');
+}
 function luckyHtml(t, isToday) {
   const o = t.outfit;
-  if (!o || !o.colors || o.colors.length < 2) return '';
-  const [a, b] = o.colors;
-  const beads = `<span class="beads" aria-hidden="true"><i style="--c:${a.hex}"></i><i style="--c:${b.hex}"></i></span>`;
-  const names = `<b>${esc(a.name)} · ${esc(b.name)}</b>`;
-  if (!isToday) return `<div class="tluck">${beads}<small>幸运色</small>${names}</div>`;
-  return `<button type="button" class="tluck" data-outfit>${beads}<small>今日幸运色</small>${names}<em>配${esc(o.accessory)}</em>`
-    + `<i class="go" aria-hidden="true">›</i><span class="why">${esc(o.text)}</span></button>`;
+  if (!o?.colors?.length) return '';
+  const fields = luckFields(o);
+  return isToday ? `<button type="button" class="tluck" data-outfit>${fields}<i class="go" aria-hidden="true">›</i></button>`
+    : `<div class="tluck">${fields}</div>`;
 }
 function youHtml(t) {
   const x = t.day, isToday = t.date === localToday();
   const { dos, donts } = dosDonts(x, false);
-  const { top, worst } = bestHours(x);
   const [ty, tm, td] = localToday().split('-').map(Number);
   const diff = Math.round((new Date(x.y, x.m - 1, x.d) - new Date(ty, tm - 1, td)) / 86400000);
   const dname = `${x.m}月${x.d}日 周${weekday(x)}`;
-  const who = isToday ? (t.demo ? `${esc(t.name)}的今天（示例）` : `${greeting()}${t.name ? '，' + esc(t.name) : ''}`) : `${REL[diff] ? REL[diff] + ' · ' : ''}${dname}${t.demo ? '（示例）' : ''}`;
+  const context = isToday ? '' : REL[diff];
   // 今日一句写的是「今天…」，看别的日子时换成明天、昨天或这天
   const fix = (txt) => (isToday ? txt : txt.replace(/今天/g, REL[diff] || '这天'));
   const nav = `<button type="button" class="ic nav" data-day-step="-1" aria-label="前一天">‹</button><button type="button" class="ic nav" data-day-step="1" aria-label="后一天">›</button>`;
   // 卡片的光晕和能量环跟着这一天的幸运色走
   const lk = luckVars(t.outfit && t.outfit.colors);
+  const art = t.arts?.[x.gz];
+  const theme = THEME[x.ssG][0], action = actOf(x);
   return `<section class="tcard k${x.level.k}${lk ? ' luck' : ''}"${lk ? ` style="${lk}"` : ''} aria-label="${isToday ? '你的今天' : dname}">`
-    + `<div class="th"><span class="eyebrow">${who}</span><span class="thr">${isToday ? '<button type="button" class="ic" data-share="today" aria-label="分享你的今天">分享</button>' : '<button type="button" class="ic" data-day-go="today">回到今天</button>'}${nav}</span></div>`
-    + `<div class="hero3"><div class="theme"><small>${isToday ? '今天' : REL[diff] || '这天'}是你的</small><b>${THEME[x.ssG][0]}</b></div>`
+    + (art ? `<img class="today-art-bg" src="${esc(pillarArtSrc(art.art))}" alt="" width="600" height="600" decoding="async" draggable="false">` : '')
+    + `<div class="th"><div class="today-date"><time datetime="${t.date}">${dname}</time>${context ? `<span>${context}</span>` : ''}${art ? dayArtButtonHtml(t, art, isToday) : ''}</div><span class="thr">${isToday ? '<button type="button" class="ic" data-share="today" aria-label="分享你的今天">分享</button>' : '<button type="button" class="ic" data-day-go="today">回到今天</button>'}${nav}</span></div>`
+    + `<div class="hero3"><div class="day-theme"><h1 tabindex="-1">${theme}</h1>${theme === action + '日' ? '' : `<small>宜${action}</small>`}</div>`
     + `<div class="ring" style="--p:${x.score}" role="img" aria-label="能量 ${x.score}，${x.level.p}"><b>${x.score}</b><small>${x.level.p}</small></div></div>`
-    + luckyHtml(t, isToday)
-    + dayArtHtml(t, isToday)
     + `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`
-    + `<dl class="yj2"><div><dt>宜</dt><dd>${short(dos.slice(0, 3))}</dd></div><div><dt>忌</dt><dd>${short(donts.slice(0, 2))}</dd></div></dl>`
-    + (isToday ? `<div class="nowline" id="nowline">${nowText(x)}</div>` : '')
-    + `<div class="hdial">${dialHtml(x, isToday, top, worst)}<div class="times">${top.map((u, i) => `<div><small>${i ? '次佳' : '最佳时段'}</small><b>${hhShort(u.i)}</b></div>`).join('')}`
-    + (worst ? `<div class="bad"><small>尽量避开</small><b>${hhShort(worst.i)}</b></div>` : '') + '</div></div>'
-    + `<p class="hcap" aria-live="polite">${hourCap(x.hours.find((u) => u.i === (isToday ? nowZhi() : (top[0] || {}).i)) || top[0], isToday)}</p>`
-    + '<button type="button" class="more" data-today-detail>看十二时辰和理由 ›</button></section>';
+    + comparisonHtml(t, dos, donts)
+    + timelineHtml(x, isToday)
+    + (isToday ? planHtml(t) : '')
+    + luckyHtml(t, isToday)
+    + '</section>';
 }
 
-// 定下的计划：今天和明天的合成一条，点了去日历看
+// 今日计划跟着建议显示，明天的计划放在明天寄语里。
 function planHtml(t) {
   const x = t.day, key = `${x.y}-${x.m}-${x.d}`;
-  const nx = new Date(x.y, x.m - 1, x.d + 1), tmr = `${nx.getFullYear()}-${nx.getMonth() + 1}-${nx.getDate()}`;
+  const plans = (t.plans || []).filter((p) => p.date === key);
+  if (!plans.length) return '';
   const { top } = bestHours(x);
   const at = (p) => (p.hour != null ? hhShort(p.hour) : top[0] ? hhShort(top[0].i) : '白天');
-  const rows = (t.plans || []).filter((p) => p.date === key).map((p) => `<p><b>今天</b><span>${esc(p.name)} · 最好 ${at(p)}</span></p>`)
-    .concat((t.plans || []).filter((p) => p.date === tmr).map((p) => `<p class="tmr"><b>明天</b><span>${esc(p.name)}${p.hour != null ? ' · ' + hhShort(p.hour) : ''}，今晚早点休息</span></p>`));
-  return rows.length ? `<a class="notice plan" href="#/calendar" aria-label="你定下的计划">${rows.join('')}</a>` : '';
+  return `<a class="today-plan" href="#/calendar"><b>今日计划</b><span>${plans.map((p) => `<span>${esc(p.name)} · 最好 ${at(p)}</span>`).join('')}</span><i aria-hidden="true">›</i></a>`;
 }
 
 // 邀请落地：朋友看到的第一屏
@@ -251,23 +212,21 @@ function stripHtml() {
   const d0 = st.days[0].day, d6 = st.days[6].day;
   const isThis = st.days.some((x) => x.date === today);
   const n = st.days.reduce((a, x) => a + ((x.moods || []).length), 0);
-  // 趋势：一条线是系统给的能量（0–100），纸片是你记的心情（1–5 换到同一高度）
-  const pts = st.days.map((x, i) => [i * 100 + 50, 50 - x.day.score * 0.44]);
-  const mood = st.days.map((x) => moodScore(x.moods, kit));
-  const cols = st.days.map((x) => {
-    const y = x.day, on = x.date === sel;
-    return `<button type="button" class="wc${on ? ' on' : ''}${x.date === today ? ' today' : ''}" data-sel-day="${x.date}" aria-pressed="${on}" aria-label="${y.m}月${y.d}日 ${actOf(y)} ${y.level.p}">`
-      + `<span class="w">${x.date === today ? '今天' : '周' + weekday(y)}</span><span class="d">${y.d}</span><span class="a k${y.level.k}">${actOf(y)}</span></button>`;
+  // 七列共用 0–100 的纵轴，上方给选中点的文字预留空间。
+  const ys = st.days.map(({ day }) => 90 - day.score * 0.55);
+  const points = ys.map((y, i) => `${i * 100 + 50},${y}`).join(' ');
+  const cols = st.days.map((x, i) => {
+    const y = x.day, on = x.date === sel, isToday = x.date === today;
+    const sticker = cellStickers((x.moods || []).filter((m) => m.mood).slice(-1), kit);
+    return `<button type="button" class="wc${on ? ' on' : ''}${isToday ? ' today' : ''}" data-sel-day="${x.date}" aria-pressed="${on}" aria-controls="dayswipe" aria-label="${isToday ? '今天，' : ''}${y.m}月${y.d}日，${y.score}分，${y.level.p}${sticker ? '，有心情记录' : ''}">`
+      + `<span class="wplot" aria-hidden="true" style="--point-y:${ys[i]}%"><i class="ed"></i>${on ? `<span class="wscore">${y.score} · ${y.level.p}</span>` : ''}</span>`
+      + `<span class="wdate"><span class="w">${isToday ? '今天' : '周' + weekday(y)}</span><span class="d">${y.d}</span>${sticker}</span></button>`;
   }).join('');
-  const trend = `<div class="wtrend" aria-hidden="true"><svg viewBox="0 0 700 52" preserveAspectRatio="none"><polyline points="${pts.map((p) => p.join(',')).join(' ')}"/></svg>`
-    + st.days.map((x, i) => `<i class="ed k${x.day.level.k}${x.date === sel ? ' on' : ''}" style="left:${(i + 0.5) / 7 * 100}%;top:${(50 - x.day.score * 0.44) / 52 * 100}%"></i>`).join('')
-    + mood.map((v, i) => (v == null ? '' : `<span class="mdot" style="left:${(i + 0.5) / 7 * 100}%;top:${(50 - (v * 20) * 0.44) / 52 * 100}%">${cellStickers(st.days[i].moods.filter((m) => m.mood).slice(-1), kit)}</span>`)).join('') + '</div>';
-  const e = entryOf(sel), a = e && e.almanac;
-  const alm = a ? `<button type="button" class="walm" data-almanac><span class="seal" aria-hidden="true">${a.gz[0]}${a.gz[1]}</span><span>大家的${sel === today ? '今天' : '这一天'} · 农历${a.lunar.monthCn}月${a.lunar.dayCn}${a.lunar.festival || a.lunar.jieqi ? ' · ' + (a.lunar.festival || a.lunar.jieqi) : ''}<em><b>宜</b>${a.yi.slice(0, 3).join(' ')} <b>忌</b>${a.ji.slice(0, 2).join(' ')}</em></span><i aria-hidden="true">›</i></button>` : '';
+  const trend = `<div class="wtrend"><svg aria-hidden="true" viewBox="0 0 700 100" preserveAspectRatio="none"><polyline points="${points}"/></svg>${cols}</div>`;
   return `<section class="wstrip" aria-label="本周"><div class="wh"><button type="button" class="ic nav" data-week-step="-1" aria-label="上一周">‹</button>`
-    + `<div class="wt"><b>${isThis ? '本周' : `${d0.m}月${d0.d}日–${d6.m === d0.m ? '' : d6.m + '月'}${d6.d}日`} · ${stripSummary(st.days)}</b><small>${n ? `这周记了 ${n} 条` : '线是能量，纸片是你记的心情'}</small></div>`
+    + `<div class="wt"><b>${isThis ? '本周运势' : `${d0.m}月${d0.d}日–${d6.m === d0.m ? '' : d6.m + '月'}${d6.d}日`} · ${stripSummary(st.days)}</b>${n ? `<small>已记 ${n} 条</small>` : ''}</div>`
     + `<button type="button" class="ic nav" data-week-step="1" aria-label="下一周">›</button><a class="tbtn" href="#/calendar">日历</a></div>`
-    + `<div class="wcols">${cols}</div>${trend}${alm}</section>`;
+    + `${trend}</section>`;
 }
 // 明天寄语：结合明天的吉凶，给一句今晚就能做的准备
 function tomorrowHtml(t) {
@@ -284,7 +243,7 @@ function viewOf(date) {
   const t = S.today;
   if (date === t.date) return t;
   const e = entryOf(date);
-  return e ? { ...t, date: e.date, day: e.day, line: e.line, outfit: e.luck ? { ...t.outfit, colors: e.luck } : null } : null;
+  return e ? { ...t, date: e.date, day: e.day, line: e.line, almanac: e.almanac, outfit: e.luck ? { colors: e.luck, accessory: e.accessory } : null } : null;
 }
 const dayView = () => viewOf(selDate());
 const cardOf = (date) => { const v = viewOf(date); return v ? youHtml(v) : '<div class="sk dsk"></div>'; };
@@ -295,7 +254,10 @@ function dayCardHtml(anim) {
 }
 function fillSides() {
   const sel = selDate();
-  for (const [cls, n] of [['prev', -1], ['next', 1]]) { const el = document.querySelector('#dtrack .' + cls); if (el && !el.firstChild) el.innerHTML = cardOf(shift(sel, n)); }
+  for (const [cls, n] of [['prev', -1], ['next', 1]]) {
+    const el = $('#dtrack > .dslot.' + cls), date = shift(sel, n);
+    if (el && (!el.firstChild || (el.firstElementChild.classList.contains('dsk') && weekWith(date)))) el.innerHTML = cardOf(date);
+  }
 }
 let slide = '';
 const tooFar = (date) => { const [y, m, d] = date.split('-').map(Number); return Math.abs(new Date(y, m - 1, d) - new Date()) > 380 * 86400000; };
@@ -311,36 +273,52 @@ function fetchWeek(date) {
 // 停在一周的头尾时，把相邻那一周先取回来，滑过去不用等
 function prefetch() {
   const sel = selDate();
-  for (const n of [-1, 1]) { const d = shift(sel, n); if (!weekWith(d) && !tooFar(d)) fetchWeek(d).then(() => { if (currentPath() === '/' && selDate() === sel) renderToday(); }, () => {}); }
+  for (const n of [-1, 1]) { const d = shift(sel, n); if (!weekWith(d) && !tooFar(d)) fetchWeek(d).catch(() => {}); }
 }
-function selectDay(date, dir) {
+function selectDay(date, dir, reveal = false) {
   const t = S.today;
   if (!t) return;
   if (tooFar(date)) { toast('再往后就翻不动了'); return; }
   S.tsel = date === t.date ? null : date;
   slide = dir > 0 ? 'in-r' : dir < 0 ? 'in-l' : '';
   renderToday();
+  if (reveal) {
+    const card = $('#dayswipe .cur .tcard');
+    card?.querySelector('h1').focus({ preventScroll: true });
+    card?.scrollIntoView({ block: 'start' });
+  }
   if (!entryOf(date)) {
     fetchWeek(date).then(() => { if (selDate() === date && currentPath() === '/') { slide = ''; renderToday(); prefetch(); } }, (e) => { toast(e.message); S.tsel = null; renderToday(); });
   } else prefetch();
 }
 // 换到前一天/后一天：先把整排滑过去，滑完再换数据（点 ‹ › 和松手都走这里）
 let moving = false;
-function slideTo(n) {
+function slideTo(n, reveal = false) {
   const tr = document.getElementById('dtrack');
   const target = shift(selDate(), n);
-  if (!tr || tooFar(target) || matchMedia('(prefers-reduced-motion: reduce)').matches) { selectDay(target, n); return; }
+  if (!tr || tooFar(target) || matchMedia('(prefers-reduced-motion: reduce)').matches) { selectDay(target, n, reveal); return; }
   moving = true;
   fillSides();
   void tr.offsetWidth;
   tr.style.transition = 'transform .26s cubic-bezier(.2,.8,.2,1)';
   tr.style.transform = `translateX(calc(${-n} * (100% + var(--dgap))))`;
   let done = false;
-  const finish = () => { if (done) return; done = true; moving = false; selectDay(target, 0); };
+  const finish = () => { if (done) return; done = true; moving = false; selectDay(target, 0, reveal); };
   tr.addEventListener('transitionend', finish, { once: true });
   setTimeout(finish, 400);
 }
-onClick('[data-sel-day]', (el) => { const d = el.getAttribute('data-sel-day'), sel = selDate(); if (d === shift(sel, 1)) slideTo(1); else if (d === shift(sel, -1)) slideTo(-1); else selectDay(d, d > sel ? 1 : d < sel ? -1 : 0); });
+onClick('[data-sel-day]', (el, e) => {
+  if (moving) return;
+  const d = el.getAttribute('data-sel-day'), sel = selDate();
+  if (e.target.closest('.wplot')) {
+    selectDay(d, 0);
+    $('.wstrip .wc.on')?.focus({ preventScroll: true });
+    return;
+  }
+  if (d === shift(sel, 1)) slideTo(1, true);
+  else if (d === shift(sel, -1)) slideTo(-1, true);
+  else selectDay(d, d > sel ? 1 : d < sel ? -1 : 0, true);
+});
 onClick('[data-day-step]', (el) => { if (!moving) slideTo(+el.getAttribute('data-day-step')); });
 onClick('[data-week-step]', (el) => { const n = +el.getAttribute('data-week-step'); selectDay(shift(selDate(), n * 7), n); });
 onClick('[data-day-go]', () => selectDay(S.today.date, selDate() > S.today.date ? -1 : 1));
@@ -389,13 +367,9 @@ function minisHtml(t) {
         ? `<button type="button" class="mini" data-draw><span class="mk lot">签</span><span class="mt"><b>每日一签</b><small>三次阴杯 · 换个问题</small><span class="mx">这件事现在不宜问，换个问题再求一支</span></span></button>`
       : d && d.status === 'closed'
         ? '<button type="button" class="mini" data-draw><span class="mk lot">签</span><span class="mt"><b>每日一签</b><small>今天时机未到</small><span class="mx">改日再来，明天再摇一支</span></span></button>'
-        : '<button type="button" class="mini" data-draw><span class="mk lot">签</span><span class="mt"><b>每日一签</b><small>摇签、掷筊、解签</small><span class="mx">观音灵签 · 每人每天一支</span></span></button>';
-  // 问一件事、转运御守：访客点了提示先测能量卡
-  const demo = t.demo, lk = t.luck || { unused: 0, per: 5 }, n = Math.min(lk.unused, lk.per);
-  const ask = `<a class="mini askmini" href="#/ask"${demo ? ' data-demo-tip="问事"' : ''}><span class="mk ask">问</span><span class="mt"><b>问一件事</b><small>拿不准就起一卦</small><span class="mx">梅花易数起卦，白话解读，再帮你挑两个适合去做的日子</span></span></a>`;
-  const ready = lk.unused >= lk.per || (lk.energy || 0) >= (lk.energyPer || 20);
-  const om = `<a class="mini ommini" href="#/luck"${demo ? ' data-demo-tip="做好事换御守"' : ''}><span class="mk om">守</span><span class="mt"><b>转运御守</b><small>${ready ? '可以换一枚了' : `善行 ${n}/${lk.per} · 冥想 ${Math.min(lk.energy || 0, lk.energyPer || 20)}/${lk.energyPer || 20} 分钟`}</small><span class="mx">做好事、提能量都能换一枚御守，也可以直接买</span></span></a>`;
-  return `<div class="minis">${draw}${ask}${om}</div>`;
+        : '<button type="button" class="mini" data-draw><span class="mk lot">签</span><span class="mt"><b>每日一签</b><small>观音灵签 · 每日一支</small></span></button>';
+  const ask = `<a class="mini askmini" href="#/ask"${t.demo ? ' data-demo-tip="问事"' : ''}><span class="mk ask">问</span><span class="mt"><b>问一件事</b><small>起卦、解读、挑日子</small></span></a>`;
+  return `<div class="minis">${draw}${ask}</div>`;
 }
 
 export function renderToday() {
@@ -405,10 +379,9 @@ export function renderToday() {
   else if (S.todayErr) h += `<div class="errbox"><p>${esc(S.todayErr)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`;
   else if (!S.today) h += '<div class="sk" style="height:44px"></div><div class="sk" style="height:420px"></div><div class="sk" style="height:84px"></div>';
   else {
-    const e = selDate() === S.today.date ? { date: S.today.date, moods: S.today.moods } : entryOf(selDate());
-    // 手机上一列：本周、卡片、四张小卡、记录此刻、明天寄语；电脑上右栏放小卡、记录此刻、明天寄语
-    h += `<div class="dgrid"><div class="dmain">${termHtml(S.today)}${planHtml(S.today)}${stripHtml()}${dayCardHtml(slide)}</div>`
-      + `<aside class="dside">${minisHtml(S.today)}${recordHtml(e, S.today.moodKit)}${tomorrowHtml(S.today)}</aside></div>`;
+    const e = entryOf(selDate());
+    h += `<div class="dgrid">${stripHtml()}<div class="dmain">${dayCardHtml(slide)}${recordHtml(e, S.today.moodKit)}</div>`
+      + `<aside class="dside">${tomorrowHtml(S.today)}${minisHtml(S.today)}${termHtml(S.today)}</aside></div>`;
     slide = '';
   }
   v.innerHTML = h + footHtml();
@@ -438,13 +411,13 @@ export function pageToday() {
 // 收下今天的画：当天第一次打开时说一句；第一次集满一甲子时说送了什么
 // 盖「收」字印的动画再放一遍（撕日历时它在撕页下面放过了）
 function replaySeal() {
-  const el = $('#view .dslot.cur .dart .seal, #view .lockart .seal');
+  const el = $('#view .dslot.cur .day-art-link .seal, #view .lockart .seal');
   if (!el) return;
   el.classList.remove('fresh'); void el.offsetWidth; el.classList.add('fresh');
 }
 function jiaziNews(j, name, date, locked, stampNew = !seen('stamp:' + date)) {
   if (!j) return;
-  if (j.reward) { toast(`集齐一甲子！送你一枚御守，${locked ? '开通会员后' : ''}在「转运御守」里直接领`); return; }
+  if (j.reward) { toast(`集齐一甲子！送你一枚御守，${locked ? '开通会员后' : ''}在「转运」里直接领`); return; }
   // 新用户的引导、点朋友链接弹出的画还在时不弹，免得压在弹层上（印照样盖）
   if (j.fresh && stampNew && seen('guide') && !S.linking) toast(`收下了今天的画「${name}」· 已收 ${j.n} / 60`);
 }
@@ -485,15 +458,13 @@ export function lotHtml(d, hist) {
 function outfitSheet() {
   const o = S.today.outfit;
   track('outfit_open');
-  openSheet('今日幸运色', `<div class="outfit"><div class="sws">${o.colors.map((c) => `<div><i style="--c:${c.hex}"></i><b>${esc(c.name)}</b></div>`).join('')}</div>`
-    + `<p>${esc(o.text)}</p><p class="acc">配饰：<b>${esc(o.accessory)}</b></p>`
-    + '<button type="button" class="btn ghost block" data-share="outfit">分享幸运色</button>'
-    + `<p class="note" style="margin:0">按你的幸运元素（${o.element}）和今天当家的五行选的，穿的、戴的、随身用的都算。</p></div>`);
+  openSheet('今日幸运指南', `<div class="outfit"><div class="luck-list">${luckFields(o)}</div>`
+    + `<p>${esc(o.text)}</p>`
+    + '<button type="button" class="btn ghost block" data-share="outfit">分享今日幸运指南</button></div>');
 }
 
 onClick('[data-almanac]', () => {
-  const e = S.today && entryOf(selDate());
-  const a = e ? e.almanac : S.today ? S.today.almanac : S.todayLocked && S.todayLocked.almanac;
+  const a = S.today ? dayView()?.almanac : S.todayLocked?.almanac;
   if (a) almanacSheet(a, !S.today || selDate() === S.today.date);
 });
 onClick('[data-draw]', () => {
@@ -505,19 +476,13 @@ onClick('[data-day-art]', (el) => {
   const t = S.today, gz = el.getAttribute('data-day-art'), a = t.arts[gz], me = t.card && t.card.pillar, j = t.jiazi;
   const isToday = el.getAttribute('data-day-date') === t.date;
   track('day_art_open', { today: isToday });
-  openSheet(`${gz}日 · ${a.name}`, `<div class="artsheet"><img class="big" src="${a.art}" alt="">`
+  openSheet(`${gz}日 · ${a.name}`, `<div class="artsheet"><img class="big" src="${esc(pillarArtSrc(a.art))}" alt="">`
     + `<p class="note" style="margin:0">每一天也有自己的天干地支，60 天一轮。${gz}日是「${esc(a.name)}」，这一天大家看到的都是这张画。</p>`
     + (me && !t.demo ? `<a class="artme" href="#/card" data-close-sheet><img src="${me.art}" alt=""><span><small>你的日柱</small><b>${me.gz} · ${esc(me.name)}</b></span><i aria-hidden="true">›</i></a>` : '')
     + (t.demo ? '<a class="btn primary block" href="#/start" data-close-sheet>测测我的日柱</a>'
       : `<div class="acts">${isToday ? '<button type="button" class="btn ghost" data-share="wall">存成今天的锁屏</button>' : ''}<a class="btn primary" href="#/jiazi" data-close-sheet>我的一甲子 · ${j ? j.n : 0}/60</a></div>`)
     + '</div>');
 });
-onClick('[data-hour]', (el) => {
-  const cap = el.closest('.tcard') && el.closest('.tcard').querySelector('.hcap');
-  if (cap) cap.innerHTML = el.getAttribute('data-cap');
-  el.closest('svg').querySelectorAll('.hs.pick').forEach((x) => x.classList.remove('pick'));
-  el.classList.add('pick');
-});
-onClick('[data-today-detail]', () => { const t = S.today, v = dayView() || t; openDay(v.day, t.chart, t.name, t.plans); });
+onClick('[data-today-detail]', () => { const t = dayView(); if (t) openHours(t.day); });
 onClick('[data-a2hs-later]', (el) => { localStorage.setItem('lrl:a2hs-later', String(Date.now())); el.closest('.notice').remove(); });
 

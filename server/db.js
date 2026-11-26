@@ -122,6 +122,16 @@ CREATE TABLE IF NOT EXISTS ratings (
   created_at TEXT NOT NULL,
   PRIMARY KEY (user_id, day)
 );
+CREATE TABLE IF NOT EXISTS todos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day TEXT NOT NULL,
+  text TEXT NOT NULL,
+  done INTEGER NOT NULL DEFAULT 0 CHECK(done IN (0,1)),
+  request_key TEXT NOT NULL,
+  UNIQUE(user_id, request_key)
+);
+CREATE INDEX IF NOT EXISTS todos_user_day ON todos(user_id, day);
 CREATE TABLE IF NOT EXISTS moods (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
@@ -246,6 +256,9 @@ const COLUMNS = [
   ['asks', 'reviewed_at', 'TEXT'],
   ['ratings', 'src', "TEXT NOT NULL DEFAULT 'score'"],
   ['users', 'jiazi_done', 'TEXT'],
+  ['amulets', 'drop_key', 'TEXT'],
+  ['deeds', 'record_key', 'TEXT'],
+  ['practices', 'record_key', 'TEXT'],
   ['orders', 'provider', "TEXT NOT NULL DEFAULT 'alipay'"],
   ['orders', 'currency', "TEXT NOT NULL DEFAULT 'CNY'"],
   ['orders', 'sub_id', 'TEXT'],
@@ -261,6 +274,9 @@ export function openDb(file) {
     if (!has) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
   }
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_invite ON users(invite_code); CREATE UNIQUE INDEX IF NOT EXISTS users_cal ON users(cal_token);');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS amulets_drop_key ON amulets(user_id, drop_key) WHERE drop_key IS NOT NULL');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS deeds_record_key ON deeds(user_id, record_key)');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS practices_record_key ON practices(user_id, record_key)');
   // 收画改成按「每天打开」算：以前的打开记录（usage_days）补进来，重复执行不会重复
   db.exec('INSERT OR IGNORE INTO open_days(user_id, day, created_at) SELECT user_id, day, created_at FROM usage_days;');
   return wrap(db);

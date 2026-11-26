@@ -1,8 +1,7 @@
 {
- "_说明": "转运御守用的内容。energy：提能量——冥想累计多少分钟换一枚御守（per_amulet_minutes），每做完一次释放练习算几分钟（release_minutes，填 0 就不算）；deeds：做好事——每换一枚御守要几件善行（per_amulet）、一天最多记几件（daily_max）、每件最多几个字（max_len）、输入框下面给的例子（examples）；release：提能量里的释放练习（圣多纳释放法）每一步的文字。改完重启服务生效。御守的心愿、颜色、冥想时长和呼吸引导还在 amulets.json。",
+ "_说明": "转运御守用的内容。energy：提能量——冥想累计多少分钟换一枚御守（per_amulet_minutes），每做完一次释放练习算几分钟（release_minutes，填 0 就不算）；deeds：做好事——每换一枚御守要几件善行（per_amulet）、每件最多几个字（max_len）、输入框下面给的例子（examples）；release：提能量里的释放练习（圣多纳释放法）每一步的文字。改完重启服务生效。御守的心愿、颜色、冥想时长和呼吸引导还在 amulets.json。",
  "deeds": {
   "per_amulet": 5,
-  "daily_max": 3,
   "max_len": 60,
   "examples": [
    "给爸妈打了个电话",

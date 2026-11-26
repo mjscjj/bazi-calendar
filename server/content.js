@@ -127,7 +127,7 @@ export function loadContent(dir = DIR) {
   for (const k of ['sheng', 'xiao', 'yin']) need(jiao.results?.[k]?.name && jiao.results[k].face && jiao.results[k].text, `掷筊缺少结果 ${k} 的 name、face、text`);
   const luck = read(dir, 'luck.json');
   const dz = luck.deeds || {};
-  need(Number.isInteger(dz.per_amulet) && dz.per_amulet >= 1 && Number.isInteger(dz.daily_max) && dz.daily_max >= 1 && Number.isInteger(dz.max_len) && dz.max_len >= 10, '转运御守缺少 deeds 的 per_amulet、daily_max 或 max_len');
+  need(Number.isInteger(dz.per_amulet) && dz.per_amulet >= 1 && Number.isInteger(dz.max_len) && dz.max_len >= 10, '转运御守缺少 deeds 的 per_amulet 或 max_len');
   need(Array.isArray(dz.examples) && dz.examples.length, '转运御守缺少善行例子 examples');
   need(Number.isInteger(luck.energy?.per_amulet_minutes) && luck.energy.per_amulet_minutes >= 1 && Number.isInteger(luck.energy?.release_minutes) && luck.energy.release_minutes >= 0, '转运御守缺少 energy 的 per_amulet_minutes 或 release_minutes');
   const rl = luck.release || {};

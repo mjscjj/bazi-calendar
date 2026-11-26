@@ -25,7 +25,7 @@ await p.evaluate(async (u) => {
   localStorage.setItem('lrl:guide', '1'); localStorage.setItem('lrl:a2hs-done', '1');
 }, user);
 await p.reload(); await p.waitForSelector('.tcard');
-check('手机今天页的小卡里有问事和御守', await p.isVisible('.minis .askmini') && await p.isVisible('.minis .ommini'));
+check('问事在今天页，转运在日历旁', await p.isVisible('.minis .askmini') && await p.isVisible('.tabbar a[href="#/calendar"] + a[href="#/luck"]'));
 await p.click('[data-draw]'); await drawLot(p); await p.waitForTimeout(4500);
 await p.screenshot({ path: `${out}/a01-lot-entry.png` });
 await p.click('#sheet .rlinks a[href="#/ask"]'); await p.waitForSelector('#askForm');

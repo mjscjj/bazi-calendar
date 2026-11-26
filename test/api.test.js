@@ -578,6 +578,32 @@ test('问事：追问最多 2 次、拒答、过期；7 天后回看和今天页
   assert.equal(db.get('SELECT COUNT(*) n FROM ask_follows WHERE user_id = ?', uid).n, 2);
 });
 
+test('每日待办按账号和日期保存，重试添加不会重复，完成状态可撤销', async () => {
+  const c = client(), other = client();
+  for (const [session, username] of [[c, 'todosone'], [other, 'todostwo']]) {
+    await session('POST', '/api/auth/register', { username, password: '12345678', agree: true, birth });
+  }
+  const day = bjDay(), body = { day, text: '准备会议提纲', key: 'daily-task-one' };
+  const create = (body) => c('POST', '/api/todos', body);
+  assert.equal((await create({ ...body, day: '2026-02-31' })).status, 400);
+  assert.equal((await create({ ...body, text: ' ' })).status, 400);
+  const { todo } = (await create(body)).data;
+  assert.deepEqual((await create(body)).data.todo, todo);
+  const path = '/api/todos/' + todo.id;
+  assert.equal((await other('PUT', path, { done: true })).status, 404);
+  await other('DELETE', path, {});
+  const week = async (session) => (await session('GET', '/api/week?date=' + day)).data.days;
+  assert.deepEqual((await week(other)).flatMap((x) => x.todos), []);
+  for (const done of [true, false]) {
+    assert.equal((await c('PUT', path, { done })).data.todo.done, Number(done));
+    const days = await week(c);
+    assert.deepEqual(days.flatMap((x) => x.todos), [{ ...todo, done: Number(done) }]);
+    assert.equal(days.find((x) => x.todos.length).date, day);
+  }
+  await c('DELETE', path, {});
+  assert.deepEqual((await week(c)).flatMap((x) => x.todos), []);
+});
+
 test('心情便签：一天贴几张、平均成当天的分数、撕掉后跟着变、日历里能看到', async () => {
   const c = client();
   await c('POST', '/api/auth/register', { username: 'moody', password: '12345678', agree: true, birth });
@@ -640,6 +666,8 @@ test('今天页：本周 7 天、明天寄语、翻到别的周', async () => {
   assert.equal(new Date(t.strip.start + 'T12:00:00Z').getUTCDay(), 1, '从周一开始');
   const me = t.strip.days.find((x) => x.date === day);
   assert.ok(me && me.line.head && me.almanac.yi);
+  assert.ok(t.strip.days.every((x) => x.accessory));
+  assert.equal(me.accessory, t.outfit.accessory);
   assert.equal(me.moods.length, 1, '本周的心情带在每一天上');
   assert.equal(me.day.score, t.day.score, '和今天卡片的分数一致');
   assert.ok(t.tomorrow.prep && !/\{/.test(t.tomorrow.prep), '明天寄语已经填好占位');
@@ -759,12 +787,8 @@ test('转运御守：5 件善行换一枚；冥想累计 20 分钟换一枚；�
   assert.equal((await c('POST', '/api/deeds', { text: '' })).status, 400);
   for (const text of ['给爸妈打了个电话', '帮同事看了代码', '给外卖员说了谢谢']) assert.equal((await c('POST', '/api/deeds', { text })).status, 200);
   const four = await c('POST', '/api/deeds', { text: '让座' });
-  assert.equal(four.status, 409, '一天最多 3 件');
+  assert.equal(four.status, 200, '同一天可继续记录第四件');
   assert.equal((await c('POST', '/api/amulets/exchange', { wish: '事业' })).status, 409, '不够 5 件');
-  // 挪两件到昨天，再记两件，凑满 5 件
-  const uid = db.get("SELECT id FROM users WHERE username = 'wisher'").id;
-  db.run("UPDATE deeds SET day = '2000-01-01' WHERE user_id = ?", uid);
-  await c('POST', '/api/deeds', { text: '捐了一点钱' });
   const d5 = await c('POST', '/api/deeds', { text: '耐心听朋友说完' });
   assert.equal(d5.data.deeds.unused, 5);
   assert.equal((await c('GET', '/api/today?date=' + bjDay())).data.luck.unused, 5);
@@ -810,6 +834,28 @@ test('转运御守：5 件善行换一枚；冥想累计 20 分钟换一枚；�
   assert.equal(b.status, 200);
   assert.equal(b.data.amulet.way, 'buy');
   assert.equal((await c('GET', '/api/amulets')).data.list.length, 4);
+});
+
+test('行动掉落：同一笔并发提交只领一次，失败时不新增御守', async () => {
+  const c = client();
+  await c('POST', '/api/auth/register', { username: 'rackuser', password: '12345678', agree: true, birth });
+  const body = { text: '替邻居提行李', recordKey: 'deed-drop-1234567890' };
+  const [first, retry] = await Promise.all([c('POST', '/api/deeds', body), c('POST', '/api/deeds', body)]);
+  assert.equal(first.status, 200);
+  assert.equal(first.data.deeds.list[0].id, retry.data.deeds.list[0].id);
+  assert.equal(retry.data.deeds.total, 1);
+  const practice = { kind: 'release', before: 6, after: 4, rounds: 1, wish: '厄除', dropKey: 'energy-drop-1234567890' };
+  const release = await c('POST', '/api/practices', practice);
+  assert.equal(release.data.minutes, 3);
+  assert.equal((await c('POST', '/api/practices', practice)).data.practice.week.release, 1);
+  assert.equal(release.data.practice.have, 3);
+  for (const i of [1,2,3]) {
+    const record = await c('POST', '/api/deeds', { ...body, recordKey: body.recordKey + i });
+    assert.equal(record.status, 200);
+    assert.equal(record.data.deeds.today, i + 1);
+  }
+  assert.equal((await c('POST', '/api/deeds', { ...body, text: '冲突记录' })).status, 400);
+  assert.equal((await c('GET', '/api/amulets')).data.list.length, 0);
 });
 
 test('农历月份表：闰月和每月天数（出生日期滚轮用）', async () => {
@@ -942,4 +988,44 @@ test('节气：节气那天有一张节气卡，按五行说对你意味着什�
   assert.ok(t.line && t.mine.startsWith('大雪起，水当令'));
   assert.equal(t.kind, c.xi.includes(4) ? 'xi' : c.ji.includes(4) ? 'ji' : 'neutral');
   assert.equal((await fetch(base + '/' + t.art)).status, 200);
+});
+
+test('五件换一枚：不足不能换，超出的善行结转，重试不会多扣', async () => {
+  const c = client();
+  await c('POST','/api/auth/register',{username:'deedbook',password:'12345678',agree:true,birth});
+  for (let i = 1; i <= 11; i++) {
+    const record = await c('POST','/api/deeds',{text:'帮邻居提行李',recordKey:'deedbook-record-'+i});
+    assert.equal(record.data.deeds.unused,i);
+    if (i === 4) assert.equal((await c('POST','/api/amulets/exchange',{wish:'学业'})).status,409);
+  }
+  assert.equal((await c('GET','/api/amulets')).data.list.length,0);
+  const batchStart = (await c('GET','/api/luck')).data.deeds.batchStart;
+  const redeem = {wish:'学业',batchStart};
+  const [a,b] = await Promise.all([c('POST','/api/amulets/exchange',redeem),c('POST','/api/amulets/exchange',redeem)]);
+  assert.equal(a.data.amulet.id,b.data.amulet.id);
+  assert.equal(a.data.deeds.unused,6);
+  const next = await c('POST','/api/amulets/exchange',{wish:'平安',batchStart:b.data.deeds.batchStart});
+  assert.equal(next.data.deeds.unused,1);
+  assert.equal(next.data.amuletCount,2);
+});
+
+test('静心进度按完成练习累计，满 20 分钟兑换且保留余量', async () => {
+  const c = client();
+  await c('POST','/api/auth/register',{username:'quietpool', password:'12345678',agree:true,birth});
+  const log = {kind:'meditate',minutes:10,way:'bowl',recordKey:'practice-complete-001'};
+  const [a,b] = await Promise.all([c('POST','/api/practices',log),c('POST','/api/practices',log)]);
+  assert.equal(a.data.practice.have,10);
+  assert.equal(b.data.practice.week.meditate,1);
+  assert.equal((await c('POST','/api/amulets/exchange',{by:'energy',wish:'学业'})).status,409);
+  for (const i of [2,3,4]) await c('POST','/api/practices',{...log,recordKey:'practice-complete-00'+i});
+  const release = await c('POST','/api/practices',{kind:'release',before:6,after:3,rounds:1,recordKey:'practice-release-001'});
+  assert.equal(release.data.practice.have,43);
+  assert.equal((await c('GET','/api/amulets')).data.list.length,0);
+  const request = {by:'energy',wish:'学业',lastExchange:release.data.practice.lastExchange};
+  const [x,y] = await Promise.all([c('POST','/api/amulets/exchange',request), c('POST','/api/amulets/exchange',request)]);
+  assert.equal(x.data.amulet.id,y.data.amulet.id);
+  assert.equal(y.data.practice.have,23);
+  const next = await c('POST','/api/amulets/exchange',{...request,lastExchange:y.data.practice.lastExchange});
+  assert.equal(next.data.practice.have,3);
+  assert.equal(next.data.amuletCount,2);
 });

@@ -1,7 +1,7 @@
 // 新用户引导：填出生信息 → 能量卡揭晓（不用注册）→ 注册 → 三步引导 → 加到主屏。
 import { $, $$, esc, api, toast, openSheet, dismissSheet, onClick, currentPath, mark, seen, readLocal, writeLocal, IS_IOS, IS_WECHAT, IS_MOBILE, IS_STANDALONE, track } from './core.js';
 import { S } from './state.js';
-import { setGlow, WX } from './data.js';
+import { pillarArtSrc, setGlow, WX } from './data.js';
 import { wheelsHtml, mountWheels } from './wheel.js';
 
 // ---------- 出生信息表单（引导页和我的资料共用） ----------
@@ -286,20 +286,16 @@ export function pageWelcome() {
 // 日柱插画（旧数据没有日柱时退回本命形象的那个字）；能量卡、我的、注册页、邀请横幅共用。
 // 旁边总有「日柱 · 称号」的标题，插画只是装饰，alt 留空免得读屏念两遍
 export const cardArt = (c, cls = 'art') => (c.pillar
-  ? `<span class="${cls}"><img src="${esc(c.pillar.art)}" alt="" width="600" height="600" decoding="async"></span>`
+  ? `<span class="${cls}"><img src="${esc(pillarArtSrc(c.pillar.art))}" alt="" width="600" height="600" decoding="async"></span>`
   : `<span class="sym" aria-hidden="true">${esc(c.symbol)}</span>`);
 export const cardTitle = (c) => (c.pillar ? `${c.pillar.gz} · ${c.pillar.name}` : `${c.dm || ''}${c.element} · ${c.image}型`);
 const cardSub = (c) => `${c.dm}${c.element} · ${c.image}型 · The ${c.en}`;
-// 能量卡上的画：右下角盖一枚刻着日柱的朱砂印。刚测完的第一张，画卷从中间展开，展开后印盖下去
-const ecardArt = (c, unroll) => (c.pillar
-  ? `<span class="art scroll${unroll ? ' unroll' : ''}"><span class="paper"><img src="${esc(c.pillar.art)}" alt="" width="600" height="600" decoding="async"><i class="pseal" aria-hidden="true">${c.pillar.gz[0]}<br>${c.pillar.gz[1]}</i></span></span>`
-  : cardArt(c));
 // 出生那天：农历哪天、月亮什么样、节气后第几天
 const bornLine = (b) => (b ? `<p class="born">你出生那天 · 农历${b.lunar} · ${b.moon} · ${b.days ? `${b.term}后第 ${b.days} 天` : `正逢${b.term}`}</p>` : '');
 export function cardHtml(c, name) {
   const total = c.force.reduce((a, f) => a + f.pct, 0) || 100;
   const p = c.pillar;
-  return `<div class="ecard"><small>${name ? esc(name) + ' 的' : '你的'}能量卡</small>${ecardArt(c)}`
+  return `<div class="ecard"><small>${name ? esc(name) + ' 的' : '你的'}能量卡</small>${cardArt(c)}`
     + `<b class="ttl">${esc(cardTitle(c))}</b><span class="en">${p ? esc(cardSub(c)) : `The ${c.en}`}</span>`
     + `<div class="traits">${c.traits.map((t) => `<span>${t}</span>`).join('')}</div>`
     + `<p class="intro">${esc(p ? p.intro : c.intro)}</p><p class="sl">${esc(p ? p.line : c.strengthLine)}</p>`
@@ -325,7 +321,7 @@ function stepHtml(c, name, k) {
   const total = c.force.reduce((a, f) => a + f.pct, 0) || 100;
   const head = `<small>${name ? esc(name) + ' 的' : '你的'}能量卡 · ${k + 1} / 3</small>`;
   const body = [
-    `${ecardArt(c, true)}<b class="ttl">${esc(cardTitle(c))}</b><span class="en">${c.pillar ? esc(`${c.dm}${c.element} · ${c.image}型`) : `The ${c.en}`}</span><p class="intro">${esc(c.pillar ? c.pillar.intro : c.intro)}</p>${bornLine(c.born)}`,
+    `${cardArt(c)}<b class="ttl">${esc(cardTitle(c))}</b><span class="en">${c.pillar ? esc(`${c.dm}${c.element} · ${c.image}型`) : `The ${c.en}`}</span><p class="intro">${esc(c.pillar ? c.pillar.intro : c.intro)}</p>${bornLine(c.born)}`,
     `<p class="slead">你是这样的人</p><div class="traits big">${c.traits.map((t) => `<span>${t}</span>`).join('')}</div><p class="sl">${esc(c.pillar ? c.pillar.line : c.strengthLine)}</p>`,
     `<p class="slead">你身上的五种能量</p><div class="fbar" aria-label="五行比例">${c.force.map((f, i) => `<i class="w${i}b" style="flex:${f.pct / total}"></i>`).join('')}</div><div class="flab">${c.force.map((f) => `<span>${f.el} ${f.pct}%</span>`).join('')}</div><div class="lucky2 big">幸运元素 <b>${c.lucky.join(' · ')}</b></div><p class="sl">每天哪股能量当家，决定了这天对你顺不顺。</p>`,
   ][k];
@@ -346,8 +342,6 @@ export function pageCard() {
     S.cardReveal = false;
     reveal = { c, name, actions, k: 0, full };
     v.innerHTML = `<div class="reveal stepped">${stepHtml(c, name, 0)}</div>`;
-    // 画卷展开后，印盖下去的那一下轻震
-    if (c.pillar && navigator.vibrate && !matchMedia('(prefers-reduced-motion: reduce)').matches) setTimeout(() => navigator.vibrate(18), 1450);
   };
   if (S.me) {
     v.innerHTML = '<div class="sk" style="height:520px"></div>';

@@ -54,7 +54,7 @@ export function pageAuth(r) {
         if (inv) writeLocal('invite', null);
         let next = '';
         try { next = (!reg && sessionStorage.getItem('lrl:next')) || ''; sessionStorage.removeItem('lrl:next'); } catch { /* 无痕模式 */ }
-        location.hash = S.me.birth ? next || '#/' : '#/welcome';
+        location.hash = S.me.birth ? (!reg && r.q.get('from') === 'luck' ? (r.q.get('tab') === 'energy' ? '#/luck?tab=energy' : '#/luck') : next || '#/') : '#/welcome';
       })
       .catch((e2) => { btn.disabled = false; err.textContent = e2.message; });
   });

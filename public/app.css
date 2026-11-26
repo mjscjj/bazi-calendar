@@ -332,7 +332,7 @@ a{color:var(--accent)}
 .tcard .slots2 b{font-size:14px;font-variant-numeric:tabular-nums}
 .tcard .slots2 span{font-size:11.5px;color:var(--cardmuted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tcard .slots2 .bad b{color:#9fb6d6}
-.tcard .more{align-self:flex-start;border:0;background:rgba(255,255,255,.1);color:var(--cardfg);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
+.tcard .more{align-self:flex-start;border:0;background:rgba(255,255,255,.1);color:var(--cardfg);border-radius:999px;padding:7px 14px;font-size:var(--today-meta);font-weight:600}
 .tcard.k1 .meter .bar i,.tcard.k2 .meter .bar i{background:#9fb6d6}
 
 /* 月份区 */
@@ -485,18 +485,20 @@ body.has-tabs .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 
 /* 你的今天 */
 .tcard .tl{align-items:center}
-.tcard .ic{border:0;background:rgba(255,255,255,.1);color:var(--cardfg);border-radius:999px;padding:3px 12px;font-size:12px;font-weight:600}
+.tcard .ic{border:0;background:rgba(255,255,255,.1);color:var(--cardfg);border-radius:999px;padding:3px 12px;font-size:var(--today-meta);font-weight:600}
 .tcard .line{margin:-2px 0 0;font-size:14.5px;line-height:1.7;color:var(--cardfg);background:rgba(255,255,255,.06);border-radius:12px;padding:10px 12px}
-.notice.plan{background:var(--surface);border-color:color-mix(in srgb,var(--glow) 45%,var(--line))}
 
-/* 今天页右边的小卡：每日一签、问一件事、转运御守 */
-.minis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mini{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;min-width:0}
-.mini .mk{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center}
+/* 每日一签、问一件事 */
+.minis{display:flex;flex-direction:column;padding:0 14px;border-radius:16px;background:var(--surface);box-shadow:var(--ring)}
+.mini{display:flex;align-items:center;gap:12px;text-align:left;border:0;background:none;padding:12px 2px;min-width:0;color:var(--fg)}
+.mini + .mini{border-top:1px solid var(--line)}
+.mini::after{content:"";width:6px;height:6px;margin:0 3px 0 auto;flex:none;border-right:1px solid var(--muted);border-top:1px solid var(--muted);transform:rotate(45deg)}
+.mini .mk{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
 .mini .mk.lot{background:linear-gradient(160deg,var(--ink2),var(--ink));color:var(--glow);font-family:var(--f-display);font-weight:900;font-size:17px}
 .mini .mt{display:flex;flex-direction:column;gap:1px;min-width:0}
-.mini .mt b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mini .mt small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .mt b{font-size:14px}
+.mini .mt small{font-size:12px;color:var(--muted)}
+.mini .mx{font-size:12px;color:var(--muted)}
 
 /* 签 */
 .lot{display:flex;flex-direction:column;gap:12px;align-items:stretch}
@@ -514,12 +516,11 @@ body.has-tabs .wrap{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 
 /* 今日幸运色弹层 */
 .outfit{display:flex;flex-direction:column;gap:12px}
-.outfit .sws{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 0 2px}
-.outfit .sws div{display:flex;flex-direction:column;align-items:center;gap:10px}
-.outfit .sws i{width:min(116px,80%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.55),rgba(255,255,255,0) 46%),var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.1),0 14px 28px -14px var(--c)}
-.outfit .sws b{font-family:var(--f-display);font-weight:900;font-size:18px;letter-spacing:.08em}
+.luck-list{display:grid;gap:0}
+.luck-list .luck-field{display:grid;grid-template-columns:5em 1fr;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.luck-list small{color:var(--muted);font-size:.8125rem}
+.luck-list b{font-size:1rem;font-weight:400}
 .outfit p{margin:0;font-size:14px;line-height:1.7}
-.outfit .acc b{color:var(--fg)}
 
 /* 能量卡揭晓 */
 .reveal{display:flex;flex-direction:column;gap:14px;padding-top:6px}
@@ -592,7 +593,7 @@ h1,h2,.phead h1{text-wrap:balance}
 .status.member{background:var(--sunk);color:var(--fg)}
 .status.blocked{background:var(--accent);color:var(--surface)}
 .notice{border:0;background:var(--sunk);border-radius:14px;padding:10px 12px 10px 14px}
-.notice.demo,.notice.plan{background:var(--surface);box-shadow:var(--ring)}
+.notice.demo{background:var(--surface);box-shadow:var(--ring)}
 .phead .back,.monthbar .nav{border:0;background:var(--surface);box-shadow:var(--ring)}
 .chip{border:0;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
 .field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--line);border-radius:12px}
@@ -608,36 +609,63 @@ h1,h2,.phead h1{text-wrap:balance}
 .alm .yj b:nth-of-type(2){margin-left:14px;color:var(--muted)}
 .alm .go{font-size:18px}
 
-/* 你的今天：焦点是主题词和能量环 */
-.tcard{padding:22px 22px 18px;border-radius:26px;gap:16px;background:radial-gradient(70% 60% at 100% 0%, color-mix(in srgb,var(--glow) 26%,transparent) 0%, transparent 70%),linear-gradient(165deg,var(--ink2),var(--ink))}
-.tcard .th{display:flex;align-items:center;justify-content:space-between}
-.tcard .eyebrow{font-size:13px;color:var(--cardmuted);letter-spacing:.04em}
+/* 你的今天：主题、行动建议和宜忌时段 */
+.tcard{
+  --today-heading:1rem;
+  --today-body:.9375rem;
+  --today-meta:.8125rem;
+  font-family:var(--f-body);font-size:var(--today-body);
+  padding:18px;border-radius:20px;gap:14px;isolation:isolate;scroll-margin-top:calc(68px + env(safe-area-inset-top,0px));background:radial-gradient(70% 60% at 100% 0%, color-mix(in srgb,var(--glow) 26%,transparent) 0%, transparent 70%),linear-gradient(165deg,var(--ink2),var(--ink))}
+.tcard:has(.today-art-bg){--cardmuted:color-mix(in srgb,var(--cardfg) 72%,var(--surface))}
+.today-art-bg{position:absolute;z-index:-1;inset:0 0 auto auto;width:100%;height:270px;object-fit:cover;object-position:center;opacity:.9;pointer-events:none;
+  mask-image:linear-gradient(100deg,#0003,#0009 46%,#000 84%),linear-gradient(#000 30%,#0008 56%,transparent 91%);mask-composite:intersect}
+.tcard:has(.today-art-bg) .ring,.tcard:has(.today-art-bg) .thr .ic{background:color-mix(in srgb,var(--surface) 84%,transparent)}
+.tcard .th{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.today-date{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;font-size:var(--today-meta);color:var(--cardmuted)}
+.today-date time{white-space:nowrap}
+.today-date > span{font-size:var(--today-meta);border-radius:6px;background:var(--cchip);padding:1px 6px}
 .tcard .ic{background:rgba(255,255,255,.08);color:var(--cardmuted);padding:4px 12px}
-.hero3{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-.hero3 .theme{display:flex;flex-direction:column;gap:2px;min-width:0}
-.hero3 .theme small{font-size:13px;color:var(--cardmuted)}
-.hero3 .theme b{font-family:var(--f-display);font-weight:900;font-size:54px;line-height:1.02;letter-spacing:.01em;color:var(--cardfg)}
-.ring{position:relative;flex:none;width:78px;height:78px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.hero3{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.day-theme{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 10px}
+.day-theme small{color:var(--cardmuted);font-size:var(--today-meta)}
+.hero3 h1{margin:0;font-family:var(--f-display);font-weight:900;font-size:clamp(2.25rem,10vw,2.5rem);line-height:1.1;color:var(--cardfg)}
+.ring{position:relative;flex:none;width:60px;height:60px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
 .ring::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--glow) calc(var(--p) * 1%), rgba(255,255,255,.12) 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px))}
 .tcard.k1 .ring::before,.tcard.k2 .ring::before{background:conic-gradient(#9FB6D6 calc(var(--p) * 1%), rgba(255,255,255,.12) 0)}
-.ring b{font-size:24px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--cardfg)}
-.ring small{font-size:11px;color:var(--cardmuted);margin-top:3px}
-.tcard .line{margin:0;padding:0;background:none;font-size:15px;line-height:1.75;color:color-mix(in srgb,var(--cardfg) 92%,transparent)}
-.yj2{margin:0;display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
-.yj2 div{display:flex;gap:12px;align-items:baseline}
-.yj2 dt{flex:none;font-family:var(--f-display);font-weight:900;font-size:15px;color:var(--cardmuted)}
-.yj2 div:first-child dt{color:var(--glow)}
-.yj2 dd{margin:0;font-size:14px;color:var(--cardfg)}
-.times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
-.times div{display:flex;flex-direction:column;gap:2px}
-.times small{font-size:11.5px;color:var(--cardmuted)}
-.times b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--cardfg)}
-.times .bad b{color:#A9BCD6}
-.tcard .more{background:none;padding:0;color:var(--cardmuted);font-size:13px;font-weight:500}
-
-/* 两张小卡 */
-.mini{border:0;box-shadow:var(--ring);border-radius:18px;padding:14px}
-.mini .mk.lot{border-radius:10px;width:36px;height:44px;font-size:16px}
+.ring b{font-size:21px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--cardfg)}
+.ring small{font-size:var(--today-meta);color:var(--cardmuted);margin-top:3px}
+.tcard .line{margin:0;padding:0;background:none;font-size:var(--today-body);line-height:1.75;color:color-mix(in srgb,var(--cardfg) 92%,transparent)}
+.day-compare{display:grid;gap:8px}
+.day-compare section{min-width:0}
+.day-public{padding:0 12px 4px}
+.day-personal{padding:12px 13px;border:1px solid var(--cline);border-radius:12px;background:color-mix(in srgb,var(--glow) 9%,var(--surface))}
+.day-yj-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+.day-yj-head h2,.today-hours h2{margin:0;font:600 var(--today-heading)/1.4 var(--f-body);letter-spacing:normal;color:var(--cardfg)}
+.day-public .day-yj-head{margin-bottom:2px}
+.day-public .day-yj-head h2{font-size:var(--today-meta);font-weight:600;color:var(--cardmuted)}
+.day-yj-head button,.day-yj-head > span{font-size:var(--today-meta);color:var(--cardmuted)}
+.day-yj-head button{border:0;background:none;padding:3px 0;min-height:26px}
+.day-yj-head button:hover{text-decoration:underline}
+.yj2{margin:0;display:grid;gap:4px}
+.yj2 div{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:baseline}
+.yj2 dt{font-weight:700;font-size:var(--today-body);color:var(--cardmuted)}
+.day-personal .yj2 div:first-child dt{color:var(--gtext)}
+.yj2 dd{margin:0;font-size:var(--today-body);line-height:1.55;color:var(--cardfg)}
+.day-public .yj2{display:flex;flex-wrap:wrap;gap:3px 12px}
+.day-public .yj2 div{gap:5px}
+.day-public .yj2 dt,.day-public .yj2 dd{font-size:var(--today-meta);color:var(--cardmuted)}
+.day-personal .yj2 dd{font-weight:400}
+.today-plan{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:8px;color:var(--cardfg);font-size:var(--today-body);text-decoration:none;overflow-wrap:anywhere}
+.today-plan b{color:var(--gtext)}
+.today-plan span span{display:block}
+.today-plan i{font-style:normal;color:var(--cardmuted)}
+.day-personal .day-yj-head{justify-content:flex-start;flex-wrap:wrap}
+.day-start{display:inline-flex;align-items:center;gap:4px;min-height:32px;margin-inline-start:auto;color:var(--cardfg);font-size:var(--today-meta);font-weight:600;text-decoration:none}
+.day-art-link,.hour-summary .more{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:32px}
+.day-art-link{min-width:44px;white-space:nowrap}
+.day-start:hover,.day-art-link:hover,.hour-summary .more:hover{text-decoration:underline;text-underline-offset:3px}
+.day-art-link .seal{display:inline-grid;place-items:center;width:20px;height:20px;border:1px solid currentColor;border-radius:4px;color:var(--cinnabar);font:600 var(--today-meta) var(--f-body);transform:rotate(-8deg)}
+.tcard .more{background:none;padding:0;color:var(--cardmuted);font-size:var(--today-meta);font-weight:500}
 
 /* 未来 7 天：不加框，只用小色点表示档位 */
 .week2{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
@@ -690,6 +718,38 @@ h1,h2,.phead h1{text-wrap:balance}
 .dos ul{font-size:13.5px;line-height:1.7}
 details summary{font-size:13px}
 
+/* 月历单日详情：个人运势与建议在前，详细资料就地展开。 */
+.calendar-day{--today-heading:1rem;--today-body:.9375rem;--today-meta:.8125rem;display:grid;gap:18px;min-width:0;padding:2px 0 8px;font:400 var(--today-body)/1.6 var(--f-body);color:var(--fg);overflow-wrap:anywhere}
+.calendar-day p{margin:0}
+.calendar-day h3{margin:0;font:600 var(--today-heading)/1.45 var(--f-body);letter-spacing:normal;color:var(--fg)}
+.detail-intro{display:grid;gap:6px}
+.detail-meta,.detail-score{font-size:var(--today-meta);color:var(--muted)}
+.detail-theme{display:flex;align-items:center;justify-content:space-between;gap:6px 14px;flex-wrap:wrap}
+.detail-theme h2{margin:0;font:600 2rem/1.3 var(--f-display);letter-spacing:normal}
+.detail-score{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.detail-score i{display:inline-block;width:7px;height:7px;border-radius:50%}
+.detail-advice{display:grid;gap:9px;padding:13px 15px;background:color-mix(in srgb,var(--glow) 8%,var(--surface));border-radius:12px}
+.detail-rows{margin:0;display:grid;gap:7px}
+.detail-rows div{display:grid;grid-template-columns:2em minmax(0,1fr);align-items:baseline;gap:12px}
+.detail-rows dt{font-size:var(--today-meta);color:var(--muted)}
+.detail-rows dd{margin:0}
+.detail-plans,.calendar-day .mymoods{display:grid;gap:6px}
+.calendar-day .hour-summary{margin-top:5px;justify-content:flex-start}
+.calendar-day .hour-best b{font-size:var(--today-body);font-variant-numeric:tabular-nums}
+.calendar-day .day-fold{border-top:1px solid var(--line)}
+.calendar-day .day-fold summary{display:flex;align-items:center;justify-content:space-between;min-height:44px;gap:10px;cursor:pointer;list-style:none;font:400 var(--today-meta)/1.5 var(--f-body);color:var(--muted)}
+.day-fold summary::-webkit-details-marker{display:none}
+.day-fold summary::after{content:"";width:7px;height:7px;margin-right:4px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.day-fold[open] > summary::after{transform:rotate(225deg)}
+.day-fold[open]{padding-bottom:12px}
+.day-fold .slots{margin-bottom:12px}
+.day-fold .slot span:last-child{display:block;overflow:visible}
+.day-fold .card{margin:0;padding:0;background:transparent;box-shadow:none;border:0}
+.day-fold .why,.day-fold p{margin-bottom:6px}
+.calendar-day .today-hours .day-fold{margin-top:8px}
+.calendar-day .today-hours + .detail-reference{margin-top:-18px}
+.detail-reference .detail-rows{font-size:.875rem}
+.daypanel .ph2 span{font-size:1rem;letter-spacing:normal;color:var(--fg)}
 /* ================= 手机操作 =================
    输入框不小于 16px（iPhone 小于 16px 会在聚焦时放大页面）；小按钮的点按范围补到约 44px；
    键盘弹出时收起底部页签；弹层关闭有过渡；提示气泡放在页签上方。 */
@@ -726,7 +786,7 @@ body.typing.has-tabs .wrap{padding-bottom:24px}
 @media (min-width:700px){@keyframes down{to{transform:translateY(24px);opacity:0}}}
 @media (hover:hover){.mrow:hover,.mini:hover,.wd2:hover{background:color-mix(in srgb,var(--surface) 70%,var(--sunk))}}
 html,body{overscroll-behavior-x:none}
-.tcard .ic{position:relative;min-height:32px;padding:6px 14px}
+.tcard .ic{position:relative;min-height:32px;padding:6px 12px;white-space:nowrap}
 .tcard .ic::after{content:"";position:absolute;inset:-8px}
 
 /* ================= 手机版 / 桌面版 =================
@@ -734,7 +794,7 @@ html,body{overscroll-behavior-x:none}
    桌面版（≥ 960px）：导航在顶栏；今天页主栏 + 侧栏；日历页大月历 + 右侧当日详情面板；
    我的页两栏；登录注册和测能量卡左右分栏；其余页面放在居中的适中宽度里。 */
 .dgrid,.dmain,.dside,.cgrid,.cmain,.mgrid,.mcol{display:flex;flex-direction:column;gap:14px;min-width:0}
-.cside,.topnav,.mini .mx{display:none}
+.cside,.topnav{display:none}
 
 @media (min-width:960px){
   .wrap{max-width:1180px;padding-left:40px;padding-right:40px}
@@ -755,27 +815,22 @@ html,body{overscroll-behavior-x:none}
   .foot{padding-top:18px}
 
   /* 今天：主栏 + 侧栏 */
-  .dgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr);gap:28px;align-items:start}
+  .dgrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:28px;align-items:start}
   .dmain,.dside{gap:18px}
   .dside{position:sticky;top:86px}
-  .tcard{padding:34px 36px 30px;gap:22px;border-radius:30px}
-  .hero3 .theme small{font-size:15px}
-  .hero3 .theme b{font-size:80px}
-  .ring{width:108px;height:108px}
-  .ring b{font-size:34px}
-  .ring small{font-size:12.5px}
-  .tcard .line{font-size:17.5px;max-width:620px}
-  .yj2 dd{font-size:15.5px}
-  .yj2 dt{font-size:17px}
-  .times b{font-size:24px}
-  .times small{font-size:12.5px}
-  .tcard .more{font-size:14px}
-  .minis{grid-template-columns:1fr;gap:12px}
-  .mini{padding:18px 20px;align-items:flex-start}
-  .mini .mk.lot{width:44px;height:54px;font-size:19px}
-  .mini .mt b{font-size:16px}
-  .mini .mt small{font-size:13px}
-  .mini .mx{display:block;margin-top:6px;font-size:13.5px;color:var(--fg);opacity:.75;white-space:normal;font-family:var(--f-display)}
+  .tcard{padding:24px 28px;gap:12px;border-radius:22px;scroll-margin-top:80px}
+  .hero3 h1{font-size:3rem}
+  .ring{width:68px;height:68px}
+  .ring b{font-size:24px}
+  .tcard .line{max-width:620px}
+  .day-compare:has(.day-public){grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:16px;align-items:start}
+  .day-public{padding-top:8px}
+  .day-personal{padding-inline:16px}
+  .dgrid > .wstrip{grid-column:1 / -1}
+  .dgrid{row-gap:18px}
+  .today-art-bg{width:85%;height:285px;mask-image:linear-gradient(100deg,transparent,#0009 40%,#000 80%),linear-gradient(#000 30%,#0008 56%,transparent 91%)}
+  .minis{padding:0 16px}
+  .mini .mt b{font-size:15px}
   .dside .weekbox{background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:16px 12px 10px}
   .dside .weekbox .sectitle{padding:0 8px}
   .dside .week2{grid-template-columns:1fr;gap:2px}
@@ -828,13 +883,9 @@ html,body{overscroll-behavior-x:none}
 /* ================= 白色 / 深色两套主题 =================
    大卡片和卡片里的分隔线、小标签、能量环都走主题变量；五行色做文字时用 --gtext（白色主题下是深一档的同色）。 */
 .tcard,.ecard,.mecard,.pthumb,.mcard,.auth .hero2{background:var(--feature-bg);box-shadow:var(--feature-shadow);color:var(--cardfg)}
-.tcard .eyebrow,.hero3 .theme small,.ring small,.times small,.tcard .more,.mecard small,.mecard .t span,.mecard .go,.pthumb small,.mcard small,.mcard span,.ecard small,.ecard .sl,.flab,.lucky2,.auth .hero2 span{color:var(--cardmuted)}
-.hero3 .theme b,.ring b,.times b,.yj2 dd,.tcard .line,.ecard .ttl,.ecard .intro,.mecard b,.mcard b{color:var(--cardfg)}
+.ring small,.tcard .more,.mecard small,.mecard .t span,.mecard .go,.pthumb small,.mcard small,.mcard span,.ecard small,.ecard .sl,.flab,.lucky2,.auth .hero2 span{color:var(--cardmuted)}
+.ring b,.tcard .line,.ecard .ttl,.ecard .intro,.mecard b,.mcard b{color:var(--cardfg)}
 .tcard .ic{background:var(--cchip);color:var(--cardmuted)}
-.yj2,.times{border-top-color:var(--cline)}
-.yj2 dt{color:var(--cardmuted)}
-.yj2 div:first-child dt{color:var(--gtext)}
-.times .bad b{color:var(--cbad)}
 .ring::before{background:conic-gradient(var(--gtext) calc(var(--p) * 1%), var(--ctrack) 0)}
 .tcard.k1 .ring::before,.tcard.k2 .ring::before{background:conic-gradient(var(--cbad) calc(var(--p) * 1%), var(--ctrack) 0)}
 .ecard .traits span{background:var(--cchip)}
@@ -1262,13 +1313,7 @@ html{transition:background-color .2s}
 .askentry i{font-style:normal;color:var(--muted);font-size:18px}
 a.mini{text-decoration:none;color:inherit}
 .mini .mk.ask{display:grid;place-items:center;border-radius:12px;background:var(--sunk);font-family:var(--f-display);font-weight:900;font-size:19px;color:var(--cinnabar)}
-.mini .mk.om{display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--glow) 18%,var(--surface));font-family:var(--f-display);font-weight:900;font-size:19px;color:var(--gtext)}
 /* 今天和明天的计划：一条，两行 */
-.notice.plan{flex-direction:column;align-items:stretch;gap:4px;text-decoration:none;color:var(--fg)}
-.notice.plan p{display:flex;gap:8px;align-items:baseline}
-.notice.plan p b{flex:none;font-size:12px;color:var(--cinnabar);letter-spacing:.06em}
-.notice.plan p.tmr b{color:var(--muted)}
-@media (min-width:960px){.mini .mk.ask,.mini .mk.om{width:44px;height:54px}}
 @media (prefers-reduced-motion: reduce){.hex.reveal i,.guacard.fresh .tend,.guacard.fresh .gnote{animation:none!important}}
 
 /* ================= 第二批：祈愿与御守 ================= */
@@ -1357,17 +1402,11 @@ body.in-ritual{overflow:hidden}
 
 /* ================= 第一步借鉴：此刻、明天、回看、所问、分张翻开 ================= */
 /* 今日一句：先一句行动话，再一句为什么 */
-.tcard .line b{display:block;font-family:var(--f-display);font-weight:900;font-size:18px;line-height:1.5;color:var(--cardfg);margin-bottom:4px}
+.tcard .line b{display:block;font-weight:600;font-size:var(--today-heading);line-height:1.5;color:var(--cardfg);margin-bottom:4px}
 .tcard .line{color:var(--cardmuted)}
-@media (min-width:960px){.tcard .line b{font-size:22px}}
 /* 此刻 */
-.nowline{font-size:13px;color:var(--cardmuted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;line-height:1.6}
-.nowline b{color:var(--cardfg)}
-.nowline .dot{width:8px;height:8px;border-radius:50%;background:var(--l3);flex:none;position:static}
-.nowline .dot.good{background:var(--plus);box-shadow:0 0 0 3px color-mix(in srgb,var(--plus) 22%,transparent)}
-.nowline .dot.bad{background:var(--l2)}
 /* 明天 */
-.tmrw{background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.tmrw{background:var(--surface);box-shadow:var(--ring);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
 .tmrw.in{box-shadow:none;padding:12px 0 0;border-top:1px solid var(--line);border-radius:0}
 .tmrw .tq{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .tmrw .tq b{font-size:15px}
@@ -1439,8 +1478,11 @@ body.in-ritual{overflow:hidden}
 /* ================= 心情便签（原每晚自评） ================= */
 .moodbox{background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
 .moodbox .q{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.moodbox .q b{font-size:16px}
-.moodbox .q small{font-size:12px;color:var(--muted)}
+.moodbox .q h2{margin:0;font:600 1rem/1.4 var(--f-body)}
+.todos .q{align-items:center;justify-content:space-between;min-height:32px;margin-bottom:10px}
+.todo-history{font:400 .8125rem/1.5 var(--f-body);color:var(--muted);padding:6px 0 6px 8px;border:0;background:transparent;cursor:pointer}
+.todo-history span{font-variant-numeric:tabular-nums}
+.archive-note{font-size:.875rem;color:var(--muted);margin:0 0 10px}
 .moodbox .q .tbtn{margin-left:auto;font-size:12.5px}
 .board{display:flex;flex-wrap:wrap;gap:12px 10px;padding:6px 2px 2px}
 .stk{--ink-n:#2B2620;position:relative;width:96px;min-height:96px;padding:10px 10px 8px;background:var(--pl);color:var(--ink-n);transform:rotate(var(--r,0deg));border-radius:3px 3px 12px 3px;box-shadow:0 1px 1px rgba(0,0,0,.05),0 8px 16px -8px rgba(0,0,0,.22);display:flex;flex-direction:column;gap:1px;transition:transform .2s,opacity .2s}
@@ -1496,38 +1538,33 @@ body.in-ritual{overflow:hidden}
 .legend .mstk.lg{position:relative;top:auto;right:auto;display:inline-flex;width:12px;height:12px;margin:0 6px 0 0;vertical-align:-1px}
 .legend .mstk.lg i{font-size:0;width:10px;height:10px;display:block}
 
-/* ================= 今天页重排：本周 7 天 → 每天的卡片 → 记录此刻 → 小卡 → 明天寄语 ================= */
-.wstrip{background:var(--surface);box-shadow:var(--ring);border-radius:18px;padding:14px 12px 12px;display:flex;flex-direction:column;gap:8px}
+/* ================= 今天页：周趋势和日期选择 ================= */
+.wstrip{background:var(--surface);box-shadow:var(--ring);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:6px}
 .wh{display:flex;align-items:center;gap:6px;padding:0 4px}
 .wt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;text-align:center}
 .wt b{font-size:15px}
 .wt small{font-size:11.5px;color:var(--muted)}
 .wh .tbtn{font-size:12.5px;margin-left:4px}
 .ic.nav{flex:none;width:34px;height:34px;border-radius:50%;border:0;background:var(--sunk);color:var(--fg);font-size:18px;line-height:1;display:grid;place-items:center;padding:0}
-.wcols{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
-.wc{border:0;background:transparent;border-radius:12px;padding:6px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;color:var(--fg)}
-.wc .w{font-size:11px;color:var(--muted)}
-.wc .d{font-size:17px;font-weight:650;line-height:1.15;font-variant-numeric:tabular-nums}
-.wc .a{font-size:11.5px;font-weight:600;color:var(--muted)}
-.wc .a.k5{color:var(--l5)}.wc .a.k4{color:var(--l4)}.wc .a.k2{color:var(--l2)}.wc .a.k1{color:var(--l1)}
+.wtrend{--plot-height:80px;position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.wtrend svg{position:absolute;inset:0 0 auto;width:100%;height:var(--plot-height);pointer-events:none}
+.wtrend polyline{fill:none;stroke:var(--muted);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.wc{position:relative;display:flex;flex-direction:column;align-items:stretch;min-width:0;padding:0;border:0;border-radius:8px;background:transparent;color:var(--fg)}
+.wplot{position:relative;height:var(--plot-height);width:100%}
+.wplot .ed,.wscore{position:absolute;left:50%;top:var(--point-y)}
+.wplot .ed{width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);background:var(--muted)}
+.wc.on .ed{width:10px;height:10px;background:var(--cinnabar);box-shadow:0 0 0 2px var(--surface)}
+.wscore{transform:translate(-50%,calc(-100% - 8px));background:var(--surface);padding:0 3px;color:var(--fg);white-space:nowrap;font-size:.8125rem;line-height:1.4;font-variant-numeric:tabular-nums;pointer-events:none}
+.wc:first-of-type .wscore,.wc:last-of-type .wscore{min-width:100%;width:max-content;text-align:center}
+.wc:first-of-type .wscore{left:0;transform:translateY(calc(-100% - 8px))}
+.wc:last-of-type .wscore{left:auto;right:0;transform:translateY(calc(-100% - 8px))}
+.wdate{position:relative;display:grid;place-items:center;gap:2px;margin:0 1px;padding:5px 0;border-radius:9px}
+.wc .w{font-size:.8125rem;color:var(--muted)}
+.wc .d{font-size:17px;font-weight:600;line-height:1.15;font-variant-numeric:tabular-nums}
 .wc.today .d,.wc.today .w{color:var(--cinnabar)}
-.wc.on{background:var(--sunk)}
-.wtrend{position:relative;height:52px;margin:0 2px}
-.wtrend svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.wtrend polyline{fill:none;stroke:color-mix(in srgb,var(--muted) 45%,transparent);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
-.wtrend .ed{position:absolute;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);background:var(--l3)}
-.wtrend .ed.k5{background:var(--l5)}.wtrend .ed.k4{background:var(--l4)}.wtrend .ed.k2{background:var(--l2)}.wtrend .ed.k1{background:var(--l1)}
-.wtrend .ed.on{width:11px;height:11px;box-shadow:0 0 0 3px var(--surface)}
-.wtrend .mdot{position:absolute;transform:translate(-50%,-50%)}
-.wtrend .mdot .mstk{margin:0;height:auto;display:block}
-.wtrend .mdot .mstk i{display:block;width:12px;height:12px;border-radius:2px;font-size:0}
-.walm{display:flex;align-items:center;gap:10px;border:0;border-top:1px solid var(--line);background:none;color:var(--fg);padding:10px 4px 0;text-align:left;font-size:12.5px;line-height:1.5}
-.walm > span:not(.seal){flex:1;min-width:0}
-.walm .seal{flex:none;font-family:var(--f-display);font-weight:900;font-size:12px;color:var(--cinnabar);background:var(--sunk);border-radius:6px;padding:3px 5px}
-.walm em{display:block;font-style:normal;color:var(--muted)}
-.walm em b{font-weight:600;color:var(--l5);margin-right:3px}
-.walm em b + b,.walm em b:nth-of-type(2){color:var(--l2)}
-.walm > i{font-style:normal;color:var(--muted);font-size:16px}
+.wc.on .wdate{background:var(--sunk)}
+.wdate .mstk{position:absolute;right:2px;bottom:4px;margin:0;height:auto}
+.wdate .mstk i{width:6px;height:6px;font-size:0}
 .tcard .thr{display:flex;align-items:center;gap:6px}
 .tcard .ic.nav{width:30px;height:30px;min-height:30px;padding:0;background:var(--cchip);color:var(--cardmuted);font-size:17px}
 .tcard .ic.nav::after{inset:-6px}
@@ -1543,51 +1580,70 @@ body.in-ritual{overflow:hidden}
 @keyframes dayInR{from{opacity:.25;transform:translateX(34px)}to{opacity:1;transform:none}}
 @keyframes dayInL{from{opacity:.25;transform:translateX(-34px)}to{opacity:1;transform:none}}
 /* 记录此刻 */
-.mchips{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 -4px;padding:2px 4px}
-.mchips::-webkit-scrollbar{display:none}
-.mchip{flex:none;width:52px;border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--fg)}
-.mchip i{width:44px;height:44px;border-radius:13px;background:var(--pl);display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:19px;color:#2B2620;box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.mchip span{font-size:12px;color:var(--muted)}
-.mchip[aria-pressed="true"] i{outline:2px solid var(--fg);outline-offset:2px}
-.mchip[aria-pressed="true"] span{color:var(--fg);font-weight:600}
+.mchips,.mrgrid > div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.moodbox,.mrecf{container-type:inline-size}
+@container (min-width:420px){.mchips,.mrgrid > div{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.mchip,.mood-entry{--mood-tone:var(--pl)}
+.mchip{display:flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:4px;border:1px solid transparent;border-radius:10px;background:color-mix(in srgb,var(--mood-tone) 44%,var(--surface));color:var(--fg);font:400 .875rem/1.4 var(--f-body);cursor:pointer}
+.mood-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:color-mix(in srgb,var(--mood-tone) 75%,var(--fg))}
+.mchip[aria-pressed="true"]{border-color:var(--fg);background:var(--mood-tone)}
+.mchip:hover{border-color:color-mix(in srgb,var(--fg) 35%,transparent)}
 .mrec{min-height:46px;font-size:15px}
 .mrecf{display:flex;flex-direction:column;gap:16px}
 .mrhead{display:flex;gap:8px}
 .mrhead span{background:var(--sunk);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
 .mrtop{display:flex;gap:14px;align-items:flex-start}
 .mrgrid{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.mrgrid > div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 4px}
-.mrgrid .mchip{width:auto}
 .mrgrid small,.mcolors-wrap small{font-size:12px;color:var(--muted)}
 .mcolors-wrap{display:flex;flex-direction:column;gap:8px}
 .mrecf textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px 12px;resize:none}
 .mrecf textarea:focus{outline:none;border-color:var(--accent)}
 .mrecf .btn:disabled{opacity:.4}
 @media (min-width:960px){
-  .wtrend{height:60px}
-  .mrgrid > div{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .wtrend{--plot-height:96px}
   .mrtop{flex-direction:column;align-items:stretch}
   .mpreview{align-self:center}
 }
-:root[data-theme="dark"] .mchip i{background:var(--pd);color:var(--fg)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mchip i{background:var(--pd);color:var(--fg)}}
+:root[data-theme="dark"] :is(.mchip,.mood-entry){--mood-tone:var(--pd)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) :is(.mchip,.mood-entry){--mood-tone:var(--pd)}}
 @media (prefers-reduced-motion: reduce){.dayswipe .tcard{animation:none!important}}
 
 /* 右栏放了记录此刻，会比一屏高，不再固定 */
 @media (min-width:960px){.dside{position:static}}
 
-/* 今天的记录：记事情或心情 */
-.mwrite{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:12px 14px;text-align:left;font-size:15px;color:var(--muted)}
-.mwrite span{color:var(--fg);font-size:16px}
-.mlab{font-size:12px;color:var(--muted);margin:2px 0 -6px}
+/* 每日待办与心情 */
+.todo-add{display:flex;gap:8px}
+.todo-add input,.todo-guest{min-width:0;min-height:42px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);padding:8px 12px;font:inherit}
+.todo-add input{flex:1;font-size:16px}
+.todo-guest{width:100%;text-align:left;color:var(--muted);font-size:.9375rem}
+.todo-list{list-style:none;margin:0;padding:0}
+.todo-list:not(:empty){margin-top:6px}
+.todo-list li{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.todo-list li:last-child{border:0}
+.todo-list label{display:flex;align-items:center;gap:10px;min-height:42px;flex:1;min-width:0;cursor:pointer;font-size:.9375rem}
+.todo-list label span{overflow-wrap:anywhere}
+.todo-list input{flex:none;width:18px;height:18px;margin:0;accent-color:var(--fg)}
+.todo-list input:checked + span{color:var(--muted);text-decoration:line-through}
+.todo-list button,.mwrite{border:0;background:transparent;color:var(--muted)}
+.todo-list button{width:36px;min-height:36px;font-size:18px}
+.mood-heading{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-bottom:-6px}
+.mood-heading h3{margin:0;font:500 .9375rem/1.5 var(--f-body)}
+.mwrite{padding:4px 0;font:inherit;font-size:.8125rem}
+.mood-log{list-style:none;padding:0;margin:0}
+.mood-entry{display:flex;align-items:center;border-top:1px solid var(--line)}
+.mood-read{display:grid;grid-template-columns:auto 8px minmax(0,1fr);align-items:baseline;gap:10px;min-width:0;flex:1;padding:12px 0;text-align:start;color:var(--fg);border:0;background:transparent;font:400 .9375rem/1.5 var(--f-body);cursor:pointer}
+.mood-read time{color:var(--muted);font-size:.8125rem;font-variant-numeric:tabular-nums}
+.mood-copy{min-width:0;overflow-wrap:anywhere}
+.mood-copy span,.mood-copy small{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.mood-copy small{color:var(--muted);font-size:.8125rem;margin-top:2px}
+.mood-entry .x{border:0;background:transparent;color:var(--muted);min-height:40px;min-width:36px;font:inherit;cursor:pointer}
+.mood-entry .x.arm{font-size:.8125rem}
 .stk[data-stk-open]{cursor:pointer}
 .stk.ev p{margin-top:4px;font-size:13px;line-height:1.5;-webkit-line-clamp:5;color:inherit}
 .stkfull{--ink-n:#2B2620;background:var(--pl);color:var(--ink-n);border-radius:6px 6px 16px 6px;padding:18px 18px 22px;display:flex;flex-direction:column;gap:4px;box-shadow:0 10px 24px -12px rgba(0,0,0,.25);margin-bottom:14px}
 .stkfull b{font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1.1}
 .stkfull .w{font-size:14px;font-weight:600}
 .stkfull p{margin:8px 0 0;font-size:16px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
-.mrgrid > div{grid-template-columns:repeat(6,minmax(0,1fr))}
-.mrgrid .mchip i{width:42px;height:42px;font-size:18px}
 :root[data-theme="dark"] .stkfull{background:var(--pd);color:var(--fg)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stkfull{background:var(--pd);color:var(--fg)}}
 .stk.ev{padding-top:24px}
@@ -1638,10 +1694,8 @@ body.in-ritual{overflow:hidden}
 .dart>img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 62%}
 .dart .cap{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;align-items:baseline;max-width:calc(100% - 76px);padding:5px 10px;border-radius:10px;background:rgba(246,241,231,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#2B2620;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dart .cap b{font-family:var(--f-display);font-size:13.5px}
-.dart .me{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px rgba(246,241,231,.95),0 4px 12px rgba(0,0,0,.2)}
-.dart .me img{display:block;width:100%;height:100%;object-fit:cover}
 .dart .seal{position:absolute;top:10px;right:10px;width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--cinnabar);color:#fff;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:16px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);transform:rotate(-8deg);opacity:.92}
-.dart .seal.fresh{animation:stampIn .6s .45s cubic-bezier(.2,1.6,.4,1) both}
+.dart .seal.fresh,.day-art-link .seal.fresh{animation:stampIn .6s .45s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes stampIn{0%{opacity:0;transform:scale(2.2) rotate(-18deg)}60%{opacity:1}100%{opacity:.92;transform:scale(1) rotate(-8deg)}}
 @media (min-width:960px){.dart{aspect-ratio:5/2}}
 .artsheet{display:flex;flex-direction:column;gap:14px}
@@ -1668,21 +1722,8 @@ body.in-ritual{overflow:hidden}
 .jz i{position:absolute;left:3px;bottom:3px;padding:1px 4px;border-radius:4px;background:rgba(246,241,231,.88);color:#2B2620;font-style:normal;font-size:10px}
 .jz.now{box-shadow:0 0 0 2px var(--cinnabar)}
 @media (min-width:960px){.jzgrid{grid-template-columns:repeat(10,1fr);gap:8px}}
-@media (prefers-reduced-motion: reduce){.dart .seal.fresh{animation:none}}
-/* 能量卡的画：右下角一枚日柱朱砂印；刚测完的第一张，画卷从中间展开，再盖印 */
-.ecard .art.scroll{position:relative;overflow:visible;background:none;box-shadow:none}
-.art.scroll .paper{position:absolute;inset:0;border-radius:inherit;overflow:hidden;background:#F6F1E7;box-shadow:0 14px 34px -16px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)}
-.pseal{position:absolute;right:8%;bottom:7%;width:38px;height:38px;display:grid;place-items:center;text-align:center;border-radius:6px;background:var(--cinnabar);color:#FFF4EC;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:14px;line-height:1.08;transform:rotate(-6deg);box-shadow:inset 0 0 0 2px rgba(255,244,236,.3);opacity:.94}
-.art.scroll.unroll .paper{animation:unroll 1.1s cubic-bezier(.65,0,.35,1) both}
-.art.scroll.unroll::before,.art.scroll.unroll::after{content:"";position:absolute;z-index:2;top:-3%;height:106%;width:10px;margin-left:-5px;border-radius:5px;background:linear-gradient(90deg,#4a2f1c,#9a6a3c 45%,#4a2f1c);box-shadow:0 4px 10px rgba(0,0,0,.25);animation:rodL 1.25s cubic-bezier(.65,0,.35,1) both}
-.art.scroll.unroll::after{animation-name:rodR}
-.art.scroll.unroll .pseal{animation:sealIn .5s 1.25s cubic-bezier(.2,1.6,.4,1) both}
+@media (prefers-reduced-motion: reduce){.dart .seal.fresh,.day-art-link .seal.fresh{animation:none}}
 .ecard .born{margin:4px 0 0;font-size:12.5px;color:var(--cardmuted)}
-@keyframes unroll{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0 0 0 0)}}
-@keyframes rodL{0%{left:50%;opacity:1}88%{left:0;opacity:1}100%{left:0;opacity:0}}
-@keyframes rodR{0%{left:50%;opacity:1}88%{left:100%;opacity:1}100%{left:100%;opacity:0}}
-@keyframes sealIn{0%{opacity:0;transform:scale(2.4) rotate(-16deg)}60%{opacity:1}100%{opacity:.94;transform:scale(1) rotate(-6deg)}}
-@media (prefers-reduced-motion: reduce){.art.scroll.unroll .paper,.art.scroll.unroll .pseal{animation:none}.art.scroll.unroll::before,.art.scroll.unroll::after{display:none}}
 /* ================= 两个人的画 ================= */
 .pairc{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;background:var(--surface);box-shadow:var(--ring);border-radius:22px;padding:20px 18px}
 .sbody .pairc{background:none;box-shadow:none;padding:4px 0 0}
@@ -1721,10 +1762,9 @@ body.in-ritual{overflow:hidden}
 .dprog{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .dprog > span{font-size:13px;color:var(--muted)}
 .dprog > span b{color:var(--fg);font-size:16px}
-.dslots{display:flex;gap:6px}
-.dslots i{width:34px;height:34px;border-radius:9px;border:1.5px dashed var(--line);display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:15px;color:#FFF4EC}
-.dslots i.on{border:0;background:var(--cinnabar);transform:rotate(-4deg);box-shadow:0 2px 6px -2px rgba(194,65,45,.6)}
-.dslots i.on:nth-child(even){transform:rotate(3deg)}
+.dslots{display:flex;gap:4px;flex:1}
+.dslots i{flex:1;height:4px;border-radius:3px;background:var(--sunk)}
+.dslots i.on{background:#b39356}
 .deedf{display:flex;gap:8px}
 .deedf input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .deedf input:focus{outline:none;border-color:var(--accent)}
@@ -1745,7 +1785,7 @@ body.in-ritual{overflow:hidden}
 .lcard > small{font-size:12px;color:var(--muted);margin-top:-8px}
 .lcard p{margin:0;font-size:13.5px;line-height:1.65;color:var(--muted)}
 .lcard .pills button{min-width:0;padding:7px 13px;font-size:14px;min-height:38px}
-.lmine{gap:0;padding:4px 16px}
+.lmine{gap:0;padding:4px 16px}.lmine .ltip{padding:12px 0 0;margin:0}
 .lkrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 0;border:0;background:none;color:var(--fg);font:inherit;text-decoration:none;text-align:left;width:100%}
 .lkrow + .lkrow{border-top:1px solid var(--line)}
 .lkrow span{font-size:15px}
@@ -1782,7 +1822,7 @@ body.in-ritual{overflow:hidden}
 /* 转运页的两个分页：做好事 / 提能量 */
 .ltabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;background:var(--sunk);border-radius:16px;padding:5px}
 .ltabs button{position:relative;border:0;background:transparent;border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted)}
-.ltabs button b{font-family:var(--f-display);font-size:17px;font-weight:900}
+.ltabs button b{font:500 .9375rem/1.5 var(--f-body)}
 .ltabs button small{font-size:12px}
 .ltabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--ring)}
 .ltabs .dot{position:absolute;top:8px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--cinnabar)}
@@ -1830,6 +1870,8 @@ body.in-ritual{overflow:hidden}
   background:radial-gradient(70% 60% at 100% 0%, color-mix(in srgb,var(--lk) 30%,transparent) 0%, transparent 70%),radial-gradient(60% 50% at 0% 100%, color-mix(in srgb,var(--lk2) 16%,transparent) 0%, transparent 70%),linear-gradient(165deg,#2A2530,#17151A)}}
 :root[data-theme="dark"] .tcard.luck{--gtext:var(--lk);
   background:radial-gradient(70% 60% at 100% 0%, color-mix(in srgb,var(--lk) 30%,transparent) 0%, transparent 70%),radial-gradient(60% 50% at 0% 100%, color-mix(in srgb,var(--lk2) 16%,transparent) 0%, transparent 70%),linear-gradient(165deg,#2A2530,#17151A)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .today-art-bg{opacity:.52}}
+:root[data-theme="dark"] .today-art-bg{opacity:.52}
 .tcard.luck.k1 .ring::before,.tcard.luck.k2 .ring::before{background:conic-gradient(var(--gtext) calc(var(--p) * 1%), var(--ctrack) 0)}
 /* ================= 撕日历：每天第一次打开，撕掉昨天那一页 ================= */
 .tear{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .4s;padding:24px}
@@ -1904,55 +1946,50 @@ body.in-ritual{overflow:hidden}
 .termsheet .tn{font-family:var(--f-display);font-size:34px;font-weight:900;letter-spacing:.16em;text-align:center}
 .termsheet p{margin:0;font-size:15px;line-height:1.8}
 .termsheet .mine{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--cinnabar) 9%,transparent);color:var(--fg)}
-/* ================= 十二时辰盘：今天卡片底部 ================= */
-.hdial{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;padding-top:14px;border-top:1px solid rgba(127,127,127,.14)}
-.hdial .times{grid-template-columns:1fr;gap:8px;padding-top:0;border-top:0}
-.hdial .times div{flex-direction:column;align-items:flex-start;gap:0}
-.hring{width:136px;height:136px;display:block;overflow:visible}
-@media (max-width:360px){.hring{width:116px;height:116px}.hdial{gap:12px}}
-.hring .hs{cursor:pointer;transition:opacity .2s,transform .2s;transform-origin:0 0}
-.hring .k5{fill:var(--l5)}.hring .k4{fill:var(--l4)}.hring .k3{fill:color-mix(in srgb,var(--cardmuted) 55%,transparent)}.hring .k2{fill:var(--l2)}.hring .k1{fill:var(--l1)}
-.hring .night{opacity:.38}
-.hring .best{stroke:var(--cardfg);stroke-width:1.6}
-.hring .pick{stroke:var(--cardfg);stroke-width:2.4;opacity:1}
-.hring .glow{animation:hglow 2.4s ease-in-out infinite;filter:drop-shadow(0 0 5px var(--glow))}
-@keyframes hglow{0%,100%{opacity:1}50%{opacity:.62}}
-.hring text{font-size:9px;fill:var(--cardmuted);text-anchor:middle;font-family:var(--f-display)}
-.hring .cn{font-size:17px;font-weight:900;fill:var(--cardfg)}
-.hring .cs{font-size:9px;fill:var(--cardmuted);font-family:var(--f-body)}
-.hring .hand{stroke:var(--cardfg);stroke-width:2.6;stroke-linecap:round;pointer-events:none}
-.hcap{margin:8px 0 0;min-height:20px;font-size:12.5px;line-height:1.6;color:var(--cardmuted)}
-.hcap b{color:var(--cardfg);font-weight:600}
-@media (min-width:960px){.hring{width:164px;height:164px}}
-@media (prefers-reduced-motion: reduce){.hring .glow{animation:none}}
+/* 时段轴：白天各时段可点，竖线标记实际时间 */
+.today-hours{display:grid;gap:3px;min-width:0;
+  --hour-good:color-mix(in srgb,var(--l4) 78%,var(--surface));
+  --hour-steady:color-mix(in srgb,var(--cardmuted) 26%,var(--surface));
+  --hour-caution:repeating-linear-gradient(135deg,var(--cbad) 0 2px,var(--hour-steady) 2px 5px)}
+.hour-heading,.hour-key{display:flex;align-items:center;gap:8px}
+.hour-heading{justify-content:space-between;flex-wrap:wrap}
+.hour-key{font-size:var(--today-meta);color:var(--cardmuted)}
+.hour-key span{display:flex;align-items:center;gap:4px}
+.hour-key span::before{content:"";width:9px;height:9px;border-radius:2px}
+.hour-key .good::before{background:var(--hour-good)}
+.hour-key .steady::before{background:var(--hour-steady)}
+.hour-key .caution::before{background:var(--hour-caution)}
+.hour-axis{position:relative}
+.hour-track{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.hour-seg{position:relative;border:0;background:none;padding:4px 0;min-height:28px;color:var(--cardfg)}
+.hour-seg::before{content:"";display:block;height:14px;border-radius:4px;background:var(--hour-steady)}
+.hour-seg.k4::before{background:color-mix(in srgb,var(--hour-good) 67%,var(--surface))}
+.hour-seg.k5::before{background:var(--hour-good)}
+.hour-seg.k1::before,.hour-seg.k2::before{background:var(--hour-caution)}
+.hour-seg.best::before{box-shadow:inset 0 0 0 1px var(--cardfg)}
+.hour-seg[aria-pressed="true"]::before{outline:1px solid var(--cardfg);outline-offset:1px}
+.hour-now{position:absolute;top:3px;bottom:3px;left:var(--now);width:2px;background:var(--cardfg);box-shadow:0 0 0 1px var(--surface);border-radius:2px;pointer-events:none}
+.hour-ticks{display:flex;justify-content:space-between;margin-top:-4px;font-size:var(--today-meta);color:var(--cardmuted);font-variant-numeric:tabular-nums}
+.hour-summary{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;color:var(--cardmuted);font-size:var(--today-meta)}
+.hour-summary .more{margin-left:auto}
+.hour-best b,.hcap b{color:var(--cardfg);font-weight:600}
+.hcap{margin:0;font-size:var(--today-meta);line-height:1.6;color:var(--cardmuted)}
+.hcap:empty{position:absolute}
+.hour-details{display:grid;gap:12px}
+.hour-details .slot span:last-child{display:block;overflow:visible}
 
-/* ================= 今日幸运色：今天卡片里主题下面的一行，底色、能量环、光晕都是这两个颜色 ================= */
-.tluck{--bead-gap:rgba(255,255,255,.9);display:flex;flex-wrap:nowrap;align-items:center;column-gap:10px;row-gap:4px;width:100%;margin:-2px 0 0;padding:9px 12px;border:0;border-radius:14px;font:inherit;text-align:left;color:var(--cardfg);
+/* 今日卡的幸运色和配饰 */
+.tluck{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:2px 16px;width:100%;min-height:44px;margin:-2px 0 0;padding:6px 10px;border:0;border-radius:14px;font:inherit;text-align:left;color:var(--cardfg);
   background:color-mix(in srgb,var(--lk,var(--glow)) 11%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--lk,var(--glow)) 26%,transparent)}
-button.tluck{cursor:pointer}
-.tluck .beads{display:flex;flex:none}
-.tluck .beads i{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.6),rgba(255,255,255,0) 45%),var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 2px var(--bead-gap)}
-.tluck .beads i+i{margin-left:-5px}
-.tluck small{font-size:12px;color:var(--cardmuted);letter-spacing:.06em;white-space:nowrap}
-.tluck b{font-family:var(--f-display);font-weight:900;font-size:15.5px;letter-spacing:.04em;white-space:nowrap}
-.tluck em{font-style:normal;font-size:12.5px;color:var(--cardmuted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.tluck .go{margin-left:auto;font-style:normal;color:var(--cardmuted)}
-.tluck .why{display:none}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tluck{--bead-gap:rgba(30,27,34,.9)} }
-:root[data-theme="dark"] .tluck{--bead-gap:rgba(30,27,34,.9)}
-.tluck + .dart{margin-top:0}
-/* 320 宽的小屏：三个字的主题和能量环放一行 */
-@media (max-width:340px){.hero3 .theme b{font-size:46px}}
-@media (max-width:360px){.tluck em{display:none}}
-/* 右边小卡剩三张：手机上每日一签占一整行 */
-.minis > :first-child{grid-column:1 / -1}
-@media (min-width:960px){
-  .tluck{flex-wrap:wrap;padding:11px 16px;column-gap:12px}
-  .tluck .beads i{width:24px;height:24px}
-  .tluck b{font-size:17px}
-  .tluck small,.tluck em{font-size:13.5px}
-  .tluck .why{display:block;flex-basis:100%;padding-left:55px;font-size:13.5px;line-height:1.6;color:var(--cardmuted)}
-}
+button.tluck{cursor:pointer;padding-inline-end:26px}
+.tluck .luck-field{display:inline-flex;align-items:baseline;gap:5px;max-width:100%}
+.tluck small{flex:none;font-size:var(--today-meta);color:var(--cardmuted)}
+.tluck b{font-size:var(--today-body);font-weight:400;line-height:1.5}
+.tluck .luck-colors{column-gap:5px}
+.luck-colors{display:flex;flex-wrap:wrap;gap:2px 8px}
+.luck-color{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.luck-color i{width:.8em;height:.8em;flex:none;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.tluck .go{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--cardmuted);font-style:normal}
 
 /* ================= 每日一签：全屏仪式。深色，不跟白色 / 深色主题走；点缀色是今天的幸运色（--lk），圣杯是金色 ================= */
 .sheet-bg.lotrite{background:rgba(3,3,6,.9)}
@@ -2097,3 +2134,124 @@ button.tluck{cursor:pointer}
 @keyframes rtrack{from{opacity:0;letter-spacing:.8em;filter:blur(12px)}to{opacity:1;letter-spacing:.18em;filter:blur(0)}}
 @media (max-height:700px){.rit{--dt:36px;--th:min(200px,25dvh)}.rres b{font-size:32px;min-height:40px;line-height:40px}.rcap{top:calc(var(--dt) + var(--D) + 12px)}}
 @media (prefers-reduced-motion:reduce){.rv span,.rcard{animation-duration:.01s!important;animation-delay:0s!important}.rdial,.rcap,.rbloom{transition-duration:.25s!important}}
+
+/* A textile display on warm paper, with the wish and its physical swatch together. */
+.luck-head{justify-content:space-between}
+.luck-head a{padding:9px 0;color:var(--muted);font-size:.8125rem;text-decoration:none}
+.charm-exhibit{min-width:0}
+.charm-stage{isolation:isolate;position:relative;overflow:hidden;border-radius:16px;background:#edddca;color:#292e34;height:clamp(235px,64vw,336px);touch-action:pan-y}
+.charm-photo{position:absolute;inset:0 0 0 auto;width:66%;mask-image:linear-gradient(90deg,transparent,#000 12%);background:#ecdcca}
+.charm-photo img,.woven-path{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.woven-path{fill:none;stroke:#ffe6a2;stroke-linecap:round;stroke-width:4.5;filter:drop-shadow(0 0 2px #a66421);pointer-events:none}
+.charm-caption{position:absolute;left:5%;top:50%;transform:translateY(-50%);width:35%;overflow-wrap:anywhere}
+.charm-caption h2{font:600 clamp(24px,6.3vw,42px)/1.28 var(--f-display);margin:0}
+.charm-caption em{display:block;font:italic clamp(14px,3.6vw,19px)/1.45 Georgia,serif;color:#63564b;margin:5px 0 14px}
+.charm-caption p{margin:0;font-size:.8125rem;line-height:1.65;max-width:13em;color:#5a5046}
+.charm-picker{display:flex;gap:7px;margin:10px 0 1px}
+.charm-picker button{display:flex;align-items:center;justify-content:center;gap:6px;flex:1;min-width:0;min-height:45px;padding:4px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;font:400 .8125rem/1.4 var(--f-body)}
+.charm-picker button[aria-pressed=true]{border-color:var(--fg);color:var(--fg)}
+.charm-picker img{width:22px;height:31px;object-fit:cover;border-radius:4px}
+.omamori:has(.amulet-photo){width:min(100%,320px);height:auto;filter:none}
+.omamori.sm:has(.amulet-photo){width:min(100%,225px)}
+.amulet-photo{width:100%;max-height:42vh;object-fit:contain;border-radius:12px;display:block}
+.omcard .amulet-photo{height:100%;object-fit:cover;border-radius:7px}
+.charm-msg{width:100%;display:grid;gap:4px}
+.charm-msg label{font-size:.8125rem;color:var(--muted)}
+.charm-msg div{display:flex;gap:6px}
+.charm-msg input{min-width:0;flex:1;font:inherit;background:var(--surface);color:var(--fg);border:1px solid var(--line);padding:8px;border-radius:8px}
+@media(max-width:359px){.charm-picker{gap:4px}.charm-picker img{width:17px;height:25px}.charm-caption p{font-size:.75rem}}
+
+/* Hanging wishes, lit like a shallow wooden display case. */
+.wish-rack{overflow:hidden;border:5px solid #ae865d;border-radius:15px;background:radial-gradient(ellipse at 48% 40%,#fff9ed,#e1cdae);color:#403326;box-shadow:inset 0 2px 9px #714e3240}
+.rack-header{display:flex;align-items:baseline;justify-content:space-between;padding:11px 16px 8px}
+.rack-header h2{margin:0;font:600 1.1rem/1.4 var(--f-display)}
+.rack-header small,.rack-caption em{font:italic .9rem/1.4 Georgia,serif;color:#705e4a}
+.rack-rows{padding:0 10px}
+.rack-rail{position:relative;isolation:isolate;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:6px 0 8px}
+.rack-rail::before{content:"";position:absolute;top:5px;left:0;right:0;height:5px;background:linear-gradient(#c19a70,#9f744d);box-shadow:0 3px 4px #62452331;border-radius:3px;z-index:-1}
+.rack-rail button{position:relative;display:grid;justify-items:center;gap:3px;min-width:0;background:transparent;border:0;color:inherit;padding:0;cursor:pointer;font:400 .8125rem/1.5 var(--f-body)}
+.rack-rail button::before{content:"";position:absolute;top:-1px;width:5px;height:7px;background:#806744;border-radius:3px;box-shadow:1px 1px 1px #dfc79f}
+.rack-rail img{height:clamp(77px,21vw,114px);max-width:85%;object-fit:contain;transform-origin:50% 3%;filter:drop-shadow(2px 3px 2px #583e263e)}
+.rack-rail span{padding:1px 7px;border-radius:3px}
+.rack-rail button[aria-pressed=true] span{background:#544332;color:#fff6e7}
+.rack-caption{border-top:1px solid #b69a79;padding:8px 16px 11px;margin:0 3px}
+.rack-caption b{font:600 1rem/1.4 var(--f-display);margin-right:8px}.rack-caption p{margin:2px 0 0;font-size:.8125rem;color:#5b4a39}
+.luck-paths button[aria-selected=true]{box-shadow:inset 0 -2px #967042}
+.luck-paths button[data-luck-tab=energy][aria-selected=true]{box-shadow:inset 0 -2px #776b9a}
+.omx:has(.amulet-photo) .omamori,.omview .omamori:has(.amulet-photo){max-height:37vh;max-width:215px}
+.omx .amulet-photo,.omview .amulet-photo{max-height:35vh;filter:drop-shadow(2px 8px 7px #52392624)}
+.omcard .amulet-photo{object-fit:contain}
+.gift-editor{gap:12px}
+.gift-editor .gift-preview{width:auto;max-width:100%;height:auto;max-height:43vh;object-fit:contain;align-self:center;border-radius:5px}
+.gift-editor .charm-msg{gap:5px}.charm-msg textarea{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;resize:vertical}
+.gift-paper,.gift-send{display:flex;gap:8px;width:100%}.gift-paper{margin:4px 0}.gift-paper button{min-height:32px;background:var(--sunk);color:var(--muted);border:1px solid transparent;border-radius:8px;font:inherit}
+.gift-paper button[aria-pressed=true]{border-color:var(--fg);color:var(--fg)}.gift-send>*{flex:1}
+@media(min-width:960px){.rack-rail img{height:104px}.wish-rack{max-width:100%}}
+
+.rack-rail button.good-drop::after,.rack-rail button.energy-drop::after{content:"";position:absolute;top:42%;left:50%;pointer-events:none}
+.rack-rail button.good-drop::after{width:4px;height:4px;border-radius:50%;background:#fff3a6;box-shadow:-19px -12px 2px #f2b848,15px 10px 1px #ffd35f,-12px 18px 0 #e9b44d,21px -8px 2px #fff2b3;animation:gold-scatter .65s ease-out both}
+.rack-rail button.energy-drop::after{width:34px;height:15px;border-radius:50%;background:#b8afd1;box-shadow:9px -3px 7px #b6a9cd,-14px 2px 6px #c3bfd8;filter:blur(3px);animation:mist-away .65s ease-out both}
+@keyframes gold-scatter{0%{opacity:0;transform:scale(.3)}35%{opacity:1}100%{opacity:0;transform:translateY(10px) scale(1.8)}}
+@keyframes mist-away{0%{opacity:0;transform:translateX(-50%) scale(.65)}35%{opacity:.8}100%{opacity:0;transform:translateX(22px) scale(1.6)}}
+
+/* 善行签的右联展示实际会掉落的御守。 */
+.ltabs.luck-paths{display:flex;justify-content:center;gap:24px;padding:0;background:transparent;border-radius:0}
+.ltabs.luck-paths button{padding:9px 4px;min-height:44px;border-radius:0;font:400 .9375rem/1.5 var(--f-body)}
+.ltabs.luck-paths button[aria-selected=true]{background:none;box-shadow:inset 0 -2px var(--earth);color:var(--fg)}
+.ltabs.luck-paths button[data-luck-tab=energy][aria-selected=true]{box-shadow:inset 0 -2px #776b9a}
+.deed-paper{--paper:color-mix(in srgb,var(--surface) 90%,#e6bb78);--ink:color-mix(in srgb,var(--fg) 76%,#97552c);--rule:color-mix(in srgb,var(--earth) 34%,var(--paper));gap:0;padding:0;background:var(--paper);color:var(--ink);border:1px solid var(--rule);border-radius:12px;box-shadow:none}
+/* 输入与提交同行，最近一次回馈附在签底。 */
+.deed-writing{padding:14px 16px 8px}
+.deed-entry{display:flex;align-items:center;gap:12px}
+.deed-entry input{min-width:0;height:44px;padding:4px 0;background:transparent;border:0;border-bottom:1px solid var(--rule);border-radius:0;color:var(--fg);caret-color:var(--ink)}
+.deed-entry input:focus{border-color:var(--ink);outline:0}
+.deed-entry input::placeholder{color:var(--muted)}
+.deed-paper .btn.primary{background:var(--ink);color:var(--paper);box-shadow:none;min-height:42px;padding:8px 19px}
+.deed-links{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-top:4px;color:var(--muted);font:400 .8125rem/1.5 var(--f-body)}
+.deed-links details[open]{flex:1 0 100%}
+.deed-links summary{width:fit-content;padding:7px 0;cursor:pointer}
+.deed-ideas div{display:flex;flex-wrap:wrap;gap:4px 12px;margin:2px 0 8px}
+.deed-ideas button{padding:5px 0;background:none;border:0;font:inherit;color:var(--ink);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:4px}
+.deed-history .dlist{max-height:15rem;overflow-y:auto}
+.deed-ticket:not(:empty){display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 0;border-top:1px dashed var(--rule);margin:0 16px;font:400 .875rem/1.5 var(--f-body)}
+.deed-stub{display:inline-flex;align-items:center;gap:6px;min-height:44px;background:transparent;border:0;color:var(--ink);font:inherit}
+.deed-stub img{width:28px;height:36px;object-fit:contain;transform-origin:50% 0}
+.deed-paper>.btn{align-self:flex-start;margin:0 16px 12px}
+@media(prefers-reduced-motion:no-preference){.deed-ticket.received img{animation:deed-arrives .55s ease-out both}}
+@keyframes deed-arrives{from{opacity:.4;transform:translateY(-7px) rotate(-10deg)}65%{transform:rotate(5deg)}to{opacity:1;transform:none}}
+
+
+/* The charm sits on its own perforated strip while the left side changes from entry to receipt. */
+.deed-writing{padding:0}
+.deed-compose,.deed-ticket:not(:empty){display:grid;grid-template-columns:minmax(0,1fr) clamp(82px,23vw,116px);align-items:stretch;padding:0;margin:0;border:0}
+.deed-compose .deed-entry,.reply-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:17px 16px;min-width:0}
+.deed-entry label,.reply-copy p{margin:0;font:500 1rem/1.5 var(--f-body);overflow-wrap:anywhere}
+.deed-compose input{width:100%;flex:none;height:38px}
+.deed-compose>.btn{align-self:center;justify-self:start;margin:16px}
+.deed-preview,.deed-keepsake{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:color-mix(in srgb,var(--earth) 7%,var(--paper));border:0;border-left:1px dashed var(--rule);border-radius:0 11px 0 0;margin:0;padding:10px 5px;color:var(--ink);font:400 .8125rem/1.5 var(--f-body)}
+.deed-preview img,.deed-keepsake img{width:59px;height:79px;object-fit:contain;filter:drop-shadow(1px 3px 2px #38241020)}
+.reply-copy small{font:400 .875rem/1.5 var(--f-body);color:var(--muted)}
+.reply-copy .btn{margin-top:3px;min-height:38px}
+.deed-links:not(:empty){margin:0;padding:2px 16px;border-top:1px dashed var(--rule)}
+.deed-history .dlist li:has([data-deed-amulet]){display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;padding-right:0;column-gap:6px}
+.deed-history li span{overflow-wrap:anywhere}
+.deed-history li [data-deed-amulet]{grid-column:2;grid-row:1 / span 2;display:flex;align-items:center;gap:4px;border:0;background:transparent;font:inherit;min-height:40px;color:var(--ink)}
+.deed-history li [data-deed-amulet] img{width:22px;height:30px;object-fit:contain}
+
+.deed-ledger{min-width:0;padding:16px}
+.deed-ledger h2{font:600 1rem/1.5 var(--f-body);margin:0;color:var(--ink)}
+.deed-marks{display:flex;gap:5px;margin:10px 0 5px}
+.deed-marks i{flex:1;height:5px;background:var(--rule);border-radius:3px}
+.deed-marks .filled{background:var(--earth)}
+.deed-balance,.deed-preview small{font:400 .8125rem/1.5 var(--f-body);color:var(--muted)}
+.deed-balance{margin:0 0 8px}
+.deed-compose .deed-ledger .deed-entry{padding:0;gap:8px}
+.deed-preview .btn.primary{padding:4px 8px;min-height:36px}
+.deed-ticket:not(:empty){display:block;padding:8px 16px;margin:0;background:var(--paper);font:400 .875rem/1.5 var(--f-body)}
+.energy-goal{--rule:color-mix(in srgb,#776b9a 35%,var(--surface));--paper:color-mix(in srgb,#9587b6 9%,var(--surface));--ink:var(--fg)}
+.energy-goal progress{width:100%;display:block;height:6px;margin:12px 0 7px;appearance:none;border:0;background:var(--rule);border-radius:4px;overflow:hidden;color:#776b9a}
+.energy-goal progress::-webkit-progress-bar{background:var(--rule)}
+.energy-goal progress::-webkit-progress-value{background:#776b9a;border-radius:4px}
+.energy-goal progress::-moz-progress-bar{background:#776b9a}
+.energy-goal .deed-preview{background:color-mix(in srgb,#9587b6 8%,var(--paper))}
+.practice-result:not(:empty){font:500 .875rem/1.5 var(--f-body);margin-top:8px}

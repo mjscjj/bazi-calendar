@@ -2,7 +2,7 @@
 import { $, $$, esc, api, toast, openSheet, dismissSheet, onClick, track, currentPath, isDesk, localToday, seen, mark } from './core.js';
 import { THEME, THEME_DESC, WX, setGlow, gwx, gzHtml, shishen, SHORT, actOf, weekday, lunarLabel, specials, hhShort, WEEK } from './data.js';
 import { S, isPro, isDemo } from './state.js';
-import { openDay, dayDetailHtml } from './day.js';
+import { openDay, dayDetailHtml, dayLabel } from './day.js';
 import { footHtml } from './today.js';
 import { cellStickers, moodWords } from './mood.js';
 
@@ -136,7 +136,7 @@ export function renderCalendar() {
 function panelHtml() {
   const x = S.cal && S.cal.days[S.sel - 1];
   if (!x) return '';
-  return `<div class="ph2"><span>${x.m}月${x.d}日 · 这一天</span></div>` + dayDetailHtml(x, S.cal.chart, S.cal.name, S.cal.plans);
+  return `<div class="ph2"><span>${dayLabel(x)}</span></div>` + dayDetailHtml(x, S.cal.chart, S.cal.name, S.cal.plans);
 }
 function selectDay(d) {
   S.sel = d;
@@ -317,7 +317,7 @@ onClick('[data-pick-day]', (el) => {
   if (isDesk() && currentPath() === '/calendar' && S.cal && S.cal.y === p.y && S.cal.m === p.m) { dismissSheet(); selectDay(p.d); return; }
   monthData(p.y, p.m).then((c) => {
     if (!pick || !$('#sheet')) return;
-    $('#sheet .sh b').textContent = `${p.m}月${p.d}日`;
+    $('#sheet .sh b').textContent = dayLabel(c.days[p.d - 1]);
     pickBody().innerHTML = '<button type="button" class="tbtn backres" data-pick-back="result">‹ 回到推荐的日子</button>' + dayDetailHtml(c.days[p.d - 1], c.chart, c.name, c.plans);
     $('#sheet .sheet').scrollTop = 0;
   }, (e) => toast(e.message));

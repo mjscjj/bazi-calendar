@@ -1,7 +1,4 @@
-// 转运御守走查：node test/e2e/wish.mjs <baseUrl> <dbPath> <outDir>
-// 今天页入口 → 转运页两个分页 → 做好事：记善行（一天最多 3 件）、攒满 5 件换一枚 → 分享 → 我的御守
-// → 提能量：冥想（测试里把时间加速 40 倍，切出去自动暂停，提前结束不算）、释放练习（圣多纳释放法）、攒够 20 分钟换一枚
-// → 直接买一枚（模拟付款后直接织好）。手机和电脑、白色和深色。服务端以 ALIPAY_FAKE=1 启动。
+// 手机和桌面端的御守选取、掉落、分享、练习与模拟支付走查。
 import { DatabaseSync } from 'node:sqlite';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
 const [base, dbPath, out] = process.argv.slice(2);
@@ -23,39 +20,45 @@ await p.evaluate(async (u) => {
   localStorage.setItem('lrl:guide', '1'); localStorage.setItem('lrl:a2hs-done', '1'); localStorage.setItem('lrl:theme', '"light"');
 }, user);
 const uid = () => db.prepare('SELECT id FROM users WHERE username = ?').get(user).id;
-await p.reload(); await p.waitForSelector('.ommini');
-check('今天页是转运御守入口', (await p.textContent('.ommini')).includes('转运御守') && (await p.textContent('.ommini small')).includes('0/5'));
-await p.click('.ommini'); await p.waitForSelector('#deedForm');
+await p.reload();
+const luckTab = p.locator('.tabbar a[href="#/calendar"] + a[href="#/luck"]');
+check('日历旁的转运页签', (await luckTab.textContent()) === '转运');
+await luckTab.click(); await p.waitForSelector('#deedForm');
 check('两个分页：做好事和提能量', (await p.$$('.ltabs [data-luck-tab]')).length === 2 && (await p.getAttribute('[data-luck-tab="deed"]', 'aria-selected')) === 'true');
 await p.screenshot({ path: `${out}/w01-luck-light.png`, fullPage: true });
 
-// 做好事
+// 善行掉落、个性化分享、同日连续记录
+const countAmulets = () => db.prepare('SELECT COUNT(*) n FROM amulets WHERE user_id = ?').get(uid()).n;
+check('架上有九种御守', await p.locator('[data-charm-wish]').count() === 9);
+await p.click('[data-charm-wish="姻缘"]');
+await p.locator('.deed-paper').evaluate(el => el.scrollIntoView({block:'center'}));
+await p.locator('.deed-paper').screenshot({path:out + '/deed-entry.png'});
+await p.click('.deed-ideas summary');
 await p.click('[data-deed-ex]');
 check('点例子填进输入框', (await p.inputValue('#deedForm input')).length > 2);
 await p.click('#deedForm button');
-await p.waitForSelector('.dslots i.on');
-for (const t of ['帮同事看了代码', '真心夸了一个人']) { await p.fill('#deedForm input', t); await p.click('#deedForm button'); await p.waitForFunction((n) => document.querySelectorAll('.dslots i.on').length === n, t === '帮同事看了代码' ? 2 : 3); }
-check('一天记满 3 件就收起输入框', !(await p.$('#deedForm')) && (await p.textContent('.dtip')).includes('明天再来'));
-db.prepare("UPDATE deeds SET day = '2000-01-01' WHERE user_id = ?").run(uid());
-await p.reload(); await p.waitForSelector('#deedForm');
-for (const t of ['给外卖员说了谢谢', '让座给老人']) { await p.fill('#deedForm input', t); await p.click('#deedForm button'); await p.waitForTimeout(300); }
-await p.waitForSelector('[data-deed-exchange]');
-check('攒满 5 件出现换御守', (await p.$$('.dslots i.on')).length === 5);
-await p.screenshot({ path: `${out}/w02-five-light.png`, fullPage: true });
-await p.click('[data-deed-exchange]'); await p.waitForSelector('#sheet .omx');
-await p.click('[data-ox-wish="事业"]');
-await p.waitForTimeout(400);
-await p.screenshot({ path: `${out}/w03-exchange-light.png` });
-await p.click('[data-ox-go]'); await p.waitForSelector('[data-om-keep]');
-await p.waitForTimeout(400);
-await p.screenshot({ path: `${out}/w04-reveal-light.png` });
-check('换来的是善缘款', db.prepare('SELECT style FROM amulets WHERE user_id = ?').get(uid()).style === 'deed');
-await p.click('[data-om-share]'); await p.waitForSelector('.sharepv img', { timeout: 8000 });
-await p.click('#sheet [data-close-sheet]'); await p.waitForSelector('#sheet', { state: 'detached' });
-check('换完进度清零', (await p.$$('.dslots i.on')).length === 0 && (await p.textContent('.dlist')).includes('已换成御守'));
-
-// 提能量：冥想
-await p.click('[data-luck-tab="energy"]'); await p.waitForSelector('.eprog');
+await p.waitForFunction(()=>document.querySelector('.deed-balance').textContent.includes('还差 4 件'));
+check('记录一件只增加进度', countAmulets() === 0 && !(await p.$('[data-deed-exchange]')));
+for (const t of ['帮同事看了代码','真心夸了一个人','把座位让给别人','陪朋友散步']) {
+  await p.fill('#deedForm input',t); await p.click('#deedForm button');
+  await p.waitForFunction(text => document.querySelector('.deed-history li span')?.textContent === text,t);
+}
+check('五件攒满后可以兑换所选御守', countAmulets()===0 && await p.isVisible('[data-deed-exchange]'));
+await p.click('[data-deed-exchange]'); await p.waitForSelector('[data-om-share]');
+check('兑换扣五件，收到一枚',countAmulets()===1 && (await p.textContent('.deed-balance')).includes('已攒 0 件'));
+await p.click('[data-om-share]'); await p.waitForSelector('.gift-preview');
+await p.fill('#gift-to','阿晴'); await p.fill('#charm-message','愿你遇见的每一份善意，都恰好落在心上。');
+const preview = () => p.getAttribute('.gift-preview','src');
+const light = await preview();
+await p.click('[data-gift-paper="dark"]');
+await p.waitForFunction(src => document.querySelector('.gift-preview').src !== src, light);
+await p.click('[data-gift-paper="light"]'); await p.waitForTimeout(350);
+const download = p.waitForEvent('download');
+await p.click('[data-share-save]'); await (await download).saveAs(out + '/gift.jpg');
+await p.screenshot({path:out + '/gift-editor.png'});
+await p.click('#sheet [data-close-sheet]'); await p.waitForSelector('#sheet',{state:'detached'});
+await p.click('[data-luck-tab="energy"]'); await p.waitForSelector('[data-med-start]');
+await p.click('[data-charm-wish="厄除"]');
 check('切到提能量分页', p.url().includes('tab=energy'));
 await p.screenshot({ path: `${out}/w04b-energy-light.png`, fullPage: true });
 await p.click('[data-med-min="1"]'); await p.click('[data-med-way="incense"]');
@@ -65,11 +68,8 @@ await p.waitForSelector('#ritual .rpause:not([hidden])');
 check('切出去自动暂停', true);
 await p.evaluate(() => { Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
 await p.click('[data-ritual-resume]');
-await p.waitForSelector('#ritual.revealed', { timeout: 15000 }); await p.waitForTimeout(300);
-check('冥想练完不发御守，只记一次', (await p.textContent('#ritual')).includes('练完了') && db.prepare('SELECT COUNT(*) n FROM amulets WHERE user_id = ?').get(uid()).n === 1);
-await p.screenshot({ path: `${out}/w05-meditate-done.png` });
-await p.click('[data-ritual-close]'); await p.waitForSelector('#ritual', { state: 'detached' });
-await p.waitForTimeout(300);
+await p.waitForFunction(()=>document.querySelector('.practice-result')?.textContent.includes('+1 分钟'));
+check('完成冥想记入余额', countAmulets()===1 && (await p.textContent('.energy-goal')).includes('还差 19 分钟'));
 check('转运页显示这周冥想次数', (await p.textContent('#view')).includes('这周冥想 1 次'));
 await p.click('[data-med-start]'); await p.waitForSelector('#ritual');
 p.once('dialog', (d) => d.accept());
@@ -98,25 +98,16 @@ await p.waitForFunction(() => { const b = document.getElementById('rlWait'); ret
 await p.click('#rlWait');
 for (let i = 0; i < 3; i++) await p.click('#release .rchoices .btn >> nth=0');
 await p.click('[data-rl-score="after:2"]'); await p.click('#release [data-rl-next]');
-await p.waitForSelector('#release .rbig');
-check('结束页显示前后对比', (await p.textContent('#release .rbig')).replace(/\s/g, '') === '8→2');
-await p.waitForTimeout(400);
-await p.screenshot({ path: `${out}/w09-release-done.png` });
+await p.waitForFunction(()=>document.querySelector('.practice-result')?.textContent.includes('+3 分钟'));
 const rel = db.prepare("SELECT detail FROM practices WHERE user_id = ? AND kind = 'release'").get(uid());
-check('释放练习记下前后分数和轮数', rel && JSON.parse(rel.detail).rounds === 2);
-await p.click('#release [data-rl-close]'); await p.waitForSelector('#release', { state: 'detached' });
-await p.waitForTimeout(300);
-check('冥想 1 分钟 + 释放 3 分钟 = 4 分钟', (await p.textContent('.eprog')).includes('4/20'));
-// 攒够 20 分钟换一枚静心款
-db.prepare("INSERT INTO practices(user_id, kind, minutes, detail, created_at) VALUES(?, 'meditate', 20, '{}', ?)").run(uid(), new Date().toISOString());
-await p.reload(); await p.waitForSelector('[data-energy-exchange]');
-check('攒够 20 分钟出现换御守，分页上有红点', !!(await p.$('[data-luck-tab="energy"] .dot')));
-await p.click('[data-energy-exchange]'); await p.waitForSelector('#sheet .omx');
-await p.click('[data-ox-go]'); await p.waitForSelector('[data-om-keep]');
-check('换来的是静心款，剩下的分钟留着', db.prepare("SELECT COUNT(*) n FROM amulets WHERE user_id = ? AND style = 'energy'").get(uid()).n === 1);
-await p.click('[data-om-keep]'); await p.waitForTimeout(300);
-check('进度只扣 20 分钟', (await p.textContent('.eprog')).includes('4/20'));
-
+check('释放练习计入 3 分钟并显示前后感受', countAmulets() === 1 && JSON.parse(rel.detail).rounds === 2 && (await p.textContent('.energy-goal')).includes('感受 8 → 2 分'));
+await p.locator('.energy-goal').evaluate(el=>el.scrollIntoView({block:'center'}));
+await p.locator('.energy-goal').screenshot({path:out+'/energy-progress.png'});
+await p.click('[data-med-min="20"]');
+await p.click('[data-med-start]'); await p.waitForFunction(()=>document.querySelector('.practice-result')?.textContent.includes('+20 分钟'), null, {timeout:45000});
+await p.click('[data-energy-exchange]'); await p.waitForSelector('[data-om-keep]');
+check('24 分钟换一枚，余 4 分钟',countAmulets()===2 && (await p.textContent('.energy-goal')).includes('已攒 4 分钟'));
+await p.click('[data-om-keep]'); await p.waitForSelector('#sheet',{state:'detached'});
 // 特别款：先付费
 await p.click('.lbuy [data-om-buy]'); await p.waitForSelector('#sheet .omx');
 check('默认买转运款', (await p.getAttribute('[data-ox-style="basic"]', 'aria-pressed')) === 'true');
@@ -131,7 +122,7 @@ await p.waitForSelector('[data-om-keep]', { timeout: 8000 });
 check('付完直接织好', db.prepare("SELECT COUNT(*) n FROM amulets WHERE user_id = ? AND way = 'buy'").get(uid()).n === 1);
 await p.click('[data-om-keep]'); await p.waitForTimeout(300);
 await p.goto(base + '/#/amulets'); await p.waitForSelector('.omgrid');
-check('我的御守里有三枚', (await p.$$('.omcard')).length === 3 && (await p.textContent('.omgrid')).includes('善行换的') && (await p.textContent('.omgrid')).includes('冥想换的'));
+check('收藏中的三枚御守及来源', (await p.$$('.omcard')).length === 3 && (await p.textContent('.omgrid')).includes('5 件善行换的') && (await p.textContent('.omgrid')).includes('20 分钟静心换的'));
 await p.screenshot({ path: `${out}/w10-collection.png`, fullPage: true });
 
 // 深色、电脑端
@@ -154,3 +145,5 @@ for (const theme of ['light', 'dark']) {
 console.log(results.join('\n'));
 console.log('ERRORS:', errors.length ? errors : 'none');
 await browser.close();
+
+if (errors.length) process.exitCode = 1;

@@ -30,9 +30,9 @@ const stick = async (mood, color, note) => {
   await p.click('[data-mood-rec]'); await p.waitForSelector('#moodForm');
   await p.click(`#moodForm [data-mood-pick="${mood}"]`); await p.click(`#moodForm [data-mood-color="${color}"]`);
   if (note) await p.fill('#moodForm textarea', note);
-  const n = (await p.$$('.moodbox .board .stk')).length;
+  const n = (await p.$$('.moodbox .mood-entry')).length;
   await p.click('#moodForm button[type=submit]');
-  await p.waitForFunction((n) => document.querySelectorAll('.moodbox .board .stk').length === n + 1, n);
+  await p.waitForFunction((n) => document.querySelectorAll('.moodbox .mood-entry').length === n + 1, n);
 };
 await p.click('[data-mood-rec]'); await p.waitForSelector('#moodForm');
 check('没选心情时「记下」是灰的', await p.isDisabled('#moodForm button[type=submit]'));
@@ -44,26 +44,26 @@ await p.click('#sheet [data-close-sheet]'); await p.waitForSelector('#sheet', { 
 await stick('happy', 'apricot', '早上跑了五公里');
 await stick('tired', 'sky', '');
 await stick('calm', 'sage', '晚上看完一本书');
-check('贴了三张', (await p.$$('.moodbox .board .stk')).length === 3);
+check('贴了三张', (await p.$$('.moodbox .mood-entry')).length === 3);
 await p.locator('.moodbox').scrollIntoViewIfNeeded();
 await p.screenshot({ path: `${out}/m02-three-light.png` });
 const uid = db.prepare('SELECT id FROM users WHERE username = ?').get(user).id;
 check('三张平均成当天的分数（5、2、3 → 3）', db.prepare('SELECT score FROM ratings WHERE user_id = ?').get(uid).score === 3);
-await p.click('.moodbox .stk [data-unstick]');
+await p.click('.moodbox .mood-entry [data-unstick]');
 await p.waitForTimeout(400);
-check('点一下 × 先变成「撕掉」，不直接删', (await p.$$('.moodbox .board .stk')).length === 3 && (await p.textContent('.moodbox .stk .x.arm')) === '撕掉');
+check('点一下 × 先变成「撕掉」，不直接删', (await p.$$('.moodbox .mood-entry')).length === 3 && (await p.textContent('.moodbox .mood-entry .x.arm')) === '撕掉');
 await p.locator('.moodbox').scrollIntoViewIfNeeded();
 await p.screenshot({ path: `${out}/m02b-arm-light.png` });
-await p.click('.moodbox .stk .x.arm');
-await p.waitForFunction(() => document.querySelectorAll('.moodbox .board .stk').length === 2);
+await p.click('.moodbox .mood-entry .x.arm');
+await p.waitForFunction(() => document.querySelectorAll('.moodbox .mood-entry').length === 2);
 check('再点一下才撕掉', true);
-await setTheme(p, 'dark'); await p.reload(); await p.waitForSelector('.moodbox .board');
+await setTheme(p, 'dark'); await p.reload(); await p.waitForSelector('.moodbox .mood-log');
 await p.locator('.moodbox').scrollIntoViewIfNeeded();
 await p.screenshot({ path: `${out}/m03-two-dark.png` });
 await p.click('[data-mood-rec]'); await p.waitForSelector('#moodForm'); await p.click('#moodForm [data-mood-pick="upset"]'); await p.click('#moodForm [data-mood-color="blush"]');
 await p.screenshot({ path: `${out}/m04-composer-dark.png` });
 await p.click('#moodForm button[type=submit]');
-await p.waitForFunction(() => document.querySelectorAll('.moodbox .board .stk').length === 3);
+await p.waitForFunction(() => document.querySelectorAll('.moodbox .mood-entry').length === 3);
 
 for (const theme of ['light', 'dark']) {
   await setTheme(p, theme);
@@ -82,7 +82,7 @@ for (const theme of ['light', 'dark']) {
   await dp.evaluate((t) => { localStorage.setItem('lrl:theme', JSON.stringify(t)); localStorage.setItem('lrl:guide', '1'); localStorage.setItem('lrl:a2hs-done', '1'); }, theme);
   await dp.reload();
   await dp.fill('input[name=username]', user); await dp.fill('input[name=password]', 'mood1234');
-  await dp.click('#authForm button[type=submit]'); await dp.waitForSelector('.moodbox .board');
+  await dp.click('#authForm button[type=submit]'); await dp.waitForSelector('.moodbox .mood-log');
   await dp.screenshot({ path: `${out}/m07-desk-today-${theme}.png`, fullPage: true });
   await dp.goto(base + '/#/calendar'); await dp.waitForSelector('.grid .c2 .mstk');
   check(`电脑月历小纸片上有字（${theme}）`, (await dp.textContent('.grid .c2.today .mstk')).length === 3);

@@ -1,5 +1,5 @@
 // 某一天的详情弹层：大家的这一天、你的这一天、宜忌、为什么、十二时辰。今天页和日历页共用。
-import { esc, openSheet } from './core.js';
+import { $$, esc, openSheet, onClick, localToday, ymd } from './core.js';
 import { ADVICE, THEME, THEME_DESC, HOUR_TIP, gzHtml, actOf, weekday, specials, dosDonts, bestHours, hhmm } from './data.js';
 import { S, isPro } from './state.js';
 import { stickerHtml, kitOf } from './mood.js';
@@ -21,34 +21,89 @@ function moodsOf(x) {
   return [];
 }
 
+export const dayLabel = x => `${x.y}年${x.m}月${x.d}日 周${weekday(x)}`;
+
 export function dayDetailHtml(x, chart, name, plans) {
-  const pro = isPro(), lun = x.lunar, wk = weekday(x);
+  const pro = isPro(), lun = x.lunar;
   const { dos, donts } = dosDonts(x, pro);
-  const { top, worst, worstWhy } = bestHours(x);
-  let h = '';
-  if (!pro) {
-    h += `<div class="calrow"><div class="bigd">${x.d}</div><div class="daymeta"><span class="t">${x.y}年${x.m}月${x.d}日 星期${wk}</span><span class="muted">农历${lun.monthCn}月${lun.dayCn}${lun.jieqi ? ' · ' + lun.jieqi : ''}${lun.festival ? ' · ' + lun.festival : ''}</span><span class="muted" style="font-size:12px">通用黄历 宜 ${(lun.yi || []).slice(0, 4).join(' ')} ｜ 忌 ${(lun.ji || []).slice(0, 3).join(' ')}</span></div></div>`;
-    const sp = specials(x, chart), pl = (plans || []).filter((p) => p.date === `${x.y}-${x.m}-${x.d}`);
-    if (sp.length || pl.length) h += `<div class="spbar">${sp.map((z) => `<span class="sp ${z.k}">${z.t}</span>`).join('')}${pl.map((p) => `<span class="sp pl">计划：${esc(p.name)}</span>`).join('')}</div>`;
-    const ms = moodsOf(x), kit = kitOf();
-    const rt = ms.length ? null : ratingOf(x);
-    if (ms.length && kit) h += `<div class="mymoods"><b>那天的记录</b><div class="board sm">${ms.map((m) => stickerHtml(m, kit)).join('')}</div></div>`;
-    if (rt) h += `<div class="myrate"><i class="rmark r${rt.score >= 4 ? 'hi' : rt.score === 3 ? 'mid' : 'lo'}"></i>你那天打了 <b>${rt.score} 分 · ${RATE_WORD[rt.score]}</b>${rt.note ? `：「${esc(rt.note)}」` : ''}</div>`;
-    h += `<div class="mylayer k${x.level.k}"><div class="mlhead"><span class="mltitle">${name ? esc(name) + '，' : ''}这天${actOf(x)}</span><span class="lvpill k${x.level.k}">${x.level.p} · 能量 ${x.score}</span></div><span class="muted" style="font-size:12.5px">${THEME[x.ssG][0]}（${THEME[x.ssG][1]}）：${THEME_DESC[x.ssG]}</span>`
-      + `<div class="slots">${top.map((t, i) => `<div class="slot"><b>${i === 0 ? '最佳时段' : '次佳时段'}</b><span class="tt">${hhmm(t.i)}</span><span>${HOUR_TIP[t.ss]}</span></div>`).join('')}`
-      + (worst && worst.level.k <= 3 ? `<div class="slot bad"><b>尽量避开</b><span class="tt">${hhmm(worst.i)}</span><span>${worstWhy}</span></div>` : '') + '</div></div>';
-  } else {
-    h += `<div class="dayhead"><div class="daygz">${gzHtml(x.gz)}</div><div class="daymeta"><span class="t">${x.m}月${x.d}日 周${wk}</span><span class="muted" style="font-size:12px">农历${lun.monthCn}月${lun.dayCn} · ${x.mgz}月 · ${x.ssG}日（支藏${x.ssZ}）</span><span class="lvpill k${x.level.k}">${x.level.n} · ${x.score}分</span></div></div>`;
+  const date = ymd(new Date(x.y, x.m - 1, x.d));
+  const dayPlans = (plans || []).filter(p => p.date === date || p.date === `${x.y}-${x.m}-${x.d}`);
+  const special = specials(x, chart);
+  const birthdays = special.filter(z => z.k === 'bd').map(z => z.t);
+  const lunar = [`农历${lun.monthCn}月${lun.dayCn}`, lun.jieqi, lun.festival, ...birthdays].filter(Boolean).join(' · ');
+  const ms = moodsOf(x), kit = kitOf(), rt = ms.length ? null : ratingOf(x);
+  const action = actOf(x);
+  const [theme, englishTheme] = THEME[x.ssG];
+  const why = `<ul class="why"><li><span class="v">60</span><span>基础分</span></li>${x.why.map(w => `<li><span class="v ${w.v > 0 ? 'p' : 'n'}">${w.v > 0 ? '+' : '−'}${Math.abs(w.v)}</span><span>${esc(w.p)}${pro ? `<span class="tech">${esc(w.t)}</span>` : ''}</span></li>`).join('')}</ul>`;
+  const reasons = [...special.filter(z => z.k !== 'bd').map(z => z.t), ...x.tags.map(t => pro ? t : ({ 桃花: '人缘旺', 驿马: '利出行' }[t] || t))];
+  const rows = (yes, no, y, n) => `<dl class="detail-rows"><div><dt>${y}</dt><dd>${yes.map(esc).join(' · ') || '—'}</dd></div><div><dt>${n}</dt><dd>${no.map(esc).join(' · ') || '—'}</dd></div></dl>`;
+  const schedule = `<details class="day-fold"><summary>查看完整时段</summary>${hourHighlightsHtml(x)}${hourTableHtml(x, pro)}</details>`;
+  return `<article class="calendar-day"><header class="detail-intro"><span class="detail-meta">${esc(lunar)}${pro ? ` · ${gzHtml(x.gz)}日 · ${esc(x.mgz)}月 · ${esc(x.ssG)}（支藏${esc(x.ssZ)}）` : ''}</span>`
+    + `<div class="detail-theme"><h2>${theme}</h2><span class="detail-score"><i class="lv k${x.level.k}" aria-hidden="true"></i>${pro ? x.level.n : x.level.p} · 能量 ${x.score}</span></div>`
+    + `<p>${action === '休整' ? '这天宜休整。' : ''}${esc(ADVICE[x.ssG].h)}</p></header>`
+    + `<section class="detail-advice"><h3>${name ? esc(name) + '的' : '我的'}日历建议</h3>${rows(dos, donts, '适合', '少做')}</section>`
+    + timelineHtml(x, date === localToday(), schedule)
+    + (dayPlans.length ? `<section class="detail-plans"><h3>当天计划</h3>${dayPlans.map(p => `<p>${esc(p.name)}</p>`).join('')}</section>` : '')
+    + (ms.length && kit ? `<section class="mymoods"><h3>当天记录</h3><div class="board sm">${ms.map(m => stickerHtml(m, kit)).join('')}</div></section>` : '')
+    + (rt ? `<p class="myrate">我的评分 · ${rt.score} 分 · ${RATE_WORD[rt.score]}${rt.note ? ' · ' + esc(rt.note) : ''}</p>` : '')
+    + `<div class="detail-reference"><details class="day-fold"><summary>为什么这么建议</summary><p>${theme}（${englishTheme}）· ${THEME_DESC[x.ssG]}</p>${reasons.length ? `<p>${reasons.map(esc).join(' · ')}</p>` : ''}${x.chongDay ? '<p>这天和你的本命能量相冲，情绪和关系易起波动。</p>' : ''}${why}</details>`
+    + `<details class="day-fold"><summary>公共黄历</summary>${rows(lun.yi || [], lun.ji || [], '宜', '忌')}</details></div></article>`;
+}
+
+// 白天用两小时一格的横轴，全天时段在详情里。
+const HOUR_START = 7 * 60, HOUR_END = 23 * 60;
+const hourStart = (u) => (u.i * 2 + 23) % 24 * 60;
+const inDaylight = (mins) => mins >= HOUR_START && mins < HOUR_END;
+const hourPosition = (mins) => `${(mins - HOUR_START) / (HOUR_END - HOUR_START) * 100}%`;
+const clockMinutes = () => { const t = new Date(); return t.getHours() * 60 + t.getMinutes(); };
+const hourCap = (u) => `<b>${hhmm(u.i)}</b> · ${HOUR_TIP[u.ss] || u.level.p} · ${u.level.p} ${u.score}`;
+setInterval(() => {
+  const markers = $$('.hour-now');
+  if (!markers.length) return;
+  const mins = clockMinutes();
+  for (const marker of markers) {
+    marker.hidden = !inDaylight(mins);
+    marker.style.setProperty('--now', hourPosition(mins));
   }
-  h += `<div class="headline">${x.chongDay ? (pro ? '日支冲自身，' : '这天和你的本命能量相冲，') + '情绪和关系易起波动。' : ''}${ADVICE[x.ssG].h}</div>`;
-  if (x.tags.length) h += `<div>${x.tags.map((t) => `<span class="tag">${pro ? t : { 桃花: '人缘旺', 驿马: '利出行' }[t]}</span>`).join('')}</div>`;
-  h += `<div class="dos"><div><b style="color:var(--l5)">适合</b><ul>${dos.map((s) => `<li>${s}</li>`).join('')}</ul></div><div><b style="color:var(--l2)">少做</b><ul>${donts.map((s) => `<li>${s}</li>`).join('')}</ul></div></div>`;
-  h += (pro ? '<div>' : '<details><summary>为什么这么建议</summary><div style="margin-top:6px">')
-    + `<ul class="why"><li><span class="v">60</span><span class="muted">${pro ? '基础分' : '每天的起点'}</span></li>${x.why.map((w) => `<li><span class="v ${w.v > 0 ? 'p' : 'n'}">${w.v > 0 ? '+' : '−'}${Math.abs(w.v)}</span><span>${w.p}${pro ? `<span class="tech">${w.t}</span>` : ''}</span></li>`).join('')}</ul></div>${pro ? '' : '</details>'}`;
-  if (pro) h += `<details><summary>当天通用黄历宜忌（与个人无关）</summary><p><b>宜</b> ${(lun.yi || []).join(' ')}</p><p><b>忌</b> ${(lun.ji || []).join(' ')}</p></details>`;
+}, 60000);
+
+export function timelineHtml(x, isToday, fullSchedule = '') {
+  const hours = (x.hours || []).filter((u) => inDaylight(hourStart(u)));
+  if (!hours.length) return '';
+  const [best] = bestHours(x).top;
+  const mins = clockMinutes();
+  const segments = hours.map((u) => {
+    const isBest = u.i === best?.i;
+    return `<button type="button" class="hour-seg k${u.level.k}${isBest ? ' best' : ''}" data-hour="${u.i}" data-cap="${esc(hourCap(u))}" aria-pressed="false" aria-label="${hhmm(u.i)}，${isBest ? '最佳时段，' : ''}${u.level.p}"></button>`;
+  }).join('');
+  return '<section class="today-hours" aria-label="时段时间轴"><div class="hour-heading"><h2>时段</h2>'
+    + '<div class="hour-key"><span class="good">顺利</span><span class="steady">平稳</span><span class="caution">留意</span></div></div>'
+    + `<div class="hour-axis"><div class="hour-track" role="group" aria-label="选择时段">${segments}</div>`
+    + (isToday ? `<i class="hour-now" style="--now:${hourPosition(mins)}"${inDaylight(mins) ? '' : ' hidden'} aria-hidden="true"></i>` : '')
+    + '</div><div class="hour-ticks" aria-hidden="true"><span>07:00</span><span>11:00</span><span>15:00</span><span>19:00</span><span>23:00</span></div>'
+    + '<div class="hour-summary">'
+    + (best ? `<span class="hour-best">最佳时段 <b>${hhmm(best.i)}</b></span>` : '')
+    + (fullSchedule ? (best ? `<span>${HOUR_TIP[best.ss]}</span>` : '') : '<button type="button" class="more" data-today-detail>查看时段详情 <span aria-hidden="true">›</span></button>') + '</div>'
+    + '<p class="hcap" aria-live="polite"></p>' + fullSchedule + '</section>';
+}
+
+onClick('[data-hour]', (el) => {
+  const timeline = el.closest('.today-hours');
+  timeline.querySelector('[aria-pressed="true"]')?.setAttribute('aria-pressed', 'false');
+  el.setAttribute('aria-pressed', 'true');
+  timeline.querySelector('.hcap').innerHTML = el.dataset.cap;
+});
+
+function hourHighlightsHtml(x) {
+  const { top, worst, worstWhy } = bestHours(x);
+  return `<div class="slots">${top.map((t, i) => `<div class="slot"><b>${i === 0 ? '最佳时段' : '次佳时段'}</b><span class="tt">${hhmm(t.i)}</span><span>${HOUR_TIP[t.ss]}</span></div>`).join('')}`
+    + (worst && worst.level.k <= 3 ? `<div class="slot bad"><b>尽量避开</b><span class="tt">${hhmm(worst.i)}</span><span>${worstWhy}</span></div>` : '') + '</div>';
+}
+
+function hourTableHtml(x, pro) {
   const t = new Date(), isToday = t.getFullYear() === x.y && t.getMonth() + 1 === x.m && t.getDate() === x.d;
   const curIdx = Math.floor(((t.getHours() + 1) % 24) / 2);
-  h += `<section class="card"><h3>${pro ? '十二时辰' : '行动时间表'}</h3><div class="hours${pro ? '' : ' simple'}">${(x.hours || []).map((u) => {
+  return `<section class="card"><h3>${pro ? '十二时辰' : '行动时间表'}</h3><div class="hours${pro ? '' : ' simple'}">${(x.hours || []).map((u) => {
     let tip = u.night ? '休息为主' : HOUR_TIP[u.ss];
     if (!u.night && u.level.k <= 2) tip = '能量偏低，安排例行小事';
     const bad = u.why.filter((w) => w.v <= -10 && /冲/.test(w.t)).map((w) => (pro ? w.t : w.p))[0];
@@ -57,9 +112,12 @@ export function dayDetailHtml(x, chart, name, plans) {
     if (!pro) return `<div class="hr${now}"><span class="tm2">${hhmm(u.i).replace('–', '<small>至 ')}</small></span><span class="bd">${bar}<span class="tx"><em style="color:var(--l${u.level.k})">${u.level.p}</em>${THEME[u.ss][0].replace('日', '')} · ${tip}${bad ? ` <span class="muted">（${bad}）</span>` : ''}</span></span></div>`;
     return `<div class="hr${now}"><span class="tm"><b>${u.name}</b>${u.range}</span><span class="hz">${gzHtml(u.gz)}</span><span class="bd">${bar}<span class="tx"><em style="color:var(--l${u.level.k})">${u.level.n}</em>${u.ss} · ${tip}${bad ? ` <span class="muted">（${bad}）</span>` : ''}</span></span></div>`;
   }).join('')}</div></section>`;
-  return h;
+}
+
+export function openHours(x) {
+  openSheet(`${x.m}月${x.d}日 · 时段详情`, `<div class="hour-details">${hourHighlightsHtml(x)}${hourTableHtml(x, false)}</div>`);
 }
 
 export function openDay(x, chart, name, plans) {
-  openSheet(`${x.m}月${x.d}日`, dayDetailHtml(x, chart, name, plans));
+  openSheet(dayLabel(x), dayDetailHtml(x, chart, name, plans));
 }

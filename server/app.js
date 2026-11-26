@@ -285,10 +285,14 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   const moodKit = () => ({ max: MK.max_per_day, noteMax: MK.note_max, eventColor: MK.event_color, moods: MK.moods.map(({ key, word, char, color, score }) => ({ key, word, char, color, score })), colors: MK.colors.map(({ key, name, light, dark }) => ({ key, name, light, dark })) });
   const moodOut = (r) => ({ id: r.id, day: r.day, mood: r.mood, color: r.color, note: r.note, createdAt: r.created_at });
   const moodsOn = (u, day) => db.all('SELECT * FROM moods WHERE user_id = ? AND day = ? ORDER BY id', u.id, day).map(moodOut);
-  // 给一周的每一天带上那天贴的心情
-  function withMoods(u, strip) {
+  // 按日期读取个人的心情和待办
+  function withRecords(u, strip) {
     const rows = db.all('SELECT * FROM moods WHERE user_id = ? AND day >= ? AND day <= ? ORDER BY id', u.id, strip.days[0].date, strip.days[6].date).map(moodOut);
-    for (const x of strip.days) x.moods = rows.filter((r) => r.day === x.date);
+    const todos = db.all('SELECT id, day, text, done FROM todos WHERE user_id = ? AND day BETWEEN ? AND ? ORDER BY id', u.id, strip.start, strip.days[6].date);
+    for (const day of strip.days) {
+      day.moods = rows.filter((r) => r.day === day.date);
+      day.todos = todos.filter((r) => r.day === day.date);
+    }
     return strip;
   }
   function syncMoodRating(u, day) {
@@ -470,7 +474,8 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     for (let k = 0; k < 7; k++) {
       const dt = new Date(Date.UTC(y, m - 1, d - dow + k)), [a, b, e] = [dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate()];
       const x = dayOut(c, a, b, e, true);
-      days.push({ date: ymd(dt), day: x, line: C.dailyLine(c, x), almanac: almanac(a, b, e), luck: C.outfit(c, x).colors });
+      const { colors, accessory } = C.outfit(c, x);
+      days.push({ date: ymd(dt), day: x, line: C.dailyLine(c, x), almanac: almanac(a, b, e), luck: colors, accessory });
     }
     return { start: days[0].date, days };
   }
@@ -773,7 +778,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     t.jiazi = jiazi;
     t.prev = prev;
     t.luck = { unused: unusedDeeds(u), per: C.luck.deeds.per_amulet, energy: energyHave(u), energyPer: C.luck.energy.per_amulet_minutes };
-    withMoods(u, t.strip);
+    withRecords(u, t.strip);
     t.news = newsFor(u);
     return t;
   });
@@ -783,11 +788,11 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
     const a = access(u);
     if (a.mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: a, ...priceInfo() });
-    return withMoods(u, weekStrip(chart(birthOf(u), xiOf(u), engineVer()), stripDay(q)));
+    return withRecords(u, weekStrip(chart(birthOf(u), xiOf(u), engineVer()), stripDay(q)));
   });
   route('GET', '/api/demo/week', async ({ q }) => weekStrip(chart(DEMO_BIRTH, null, engineVer()), stripDay(q)));
   route('GET', '/api/demo/today', async ({ q }) => {
-    return todayFor(DEMO_BIRTH, null, validDay(q.get('date')), { name: DEMO_NAME, demo: true, plans: [], draw: null });
+    return todayFor(DEMO_BIRTH, null, validDay(q.get('date')), { name: DEMO_NAME, demo: true, moodKit: moodKit(), plans: [], draw: null });
   });
   // ----- 每日一签：默念所求 → 摇签（先只知道签号）→ 掷筊向神明确认 → 解签 -----
   // status：pending 摇出了签、还没掷出圣杯；done 圣杯，签文可以看；
@@ -1149,6 +1154,12 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       list: db.all('SELECT * FROM amulets WHERE user_id = ? ORDER BY id DESC', u.id).map(amuletOut),
     };
   });
+  route('GET', '/api/amulets/:id', async ({ req, params }) => {
+    const u = requireUser(req);
+    const row = db.get('SELECT * FROM amulets WHERE id = ? AND user_id = ?', Number(params.id), u.id);
+    if (!row) throw new HttpError(404, '没有找到这枚御守');
+    return { amulet: amuletOut(row) };
+  });
   const luckGate = (u) => {
     if (!u.birth_date) throw new HttpError(409, '请先填写出生信息', { error: 'need_birth' });
     if (access(u).mode === 'blocked') throw new HttpError(402, '免费体验已用完', { error: 'paywall', access: access(u), ...priceInfo() });
@@ -1175,25 +1186,28 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   });
   // 做好事：记一件善行；攒够 per_amulet 件换一枚善缘款
   const LK = C.luck;
-  const deedOut = (r) => ({ id: r.id, day: r.day, text: r.text, used: !!r.amulet_id, createdAt: r.created_at });
+  const deedOut = (r) => ({ id: r.id, day: r.day, text: r.text, used: !!r.amulet_id, amuletId: r.amulet_id, wish: r.wish, createdAt: r.created_at });
   const unusedDeeds = (u) => db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ? AND amulet_id IS NULL', u.id).n;
   function deedInfo(u) {
     return {
-      per: LK.deeds.per_amulet, dailyMax: LK.deeds.daily_max, maxLen: LK.deeds.max_len, examples: LK.deeds.examples,
+      poolRewards: [], // Older clients read this field after saving a deed.
+      batchStart: db.get('SELECT MIN(id) id FROM deeds WHERE user_id = ? AND amulet_id IS NULL', u.id).id,
+      per: LK.deeds.per_amulet, maxLen: LK.deeds.max_len, examples: LK.deeds.examples,
       unused: unusedDeeds(u), today: db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ? AND day = ?', u.id, bjDay()).n,
       total: db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ?', u.id).n,
-      list: db.all('SELECT * FROM deeds WHERE user_id = ? ORDER BY id DESC LIMIT 30', u.id).map(deedOut),
+      list: db.all('SELECT d.*, a.wish FROM deeds d LEFT JOIN amulets a ON a.id = d.amulet_id AND a.user_id = d.user_id WHERE d.user_id = ? ORDER BY d.id DESC LIMIT 30', u.id).map(deedOut),
     };
   }
   // 能量：练习累计的分钟数减去已经换掉的（换的时候记在那枚御守的 minutes 上）
   const energyHave = (u) => db.get('SELECT COALESCE(SUM(minutes), 0) n FROM practices WHERE user_id = ?', u.id).n
     - db.get("SELECT COALESCE(SUM(minutes), 0) n FROM amulets WHERE user_id = ? AND way = 'energy'", u.id).n;
+  const lastEnergyId = u => db.get("SELECT COALESCE(MAX(id), 0) id FROM amulets WHERE user_id = ? AND way = 'energy'", u.id).id;
   function practiceInfo(u) {
     const since = new Date(Date.now() - 7 * DAY_MS).toISOString();
     const n = (kind, from) => db.get('SELECT COUNT(*) n FROM practices WHERE user_id = ? AND kind = ? AND created_at >= ?', u.id, kind, from).n;
     return {
       week: { meditate: n('meditate', since), release: n('release', since) }, total: { meditate: n('meditate', ''), release: n('release', '') },
-      have: energyHave(u), per: LK.energy.per_amulet_minutes, releaseMinutes: LK.energy.release_minutes,
+      have: energyHave(u), lastExchange: lastEnergyId(u), per: LK.energy.per_amulet_minutes, releaseMinutes: LK.energy.release_minutes,
     };
   }
   route('GET', '/api/luck', async ({ req }) => {
@@ -1215,10 +1229,19 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     luckGate(u);
     const text = str(body.text, LK.deeds.max_len, '这件好事');
     if (text.length < 2) throw bad('写一句做了什么好事');
-    const day = bjDay();
-    if (db.get('SELECT COUNT(*) n FROM deeds WHERE user_id = ? AND day = ?', u.id, day).n >= LK.deeds.daily_max) throw new HttpError(409, `一天最多记 ${LK.deeds.daily_max} 件，明天再来`);
-    db.run('INSERT INTO deeds(user_id, day, text, created_at) VALUES(?,?,?,?)', u.id, day, text, nowIso());
+    if (body.dropKey !== undefined) throw new HttpError(409, '善行已改为集满五件兑换，请刷新页面后记录');
+    const key = body.recordKey;
+    if (key !== undefined && (typeof key !== 'string' || !/^[a-zA-Z0-9-]{16,64}$/.test(key))) throw bad('记录凭证无效');
+    db.tx(() => {
+      const previous = key && db.get('SELECT text FROM deeds WHERE user_id = ? AND record_key = ?', u.id, key);
+      if (previous) {
+        if (previous.text !== text) throw bad('这一笔记录已使用');
+        return;
+      }
+      db.run('INSERT INTO deeds(user_id, day, text, created_at, record_key) VALUES(?,?,?,?,?)', u.id, bjDay(), text, nowIso(), key ?? null);
+    });
     return { deeds: deedInfo(u) };
+
   });
   route('DELETE', '/api/deeds/:id', async ({ req, params }) => {
     const u = requireUser(req);
@@ -1235,22 +1258,33 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (body.by === 'energy') {
       const need = LK.energy.per_amulet_minutes;
       const eid = db.tx(() => {
+        const key = body.lastExchange == null ? null : 'energy-exchange:' + body.lastExchange;
+        if (key && body.lastExchange !== lastEnergyId(u)) {
+          const prior = db.get('SELECT id, wish FROM amulets WHERE user_id = ? AND drop_key = ?', u.id, key);
+          if (prior?.wish === wish.name) return prior.id;
+          throw new HttpError(409, '静心进度已更新，请刷新后再兑换');
+        }
         const have = energyHave(u);
         if (have < need) throw new HttpError(409, `还差 ${need - have} 分钟`);
-        return Number(db.run('INSERT INTO amulets(user_id, month, wish, way, minutes, style, look, created_at) VALUES(?,?,?,?,?,?,?,?)',
-          u.id, info.month, wish.name, 'energy', need, 'energy', JSON.stringify(lookOf('energy', info)), nowIso()).lastInsertRowid);
+        return Number(db.run('INSERT INTO amulets(user_id, month, wish, way, minutes, style, look, created_at, drop_key) VALUES(?,?,?,?,?,?,?,?,?)',
+          u.id, info.month, wish.name, 'energy', need, 'energy', JSON.stringify(lookOf('energy', info)), nowIso(), key).lastInsertRowid);
       });
-      return { amulet: amuletOut(db.get('SELECT * FROM amulets WHERE id = ?', eid)), practice: practiceInfo(u) };
+      return { amulet: amuletOut(db.get('SELECT * FROM amulets WHERE id = ?', eid)), practice: practiceInfo(u), amuletCount: db.get('SELECT COUNT(*) n FROM amulets WHERE user_id = ?', u.id).n };
     }
     const id = db.tx(() => {
       const ids = db.all('SELECT id FROM deeds WHERE user_id = ? AND amulet_id IS NULL ORDER BY id LIMIT ?', u.id, per).map((r) => r.id);
+      if (body.batchStart != null && body.batchStart !== ids[0]) {
+        const prior = db.get('SELECT a.id, a.wish FROM deeds d JOIN amulets a ON a.id=d.amulet_id AND a.user_id=d.user_id WHERE d.id=? AND d.user_id=?', body.batchStart, u.id);
+        if (prior && prior.wish === wish.name) return prior.id;
+        throw new HttpError(409, '善行进度已更新，请刷新后再兑换');
+      }
       if (ids.length < per) throw new HttpError(409, `还差 ${per - ids.length} 件善行`);
       const aid = Number(db.run('INSERT INTO amulets(user_id, month, wish, way, minutes, style, look, created_at) VALUES(?,?,?,?,?,?,?,?)',
         u.id, info.month, wish.name, 'deed', 0, 'deed', JSON.stringify(lookOf('deed', info)), nowIso()).lastInsertRowid);
       db.run(`UPDATE deeds SET amulet_id = ? WHERE id IN (${ids.map(() => '?').join(',')})`, aid, ...ids);
       return aid;
     });
-    return { amulet: amuletOut(db.get('SELECT * FROM amulets WHERE id = ?', id)), deeds: deedInfo(u) };
+    return { amulet: amuletOut(db.get('SELECT * FROM amulets WHERE id = ?', id)), deeds: deedInfo(u), amuletCount: db.get('SELECT COUNT(*) n FROM amulets WHERE user_id = ?', u.id).n };
   });
   // 提能量：冥想、释放练习，只记一次练习
   route('POST', '/api/practices', async ({ req, body }) => {
@@ -1258,7 +1292,6 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     luckGate(u);
     const kind = body.kind;
     if (!['meditate', 'release'].includes(kind)) throw bad('练习类型不对');
-    if (!limit('practice:' + u.id, 40, DAY_MS)) throw new HttpError(429, '今天练得够多了，休息一下');
     let minutes = 0, detail = {};
     if (kind === 'meditate') {
       minutes = parseInt(body.minutes, 10);
@@ -1269,8 +1302,23 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       detail = { before: sc(body.before), after: sc(body.after), rounds: Math.min(LK.release.max_rounds, Math.max(1, parseInt(body.rounds, 10) || 1)) };
       minutes = LK.energy.release_minutes;
     }
-    db.run('INSERT INTO practices(user_id, kind, minutes, detail, created_at) VALUES(?,?,?,?,?)', u.id, kind, minutes, JSON.stringify(detail), nowIso());
-    return { practice: practiceInfo(u) };
+    const key = body.recordKey ?? body.dropKey;
+    if (key !== undefined && (typeof key !== 'string' || !/^[a-zA-Z0-9-]{16,64}$/.test(key))) throw bad('练习凭证无效');
+    const details = JSON.stringify(detail);
+    db.tx(() => {
+      if (key) {
+        const previous = db.get('SELECT kind, minutes, detail FROM practices WHERE user_id = ? AND record_key = ?', u.id, key);
+        if (previous) {
+          if (previous.kind !== kind || previous.minutes !== minutes || previous.detail !== details) throw bad('这次练习已记录');
+          return;
+        }
+        if (body.dropKey && db.get("SELECT id FROM amulets WHERE user_id = ? AND way = 'energy' AND drop_key = ?", u.id, key)) return;
+      }
+      if (!limit('practice:' + u.id, 40, DAY_MS)) throw new HttpError(429, '今天练得够多了，休息一下');
+      db.run('INSERT INTO practices(user_id, kind, minutes, detail, created_at, record_key) VALUES(?,?,?,?,?,?)', u.id, kind, minutes, details, nowIso(), key ?? null);
+    });
+    return { practice: practiceInfo(u), minutes };
+
   });
 
   // 每晚自评：今天或昨天，1–5 分；同时记下系统当天的判断，用来对照
@@ -1286,6 +1334,31 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     db.run(`INSERT INTO ratings(user_id, day, score, sys_score, sys_level, note, created_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id, day) DO UPDATE SET score = excluded.score${'note' in body ? ', note = excluded.note' : ''}, created_at = excluded.created_at`,
       u.id, day, score, x.score, x.level.k, note, nowIso());
     return { summary: rateMonth(u, day) };
+  });
+
+  route('POST', '/api/todos', async ({ req, body }) => {
+    const u = requireUser(req), day = body.day, key = body.key;
+    const date = new Date(day + 'T12:00:00Z');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || isNaN(date) || ymd(date) !== day) throw bad('日期不对');
+    const text = str(body.text, 120, '待办');
+    if (!text || typeof body.text !== 'string') throw bad('写下要做的事');
+    if (typeof key !== 'string' || !/^[a-z0-9-]{8,64}$/i.test(key)) throw bad('待办编号无效');
+    db.run('INSERT INTO todos(user_id, day, text, request_key) VALUES(?,?,?,?) ON CONFLICT(user_id,request_key) DO NOTHING', u.id, day, text, key);
+    const todo = db.get('SELECT id, day, text, done FROM todos WHERE user_id = ? AND request_key = ?', u.id, key);
+    if (todo.day !== day || todo.text !== text) throw new HttpError(409, '这条待办已保存');
+    return { todo };
+  });
+  route('PUT', '/api/todos/:id', async ({ req, params, body }) => {
+    const u = requireUser(req);
+    if (typeof body.done !== 'boolean') throw bad('完成状态无效');
+    const todo = db.get('UPDATE todos SET done = ? WHERE id = ? AND user_id = ? RETURNING id, day, text, done', Number(body.done), Number(params.id), u.id);
+    if (!todo) throw new HttpError(404, '找不到这条待办');
+    return { todo };
+  });
+  route('DELETE', '/api/todos/:id', async ({ req, params }) => {
+    const u = requireUser(req);
+    db.run('DELETE FROM todos WHERE id = ? AND user_id = ?', Number(params.id), u.id);
+    return { ok: true };
   });
 
   // 今天的记录：可以只记心情、只记事情，或者都记（今天或前后两天内，按用户本地日期）；撕掉一条

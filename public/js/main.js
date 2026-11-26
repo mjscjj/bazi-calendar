@@ -23,12 +23,13 @@ const PAGES = {
   '/profile': pageProfile, '/member': pageMember, '/feedback': pageFeedback, '/about': pageAbout,
   '/invite': pageInvite, '/ics': pageIcs, '/ask': pageAsk, '/ask/result': pageAskResult, '/asks': pageAsks, '/wish': pageWish, '/luck': pageLuck, '/amulets': pageAmulets, '/lots': pageLots, '/jiazi': pageJiazi, '/recap': pageRecap,
 };
-const TABS = [['/', '今天', 'sun'], ['/calendar', '日历', 'cal'], ['/me', '我的', 'me']];
-const NEED_LOGIN = ['/me', '/energy', '/welcome', '/profile', '/member', '/feedback', '/invite', '/ics', '/ask', '/ask/result', '/asks', '/wish', '/luck', '/amulets', '/lots', '/jiazi', '/recap'];
+const TABS = [['/', '今天', 'sun'], ['/calendar', '日历', 'cal'], ['/luck', '转运', 'luck'], ['/me', '我的', 'me']];
+const NEED_LOGIN = ['/me', '/energy', '/welcome', '/profile', '/member', '/feedback', '/invite', '/ics', '/ask', '/ask/result', '/asks', '/amulets', '/lots', '/jiazi', '/recap'];
 const GUEST_ONLY = ['/login', '/register', '/forgot', '/start'];
 const ICON = {
   sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>',
   cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>',
+  luck: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6V5a3 3 0 0 1 6 0v1M8 6h8l3 4v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9z"/><path d="m12 10 3 3-3 3-3-3z"/></svg>',
   me: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20.5c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg>',
   dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
   light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>',
@@ -41,8 +42,13 @@ export function route() {
 }
 const go = (p) => { if (location.hash === '#' + p) renderPage(); else location.hash = '#' + p; };
 
+function activeTab(path) {
+  return ['/amulets', '/wish'].includes(path) ? '/luck' : path;
+}
+
 function renderTop(r) {
-  const tab = TABS.find((t) => t[0] === r.path) ? r.path : (['/energy', '/profile', '/member', '/feedback', '/about', '/card', '/invite', '/ics', '/asks', '/ask', '/ask/result', '/wish', '/luck', '/amulets', '/lots', '/jiazi', '/recap'].includes(r.path) && S.me ? '/me' : '');
+  let tab = activeTab(r.path);
+  if (S.me && ['/energy', '/profile', '/member', '/feedback', '/about', '/card', '/invite', '/ics', '/asks', '/ask', '/ask/result', '/lots', '/jiazi', '/recap'].includes(r.path)) tab = '/me';
   let h = '<button class="brand" type="button" data-go="/" aria-label="流日历首页"><span class="mk">流</span><b>流日历</b></button>'
     + `<nav class="topnav" aria-label="主导航">${TABS.map(([p, label]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${label}${p === '/me' && S.unread ? '<i class="badge"></i>' : ''}</a>`).join('')}</nav><div class="sp-r">`
     + `<button type="button" class="themebtn" data-theme-toggle aria-label="${isDarkNow() ? '切换到白色' : '切换到深色'}" title="${isDarkNow() ? '切换到白色' : '切换到深色'}">${isDarkNow() ? ICON.light : ICON.dark}</button>`;
@@ -54,16 +60,18 @@ function renderTop(r) {
     else if (a.mode === 'blocked') { cls = 'blocked'; st = '开通会员'; }
     if (st) h += `<button type="button" class="status ${cls}" data-go="/member">${st}</button>`;
   } else if (!['/login', '/register'].includes(r.path)) {
-    h += '<a class="btn sm ghost" href="#/login">登录</a>';
+    const from = r.path === '/luck' ? '?from=luck' + (r.q.get('tab') === 'energy' ? '&amp;tab=energy' : '') : '';
+    h += `<a class="btn sm ghost" href="#/login${from}">登录</a>`;
   }
   $('#top').innerHTML = h + '</div>';
 }
 function renderTabbar(r) {
-  const show = TABS.some((t) => t[0] === r.path);
+  const tab = activeTab(r.path);
+  const show = TABS.some((t) => t[0] === tab);
   document.body.classList.toggle('has-tabs', show);
   $('#tabbar').hidden = !show;
   if (!show) return;
-  $('#tabbar').innerHTML = TABS.map(([p, label, ic]) => `<a href="#${p}" class="${r.path === p ? 'on' : ''}" aria-current="${r.path === p ? 'page' : 'false'}">${ICON[ic]}<span>${label}</span>${p === '/me' && S.unread ? '<i class="badge"></i>' : ''}</a>`).join('');
+  $('#tabbar').innerHTML = TABS.map(([p, label, ic]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${ICON[ic]}<span>${label}</span>${p === '/me' && S.unread ? '<i class="badge"></i>' : ''}</a>`).join('');
 }
 
 export function renderPage() {

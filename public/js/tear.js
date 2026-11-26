@@ -1,5 +1,6 @@
 // 撕日历：每天第一次打开，屏幕上还挂着昨天那一页老黄历；往下一拉（或点「撕掉昨天」），
 // 「刺啦」一声撕下来，露出今天这一页和今天的画，再回到今天页。注册当天没有「昨天」，不出现。
+import { pillarArtSrc } from './data.js';
 import { $, esc, localToday, ymd, seen, mark, track } from './core.js';
 import { S } from './state.js';
 
@@ -52,7 +53,7 @@ export function showTear(d, art, done) {
   el.className = 'tear'; el.id = 'tear';
   el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', '撕下昨天的日历');
   el.innerHTML = '<div class="tpad"><div class="trings" aria-hidden="true"><i></i><i></i></div>'
-    + `<div class="tunder">${pageHtml(today, 'tpage')}${art ? `<img class="tart" src="${esc(art.art)}" alt="">` : ''}</div>`
+    + `<div class="tunder">${pageHtml(today, 'tpage')}${art ? `<img class="tart" src="${esc(pillarArtSrc(art.art))}" alt="">` : ''}</div>`
     + `${pageHtml(d.prev, 'tpage tleaf')}</div>`
     + '<p class="ttip">往下拉，撕掉昨天</p><button type="button" class="btn ghost tgo">撕掉昨天</button>';
   document.body.appendChild(el);

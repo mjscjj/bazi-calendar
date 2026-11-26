@@ -1,5 +1,6 @@
 // 月度回顾：这个月打开了几天、收了哪些画、记了什么心情、最顺的一天、最好的一支签、做了几件好事，可以生成一张分享图。
 // 每月 1–7 号默认看上个月，之后看这个月（到今天为止）；可以往前翻到注册那个月。
+import { pillarArtSrc } from './data.js';
 import { $, esc, api, onClick, currentPath, isDarkNow, track, localToday } from './core.js';
 import { S } from './state.js';
 import { footHtml } from './today.js';
@@ -27,10 +28,10 @@ export function pageRecap() {
     const nav = `<div class="rcnav">${prev >= first ? `<a href="#/recap?month=${prev}">‹ ${monthCn(+prev.slice(5))}</a>` : '<span></span>'}`
       + `${next <= cur ? `<a href="#/recap?month=${next}">${monthCn(+next.slice(5))} ›</a>` : '<span></span>'}</div>`;
     const me = d.card && d.card.pillar;
-    const hero = `<section class="rchero">${me ? `<img src="${esc(me.art)}" alt="">` : ''}<div><small>${d.y} · ${d.inProgress ? '到今天为止' : '整月'}</small>`
+    const hero = `<section class="rchero">${me ? `<img src="${esc(pillarArtSrc(me.art))}" alt="">` : ''}<div><small>${d.y} · ${d.inProgress ? '到今天为止' : '整月'}</small>`
       + `<b>${esc(d.name || '你')}的${monthCn(d.m)}</b><span>${d.opened ? `这个月打开了 ${d.opened} 天` : '这个月还没打开过'}</span></div></section>`;
     const wall = d.arts.length
-      ? `<div class="rcwall">${d.arts.map((a) => `<figure><img src="${esc(a.art)}" alt="" loading="lazy"><figcaption>${esc(a.gz)}</figcaption></figure>`).join('')}</div>`
+      ? `<div class="rcwall">${d.arts.map((a) => `<figure><img src="${esc(pillarArtSrc(a.art))}" alt="" loading="lazy"><figcaption>${esc(a.gz)}</figcaption></figure>`).join('')}</div>`
       : '<p class="note" style="margin:0">这个月还没收到画。每天打开流日历，就收下当天的那张。</p>';
     const moods = d.moods.length
       ? `<div class="rcmoods">${d.moods.map((m) => `<span><i style="background:${dark ? m.dark : m.light}">${esc(m.char)}</i>${esc(m.word)} <b>× ${m.n}</b></span>`).join('')}</div>`

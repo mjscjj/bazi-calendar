@@ -2,7 +2,7 @@
 // 另有「今日锁屏」：按手机屏幕比例（1170×2532），上面留给锁屏时钟，下面是今天的画和你的主题。
 // 跟随当前的白色 / 深色主题，预览时也能手动换；登录用户的二维码都带着自己的邀请码。
 import { $, esc, openSheet, onClick, toast, track, IS_MOBILE, IS_WECHAT, isDarkNow } from './core.js';
-import { THEME, hhmm, hhShort, bestHours, HOUR_TIP } from './data.js';
+import { pillarArtSrc, THEME, hhmm, hhShort, bestHours, HOUR_TIP } from './data.js';
 import { S } from './state.js';
 
 const W = 1080, H = 1920;
@@ -83,13 +83,6 @@ const DRAW = {
       ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 48; ctx.shadowOffsetY = 14;
       roundRect(ctx, x, y, s, s, 36); ctx.fillStyle = '#F6F1E7'; ctx.fill(); ctx.restore();
       ctx.save(); roundRect(ctx, x, y, s, s, 36); ctx.clip(); ctx.drawImage(img, x, y, s, s); ctx.restore();
-      // 右下角的朱砂印：日柱两个字竖排
-      const ss = 66;
-      ctx.save(); ctx.translate(x + s - ss / 2 - 34, y + s - ss / 2 - 30); ctx.rotate(-0.1);
-      ctx.fillStyle = '#C2412D'; roundRect(ctx, -ss / 2, -ss / 2, ss, ss, 10); ctx.fill();
-      text(ctx, c.pillar.gz[0], 0, -5, { size: 27, font: SERIF, weight: 900, color: '#FFF4EC' });
-      text(ctx, c.pillar.gz[1], 0, 25, { size: 27, font: SERIF, weight: 900, color: '#FFF4EC' });
-      ctx.restore();
       text(ctx, `${c.pillar.gz} · ${c.pillar.name}`, W / 2, 950, { size: 72, font: SERIF, weight: 900 });
       text(ctx, `${c.dm}${c.element} · ${c.image}型`, W / 2, 1022, { size: 42, color: glowText() });
     } else {
@@ -142,14 +135,15 @@ const DRAW = {
     text(ctx, `今天的关键词 · ${d.keyword}`, W / 2, 1520, { size: 46, weight: 700, color: glowText() });
   },
   outfit(ctx, o) {
-    text(ctx, '今日幸运色', W / 2, 260, { size: 72, font: SERIF, weight: 900 });
+    text(ctx, '今日幸运指南', W / 2, 260, { size: 72, font: SERIF, weight: 900 });
+    text(ctx, '幸运色', W / 2, 380, { size: 42, color: P.muted });
     o.colors.forEach((c, i) => {
       const cx = W / 2 + (i ? 210 : -210);
       bead(ctx, c.hex, cx, 640, 190);
       ctx.strokeStyle = P.ring; ctx.lineWidth = 4; ctx.stroke();
       text(ctx, c.name, cx, 900, { size: 56, weight: 700 });
     });
-    text(ctx, `配饰 · ${o.accessory}`, W / 2, 1060, { size: 52, weight: 600, color: glowText() });
+    text(ctx, `幸运配饰 · ${o.accessory}`, W / 2, 1060, { size: 52, weight: 600, color: glowText() });
     wrap(ctx, o.text, W / 2, 1200, 860, 68, 4, { size: 44, color: P.muted });
   },
   invite(ctx, d) { DRAW.card(ctx, { ...d, invite: d.days || 7 }); },
@@ -246,13 +240,45 @@ const DRAW = {
     if (top[0]) text(ctx, `最好的时段 ${hhmm(top[0].i)}`, cw / 2, ay + s + 330, { size: 46, weight: 600, color: glowText() });
     text(ctx, '流日历', cw / 2, ch - 170, { size: 34, font: SERIF, color: P.muted });
   },
-  amulet(ctx, { img, a }) {
-    text(ctx, `${a.look.monthCn} · ${a.wish}`, W / 2, 250, { size: 44, color: P.muted });
-    text(ctx, '我的御守', W / 2, 360, { size: 80, font: SERIF, weight: 900 });
-    ctx.save(); ctx.shadowColor = a.look.colors[0]; ctx.shadowBlur = 80;
-    ctx.drawImage(img, W / 2 - 280, 450, 560, 840); ctx.restore();
-    text(ctx, `静坐 ${a.minutes} 分钟，许了一个心愿`, W / 2, 1430, { size: 42, color: P.muted });
-    text(ctx, a.style === 'term' ? `${a.look.term} · 节气款` : a.style === 'birthday' ? '生日月 · 特别款' : `幸运色 · ${a.look.element}`, W / 2, 1510, { size: 40, weight: 600, color: glowText() });
+  amulet(ctx, { img, a, art, message, recipient }) {
+    const night = mode === 'dark';
+    const inks = {travel:'#31506c',dawn:'#9a4a26',laurel:'#326349',sakura:'#9e4970',cat:'#995720',crane:'#38716a',home:'#7f5a27',moon:'#65538d',falcon:'#325592','pool-dew':'#24645a','pool-koi':'#82532d','pool-lotus':'#70516c'};
+    const ink = night ? '#eddcb9' : inks[art?.photo] || '#805434';
+    const paper = night ? '#302c38' : '#fbf3df';
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, 1350);
+    // Two-color letterpress border of the keepsake card.
+    ctx.save(); ctx.strokeStyle = ink; ctx.lineWidth = 7;
+    ctx.setLineDash([24, 14]); ctx.strokeRect(27, 27, W-54, 1296); ctx.restore();
+    text(ctx, recipient ? '送给 ' + recipient : '送你一枚好运', 86, 133, { size:44, weight:600, align:'left', color:ink });
+    ctx.save(); ctx.translate(W-147,155); ctx.rotate(.13); ctx.strokeStyle=ink;ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(0,0,73,0,Math.PI*2);ctx.stroke();
+    text(ctx,'OMAMORI',0,-9,{size:20,font:'Georgia,serif',color:ink});
+    text(ctx,a.way === 'energy' ? '静心' : (a.way === 'pool' ? '限定' : a.way === 'deed' ? '善意' : '祝福'),0,35,{size:33,font:SERIF,color:ink});ctx.restore();
+    const scale = Math.min(640 / img.naturalWidth, 635 / img.naturalHeight);
+    const w = img.naturalWidth * scale, h = img.naturalHeight * scale;
+    ctx.save();ctx.translate(W/2,557);ctx.rotate(-.065);
+    ctx.shadowColor='rgba(70,44,22,.23)';ctx.shadowBlur=18;ctx.shadowOffsetY=13;
+    ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore();
+    for (const [x,y,r] of [[220,420,16],[818,620,17],[780,660,9],[256,704,9]]) {
+      ctx.save();ctx.translate(x,y);ctx.fillStyle=night?'#c29b67':'#be9352';ctx.beginPath();
+      ctx.moveTo(0,-r);ctx.quadraticCurveTo(2,-2,r,0);ctx.quadraticCurveTo(2,2,0,r);
+      ctx.quadraticCurveTo(-2,2,-r,0);ctx.quadraticCurveTo(-2,-2,0,-r);ctx.fill();ctx.restore();
+    }
+    text(ctx,art?.title || a.wish+'御守',W/2,975,{size:79,font:SERIF,weight:600,color:ink});
+    text(ctx,art?.en || 'Omamori',W/2,1037,{size:41,font:'Georgia,serif',color:ink});
+    wrap(ctx,message,W/2,1140,W-176,55,3,{size:40,color:night?'#f9efdf':'#413a33'});
+  },
+  amuletWall(ctx, { img, landscape, art, a }) {
+    const w = ctx.canvas.width, h = ctx.canvas.height;
+    if (landscape) {
+      const scale = Math.max(w/img.naturalWidth,h/img.naturalHeight);
+      ctx.drawImage(img,(w-img.naturalWidth*scale)/2,(h-img.naturalHeight*scale)/2,img.naturalWidth*scale,img.naturalHeight*scale);
+      return;
+    }
+    ctx.fillStyle = art ? '#eee0cf' : a.look.colors[1]; ctx.fillRect(0,0,w,h);
+    const scale = Math.min(w*.78/img.naturalWidth, h*.50/img.naturalHeight);
+    const iw = img.naturalWidth*scale, ih = img.naturalHeight*scale;
+    ctx.drawImage(img,(w-iw)/2,h*.59-ih/2,iw,ih);
   },
 };
 
@@ -326,27 +352,37 @@ function todayWithArt(ctx, t, art) {
 function render(kind, data, theme) {
   mode = theme; P = THEMES[theme];
   const cv = document.createElement('canvas');
-  const wall = kind === 'wall';
+  const wall = kind === 'wall' || kind === 'amuletWall';
   cv.width = wall ? 1170 : W; cv.height = wall ? 2532 : H;
+  if (kind === 'amulet') cv.height = 1350;
   const ctx = cv.getContext('2d');
-  if (wall) { DRAW.wall(ctx, data); return cv; }
+  if (kind === 'amulet') {
+    ctx.fillStyle = theme === 'light' ? '#f6f1e8' : '#252525';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    DRAW.amulet(ctx, data);
+    return cv;
+  }
+  if (wall) { DRAW[kind](ctx, data); return cv; }
   base(ctx); DRAW[kind](ctx, data); footer(ctx, kind);
   return cv;
 }
 
-const NAMES = { gua: '卦签', card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日幸运色', invite: '邀请海报', amulet: '御守', wall: '今日锁屏', recap: '月度回顾', term: '节气海报' };
-const SLUG = { gua: 'gua', card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'amulet', wall: 'wallpaper', recap: 'recap', term: 'solar-term' };
+const NAMES = { gua: '卦签', card: '能量卡', today: '我的今天', lot: '今日一签', outfit: '今日幸运指南', invite: '邀请海报', amulet: '御守祝福卡', amuletWall: '御守锁屏壁纸', wall: '今日锁屏', recap: '月度回顾', term: '节气海报' };
+const SLUG = { gua: 'gua', card: 'card', today: 'today', lot: 'lot', outfit: 'outfit', invite: 'invite', amulet: 'omu-blessing', amuletWall: 'omu-wallpaper', wall: 'wallpaper', recap: 'recap', term: 'solar-term' };
 // 分享图用 JPG：手机相册、微信都当照片处理（PNG 动辄两三兆，常被当成一个文件）
 const jpg = (cv) => cv.toDataURL('image/jpeg', 0.92);
 // 网页没法直接写进相册：手机上最可靠的是长按图片「保存图片 / 添加到照片」，所以放在最前面说；
 // 「发给朋友」只传图片本身，电脑上给一个下载
 function pvHtml(url, kind, theme, data) {
   const tip = IS_WECHAT ? '长按图片，选「保存图片」存进相册，或直接「发送给朋友」' : '长按图片，就能保存到相册';
-  return `<div class="sharepv"><span class="segs pvtheme" role="group" aria-label="图片颜色">${[['light', '白色'], ['dark', '深色']].map(([k, l]) => `<button type="button" data-share-theme="${k}" aria-pressed="${k === theme}">${l}</button>`).join('')}</span>`
+  if (kind === 'amulet') {
+    return `<div class="sharepv gift-editor"><img class="gift-preview" src="${url}" alt="御守祝福明信片"><form class="charm-msg"><label for="gift-to">送给谁</label><input id="gift-to" name="recipient" maxlength="14" placeholder="朋友的名字或昵称（选填）" value="${esc(data.recipient || '')}"><label for="charm-message">想对对方说</label><textarea id="charm-message" name="note" maxlength="48" rows="2" required>${esc(data.message)}</textarea><div class="gift-paper" role="group" aria-label="信纸颜色">${[['light','奶油信纸'],['dark','午夜信纸']].map(([k,label]) => `<button type="button" data-gift-paper="${k}" aria-pressed="${k===theme}">${label}</button>`).join('')}</div></form><div class="gift-send">${navigator.share && !IS_WECHAT ? '<button class="btn primary" data-share-go>送给朋友</button>' : ''}<a class="btn ghost" href="${url}" download="omamori-blessing.jpg" data-share-save>保存祝福卡</a></div>${IS_MOBILE ? '<p class="savetip">也可以长按明信片，保存或转发。</p>' : ''}</div>`;
+  }
+  return '<div class="sharepv">'  + (kind === 'amuletWall' ? '' : `<span class="segs pvtheme" role="group" aria-label="图片颜色">${[['light', '白色'], ['dark', '深色']].map(([k, l]) => `<button type="button" data-share-theme="${k}" aria-pressed="${k === theme}">${l}</button>`).join('')}</span>`)
     + (kind === 'gua' ? `<span class="segs pvtheme" role="group" aria-label="问的事">${[['0', '不带问题'], ['1', '带上问的事']].map(([k, l]) => `<button type="button" data-share-q="${k}" aria-pressed="${!!(data && data.withQ) === (k === '1')}">${l}</button>`).join('')}</span>` : '')
     + `<img src="${url}" alt="${esc(NAMES[kind])}分享图">`
     + (IS_MOBILE
-      ? `<p class="savetip">${tip}${kind === 'wall' ? '，再在手机设置里设为锁屏' : ''}</p>${!IS_WECHAT && navigator.share ? '<button type="button" class="btn ghost block" data-share-go>发给朋友</button>' : ''}`
+      ? `<p class="savetip">${tip}${kind === 'wall' || kind === 'amuletWall' ? '，再在手机设置里设为锁屏' : ''}</p>${!IS_WECHAT && navigator.share ? '<button type="button" class="btn ghost block" data-share-go>发给朋友</button>' : ''}`
       : `<a class="btn primary block" href="${url}" download="liurili-${SLUG[kind]}.jpg" data-share-save>保存图片</a>${navigator.share ? '<button type="button" class="btn ghost block" data-share-go>分享</button>' : ''}`)
     + '</div>';
 }
@@ -365,12 +401,33 @@ export function share(kind, data) {
   return Promise.all([art ? artOf(art) : Promise.resolve(null), many]).then(([img, imgs]) => {
     const d = { ...data, ...(img ? { img } : {}), ...(imgs ? { imgs } : {}) };
     const cv = render(kind, d, theme);
-    openSheet(kind === 'wall' ? NAMES.wall : '分享' + NAMES[kind], pvHtml(jpg(cv), kind, theme, d));
+    openSheet(kind === 'wall' || kind === 'amuletWall' ? NAMES[kind] : '分享' + NAMES[kind], pvHtml(jpg(cv), kind, theme, d));
     lastShare = { cv, kind, name: NAMES[kind], data: d, theme };
   });
 }
 const arts = {};
-const artOf = (src) => arts[src] || (arts[src] = new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => { delete arts[src]; ok(null); }; im.src = src; }));
+const artOf = (src) => arts[src] || (arts[src] = new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => { delete arts[src]; ok(null); }; im.src = pillarArtSrc(src); }));
+function refreshGift() {
+  const s = lastShare, form = $('.gift-editor .charm-msg');
+  if (!form || s?.kind !== 'amulet') return;
+  s.data = { ...s.data, recipient: form.elements.recipient.value.trim(), message: form.elements.note.value.trim() || s.data.art?.message || '愿你心想事成。' };
+  s.cv = render(s.kind, s.data, s.theme);
+  const url = jpg(s.cv);
+  $('.gift-preview').src = url;
+  $('.gift-send [data-share-save]').href = url;
+}
+let giftFrame;
+document.addEventListener('input', e => {
+  if (!e.target.closest('.charm-msg')) return;
+  cancelAnimationFrame(giftFrame); giftFrame = requestAnimationFrame(refreshGift);
+});
+document.addEventListener('submit', e => { if(e.target.matches('.charm-msg')) {e.preventDefault(); refreshGift();} });
+onClick('[data-gift-paper]', el => {
+  if (!lastShare) return;
+  lastShare.theme = el.dataset.giftPaper;
+  for (const b of el.parentElement.children) b.setAttribute('aria-pressed',String(b===el));
+  refreshGift();
+});
 onClick('[data-share-theme]', (el) => {
   const s = lastShare, theme = el.getAttribute('data-share-theme');
   if (!s || s.theme === theme) return;
@@ -391,11 +448,15 @@ onClick('[data-share-save]', () => { const s = lastShare; if (s) track('share_sa
 onClick('[data-share-go]', () => {
   const s = lastShare;
   if (!s) return;
-  s.cv.toBlob((blob) => {
-    // 只传图片本身，不带标题文字：带了标题，系统和微信常把它当成一个文件发出去
-    const file = new File([blob], `liurili-${SLUG[s.kind]}.jpg`, { type: 'image/jpeg' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file] }).then(() => track('share_done', { kind: s.kind }), () => {});
-    else toast(IS_MOBILE ? '长按上面的图片，就能保存到相册' : '用「保存图片」存下来，再发给朋友');
-  }, 'image/jpeg', 0.92);
+  const src = $('.sharepv img')?.src;
+  if (!src) return;
+  const bytes = Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0));
+  const file = new File([bytes], `liurili-${SLUG[s.kind]}.jpg`, { type:'image/jpeg' });
+  if (navigator.canShare?.({files:[file]})) {
+    navigator.share({files:[file]}).then(() => track('share_done',{kind:s.kind}), e => {
+      if (e.name !== 'AbortError') toast('可以先保存图片，再发送给朋友');
+    });
+  } else toast(IS_MOBILE ? '长按上面的图片，就能保存到相册' : '保存图片后就能发给朋友');
+
 });
 

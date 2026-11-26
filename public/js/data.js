@@ -1,4 +1,6 @@
 // 展示用的常量和小工具（沿用原单页的文案）。日历和分数都由服务端算好，这里只负责把它们说成人话。
+// 同一日柱的旧能量卡、收藏和分享图也要加载新版画作。
+export const pillarArtSrc = (path) => path.startsWith('art/pillars/') ? path.split('?')[0] + '?v=plein-air-1' : path;
 export const GAN = '甲乙丙丁戊己庚辛壬癸', ZHI = '子丑寅卯辰巳午未申酉戌亥';
 export const WX = ['木', '火', '土', '金', '水'], WXEN = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'], WXC = ['w0', 'w1', 'w2', 'w3', 'w4'];
 const ZHI_WX = [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4];
