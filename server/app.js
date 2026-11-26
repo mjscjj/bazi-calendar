@@ -396,7 +396,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   // 首单按 ref 找到订单，续费按 subscription_id 找到用户，每次扣款加一期天数。取消续费不用处理，到期自然停。
   const gumroadDays = (recurrence) => recurrence === 'yearly' ? 365 : settings.int('member_days');
   const gumroadInfo = () => gumroad ? { monthly: gumroad.plans.monthly.cents, yearly: gumroad.plans.yearly.cents } : null;
-  // 同一个 Gumroad 商品也给美国版 Sixty 收款（订单号 SXT 开头）。不归中文版的 Ping 原样转给 GUMROAD_FORWARD_URL：
+  // 同一个 Gumroad 商品也给美国版 Flow Day 收款（订单号 SXT 开头）。不归中文版的 Ping 原样转给 GUMROAD_FORWARD_URL：
   // ref 是 SXT 开头；或没有 ref 时，续费的订阅、退款/争议的订单在这里查不到
   const gumroadForward = (env.GUMROAD_FORWARD_URL || '').trim();
   function notOurs(p) {
@@ -580,7 +580,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (db.get('SELECT 1 x FROM users WHERE username = ?', username)) throw bad('这个用户名已经被用了');
     // 访客先看过能量卡的，把当时填的出生信息一起带进来
     const b = body.birth ? validBirth(body.birth) : null;
-    if (env.US_EDITION === '1' && b && ageOf(b.date) < 13) throw bad('Sixty accounts are for ages 13 and up.');
+    if (env.US_EDITION === '1' && b && ageOf(b.date) < 13) throw bad('Flow Day accounts are for ages 13 and up.');
     const nickname = str(body.nickname, 12, '称呼');
     const r = db.run('INSERT INTO users(username, pass_hash, nickname, birth_date, birth_time, gender, birth_cal, birth_city, birth_lng, birth_tz, birth_zhi, invite_code, created_at, last_seen_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
       username, hashPassword(password), nickname, ...(b ? birthCols(b) : [null, null, null, 'solar', null, null, null, null]), newInviteCode(), nowIso(), nowIso());

@@ -14,9 +14,8 @@ async function drawCard(o) {
   const W = 1080, H = 1920, X = 90, IW = 900, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const ctx = cv.getContext('2d'), img = await loadImg(o.art), E = S.C.elements[o.el];
   ctx.fillStyle = '#F6F5F1'; ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = '#16151A'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(X + 26, 138, 23, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = '#E0573E'; ctx.beginPath(); ctx.arc(X + 26, 112, 8, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#16151A'; ctx.font = "400 64px 'Instrument Serif'"; ctx.fillText('Sixty', X + 66, 160);
+  ctx.drawImage(await loadImg('logo.svg'), X, 104, 56, 56);
+  ctx.fillStyle = '#16151A'; ctx.font = "400 64px 'Instrument Serif'"; ctx.fillText('Flow Day', X + 72, 156);
   ctx.save(); ctx.shadowColor = 'rgba(20,18,14,.25)'; ctx.shadowBlur = 50; ctx.shadowOffsetY = 26; rrect(ctx, X, 230, IW, IW, 44); ctx.fillStyle = '#EFEDE7'; ctx.fill(); ctx.restore();
   ctx.save(); rrect(ctx, X, 230, IW, IW, 44); ctx.clip(); ctx.drawImage(img, X, 230, IW, IW); ctx.restore();
   ctx.font = '600 28px Inter'; const kt = o.kicker.toUpperCase(), kw = ctx.measureText(kt).width + 56;
@@ -45,7 +44,7 @@ export async function shareImage(make, filename, sign, link) {
   const canFiles = navigator.canShare && navigator.canShare({ files: [file] });
   const touch = matchMedia('(pointer: coarse)').matches;
   openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Your card</h2><p class="muted" style="margin:0">Sized for Stories and TikTok.</p>
-    <img class="shot" src="${url}" alt="Your Sixty card">
+    <img class="shot" src="${url}" alt="Your Flow Day card">
     ${touch ? '<p class="tip">Press and hold the image to save it to Photos.</p>' : ''}
     <div class="btns">${canFiles ? '<button class="btn block" id="doShare">Share image</button>' : ''}
     ${!touch || !canFiles ? `<a class="btn ${canFiles ? 'ghost ' : ''}block" id="doSave" href="${url}" download="${filename}">Download image</a>` : ''}

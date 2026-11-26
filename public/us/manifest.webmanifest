@@ -1,6 +1,6 @@
 {
-  "name": "Sixty — your day sign",
-  "short_name": "Sixty",
+  "name": "Flow Day — your day sign",
+  "short_name": "Flow Day",
   "start_url": "./#/today",
   "scope": "./",
   "display": "standalone",

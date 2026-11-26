@@ -1,5 +1,5 @@
 [Unit]
-Description=Sixty 美国版数据库每日 04:40 备份
+Description=Flow Day 美国版数据库每日 04:40 备份
 
 [Timer]
 OnCalendar=*-*-* 04:40:00

@@ -13,7 +13,7 @@ const HOUR = 3600000;
 
 // 发信：配了 RESEND_API_KEY 就用 Resend 发；没配时把链接写进日志，由人转发
 function makeMailer(env, log) {
-  const key = (env.RESEND_API_KEY || '').trim(), from = env.MAIL_FROM || 'Sixty <hello@mindflow.zone>';
+  const key = (env.RESEND_API_KEY || '').trim(), from = env.MAIL_FROM || 'Flow Day <hello@mindflow.zone>';
   return {
     live: !!key,
     async send(to, subject, html, text) {
@@ -43,9 +43,9 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
       const token = crypto.randomBytes(24).toString('base64url'), now = Date.now();
       db.run('INSERT INTO password_resets(token_hash, user_id, created_at, expires_at) VALUES(?,?,?,?)', sha(token), u.id, new Date(now).toISOString(), new Date(now + HOUR).toISOString());
       const link = `${publicBase(req)}/us/#/reset/${token}`;
-      await mailer.send(email, 'Reset your Sixty password',
-        `<p>Someone (hopefully you) asked to reset your Sixty password.</p><p><a href="${link}">Choose a new password</a> — this link works for one hour.</p><p>If it wasn't you, you can ignore this email.</p>`,
-        `Reset your Sixty password: ${link} (works for one hour)`).catch((e) => log.error(`[us-mail] ${e.message}`));
+      await mailer.send(email, 'Reset your Flow Day password',
+        `<p>Someone (hopefully you) asked to reset your Flow Day password.</p><p><a href="${link}">Choose a new password</a> — this link works for one hour.</p><p>If it wasn't you, you can ignore this email.</p>`,
+        `Reset your Flow Day password: ${link} (works for one hour)`).catch((e) => log.error(`[us-mail] ${e.message}`));
     }
     return { ok: true };
   });
@@ -69,9 +69,9 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
     const base = publicBase(req);
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="${esc(desc)}">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Sixty"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Flow Day"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
 <meta property="og:image" content="${esc(base + image)}"><meta property="og:url" content="${esc(base + to)}"><meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="refresh" content="0;url=${esc(base + to)}"></head><body><script>location.replace(${JSON.stringify(base + to)})</script><a href="${esc(base + to)}">Open Sixty</a></body></html>`;
+<meta http-equiv="refresh" content="0;url=${esc(base + to)}"></head><body><script>location.replace(${JSON.stringify(base + to)})</script><a href="${esc(base + to)}">Open Flow Day</a></body></html>`;
   };
   // 手机日历订阅（英文）：未来 60 天每天一条全天日程；定了时段的计划按手机本地时间（不带时区）
   const GAN = '甲乙丙丁戊己庚辛壬癸', pad = (n) => String(n).padStart(2, '0'), DAY = 86400000;
@@ -80,13 +80,13 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
   const hourLabel = (i) => { const a = (i * 2 + 23) % 24, f = (h) => `${h % 12 || 12}${h < 12 ? 'am' : 'pm'}`; return `${f(a)}–${f((a + 2) % 24)}`; };
   function ics({ c, userId, name, today, plans, expired, url, days = 60 }) {
     const now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
-    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MindFlow//Sixty//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-      `X-WR-CALNAME:${icsText('Sixty' + (name ? ' · ' + name : ''))}`, 'REFRESH-INTERVAL;VALUE=DURATION:PT6H', 'X-PUBLISHED-TTL:PT6H'];
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MindFlow//FlowDay//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+      `X-WR-CALNAME:${icsText('Flow Day' + (name ? ' · ' + name : ''))}`, 'REFRESH-INTERVAL;VALUE=DURATION:PT6H', 'X-PUBLISHED-TTL:PT6H'];
     const dv = (t) => { const d = new Date(t); return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`; };
     const allDay = (uid, t, summary, desc) => L.push('BEGIN:VEVENT', `UID:${uid}`, `DTSTAMP:${now}`, `DTSTART;VALUE=DATE:${dv(t)}`, `DTEND;VALUE=DATE:${dv(t + DAY)}`,
       `SUMMARY:${icsText(summary)}`, `DESCRIPTION:${icsText(desc)}`, 'TRANSP:TRANSPARENT', `URL:${url}`, 'END:VEVENT');
     const [ty, tm, td] = today.split('-').map(Number), t0 = Date.UTC(ty, tm - 1, td);
-    if (expired) allDay(`expired-${userId}@mindflow.zone`, t0, 'Sixty Plus has ended', `Renew to bring your daily readings back.\n${url}`);
+    if (expired) allDay(`expired-${userId}@mindflow.zone`, t0, 'Flow Day Plus has ended', `Renew to bring your daily readings back.\n${url}`);
     else {
       for (let k = 0; k < days; k++) {
         const t = t0 + k * DAY, d = new Date(t), x = dayOut(c, d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), true);
@@ -166,7 +166,7 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
     const { createCanvas } = canvasMod || await import('@napi-rs/canvas').then((m) => (canvasMod = m));
     const cv = createCanvas(W, H), ctx = cv.getContext('2d'), k = W / 1179;
     ctx.fillStyle = '#16151A'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#F2F1EE'; ctx.textAlign = 'center';
-    ctx.font = `400 ${72 * k}px "Instrument Serif"`; ctx.fillText('Sixty Plus has ended', W / 2, H * 0.6);
+    ctx.font = `400 ${72 * k}px "Instrument Serif"`; ctx.fillText('Flow Day Plus has ended', W / 2, H * 0.6);
     ctx.font = `500 ${32 * k}px Inter`; ctx.fillStyle = 'rgba(242,241,238,.7)'; ctx.fillText('Renew to bring your daily lock screen back.', W / 2, H * 0.6 + 70 * k);
     return cv.encode('jpeg', 85);
   }
@@ -200,14 +200,14 @@ export function registerUsSite({ route, db, env, log, limit, bad, HttpError, has
       if (m) {
         const x = C.pillars.find((y) => y.slug === m[1]);
         if (!x) return null;
-        return sharePage(req, `${signName(x)} — ${x.name} · Sixty`, `${x.intro} There are 60 kinds of people. Which one are you?`, `/art/pillars/${x.art}`, `/us/#/sign/${x.slug}`);
+        return sharePage(req, `${signName(x)} — ${x.name} · Flow Day`, `${x.intro} There are 60 kinds of people. Which one are you?`, `/art/pillars/${x.art}`, `/us/#/sign/${x.slug}`);
       }
       m = p.match(/^\/i\/([A-Za-z0-9]{4,12})\/?$/);
       if (m) {
         const inv = db.get("SELECT * FROM users WHERE invite_code = ? AND status = 'active'", m[1].toUpperCase());
         const x = inv && inv.birth_date ? pillar(chartOf(inv).pillars[2]) : null;
         const who = inv?.nickname && !/[一-鿿]/.test(inv.nickname) ? inv.nickname : 'A friend';
-        return sharePage(req, x ? `${who} is a${/^[AEIOU]/.test(C.stems[x.stem].element) ? 'n' : ''} ${signName(x)}. What do you two make?` : 'You are invited to Sixty',
+        return sharePage(req, x ? `${who} is a${/^[AEIOU]/.test(C.stems[x.stem].element) ? 'n' : ''} ${signName(x)}. What do you two make?` : 'You are invited to Flow Day',
           'Every pair of signs makes a painting of its own. Add your birthday to see yours.', x ? `/art/pillars/${x.art}` : '/us/og.jpg', `/us/#/i/${m[1].toUpperCase()}`);
       }
       return null;

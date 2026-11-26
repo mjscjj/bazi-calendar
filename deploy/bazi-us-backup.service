@@ -1,5 +1,5 @@
 [Unit]
-Description=Sixty 美国版数据库每日备份（候补名单和埋点）
+Description=Flow Day 美国版数据库每日备份（候补名单和埋点）
 
 [Service]
 Type=oneshot

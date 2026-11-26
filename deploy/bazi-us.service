@@ -1,5 +1,5 @@
 [Unit]
-Description=Sixty 美国版 (mindflow.zone/sixty，us-mvp 分支)
+Description=Flow Day 美国版 (mindflow.zone/sixty，us-mvp 分支)
 After=network-online.target
 
 [Service]

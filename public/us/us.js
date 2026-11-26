@@ -1,4 +1,4 @@
-// Sixty — entry and routing. Same backend and features as the Chinese edition (流日历), in English.
+// Flow Day — entry and routing. Same backend and features as the Chinese edition (流日历), in English.
 import { $, $$, S, api, track, closeSheet, pillarOf, byGz, signName, art, esc, localDay } from './js/core.js';
 import { pageLanding, pageReveal, pageSignin, pageInvite, pageReset, pageNeedBirth } from './js/onboard.js';
 import { pageToday } from './js/today.js';
@@ -79,4 +79,4 @@ addEventListener('sixty:auth', async () => { await loadMe(); render(); });
 
 fetch('content.json').then((r) => r.json())
   .then(async (c) => { S.C = c; await loadMe(); render(); })
-  .catch((e) => { console.error(e); view.innerHTML = '<div class="page"><p class="intro">Sixty could not load. Please refresh.</p></div>'; });
+  .catch((e) => { console.error(e); view.innerHTML = '<div class="page"><p class="intro">Flow Day could not load. Please refresh.</p></div>'; });

@@ -202,9 +202,9 @@ function tonightHtml(t) {
   const r = t.rate || {}, sm = r.summary || {}, acc = sm.rated >= 3 ? Math.round(sm.match / sm.rated * 100) : null;
   return `<div class="card tonight"><p class="label">Tonight</p>
     ${r.today ? `<h3 class="h3" style="margin-top:6px">You rated today ${S.C.ratings[r.today - 1].toLowerCase()}.</h3>
-      <p class="muted" style="margin:4px 0 0">${acc != null ? `This month Sixty matched your days <b>${acc}%</b> of the time (${sm.match} of ${sm.rated}).` : `Rate a few more evenings and we'll show how often Sixty matches your days.`}</p>`
+      <p class="muted" style="margin:4px 0 0">${acc != null ? `This month Flow Day matched your days <b>${acc}%</b> of the time (${sm.match} of ${sm.rated}).` : `Rate a few more evenings and we'll show how often Flow Day matches your days.`}</p>`
     : `<h3 class="h3" style="margin-top:6px">How did today go?</h3><div class="rate" role="radiogroup">${S.C.ratings.map((w, i) => `<button data-s="${i + 1}" aria-label="${w}"><i>${['😣', '😕', '😐', '🙂', '😄'][i]}</i><span>${w}</span></button>`).join('')}</div>
-      <p class="hint">Your ratings show how often Sixty gets your days right.</p>`}</div>`;
+      <p class="hint">Your ratings show how often Flow Day gets your days right.</p>`}</div>`;
 }
 function wireTonight() {
   $$('.rate button').forEach((b) => b.addEventListener('click', async () => {
@@ -261,7 +261,7 @@ function installCard() {
   if (standalone || days.size < 2 || store.get('a2hs') || $('#a2hs')) return;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   $('#below').insertAdjacentHTML('beforeend', `<div class="card a2hs" id="a2hs"><button class="x" aria-label="Dismiss">×</button>
-    <p class="label">Make it a habit</p><h3 class="h3" style="margin-top:6px">Add Sixty to your Home Screen</h3>
+    <p class="label">Make it a habit</p><h3 class="h3" style="margin-top:6px">Add Flow Day to your Home Screen</h3>
     <p class="muted" style="margin:4px 0 12px;font-size:15px">Open your day in one tap, like an app.</p>
     ${installEvt ? '<button class="btn block" id="doInstall">Add to Home Screen</button>' : ios ? '<ol class="steps"><li>Tap the <b>Share</b> button in Safari</li><li>Choose <b>Add to Home Screen</b></li></ol>' : '<p class="small">Use your browser menu → <b>Install app</b> or <b>Add to Home screen</b>.</p>'}</div>`);
   $('#a2hs .x').addEventListener('click', () => { store.set('a2hs', 1); $('#a2hs').remove(); });
@@ -269,12 +269,12 @@ function installCard() {
   track('us_install_card');
 }
 
-// ---------- trust: how often Sixty matched your days (after 3 rated evenings) ----------
+// ---------- trust: how often Flow Day matched your days (after 3 rated evenings) ----------
 function accuracyChip(sm) {
   if (!sm || sm.rated < 3 || $('.acc')) return;
   const pct = Math.round(sm.match / sm.rated * 100);
   $('.tdhead > div').insertAdjacentHTML('beforeend', `<button class="chip acc" title="From your evening ratings">${pct}% match</button>`);
-  $('.acc').addEventListener('click', () => toast(`Sixty matched ${sm.match} of the ${sm.rated} evenings you rated this month`));
+  $('.acc').addEventListener('click', () => toast(`Flow Day matched ${sm.match} of the ${sm.rated} evenings you rated this month`));
 }
 
 // ---------- your people today, and the living lock screen invite ----------

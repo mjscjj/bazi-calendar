@@ -1,4 +1,4 @@
-// Shared pieces for Sixty (US). The backend is the same as the Chinese edition; this file turns its
+// Shared pieces for Flow Day (US). The backend is the same as the Chinese edition; this file turns its
 // structured answers (stems, ten gods, levels, hours) into English using content.json.
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => [...el.querySelectorAll(s)];

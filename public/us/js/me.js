@@ -35,13 +35,13 @@ export async function pageMe() {
         <button data-act="out"><span>Sign out</span></button>
         <button data-act="del" class="danger"><span>Delete my account</span></button>
       </div>
-      <p class="hint">${S.me.access?.beta ? 'Sixty Plus is free for everyone during the beta.' : ''}</p></div>
+      <p class="hint">${S.me.access?.beta ? 'Flow Day Plus is free for everyone during the beta.' : ''}</p></div>
   </div>`;
   $$('[data-theme]').forEach((x) => x.addEventListener('click', () => { store.set('theme', x.dataset.theme); applyTheme(); $$('[data-theme]').forEach((y) => y.setAttribute('aria-pressed', String(y === x))); }));
   $('[data-act=birth]').addEventListener('click', birthSheet);
   $$('[data-sound]').forEach((x) => x.addEventListener('click', () => { store.set('sound', +x.dataset.sound); $$('[data-sound]').forEach((y) => y.setAttribute('aria-pressed', String(y === x))); if (+x.dataset.sound) sfx('chime'); }));
   $('[data-act=fb]').addEventListener('click', () => {
-    openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Send feedback</h2><p class="muted" style="margin:0 0 14px">We read every note. Thank you for helping shape Sixty.</p>
+    openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Send feedback</h2><p class="muted" style="margin:0 0 14px">We read every note. Thank you for helping shape Flow Day.</p>
       <form id="fbForm"><textarea class="input" name="t" rows="5" maxlength="500" required style="height:auto;padding:12px 14px" placeholder="What should we know?"></textarea><p class="err"></p><button class="btn block" type="submit">Send</button></form>`);
     $('#fbForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -130,8 +130,8 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', applyThe
 
 // ---------- your collection of 60 ----------
 export async function pageCollection() {
-  view().innerHTML = `<div class="page" style="max-width:1080px"><p class="label" style="margin-top:6px">Your Sixty</p><h1 class="display" id="colTitle">·</h1>
-    <p class="lede">Every day has one of 60 paintings. Open Sixty on a day to collect its painting — the whole cycle takes 60 days.</p><div class="grid wall" id="wall">${loading(300)}</div></div>`;
+  view().innerHTML = `<div class="page" style="max-width:1080px"><p class="label" style="margin-top:6px">Your 60</p><h1 class="display" id="colTitle">·</h1>
+    <p class="lede">Every day has one of 60 paintings. Open Flow Day on a day to collect its painting — the whole cycle takes 60 days.</p><div class="grid wall" id="wall">${loading(300)}</div></div>`;
   try {
     const j = await api('GET', 'jiazi'), got = new Map(j.list.map((x) => [x.gz, x.day])), today = pillarOf(localDay());
     $('#colTitle').innerHTML = `<span data-n>0</span> <em>of 60</em>`; countUp($('[data-n]'), j.n, 800);
@@ -183,10 +183,10 @@ export function pagePair(code, reveal) {
     <div class="right after"><div class="sign-name"><p class="label">You & ${who}</p><h1 class="display" style="font-size:clamp(40px,11vw,58px)">${esc(e.name)}</h1><p class="poetic">${e.tag}</p></div>
       <p class="intro">${esc(e.text)}</p>
       ${pv.best ? `<div class="card" style="margin-top:16px"><p class="label">Best day to do something together</p><h3 class="h3" style="margin-top:6px">${fmt(pv.best.date || `${pv.best.y}-${String(pv.best.m).padStart(2, '0')}-${String(pv.best.d).padStart(2, '0')}`, 'full')}</h3></div>` : ''}
-      <div class="btns">${S.me ? '<a class="btn block" href="#/friends">See all my friends</a>' : store.get('pending')?.birth && ageOf(store.get('pending').birth.date) < 13 ? '<p class="hint">Sixty accounts are for ages 13 and up.</p>' : '<button class="btn block" id="pairSignup">Save this — create your free account</button>'}
+      <div class="btns">${S.me ? '<a class="btn block" href="#/friends">See all my friends</a>' : store.get('pending')?.birth && ageOf(store.get('pending').birth.date) < 13 ? '<p class="hint">Flow Day accounts are for ages 13 and up.</p>' : '<button class="btn block" id="pairSignup">Save this — create your free account</button>'}
         <button class="btn ghost block" id="pairShare">Share our painting</button></div></div></div>`;
   $('#pairSignup')?.addEventListener('click', () => import('./onboard.js').then((m) => m.signupSheet(`Save your sign and your painting with ${pv.who || 'your friend'}.`)));
-  $('#pairShare').addEventListener('click', () => sharePair({ art: e.art, el: mine ? elOf(mine) : 'Earth', kicker: `Me & ${pv.who || 'a friend'}`, title: e.name, sub: e.tag, meta: mine && them ? `${signName(mine)} & ${signName(them)}` : 'Sixty', body: 'Every pair of signs makes a painting of its own. What do you make with your people?' }));
+  $('#pairShare').addEventListener('click', () => sharePair({ art: e.art, el: mine ? elOf(mine) : 'Earth', kicker: `Me & ${pv.who || 'a friend'}`, title: e.name, sub: e.tag, meta: mine && them ? `${signName(mine)} & ${signName(them)}` : 'Flow Day', body: 'Every pair of signs makes a painting of its own. What do you make with your people?' }));
   if (reveal) setTimeout(() => buzz(16), 1200);
 }
 
@@ -209,19 +209,19 @@ export function pageSign(slug, reveal) {
 // ---------- terms and privacy ----------
 const LEGAL = {
   terms: ['Terms of Use', `
-    <p>Sixty is a daily calendar and reflection app based on the traditional Chinese sexagenary calendar. By creating an account you agree to these terms.</p>
+    <p>Flow Day is a daily calendar and reflection app based on the traditional Chinese sexagenary calendar. By creating an account you agree to these terms.</p>
     <h3 class="h3">For reflection and fun</h3><p>Readings, scores, best days and pairings are generated from calendar rules. They are not predictions and not medical, legal, financial or professional advice. Please make important decisions with your own judgment.</p>
     <h3 class="h3">Your account</h3><p>You must be 13 or older. Keep your password private. You can delete your account at any time in Me → Settings.</p>
     <h3 class="h3">Fair use</h3><p>Don't misuse the service, try to break it, or scrape it. We may suspend accounts that do.</p>
-    <h3 class="h3">Sixty Plus</h3><p>Paid features, when offered, are billed by Gumroad as the merchant of record. Subscriptions renew automatically until you cancel from your Gumroad receipt. During the beta, everything is free.</p>
+    <h3 class="h3">Flow Day Plus</h3><p>Paid features, when offered, are billed by Gumroad as the merchant of record. Subscriptions renew automatically until you cancel from your Gumroad receipt. During the beta, everything is free.</p>
     <h3 class="h3">Changes</h3><p>We may update the service and these terms. If the changes are significant we will tell you in the app.</p>`],
   privacy: ['Privacy Policy', `
     <p>We keep this short and plain.</p>
     <h3 class="h3">What we collect</h3><p>Your email and password (stored hashed), your birth date and optionally birth time, birth place and sex at birth, the first name you choose, and what you do in the app (like which days you open it). We also record anonymous usage events to understand which features help.</p>
-    <h3 class="h3">Why</h3><p>Only to calculate your readings, remember your collection and friends, and improve Sixty. We don't sell your data or use it for advertising.</p>
+    <h3 class="h3">Why</h3><p>Only to calculate your readings, remember your collection and friends, and improve Flow Day. We don't sell your data or use it for advertising.</p>
     <h3 class="h3">Friends</h3><p>When you connect with a friend, each of you sees your sign and the painting you make together — never each other's birthday.</p>
     <h3 class="h3">Deleting</h3><p>Delete your account any time in Me → Settings; we remove your data from our database right away (backups roll over within 14 days).</p>
-    <h3 class="h3">Children</h3><p>Sixty is not for children under 13, and we don't knowingly collect their information.</p>
+    <h3 class="h3">Children</h3><p>Flow Day is not for children under 13, and we don't knowingly collect their information.</p>
     <h3 class="h3">Contact</h3><p>Questions or requests: use the feedback option in the app.</p>`],
 };
 export function pageLegal(kind) {
@@ -260,10 +260,10 @@ export async function pageRecap(month) {
     ${r.arts.length ? `<div class="sec"><p class="label">Collected in ${name}</p><div class="miniwall">${r.arts.map((a, i) => `<img src="${art(byGz(a.gz))}" alt="" style="--i:${i}" loading="lazy">`).join('')}</div></div>` : ''}
     ${best ? `<div class="sec"><p class="label">Your strongest day</p><a class="card daymini" href="#/today?d=${best.day}"><img src="${art(pillarOf(best.day))}" alt="" width="56" height="56"><div><b>${fmt(best.day, 'full')}</b><p class="small" style="margin:2px 0 0">Scored ${best.score}</p></div><span class="go">›</span></a></div>` : ''}
     ${top ? `<div class="sec"><p class="label">Most-felt mood</p><div class="card"><h3 class="h2" style="font-size:28px">${S.C.moods[top[0]] || top[0]}</h3><p class="small" style="margin:4px 0 0">${top[1]} time${top[1] === 1 ? '' : 's'} this month</p></div></div>` : ''}
-    ${r.match?.rated >= 3 ? `<div class="sec"><p class="label">How often Sixty matched your days</p><div class="card"><h3 class="h2" style="font-size:36px">${Math.round(r.match.match / r.match.rated * 100)}%</h3><p class="small" style="margin:4px 0 0">${r.match.match} of ${r.match.rated} evenings you rated</p></div></div>` : ''}
+    ${r.match?.rated >= 3 ? `<div class="sec"><p class="label">How often Flow Day matched your days</p><div class="card"><h3 class="h2" style="font-size:36px">${Math.round(r.match.match / r.match.rated * 100)}%</h3><p class="small" style="margin:4px 0 0">${r.match.match} of ${r.match.rated} evenings you rated</p></div></div>` : ''}
     <button class="btn block" id="recapShare" style="margin-top:22px">Share my ${name}</button></div>`;
   $$('[data-n]').forEach((x) => countUp(x, +x.dataset.n, 800));
-  $('#recapShare').addEventListener('click', () => sharePair({ art: art(best ? pillarOf(best.day) : S.me.p), el: elOf(S.me.p), kicker: `My ${name}`, title: `${r.opened} days · ${r.arts.length} paintings`, sub: `${signName(S.me.p)} on Sixty`, meta: best ? `Strongest day: ${fmt(best.day, 'md')}` : 'Sixty', body: 'Every day has one of 60 paintings. Collect them all — one a day.' }));
+  $('#recapShare').addEventListener('click', () => sharePair({ art: art(best ? pillarOf(best.day) : S.me.p), el: elOf(S.me.p), kicker: `My ${name}`, title: `${r.opened} days · ${r.arts.length} paintings`, sub: `${signName(S.me.p)} on Flow Day`, meta: best ? `Strongest day: ${fmt(best.day, 'md')}` : 'Flow Day', body: 'Every day has one of 60 paintings. Collect them all — one a day.' }));
   track('us_recap');
 }
 
@@ -273,7 +273,7 @@ async function posterOf() {
   cv.width = W; cv.height = top + 10 * (cell + gap) + 150;
   const ctx = cv.getContext('2d'); ctx.fillStyle = '#F6F5F1'; ctx.fillRect(0, 0, cv.width, cv.height);
   await document.fonts.load("400 80px 'Instrument Serif'");
-  ctx.fillStyle = '#16151A'; ctx.font = "400 84px 'Instrument Serif'"; ctx.fillText('My Sixty', 60, 120);
+  ctx.fillStyle = '#16151A'; ctx.font = "400 84px 'Instrument Serif'"; ctx.fillText('My 60', 60, 120);
   ctx.font = "italic 400 40px 'Instrument Serif'"; ctx.fillStyle = '#57545A'; ctx.fillText('The full cycle, one painting a day', 420, 118);
   const x0 = (W - cols * cell - (cols - 1) * gap) / 2;
   await Promise.all(S.C.pillars.map((p, i) => new Promise((ok) => { const im = new Image(); im.onload = () => { const x = x0 + (i % cols) * (cell + gap), y = top + Math.floor(i / cols) * (cell + gap); ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, cell, cell, 14); ctx.clip(); ctx.drawImage(im, x, y, cell, cell); ctx.restore(); ok(); }; im.onerror = ok; im.src = art(p); })));

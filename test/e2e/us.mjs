@@ -1,4 +1,4 @@
-// 美国版 Sixty 走查：node test/e2e/us.mjs <美国版页面地址，如 http://127.0.0.1:3210/sixty/us/> <截图目录> [数据库路径]
+// 美国版 Flow Day 走查：node test/e2e/us.mjs <美国版页面地址，如 http://127.0.0.1:3210/sixty/us/> <截图目录> [数据库路径]
 // 服务端要开 US_EDITION=1 DAY_TZ=America/Chicago MEMBER_FOR_ALL=1 GENDER_OPTIONAL=1。给了数据库路径时，会把测试账号改成三天前注册，验证第二天打开要撕日历。（每日一签要 JIAO_FAKE=xiao,sheng，先笑杯再圣杯）
 // 落地页 → 排盘动画 → 三张揭晓 → 注册 → Today（Why、表盘、一周条）→ 月历 → 当天 → 挑日子 → Me → 收藏墙 → 邀请 → 两人的画 → 深色 → 条款 → 注销
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);

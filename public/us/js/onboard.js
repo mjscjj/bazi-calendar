@@ -22,7 +22,7 @@ export function pageLanding() {
         ${[['Your sign', 'One of 60, with its own painting, element and character.', '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="4" r="2" fill="currentColor"/>'],
           ['Every day, read for you', 'Your energy, best hours, lucky colors — and why.', '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/>'],
           ['Your best days', 'Interview, first date, launch? See the best days ahead.', '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14l2 2 4-4"/>'],
-          ['Collect all 60', 'Each day has a painting. Open Sixty to collect it.', '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>']]
+          ['Collect all 60', 'Each day has a painting. Open Flow Day to collect it.', '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>']]
           .map(([h, p, ic]) => `<div class="feature"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">${ic}</svg></span><div><h3 class="h3">${h}</h3><p>${p}</p></div></div>`).join('')}
       </div></div>
       <div class="sec"><p class="label">All 60 signs</p>
@@ -114,10 +114,10 @@ export function pageReveal() {
           <div class="chips" style="margin-top:14px">${chipEl(elOf(p), `${s.polarity} ${elOf(p)}`)}<span class="chip">${p.animal}</span><span class="chip">No. ${p.no} of 60</span></div></div>
       </section>
       <section class="step" id="stepEl"><p class="label">Your five elements</p><h2 class="h2" style="margin-top:6px">What you're made of</h2><div id="elBody" style="margin-top:16px"></div></section>
-      <section class="step"><p class="label">Your card</p><h2 class="h2" style="margin-top:6px">Keep your Sixty</h2>
+      <section class="step"><p class="label">Your card</p><h2 class="h2" style="margin-top:6px">Keep your card</h2>
         <div class="card mini-sign" style="margin-top:16px"><img src="${art(p)}" alt="" width="72" height="72"><div><b>${signName(p)}</b><span>${esc(p.name)}</span><span class="small">${s.traits.join(' · ')}</span></div></div>
         <ul class="perks" style="margin-top:18px"><li>A reading every day — energy, best hours, lucky colors</li><li>Your month at a glance and your best days ahead</li><li>Collect all 60 paintings, one each day</li><li>The painting you make with each friend</li></ul>
-        ${ageOf(pend.birth.date) < 13 ? '<div class="card"><p class="muted" style="margin:0">Sixty accounts are for ages 13 and up. You can still explore all 60 signs.</p></div><a class="btn block" href="#/sixty" style="margin-top:10px">See all 60 signs</a>' : `<button class="btn block" id="toSignup">Save my Sixty — it's free</button>`}
+        ${ageOf(pend.birth.date) < 13 ? '<div class="card"><p class="muted" style="margin:0">Flow Day accounts are for ages 13 and up. You can still explore all 60 signs.</p></div><a class="btn block" href="#/sixty" style="margin-top:10px">See all 60 signs</a>' : `<button class="btn block" id="toSignup">Save my Flow Day — it's free</button>`}
         <button class="btn ghost block" id="shareMine" style="margin-top:10px">Share my sign</button>
         <p class="hint" style="text-align:center">Already have an account? <a href="#/signin">Sign in</a></p>
       </section>
@@ -159,13 +159,13 @@ export function pageReveal() {
 // ---------- accounts ----------
 export function signupSheet(note) {
   const pend = store.get('pending');
-  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Save your Sixty</h2>
+  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Save your Flow Day</h2>
     <p class="muted" style="margin:0 0 16px">${esc(note || 'Free. Your readings, collection and friends stay with you on any device.')}</p>
     <form id="signup">
       <label class="field"><span class="label">Email</span><input class="input" name="email" type="email" autocomplete="email" required></label>
       <label class="field"><span class="label">Password</span><input class="input" name="pw" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></label>
       <label class="field"><span class="label">First name (optional)</span><input class="input" name="name" autocomplete="given-name" maxlength="12"></label>
-      <label class="check"><input type="checkbox" name="agree" required> <span>I agree to the <a href="#/terms" target="_blank">Terms</a> and <a href="#/privacy" target="_blank">Privacy Policy</a>, and understand Sixty is for reflection and fun, not advice.</span></label>
+      <label class="check"><input type="checkbox" name="agree" required> <span>I agree to the <a href="#/terms" target="_blank">Terms</a> and <a href="#/privacy" target="_blank">Privacy Policy</a>, and understand Flow Day is for reflection and fun, not advice.</span></label>
       <p class="err"></p><button class="btn block" type="submit">Create my account</button>
     </form>`);
   $('#signup').addEventListener('submit', async (e) => {
@@ -176,7 +176,7 @@ export function signupSheet(note) {
       await api('POST', 'auth/register', { username: f.email.value.trim(), password: f.pw.value, nickname: f.name.value.trim() || undefined, agree: true,
         birth: pend?.birth, invite: pend?.invite || undefined, anonId: anonId() });
       track('us_signup', { invite: !!pend?.invite });
-      store.del('pending'); store.del('pairPreview'); closeSheet(); toast('Welcome to Sixty'); location.hash = '#/today'; window.dispatchEvent(new Event('sixty:auth'));
+      store.del('pending'); store.del('pairPreview'); closeSheet(); toast('Welcome to Flow Day'); location.hash = '#/today'; window.dispatchEvent(new Event('sixty:auth'));
     } catch (x) { err.textContent = x.message; btn.disabled = false; }
   });
 }
@@ -229,7 +229,7 @@ export async function pageInvite(code) {
   track('us_invite_open', { sign: them?.slug });
   view().innerHTML = `<div class="page">
     <span class="chip" style="margin-top:6px">An invitation</span>
-    <h1 class="display" style="margin-top:14px;font-size:clamp(38px,10vw,56px)">${esc(who)} is ${them ? aSign(them) : 'on Sixty'}. <em>What do you two make?</em></h1>
+    <h1 class="display" style="margin-top:14px;font-size:clamp(38px,10vw,56px)">${esc(who)} is ${them ? aSign(them) : 'on Flow Day'}. <em>What do you two make?</em></h1>
     ${them ? `<div class="duo"><div><img src="${art(them)}" alt=""><div><b>${esc(who)}</b>${esc(them.name)}</div></div><div><img src="${art(S.C.pillars[0])}" alt="" style="filter:grayscale(1) opacity(.35)"><div><b>You</b>Add your birthday</div></div></div>` : ''}
     <form class="card" id="pairForm" style="margin-top:16px"><label class="label" for="pday" style="display:block;margin-bottom:8px">Your birthday</label>
       <div class="row"><input class="input" id="pday" type="text" inputmode="numeric" autocomplete="bday" placeholder="MM / DD / YYYY" maxlength="14"><button class="btn" type="submit">Reveal</button></div>

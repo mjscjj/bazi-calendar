@@ -949,7 +949,7 @@ test('美国版（/us/）：页面能打开；英文内容和插画齐全；网�
   assert.equal(r.status, 301);
   assert.equal(r.headers.get('location'), '/bazi/us/');
   const html = await (await fetch(base + '/us/')).text();
-  assert.ok(html.includes('<title>Sixty'));
+  assert.ok(html.includes('<title>Flow Day'));
   const us = JSON.parse(fs.readFileSync(new URL('../public/us/content.json', import.meta.url)));
   assert.equal(us.pillars.length, 60);
   const art = (dir, f) => fs.existsSync(new URL(`../public/art/${dir}/${f}`, import.meta.url));

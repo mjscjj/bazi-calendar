@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 在 150 上发布美国版 Sixty（us-mvp 分支，和中文版分开跑）：先备份数据库，再拉 GitHub 上的 us-mvp，重启服务并做健康检查。
+# 在 150 上发布美国版 Flow Day（us-mvp 分支，和中文版分开跑）：先备份数据库，再拉 GitHub 上的 us-mvp，重启服务并做健康检查。
 # 用法（在服务器的 /root/apps/bazi-us 里执行）：./scripts/deploy-us.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
