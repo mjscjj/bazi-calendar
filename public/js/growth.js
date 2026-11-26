@@ -48,16 +48,17 @@ export function pageInvite() {
     if (currentPath() !== '/invite') return;
     S.inviteCode = d.code; S.friends = fr.list;
     const url = inviteUrl(d.code);
-    const st = (r) => (r.status === 'done' ? `<em class="ok">已生效 +${d.days} 天</em>` : r.status === 'capped' ? '<em>已生效 · 本月奖励已满</em>' : r.status === 'blocked' ? '<em>同一台设备注册，不计奖励</em>' : `<em>${esc(r.need)}</em>`);
+    const beta = !!S.access?.beta; // 体验版人人都是会员，不提奖励天数
+    const st = (r) => beta ? '<em class="ok">已加入</em>' : (r.status === 'done' ? `<em class="ok">已生效 +${d.days} 天</em>` : r.status === 'capped' ? '<em>已生效 · 本月奖励已满</em>' : r.status === 'blocked' ? '<em>同一台设备注册，不计奖励</em>' : `<em>${esc(r.need)}</em>`);
     v.innerHTML = phead(T)
-      + (S.access?.beta ? '<section class="invhero"><b>邀请朋友一起来<br>看看你们俩的画</b><span>朋友测完能量卡、注册后，就在这里看你们俩的画。</span>' // 体验版人人都是会员，不提奖励天数
+      + (beta ? '<section class="invhero"><b>邀请朋友一起来<br>看看你们俩的画</b><span>朋友测完能量卡、注册后，就在这里看你们俩的画。</span>'
         : `<section class="invhero"><b>每邀请一位朋友<br>你们各得 ${d.days} 天会员</b><span>朋友测完能量卡、注册，第二天再打开一次就生效。</span>`)
       + `<div class="linkbox"><span>${esc(url.replace(/^https?:\/\//, ''))}</span><button type="button" class="btn sm primary" data-inv-copy>复制</button></div>`
       + '<button type="button" class="btn ghost block" data-inv-poster>生成邀请海报</button></section>'
       + friendsHtml(fr.list)
-      + `<section class="card"><div class="stats3"><div><b>${d.stats.invited}</b><small>已邀请</small></div><div><b>${d.stats.done}</b><small>已生效</small></div><div><b>${d.stats.days}</b><small>得到的天数</small></div></div></section>`
+      + (beta ? '' : `<section class="card"><div class="stats3"><div><b>${d.stats.invited}</b><small>已邀请</small></div><div><b>${d.stats.done}</b><small>已生效</small></div><div><b>${d.stats.days}</b><small>得到的天数</small></div></div></section>`)
       + `<section class="card"><h3>邀请记录</h3>${d.list.length ? `<div class="ilist">${d.list.map((r) => `<div><span>${esc(r.name)}<small>${dtText(r.at)}</small></span>${st(r)}</div>`).join('')}</div>` : '<div class="empty">还没有朋友通过你的链接注册</div>'}</section>`
-      + `<p class="note" style="margin:0;text-align:center">${d.left > 0 ? `本月还能获得 ${d.left} 次奖励` : '本月的邀请奖励已经满了，朋友注册仍然能拿到奖励'}</p>` + footHtml();
+      + (beta ? '' : `<p class="note" style="margin:0;text-align:center">${d.left > 0 ? `本月还能获得 ${d.left} 次奖励` : '本月的邀请奖励已经满了，朋友注册仍然能拿到奖励'}</p>`) + footHtml();
     S.inviteUrl = url;
   }, (e) => { v.innerHTML = errHtml(T, e); });
 }
@@ -69,7 +70,7 @@ function friendsHtml(list) {
       + (x.pair ? `<img src="${esc(x.pair.art)}" alt="">` : '<span class="frnone" aria-hidden="true">画</span>')
       + `<span><b>${esc(x.name)}</b><small>${SRC[x.src]} · ${x.pair ? esc(x.pair.tag) : '测完能量卡后就有你们俩的画'}</small></span>${x.pair ? '<i aria-hidden="true">›</i>' : ''}</button>`).join('')}</div>`
       : '<div class="empty">还没有朋友。把下面的链接发给朋友，TA 测完能量卡就会出现在这里。</div>')
-    + '<p class="note" style="margin:0">链接发给新朋友：注册后你们各得会员；发给已经在用 flowday 的朋友：TA 点开，你们也会在这里看到彼此的画。双方只看到对方的本命形象，看不到生日。</p></section>';
+    + `<p class="note" style="margin:0">链接发给新朋友：${S.access?.beta ? 'TA 注册后就会出现在这里' : '注册后你们各得会员'}；发给已经在用 flowday 的朋友：TA 点开，你们也会在这里看到彼此的画。双方只看到对方的本命形象，看不到生日。</p></section>`;
 }
 onClick('[data-friend]', (el) => {
   const x = S.friends && S.friends[+el.getAttribute('data-friend')];
