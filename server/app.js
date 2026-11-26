@@ -1417,6 +1417,12 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       return { name: shownName(f), src: r.src, at: r.created_at, pair: fc ? { ...C.pair(mine.dm, fc.dm), best: pairBest(mine, fc) } : null };
     }).filter(Boolean);
   }
+  // 新用户做完「第一天的三件事」：送一次御守（在「转运」里领），每个账号只送一次
+  route('POST', '/api/onboard/gift', async ({ req }) => {
+    const u = requireUser(req);
+    const given = db.run('UPDATE users SET welcome_gift = ?, amulet_credits = amulet_credits + 1 WHERE id = ? AND welcome_gift IS NULL', nowIso(), u.id).changes > 0;
+    return { given };
+  });
   route('GET', '/api/friends', async ({ req }) => ({ list: friendsOf(requireUser(req)) }));
   // 已经注册的人打开朋友的邀请链接：两人连上，互相看到你们俩的画（不算邀请奖励）
   route('POST', '/api/friends/link', async ({ req, body }) => {

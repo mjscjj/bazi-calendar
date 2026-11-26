@@ -4,7 +4,7 @@ import { S } from './state.js';
 import { pageToday } from './today.js';
 import { pageCalendar } from './calendar.js';
 import { pageMe, pageEnergy } from './me.js';
-import { pageStart, pageCard, pageWelcome, openGuide } from './onboard.js';
+import { pageStart, pageCard, pageWelcome, openWelcome } from './onboard.js';
 import { pageAuth, pageForgot, pageProfile, pageMember, pageFeedback, pageAbout } from './account.js';
 import { openPay } from './pay.js';
 import { pageInvite, pageIcs, catchInvite } from './growth.js';
@@ -86,7 +86,7 @@ export function renderPage() {
   $('#view').dataset.page = (r.path.slice(1) || 'today');
   window.scrollTo(0, 0);
   (PAGES[r.path] || pageToday)(r);
-  if (S.justRegistered && r.path === '/') { S.justRegistered = false; setTimeout(openGuide, 900); }
+  if (S.justRegistered && r.path === '/') { S.justRegistered = false; setTimeout(openWelcome, 300); }
 }
 
 // 会员状态变了以后刷新顶栏（今天页、支付成功后会调）

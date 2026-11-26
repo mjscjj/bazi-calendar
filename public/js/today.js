@@ -1,8 +1,8 @@
 // 今天页：本周趋势 → 每日卡片（公共与个人宜忌、时辰）→ 记录与工具。
-import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath } from './core.js';
+import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath, ymd } from './core.js';
 import { pillarArtSrc, THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, GRADE_CLS } from './data.js';
 import { S, isDemo } from './state.js';
-import { openHours, timelineHtml } from './day.js';
+import { openHours, openDay, timelineHtml } from './day.js';
 import { recordHtml, onMoodChange, cellStickers } from './mood.js';
 import { cardArt, cardTitle } from './onboard.js';
 import { shouldTear, showTear } from './tear.js';
@@ -52,16 +52,23 @@ function noticesHtml() {
     return h;
   }
   // 系统提示同时只放一条，按重要程度：邀请到账 > 体验最后一天 / 会员快到期 > 补出生城市 > 加到主屏
-  const today = localToday(), news = (t && t.news) || [];
+  const today = localToday(), news = (t && t.news) || [], dn = dayN();
+  h += firstDayHtml(t, dn) + firstNightHtml(t, dn);
   if (news.length) h += `<div class="notice good"><p>${news.map((n) => esc(n.text)).join('；')}</p><button type="button" class="x" data-close-notice aria-label="关闭提示">×</button></div>`;
   else if (recapNotice(today)) h += recapNotice(today);
   else if (a && a.mode === 'free' && a.remaining === 0 && !seen('lastfree-' + today)) {
     h += `<div class="notice" data-notice="lastfree-${today}"><p>今天是最后一次免费体验，之后 ¥${price(S.priceCents)}/月。</p><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
   } else if (a && a.mode === 'member' && a.daysLeft <= 3 && !seen('expiring-' + today)) {
     h += `<div class="notice" data-notice="expiring-${today}"><p>会员还有 ${a.daysLeft} 天到期（${mdText(a.memberUntil)}）。</p><a class="btn sm primary" href="#/member">续费</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
+  } else if (dn === 2 && !seen('drip-pick')) {
+    h += '<div class="notice" data-notice="drip-pick"><p>这周有要做的事吗？写下来，帮你挑出合适的日子和时段。</p><a class="btn sm ghost" href="#/calendar" data-dismiss-go>去挑日子</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
+  } else if (dn === 4 && S.me && S.me.birth && !S.me.birth.time && !seen('drip-time')) {
+    h += '<div class="notice" data-notice="drip-time"><p>补上出生时间，时辰和每天的分数会算得更准。</p><a class="btn sm ghost" href="#/profile" data-dismiss-go>去补上</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
+  } else if (dn === 6 && !seen('drip-week')) {
+    h += '<div class="notice" data-notice="drip-week"><p>第一周过完了，看看这个月你收了几张画、哪天最顺。</p><a class="btn sm ghost" href="#/recap" data-dismiss-go>看看</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
   } else if (S.me && S.me.birth && S.me.birth.time && !S.me.birth.city && !seen('city-tip')) {
     h += '<div class="notice" data-notice="city-tip"><p>补上出生城市，按真太阳时排盘，时辰更准。</p><a class="btn sm ghost" href="#/profile" data-dismiss-go>去补上</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
-  } else if (!IS_STANDALONE() && !seen('a2hs-done') && (Date.now() - (readLocal('a2hs-later') || 0)) > 7 * 86400000 && seen('guide')) {
+  } else if (!IS_STANDALONE() && !seen('a2hs-done') && (Date.now() - (readLocal('a2hs-later') || 0)) > 7 * 86400000 && seen('guide') && (dn >= 1 || t?.draw?.status === 'done')) {
     h += `<div class="notice" data-notice="a2hs"><p>${IS_MOBILE ? '加到主屏，像 App 一样一点就开。' : '安装到电脑，以后从桌面一点就开。'}</p><button type="button" class="btn sm ghost" data-install>${IS_MOBILE ? '怎么加' : '怎么装'}</button><button type="button" class="x" data-a2hs-later aria-label="以后再说">×</button></div>`;
   }
   return h;
@@ -280,6 +287,7 @@ function selectDay(date, dir, reveal = false) {
   if (!t) return;
   if (tooFar(date)) { toast('再往后就翻不动了'); return; }
   S.tsel = date === t.date ? null : date;
+  if (date !== t.date && !seen('fd-swipe')) { mark('fd-swipe'); track('fd_task', { k: 'swipe' }); setTimeout(firstDayCheck, 0); }
   slide = dir > 0 ? 'in-r' : dir < 0 ? 'in-l' : '';
   renderToday();
   if (reveal) {
@@ -374,6 +382,7 @@ function minisHtml(t) {
 
 export function renderToday() {
   const v = $('#view');
+  fdGift();
   let h = noticesHtml();
   if (S.todayLocked) h += lockHtml(S.todayLocked);
   else if (S.todayErr) h += `<div class="errbox"><p>${esc(S.todayErr)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`;
@@ -385,6 +394,7 @@ export function renderToday() {
     slide = '';
   }
   v.innerHTML = h + footHtml();
+  ghostHand();
 }
 
 export function pageToday() {
@@ -486,3 +496,79 @@ onClick('[data-day-art]', (el) => {
 onClick('[data-today-detail]', () => { const t = dayView(); if (t) openHours(t.day); });
 onClick('[data-a2hs-later]', (el) => { localStorage.setItem('lrl:a2hs-later', String(Date.now())); el.closest('.notice').remove(); });
 
+
+// ---------- 新用户的第一周：第一天卡、第一晚、每天解锁一样（只看本机的标记和注册日期，不加接口） ----------
+// 注册当天是第 0 天
+function dayN() {
+  if (!S.me || !S.me.createdAt || isDemo()) return -1;
+  const a = new Date(ymd(new Date(S.me.createdAt)) + 'T00:00:00'), b = new Date(localToday() + 'T00:00:00');
+  return Math.round((b - a) / 86400000);
+}
+const FD = [['why', '看看为什么'], ['swipe', '滑到明天'], ['draw', '求今天的第一支签']];
+const fdOk = (k, t) => seen('fd-' + k) || (k === 'draw' && t?.draw?.status === 'done');
+// 最好的时段离现在还有多久
+function bestCountdown(x) {
+  const top = bestHours(x).top;
+  if (!top.length) return { h: null, txt: '' };
+  const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
+  for (const h of top.slice().sort((p, q) => p.i - q.i)) {
+    const st = ((h.i * 2 + 23) % 24) * 60, en = st + 120;
+    if (mins < st) { const m = st - mins; return { h, txt: m >= 60 ? `还有 ${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分` : ''}` : `还有 ${m} 分钟` }; }
+    if (mins < en) return { h, txt: '正在进行' };
+  }
+  return { h: top[0], txt: '已经过了' };
+}
+function firstDayHtml(t, dn) {
+  if (dn !== 0 || !t || t.demo) return '';
+  if (seen('fd-done')) {
+    return seen('fd-done-ack') ? '' : '<div class="notice fdcard done" data-notice="fd-done-ack"><p><b>第一天的三件事都做完了。</b>送你一枚「初见」御守，在「转运」里领。明天打开，会先撕掉今天这一页。</p><button type="button" class="x" data-dismiss aria-label="关闭">×</button></div>';
+  }
+  const { h, txt } = bestCountdown(t.day), n = FD.filter(([k]) => fdOk(k, t)).length;
+  return `<section class="fdcard" aria-label="第一天"><div class="fdhead"><span class="fdtag">第一天</span><span class="fdprog">${n} / 3</span></div>`
+    + `<p class="fdline">今天对你是「${esc(t.day.level.p)}」日${h ? `，最好的时段是 <b>${hhShort(h.i)}</b><em>${txt}</em>` : ''}</p>`
+    + `<div class="fdtasks">${FD.map(([k, label]) => `<button type="button" class="${fdOk(k, t) ? 'ok' : ''}" data-fd="${k}"><i aria-hidden="true"></i>${k === 'why' ? `为什么今天是「${esc(t.day.level.p)}」` : label}</button>`).join('')}</div>`
+    + '<p class="fdgift">三件做完，送你一枚御守</p></section>';
+}
+// 第一天晚上：告诉我准不准
+const RATE = ['很不顺', '有点难', '一般', '挺好', '很顺'];
+function firstNightHtml(t, dn) {
+  if (dn !== 0 || !t || t.demo || new Date().getHours() < 18 || seen('fd-rate')) return '';
+  return `<section class="fdnight" aria-label="第一天晚上"><p><b>第一天过得怎么样？</b>告诉我准不准，我会越来越懂你。</p>`
+    + `<div class="fdrate">${RATE.map((w, i) => `<button type="button" data-fd-rate="${i + 1}">${w}</button>`).join('')}</div></section>`;
+}
+function rateReply(k, score) {
+  if (score >= 4) return k >= 4 ? '顺的日子你也觉得顺，我们对上了。' : k <= 2 ? `今天本是「${S.today.day.level.p}」日，你却过得不错——说明你稳住了。` : '平稳的一天被你过成了好日子。';
+  if (score <= 2) return k <= 2 ? '今天本就要留神，辛苦了。明天会不一样。' : '今天比预想的难一些，我记下了，会慢慢更懂你。';
+  return '不好不坏，正是平稳的样子。';
+}
+onClick('[data-fd-rate]', async (el) => {
+  const score = +el.getAttribute('data-fd-rate');
+  mark('fd-rate'); track('fd_rate', { score });
+  api('POST', 'ratings', { day: localToday(), score, note: '' }).catch(() => {});
+  toast(rateReply(S.today.day.level.k, score));
+  renderToday();
+});
+onClick('[data-fd]', (el) => {
+  const k = el.getAttribute('data-fd'), t = S.today;
+  if (!t) return;
+  if (k === 'why') { mark('fd-why'); track('fd_task', { k }); openDay(t.day, t.chart, t.name, t.plans); setTimeout(firstDayCheck, 0); }
+  else if (k === 'swipe') slideTo(1);
+  else if (k === 'draw') document.querySelector('.minis [data-draw]')?.click();
+});
+// 三件都做完：送一次御守（每次画今天页时检查，求签做完回来也会走到）
+function fdGift() {
+  const t = S.today;
+  if (!t || t.demo || dayN() !== 0 || seen('fd-done') || !FD.every(([k]) => fdOk(k, t))) return;
+  mark('fd-done'); track('fd_done');
+  api('POST', 'onboard/gift', {}).then((r) => { if (r.given) toast('三件事都做完了，送你一枚御守，在「转运」里领'); }).catch(() => {});
+}
+function firstDayCheck() { if (currentPath() === '/') renderToday(); }
+// 第一天，日卡上一只小手左右划一下，提示可以滑（只出现一次）
+function ghostHand() {
+  const t = S.today;
+  if (!t || t.demo || dayN() !== 0 || seen('hint-swipe') || !seen('guide') || selDate() !== t.date || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const card = document.querySelector('.dslot.cur .tcard') || document.querySelector('.tcard');
+  if (!card) return;
+  mark('hint-swipe');
+  setTimeout(() => { if (!card.isConnected) return; const g = document.createElement('i'); g.className = 'ghost-hand'; g.setAttribute('aria-hidden', 'true'); card.appendChild(g); setTimeout(() => g.remove(), 3200); }, 2600);
+}

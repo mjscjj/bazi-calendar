@@ -354,26 +354,33 @@ export function pageCard() {
   show(p.card, p.nickname, '<button type="button" class="btn ghost" data-share="card">分享</button><a class="btn primary" href="#/register">保存并看我的今天</a>');
 }
 
-// ---------- 三步引导 ----------
-let guideNext = null;
-const STEPS = [
-  ['这是你的今天', '每天打开就看这里：今天是什么日子、适合做什么、几点最好。上面一行是大家都一样的黄历，下面是只属于你的。'],
-  ['在日历里挑日子', '要汇报、面试、搬家、谈合作，在「日历」里写下这件事，帮你挑出合适的日子和时段。'],
-  ['每天一签、一张画', '每天一支签、一组幸运色，都和你今天的能量有关；每天打开还会收下当天的那张画，60 天集齐一甲子。加到主屏，早上醒来一点就开。'],
-];
-export function openGuide() {
+// ---------- 注册成功：你的画铺满全屏，约 2 秒后飞进「我的」页签 ----------
+// 不弹说明、不加按钮；看过记成 guide（撕日历、收画提示、加到主屏都以它为前提）
+export function openWelcome(tries = 0) {
   if (seen('guide')) return;
-  let i = 0;
-  const body = openSheet('欢迎来到 flowday', '', { onClose: () => mark('guide') });
-  const render = () => {
-    const [t, d] = STEPS[i];
-    body.innerHTML = `<div class="guide"><div class="dots3">${STEPS.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div><h2>${t}</h2><p>${d}</p>`
-      + `<div class="acts">${i < STEPS.length - 1 ? '<button type="button" class="btn ghost" data-close-sheet>跳过</button><button type="button" class="btn primary" data-guide-next>下一步</button>' : (IS_STANDALONE() ? '<button type="button" class="btn primary block" data-close-sheet>开始使用</button>' : '<button type="button" class="btn ghost" data-close-sheet>以后再说</button><button type="button" class="btn primary" data-install>加到主屏</button>')}</div></div>`;
-  };
-  render();
-  guideNext = () => { i++; render(); };
+  const p = S.today && S.today.card && S.today.card.pillar;
+  if (!p) { if (tries < 20) setTimeout(() => openWelcome(tries + 1), 150); else mark('guide'); return; }
+  mark('guide');
+  track('onboard_welcome');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const el = document.createElement('div');
+  el.className = 'welcome';
+  el.innerHTML = `<img src="${esc(p.art)}" alt=""><div class="wtxt"><b>${esc(p.gz)} · ${esc(p.name)}</b><p>从今天起，每天都有一张画属于你。</p></div>`;
+  document.body.appendChild(el);
+  const done = () => el.remove();
+  el.addEventListener('click', done);
+  setTimeout(() => {
+    // 飞进「我的」页签：你的能量卡和这张画都在那里（手机是底部页签，电脑是顶部导航）
+    const img = el.querySelector('img'), to = [...document.querySelectorAll('.tabbar a[href="#/me"], .topnav a[href="#/me"]')].find((x) => x.offsetParent);
+    el.classList.add('fly');
+    if (to) {
+      const a = img.getBoundingClientRect(), b = to.getBoundingClientRect();
+      img.style.transform = `translate(${b.left + b.width / 2 - a.left - a.width / 2}px, ${b.top + b.height / 2 - a.top - a.height / 2}px) scale(${b.width / a.width})`;
+      img.style.borderRadius = '50%';
+    }
+    setTimeout(done, 750);
+  }, 2200);
 }
-onClick('[data-guide-next]', () => guideNext && guideNext());
 onClick('[data-card-next]', () => {
   if (!reveal || currentPath() !== '/card') return;
   reveal.k++;
