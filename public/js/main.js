@@ -1,5 +1,5 @@
 // 入口：路由、顶栏、底部页签、全局点击、离线缓存与“加到主屏”。
-import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mdText, mark, track, localToday, isDarkNow, setTheme, applyTheme, toast } from './core.js';
+import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, track, localToday, isDarkNow, setTheme, applyTheme, toast } from './core.js';
 import { S } from './state.js';
 import { pageToday } from './today.js';
 import { pageCalendar } from './calendar.js';
@@ -49,8 +49,8 @@ function renderTop(r) {
   if (S.me) {
     const a = S.access || {};
     let st = '', cls = '';
-    if (a.mode === 'member') { cls = a.daysLeft <= 3 ? 'warn' : 'member'; st = '会员 · 至 ' + mdText(a.memberUntil); }
-    else if (a.mode === 'free') st = '免费体验 · 剩 ' + a.remaining + ' 次';
+    // 会员不在顶栏显示到期日，主页干净一点；到期日在「我的 → 会员与订单」，快到期时今天页有提醒
+    if (a.mode === 'free') st = '免费体验 · 剩 ' + a.remaining + ' 次';
     else if (a.mode === 'blocked') { cls = 'blocked'; st = '开通会员'; }
     if (st) h += `<button type="button" class="status ${cls}" data-go="/member">${st}</button>`;
   } else if (!['/login', '/register'].includes(r.path)) {
