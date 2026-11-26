@@ -10,6 +10,7 @@ function loadCard() { return api('GET', 'me/card').then((d) => { card = d.card; 
 
 function statusText() {
   const a = S.access || {};
+  if (a.beta) return '体验版 · 会员免费';
   if (a.mode === 'member') return `会员 · 至 ${mdText(a.memberUntil)}`;
   if (a.mode === 'free') return `免费体验 · 剩 ${a.remaining} 次`;
   return a.expired ? '会员已到期' : '开通会员';

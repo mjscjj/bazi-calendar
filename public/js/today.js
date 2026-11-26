@@ -58,7 +58,9 @@ function noticesHtml() {
   else if (recapNotice(today)) h += recapNotice(today);
   else if (a && a.mode === 'free' && a.remaining === 0 && !seen('lastfree-' + today)) {
     h += `<div class="notice" data-notice="lastfree-${today}"><p>今天是最后一次免费体验，之后 ¥${price(S.priceCents)}/月。</p><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
-  } else if (a && a.mode === 'member' && a.daysLeft <= 3 && !seen('expiring-' + today)) {
+  } else if (a && a.beta && !seen('beta-member')) {
+    h += '<div class="notice good" data-notice="beta-member"><p><b>你很幸运</b>：现在是体验版，会员免费送你，所有功能随便用。</p><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
+  } else if (a && a.mode === 'member' && !a.beta && a.daysLeft <= 3 && !seen('expiring-' + today)) {
     h += `<div class="notice" data-notice="expiring-${today}"><p>会员还有 ${a.daysLeft} 天到期（${mdText(a.memberUntil)}）。</p><a class="btn sm primary" href="#/member">续费</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
   } else if (dn === 2 && !seen('drip-pick')) {
     h += '<div class="notice" data-notice="drip-pick"><p>这周有要做的事吗？写下来，帮你挑出合适的日子和时段。</p><a class="btn sm ghost" href="#/calendar" data-dismiss-go>去挑日子</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';

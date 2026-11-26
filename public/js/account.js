@@ -127,7 +127,8 @@ export function pageMember() {
     S.access = d.access; S.priceCents = d.priceCents; S.memberDays = d.memberDays;
     const a = d.access;
     let card;
-    if (a.mode === 'member') card = `<div class="mcard"><small>月度会员</small><b>有效期至 ${ymdText(a.memberUntil)}</b><span>还剩 ${a.daysLeft} 天${a.daysLeft <= 3 ? '，快到期了' : ''}</span></div>`;
+    if (a.beta) card = '<div class="mcard"><small>体验版</small><b>你很幸运，会员免费送</b><span>现在是体验版，所有功能随便用，不用付钱</span></div>';
+    else if (a.mode === 'member') card = `<div class="mcard"><small>月度会员</small><b>有效期至 ${ymdText(a.memberUntil)}</b><span>还剩 ${a.daysLeft} 天${a.daysLeft <= 3 ? '，快到期了' : ''}</span></div>`;
     else if (a.mode === 'free') card = `<div class="mcard"><small>免费体验中</small><b>还剩 ${a.remaining} 次</b><span>同一天里随便看只算 1 次，共 ${a.freeLimit} 次</span></div>`;
     else card = `<div class="mcard"><small>${a.expired ? '会员已到期' : '免费体验已用完'}</small><b>开通后继续使用</b><span>你的资料和计划都还在</span></div>`;
     const buy = `<section class="card"><div class="price"><b>¥${price(d.priceCents)}</b><span>/ ${d.memberDays} 天</span></div>`
@@ -138,7 +139,7 @@ export function pageMember() {
       const st = { paid: '已支付', pending: '待支付', refunded: '已退款' }[o.status] || o.status;
       return `<div class="o"><span>${o.product && o.product !== 'member' ? esc(o.productName) : `月度会员 · ${o.days} 天`}</span><span class="s">¥${price(o.amountCents)}</span><small>${dtText(o.paidAt || o.createdAt)} · ${o.outTradeNo}</small><small style="text-align:right">${st}</small></div>`;
     }).join('') + '</div>' : '<div class="empty">还没有订单</div>') + '</section>';
-    v.innerHTML = phead('会员与订单') + card + buy + orders + '<p class="note" style="text-align:center;margin:0">付了钱但没开通？<a href="#/feedback?t=付款问题">告诉我们</a></p>' + footHtml();
+    v.innerHTML = phead('会员与订单') + card + (a.beta ? '' : buy) + orders + '<p class="note" style="text-align:center;margin:0">付了钱但没开通？<a href="#/feedback?t=付款问题">告诉我们</a></p>' + footHtml();
   }, (e) => { v.innerHTML = phead('会员与订单') + `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`; });
 }
 
@@ -215,7 +216,7 @@ onClick('#logoutBtn', () => {
 onClick('[data-delete-open]', () => {
   const a = S.access || {};
   openSheet('注销账号', '<form class="form" id="delForm" novalidate><p style="margin:0;font-size:14px;line-height:1.7">注销后会<b>立即删除</b>你的出生信息、计划、签、心情便签、问事、反馈和邀请关系，无法恢复。订单只保留金额、时间和支付宝交易号用于对账，不再和你关联。</p>'
-    + (a.mode === 'member' ? `<p class="warnline">还剩 ${a.daysLeft} 天的会员会一起作废，不退款。</p>` : '')
+    + (a.mode === 'member' && !a.beta ? `<p class="warnline">还剩 ${a.daysLeft} 天的会员会一起作废，不退款。</p>` : '')
     + '<label class="field"><span>输入密码确认</span><input name="password" type="password" autocomplete="current-password" required></label>'
     + '<div class="err" id="delErr"></div><button type="submit" class="btn danger block">注销账号</button></form>');
 });

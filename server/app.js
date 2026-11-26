@@ -148,6 +148,8 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (until && until > nowIso()) {
       return { mode: 'member', memberUntil: until, daysLeft: Math.ceil((new Date(until) - Date.now()) / DAY_MS) };
     }
+    // 体验版：所有人免费当会员，没有到期日
+    if (settings.get('beta_member') === '1') return { mode: 'member', beta: true, memberUntil: null, daysLeft: null };
     const freeLimit = settings.int('free_uses');
     const used = db.get('SELECT COUNT(*) n FROM usage_days WHERE user_id = ?', u.id).n;
     const todayCounted = !!db.get('SELECT 1 x FROM usage_days WHERE user_id = ? AND day = ?', u.id, today);
@@ -1828,6 +1830,10 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if ('engine' in body && ['v1', 'v2'].includes(body.engine) && body.engine !== before.engine) { settings.set('engine', body.engine); changes.push(`打分规则 ${before.engine} → ${body.engine}`); }
     num('amulet_price_cents', 1, 100000, '特别款御守单价（分）');
     num('invite_cap', 0, 100, '每月邀请奖励上限');
+    if ('beta_member' in body) {
+      const v = body.beta_member ? '1' : '0';
+      if (v !== before.beta_member) { settings.set('beta_member', v); changes.push(`体验版会员 ${v === '1' ? '打开' : '关闭'}`); }
+    }
     for (const [k, name, max] of [['order_subject', '订单名称', 60], ['disclaimer', '娱乐声明', 2000], ['terms', '用户协议', 20000], ['privacy', '隐私政策', 20000]]) {
       if (!(k in body)) continue;
       const v = String(body[k]).trim();

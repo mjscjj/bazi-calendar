@@ -181,6 +181,7 @@ function pageSettings() {
     var s = d.settings;
     shell('<div class="bar2"><h1>设置</h1><button class="btn primary" form="sf">保存设置</button></div><form id="sf" class="setg">'
       + '<label class="field"><span>月度会员价格（元）</span><input name="price" type="number" step="0.01" min="0.01" value="' + (s.price_cents / 100).toFixed(2) + '"><span class="hint">只影响之后新下的订单</span></label>'
+      + '<label class="field"><span>体验版会员</span><select name="beta_member"><option value="1"' + (s.beta_member === '1' ? ' selected' : '') + '>打开：所有人免费当会员</option><option value="0"' + (s.beta_member === '1' ? '' : ' selected') + '>关闭：按免费次数和付费会员</option></select><span class="hint">测试阶段打开；关闭后恢复收费，已付费的会员不受影响</span></label>'
       + '<label class="field"><span>免费体验次数</span><input name="free_uses" type="number" min="0" max="30" value="' + esc(s.free_uses) + '"><span class="hint">按使用日计，同一天只算 1 次</span></label>'
       + '<label class="field"><span>特别款御守单价（元）</span><input name="amulet_price" type="number" step="0.01" min="0.01" value="' + (s.amulet_price_cents / 100).toFixed(2) + '"><span class="hint">节气款、生日款</span></label>'
       + '<label class="field"><span>打分规则</span><select name="engine"><option value="v1"' + (s.engine === 'v1' ? ' selected' : '') + '>v1（现在线上用的）</option><option value="v2"' + (s.engine === 'v2' ? ' selected' : '') + '>v2（加大运流年、冲克分喜忌）</option></select><span class="hint">会改变所有人每天的分数。先在「规则对比」里看过、发起人点头后再切，最好在月初切</span></label>'
@@ -194,7 +195,7 @@ function pageSettings() {
     $('#sf').onsubmit = function (e) {
       e.preventDefault(); var f = e.target;
       if (f.engine.value !== s.engine && !confirm('切换打分规则会改变所有人每天的分数和档位，确定现在切换吗？')) return;
-      api('PUT', 'admin/settings', { price_cents: Math.round(parseFloat(f.price.value) * 100), free_uses: +f.free_uses.value, amulet_price_cents: Math.round(parseFloat(f.amulet_price.value) * 100), engine: f.engine.value, invite_days: +f.invite_days.value, invite_cap: +f.invite_cap.value, order_subject: f.order_subject.value, disclaimer: f.disclaimer.value, terms: f.terms.value, privacy: f.privacy.value })
+      api('PUT', 'admin/settings', { price_cents: Math.round(parseFloat(f.price.value) * 100), free_uses: +f.free_uses.value, beta_member: f.beta_member.value === '1', amulet_price_cents: Math.round(parseFloat(f.amulet_price.value) * 100), engine: f.engine.value, invite_days: +f.invite_days.value, invite_cap: +f.invite_cap.value, order_subject: f.order_subject.value, disclaimer: f.disclaimer.value, terms: f.terms.value, privacy: f.privacy.value })
         .then(function () { $('#serr').textContent = ''; toast('已保存'); }, function (er) { $('#serr').textContent = er.message; });
     };
   });

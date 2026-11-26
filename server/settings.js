@@ -4,6 +4,7 @@ export const DEFAULTS = {
   price_cents: '290',
   member_days: '30',
   free_uses: '2',
+  beta_member: '0', // 体验版：打开后所有人都按会员算，不用付钱（测试阶段在后台打开）
   amulet_price_cents: '390',
   engine: 'v1',
   invite_days: '7',
