@@ -13,7 +13,19 @@ export const MONTHS = 'January February March April May June July August Septemb
 export const WEEK = 'Sun Mon Tue Wed Thu Fri Sat'.split(' ');
 export const WEEK_LONG = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
 export const SITE = 'mindflow.zone/sixty';
-export const S = { C: null, me: null, today: null }; // content, /api/me, last /api/today
+export const S = { C: null, me: null, guest: null, today: null }; // content, /api/me (signed in), guest (birthday kept on this phone only), last today
+
+// ---------- who is looking: an account, or a guest whose birthday stays on this phone ----------
+export const you = () => S.me?.p || S.guest?.p || null;
+export const signedIn = () => !!S.me;
+const guestBody = (o = {}) => ({ birth: S.guest.birth, ...o });
+// the same numbers either way; a guest's are calculated on the spot and not stored
+export const data = {
+  today: (date) => (S.me ? api('GET', 'today?date=' + date) : api('POST', 'us/guest/today', guestBody({ date }))),
+  week: (date) => (S.me ? api('GET', 'week?date=' + date) : api('POST', 'us/guest/week', guestBody({ date }))),
+  calendar: (y, m) => (S.me ? api('GET', `calendar?y=${y}&m=${m}&today=${localDay()}`) : api('POST', 'us/guest/calendar', guestBody({ y, m, today: localDay() }))),
+  pick: (type, range) => (S.me ? api('POST', 'pick', { type, range, today: localDay() }) : api('POST', 'us/guest/pick', guestBody({ type, range, today: localDay() }))),
+};
 
 // ---------- dates ----------
 export const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -53,6 +65,12 @@ export const level = (k) => S.C.levels[k];
 export const theme = (ten, tone, date) => { const a = S.C.themes[ten][tone === 'ji' ? 'ji' : 'xi']; return a[date ? cycleIndex(date) % a.length : 0]; };
 export const toneOf = (chart, gz) => { const e = GAN.indexOf(gz[0]) >> 1; return chart?.xi?.includes(e) ? 'xi' : chart?.ji?.includes(e) ? 'ji' : 'neutral'; };
 export const tenName = (ten) => S.C.tenGods[ten]?.[0] || ten;
+// the Ten Gods relation of a stem to your day stem (same rule as the server's shishen)
+export function shishen(dm, g) {
+  const a = GAN.indexOf(dm), b = GAN.indexOf(g), r = ((b >> 1) - (a >> 1) + 5) % 5, same = a % 2 === b % 2;
+  return [['比肩', '劫财'], ['食神', '伤官'], ['偏财', '正财'], ['七杀', '正官'], ['偏印', '正印']][r][same ? 0 : 1];
+}
+export const toneWord = (tone) => (tone === 'xi' ? 'fuels you' : tone === 'ji' ? 'drains you a little' : 'keeps things even');
 export const tenFull = (ten) => (S.C.tenGods[ten] ? `${S.C.tenGods[ten][0]} (${S.C.tenGods[ten][1]} · ${ten})` : ten);
 
 // One reason from the engine, in English. The engine's own note ("t") stays as the small print.
@@ -76,6 +94,18 @@ export function whyEn(w) {
   if (/黑道/.test(t)) return 'A traditionally quiet hour in the old almanac.';
   if (/黄道/.test(t)) return 'A traditionally lucky hour in the old almanac.';
   return null;
+}
+// the best and the weakest waking hours (7 AM – 9 PM) of a day
+export const wakeHours = (d) => d.hours.filter((h) => h.i >= 4 && h.i <= 10);
+export const bestHour = (d) => wakeHours(d).slice().sort((a, b) => b.score - a.score)[0];
+export const worstHour = (d) => wakeHours(d).slice().sort((a, b) => a.score - b.score)[0];
+// where a day sits in its week: "Best day this week", "3rd best this week", "Toughest day this week"
+export function weekRank(days, date) {
+  const sorted = days.slice().sort((a, b) => b.day.score - a.day.score), i = sorted.findIndex((x) => x.date === date);
+  if (i < 0) return '';
+  if (i === 0) return 'Best day this week';
+  if (i === sorted.length - 1) return 'Toughest day this week';
+  return `${['', '2nd', '3rd', '4th', '5th', '6th'][i]} best this week`;
 }
 export const whyList = (why, n = 6) => why.map((w) => ({ v: w.v, en: whyEn(w), t: w.t })).filter((x) => x.en).slice(0, n);
 // lucky colors from the engine's pick (an element), in English
@@ -134,13 +164,20 @@ export function countUp(el, to, ms = 900) {
 }
 
 // ---------- sheet ----------
-export function openSheet(html, cls = '') {
+let onSheetClose = null;
+export function openSheet(html, cls = '', onClose = null) {
+  const prev = onSheetClose; onSheetClose = null; prev?.();
   const s = $('#sheet'); s.innerHTML = `<div class="panel ${cls}" role="dialog" aria-modal="true">${html}</div>`; s.hidden = false;
   document.body.style.overflow = 'hidden';
-  s.querySelector('.x')?.addEventListener('click', closeSheet);
+  s.querySelector('.x')?.addEventListener('click', () => closeSheet());
+  onSheetClose = onClose;
   return s.querySelector('.panel');
 }
-export function closeSheet() { const s = $('#sheet'); if (s.hidden) return; s.hidden = true; s.innerHTML = ''; document.body.style.overflow = ''; }
+export function closeSheet() {
+  const s = $('#sheet'); if (s.hidden) return;
+  s.hidden = true; s.innerHTML = ''; document.body.style.overflow = '';
+  const f = onSheetClose; onSheetClose = null; f?.();
+}
 $('#sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet') closeSheet(); });
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 
@@ -148,32 +185,11 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
 export const loading = (h = 120) => `<div class="skeleton" style="height:${h}px"></div>`;
 export const failed = (msg) => `<div class="card"><p class="muted" style="margin:0">${esc(msg)}</p><button class="btn ghost block" style="margin-top:12px" onclick="location.reload()">Try again</button></div>`;
 export const chipEl = (el, text) => `<span class="chip el" style="${elStyle(el)}"><span class="dot"></span>${esc(text || el)}</span>`;
-export function ring(score, size = 78) {
-  const r = size / 2 - 5, c = 2 * Math.PI * r, f = Math.max(0.04, Math.min(1, score / 100));
-  return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 ${size} ${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--soft)" stroke-width="7"/>
-    <circle class="arc" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--lv)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c * f} ${c}" style="--c:${c}"/></svg><b data-count="${score}">${score}</b></div>`;
+export function ring(score, size = 64, w = 6) {
+  const r = size / 2 - w / 2 - 1, c = 2 * Math.PI * r, f = Math.max(0.04, Math.min(1, score / 100));
+  return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 ${size} ${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--soft)" stroke-width="${w}"/>
+    <circle class="arc" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--lv)" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c * f} ${c}" style="--c:${c}"/></svg><b data-count="${score}" style="font-size:${Math.round(size * 0.4)}px">${score}</b></div>`;
 }
-// birthday input that formats as MM / DD / YYYY and accepts autofill
-export function readBirthday(v) {
-  let y, m, d;
-  v = String(v || '').trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) [y, m, d] = v.split('-').map(Number);
-  else { const n = v.replace(/\D/g, ''); if (n.length === 8) { m = +n.slice(0, 2); d = +n.slice(2, 4); y = +n.slice(4); } }
-  const t = y && new Date(y, m - 1, d);
-  if (!t || t.getMonth() !== m - 1 || t.getDate() !== d) return { err: 'Please enter a real date, like 03 / 14 / 1992.' };
-  const s = iso(t);
-  if (y < 1902 || s > localDay()) return { err: 'Please enter a birthday between 1902 and today.' };
-  return { date: s };
-}
-export function maskBirthday(input) {
-  input.addEventListener('input', () => {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(input.value)) return;
-    const d = input.value.replace(/\D/g, '').slice(0, 8);
-    input.value = d.length > 4 ? `${d.slice(0, 2)} / ${d.slice(2, 4)} / ${d.slice(4)}` : d.length > 2 ? `${d.slice(0, 2)} / ${d.slice(2)}` : d;
-  });
-}
-export const birthdayValue = (date) => (date ? `${date.slice(5, 7)} / ${date.slice(8)} / ${date.slice(0, 4)}` : '');
-
 // ---------- sound: tiny sounds made on the fly (no audio files); off in Me → Settings ----------
 let AC = null;
 const ac = () => (AC = AC || new (window.AudioContext || window.webkitAudioContext)());

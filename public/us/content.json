@@ -3509,5 +3509,36 @@
   "Okay",
   "Good",
   "Great"
- ]
+ ],
+ "questions": [
+  "Should I take the new job?",
+  "Is now the time to ask for a raise?",
+  "Will this relationship grow?",
+  "Should I move this year?",
+  "Is this a good investment?",
+  "How do I mend things with a friend?",
+  "Should I start my own thing?",
+  "Where did I leave it?"
+ ],
+ "decades": {
+  "正官": "A decade of structure: roles, titles and commitments shape you. Rules work in your favor if you play by them.",
+  "七杀": "A decade of pressure that builds strength: big challenges, fast growth, and a need for allies.",
+  "正印": "A decade of support: learning, mentors and a home base. A good time to deepen skills.",
+  "偏印": "A decade of insight: unusual paths, solo study, and ideas ahead of their time.",
+  "比肩": "A decade among peers: independence, teamwork and standing on your own feet.",
+  "劫财": "A decade of competition: more rivals and more drive. Watch spending and shared money.",
+  "食神": "A decade of ease and craft: enjoying life, making things, and letting talent show.",
+  "伤官": "A decade of expression: speaking up, breaking molds and creative risk.",
+  "正财": "A decade of steady earning: building savings, routines and solid ground.",
+  "偏财": "A decade of opportunity: deals, travel and windfalls that reward quick moves."
+ },
+ "pickFor": {
+  "work": "面试",
+  "money": "签约",
+  "love": "约会",
+  "home": "搬家",
+  "move": "出行",
+  "dispute": "谈判",
+  "health": "休息"
+ }
 }

@@ -1057,3 +1057,36 @@ test('美国版站点：不满 13 岁不能注册；按浏览器时区切天；�
     assert.equal((await call('POST', '/api/auth/login', { username: 'amy@example.com', password: 'newpassword1' })).status, 200);
   } finally { srv.close(); }
 });
+
+test('美国版访客：不注册也能拿今天、本周、月历和挑日子，算完不存；中文版没有这些接口', async () => {
+  const env = { BASE_PATH: '/sixty', COOKIE_SECURE: '0', ASK_AI: 'fake', US_EDITION: '1', DAY_TZ: 'America/Chicago', MEMBER_FOR_ALL: '1', GENDER_OPTIONAL: '1' };
+  const sdb = openDb(':memory:');
+  const srv = createServer({ db: sdb, alipay: null, env, log: { info() {}, error() {}, warn() {} } });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  const B = `http://127.0.0.1:${srv.address().port}/sixty`;
+  const call = async (p, body) => { const r = await fetch(B + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return { status: r.status, data: await r.json().catch(() => ({})) }; };
+  try {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }), birth = { date: '1992-03-14', time: '08:30', city: 'New York, NY' };
+    const t = await call('/api/us/guest/today', { birth, date: today });
+    assert.equal(t.status, 200);
+    assert.equal(t.data.chart.pillars.length, 4); assert.ok(t.data.day.score > 0 && t.data.strip.days.length === 7 && t.data.tomorrow && t.data.moodKit);
+    assert.ok(!t.data.jiazi && !t.data.draw, '访客没有收画和签');
+    const w = await call('/api/us/guest/week', { birth, date: '2026-12-10' });
+    assert.equal(w.status, 200); assert.equal(w.data.days.length, 7);
+    const [y, m] = today.split('-').map(Number);
+    const c = await call('/api/us/guest/calendar', { birth, y, m, today });
+    assert.equal(c.status, 200); assert.equal(c.data.days.length, new Date(y, m, 0).getDate());
+    const p = await call('/api/us/guest/pick', { birth, type: '面试', range: '1m', today });
+    assert.equal(p.status, 200); assert.ok(p.data.picks.length >= 1 && p.data.days > 0);
+    assert.equal((await call('/api/us/guest/pick', { birth, type: 'nope', today })).status, 400);
+    assert.equal((await call('/api/us/guest/today', { birth: { date: '2999-01-01' }, date: today })).status, 400);
+    assert.equal(sdb.get('SELECT COUNT(*) n FROM users').n, 0, '访客什么都不存');
+  } finally { srv.close(); }
+  // 中文版没有访客接口
+  const cn = createServer({ db: openDb(':memory:'), alipay: null, env: { BASE_PATH: '/bazi', COOKIE_SECURE: '0', ASK_AI: 'fake' }, log: { info() {}, error() {}, warn() {} } });
+  await new Promise((r) => cn.listen(0, '127.0.0.1', r));
+  try {
+    const r = await fetch(`http://127.0.0.1:${cn.address().port}/bazi/api/us/guest/today`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    assert.equal(r.status, 404);
+  } finally { cn.close(); }
+});

@@ -707,6 +707,27 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     return { ...calendarFor(DEMO_BIRTH, null, q), plans: [], name: DEMO_NAME, demo: true };
   });
 
+  // 美国版访客：不注册也能看今天、本周、月历和挑日子。生日只用来当场计算，不保存；要保存的动作（收画、心情、计划、签）才需要账号
+  if (env.US_EDITION === '1') {
+    const guestChart = (body, ip) => {
+      if (!limit('guest:' + ip, 600, 3600000)) throw new HttpError(429, '操作太频繁，请稍后再试');
+      return validBirth(body.birth, false);
+    };
+    route('POST', '/api/us/guest/today', async ({ body, ip }) => {
+      const t = todayFor(guestChart(body, ip), null, validDay(body.date), { moodKit: moodKit() });
+      delete t.arts;
+      return t;
+    });
+    route('POST', '/api/us/guest/week', async ({ body, ip }) => weekStrip(chart(guestChart(body, ip), null, engineVer()), stripDay(new URLSearchParams({ date: String(body.date || '') }))));
+    route('POST', '/api/us/guest/calendar', async ({ body, ip }) => calendarFor(guestChart(body, ip), null, new URLSearchParams({ y: String(body.y), m: String(body.m), today: String(body.today || '') })));
+    route('POST', '/api/us/guest/pick', async ({ body, ip }) => {
+      const b = guestChart(body, ip), type = C.pickType(body.type);
+      if (!type) throw bad('请选一类事');
+      const range = ['month', '1m', '3m'].includes(body.range) ? body.range : '1m';
+      return { type: type.name, range, ...pickDays(chart(b, null, engineVer()), type, C.pick.all_ji, validDay(body.today), range) };
+    });
+  }
+
   // 能量卡：访客不用注册就能看（不保存），登录用户看自己的
   route('POST', '/api/preview/card', async ({ body, ip }) => {
     if (!limit('preview:' + ip, 30, 3600000)) throw new HttpError(429, '操作太频繁，请稍后再试');

@@ -1,43 +1,67 @@
-// 美国版 Flow Day 走查：node test/e2e/us.mjs <美国版页面地址，如 http://127.0.0.1:3210/sixty/us/> <截图目录> [数据库路径]
-// 服务端要开 US_EDITION=1 DAY_TZ=America/Chicago MEMBER_FOR_ALL=1 GENDER_OPTIONAL=1。给了数据库路径时，会把测试账号改成三天前注册，验证第二天打开要撕日历。（每日一签要 JIAO_FAKE=xiao,sheng，先笑杯再圣杯）
-// 落地页 → 排盘动画 → 三张揭晓 → 注册 → Today（Why、表盘、一周条）→ 月历 → 当天 → 挑日子 → Me → 收藏墙 → 邀请 → 两人的画 → 深色 → 条款 → 注销
+// 美国版 Flow Day 走查：node test/e2e/us.mjs <美国版页面地址，如 http://127.0.0.1:3210/sixty/us/> <截图目录> [数据库路径] [wide]
+// 服务端要开 US_EDITION=1 DAY_TZ=America/Chicago MEMBER_FOR_ALL=1 GENDER_OPTIONAL=1。给了数据库路径时，会把测试账号改成三天前注册，验证第二天打开有「撕掉昨天」。
+// （每日一签要 JIAO_FAKE=xiao,sheng，先笑杯再圣杯；第 5 个参数写 wide 用电脑尺寸）
+// 访客：落地页 → 滚轮选生日 → 排盘动画 → 揭晓（今天对你、补出生时间和地点）→ Today（Why、表盘、要保存时提示注册）→ 月历（点一天、挑日子）→ 签 → 朋友 → You → 设置
+// 注册后：心情 → 撕掉昨天 → 存计划 → 求签 → 锁屏 → 月度回顾 → 收藏 → 邀请 → 朋友打开链接 → 两人的画 → 朋友注册 → 你的朋友今天 → 深色 → 条款 → 注销
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE);
-const [base, out] = process.argv.slice(2);
+const [base, out, dbPath, wide] = process.argv.slice(2);
 const AMY = `t${Date.now()}a@example.com`, ALEX = `t${Date.now()}b@example.com`;
 const b = await chromium.launch({ executablePath: process.env.CHROME });
 const errs = [];
-const mk = async (o = {}) => { const c = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, ...o }); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(e.message)); p.on('console', (m) => m.type() === 'error' && errs.push('console ' + m.text())); return p; };
+const VP = wide === 'wide' ? { viewport: { width: 1280, height: 860 } } : { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+const mk = async () => { const c = await b.newContext(VP); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(e.message)); p.on('console', (m) => m.type() === 'error' && errs.push('console ' + m.text())); return p; };
 const p = await mk();
 const shot = (pg, n, full) => pg.screenshot({ path: `${out}/${n}.png`, fullPage: !!full });
 const step = (s) => console.log('—', s);
+// turn the wheels of the open date picker to a date
+const wheelTo = async (pg, y, m, d) => {
+  await pg.waitForSelector('.wheels'); await pg.waitForTimeout(350);
+  await pg.evaluate(([y2, m2]) => { const c = document.querySelectorAll('.wcol'); c[0].scrollTop = (m2 - 1) * 40; c[2].scrollTop = (y2 - 1902) * 40; c.forEach((x) => x.dispatchEvent(new Event('scroll'))); }, [y, m]);
+  await pg.waitForTimeout(250);
+  await pg.evaluate((d2) => { const c = document.querySelectorAll('.wcol')[1]; c.scrollTop = (d2 - 1) * 40; c.dispatchEvent(new Event('scroll')); }, d);
+  await pg.waitForTimeout(250); await pg.click('#pdOk');
+};
+
 step('landing'); await p.goto(base + '#/'); await p.waitForSelector('#birthForm'); await p.waitForTimeout(500); await shot(p, 'a1-landing');
-await p.type('#bday', '03141992'); await p.click('#birthForm button');
-step('theater'); await p.waitForSelector('.theater'); await p.waitForTimeout(900); await shot(p, 'b1-wheel'); await p.waitForTimeout(2900); await shot(p, 'b2-sky'); await p.waitForTimeout(2200); await shot(p, 'b3-five');
-step('reveal'); await p.waitForSelector('.reveal-steps'); await p.waitForTimeout(1600); await shot(p, 'c1-reveal1');
-await p.click('#nextStep'); await p.waitForSelector('#elBody .bars'); await p.waitForTimeout(1200); await shot(p, 'c2-reveal2');
-await p.click('#nextStep'); await p.waitForTimeout(500); await shot(p, 'c3-reveal3');
-step('signup'); await p.click('#toSignup'); await p.fill('#signup [name=email]', AMY); await p.fill('#signup [name=pw]', 'password123'); await p.fill('#signup [name=name]', 'Amy'); await p.check('#signup [name=agree]'); await shot(p, 'c4-signup');
-await p.click('#signup button[type=submit]');
-step('today'); await p.waitForSelector('#daycard .score'); await p.waitForTimeout(900);
-console.log('tear on signup day (should be false):', !!(await p.$('.tear')));
-if (process.argv[4]) { const { DatabaseSync } = await import('node:sqlite'); const db = new DatabaseSync(process.argv[4]); const u = db.prepare("SELECT id FROM users WHERE username = ?").get(AMY);
-  db.prepare("UPDATE users SET created_at = ? WHERE id = ?").run(new Date(Date.now() - 3 * 864e5).toISOString(), u.id); db.prepare('DELETE FROM open_days WHERE user_id = ?').run(u.id); db.close(); }
-if (process.argv[4]) { await p.evaluate(() => localStorage.removeItem('sixty.torn')); await p.reload(); } await p.waitForSelector('#daycard .score'); await p.waitForTimeout(900);
-console.log('tear overlay:', !!(await p.$('.tear'))); await shot(p, 'd1-tear');
-if (await p.$('.tear')) { const bx = await (await p.$('.tpage')).boundingBox(); await p.mouse.move(bx.x + bx.width / 2, bx.y + 60); await p.mouse.down(); for (let i = 1; i <= 8; i++) { await p.mouse.move(bx.x + bx.width / 2, bx.y + 60 + i * 22); await p.waitForTimeout(16); } await shot(p, 'd2-tearing'); await p.mouse.up(); await p.waitForTimeout(900); }
-await shot(p, 'd3-today'); await p.click('.why-btn'); await p.waitForTimeout(300); await shot(p, 'd4-why', true);
-const dial = await (await p.$('#dial svg')).boundingBox(); await p.mouse.move(dial.x + dial.width * 0.85, dial.y + dial.height * 0.5); await p.mouse.down(); await p.mouse.move(dial.x + dial.width * 0.5, dial.y + dial.height * 0.92, { steps: 6 }); await p.mouse.up();
-await (await p.$('.dial-card')).screenshot({ path: `${out}/d5-dial.png` });
-await p.click('#week button:nth-child(6)'); await p.waitForTimeout(600); await shot(p, 'd6-otherday');
-step('mood'); await p.click('#week button.today'); await p.waitForSelector('.moodrow'); await p.click('.moodrow button[data-m=calm]'); await p.waitForSelector('.moodlog'); console.log('mood logged:', await p.textContent('.moodlog'));
-step('a2hs'); await p.evaluate(() => localStorage.setItem('sixty.days', JSON.stringify(['2020-01-01']))); await p.goto(base + '#/calendar'); await p.goto(base + '#/today'); await p.waitForSelector('#a2hs'); await (await p.$('#a2hs')).screenshot({ path: `${out}/d7-a2hs.png` });
-step('calendar'); await p.click('.tabs a[data-tab=calendar]'); await p.waitForSelector('.cal button.lv3, .cal button.lv4, .cal button.lv2, .cal button.lv5'); await p.waitForTimeout(1200); await shot(p, 'e1-cal');
-await p.click('.cal button[data-d$="-20"]'); await p.waitForSelector('#sheet .score'); await p.waitForTimeout(500); await shot(p, 'e2-daysheet'); await p.click('#sheet .x');
-step('pick'); await p.goto(base + '#/pick'); await p.waitForSelector('.picks'); await p.click('.picks button'); await p.waitForTimeout(700); await shot(p, 'e3-scan'); await p.waitForSelector('.result'); await p.waitForTimeout(700); await shot(p, 'e4-pick', true);
-await p.click('[data-save]'); await p.waitForFunction(() => document.querySelector('[data-save]').disabled); console.log('plan saved');
-await p.goto(base + '#/calendar'); await p.waitForSelector('.planrow'); await shot(p, 'e5-plans', true);
-step('me'); await p.click('.tabs a[data-tab=me]'); await p.waitForSelector('.pillars'); await p.waitForTimeout(1200); await shot(p, 'f1-me', true);
-step('oracle'); await p.click('.tabs a[data-tab=oracle]'); await p.waitForSelector('#hold'); await p.fill('#q', 'Should I take the new job?'); await p.click('.topics .chip[data-k=work]'); await shot(p, 'o1-ask');
+await p.click('#bday'); await shot(p, 'a2-wheel'); await wheelTo(p, 1992, 3, 14);
+step('theater'); await p.waitForSelector('.theater'); await p.waitForTimeout(1000); await shot(p, 'b1-wheel'); await p.waitForTimeout(1200); await shot(p, 'b2-sky'); await p.waitForTimeout(1300); await shot(p, 'b3-five');
+step('reveal'); await p.waitForSelector('.revealpage'); await p.waitForSelector('#forYou .word'); await p.waitForTimeout(1200); await shot(p, 'c1-reveal', true);
+await p.click('#addTime'); await p.waitForSelector('#ptOk'); await shot(p, 'c2-time'); await p.click('#ptOk');
+await p.waitForSelector('#pcQ'); await p.fill('#pcQ', 'new y'); await p.waitForTimeout(200); await shot(p, 'c3-city'); await p.click('#pcList [data-c]');
+await p.waitForFunction(() => /Born at/.test(document.querySelector('#addTime')?.textContent || '')); console.log('birth time added:', (await p.textContent('#addTime')).trim().replace(/\s+/g, ' '));
+step('guest today'); await p.click('#toToday'); await p.waitForSelector('#daycard .scoreline'); await p.waitForTimeout(900); await shot(p, 'd1-today'); await shot(p, 'd1-today-full', true);
+console.log('guest today: score', await p.textContent('#daycard .ring b'), '·', (await p.textContent('.meet p')).trim());
+await p.click('.why-btn'); await p.waitForTimeout(300); console.log('why rows:', (await p.$$('.why .wrow')).length); await shot(p, 'd2-why', true);
+await p.click('.band'); await p.waitForSelector('#dial'); await p.waitForTimeout(800);
+{ const dl = await (await p.$('#dial svg')).boundingBox(); await p.mouse.move(dl.x + dl.width * 0.85, dl.y + dl.height * 0.5); await p.mouse.down(); await p.mouse.move(dl.x + dl.width * 0.5, dl.y + dl.height * 0.92, { steps: 6 }); await p.mouse.up(); }
+await shot(p, 'd3-dial'); await p.click('#sheet .x');
+await p.click('#week button:nth-child(6)'); await p.waitForTimeout(600); await shot(p, 'd4-otherday');
+await p.click('.moodrow button, #backToday').catch(() => {}); await p.goto(base + '#/today'); await p.waitForSelector('.moodrow'); await p.click('.moodrow button');
+await p.waitForSelector('#signup'); console.log('guest mood asks for an account: yes'); await shot(p, 'd5-gate'); await p.click('#sheet .x');
+step('guest calendar'); await p.click('.tabs a[data-tab=calendar]'); await p.waitForSelector('#cal button.lv1, #cal button.lv2, #cal button.lv3, #cal button.lv4, #cal button.lv5'); await p.waitForTimeout(1000); await shot(p, 'e1-cal', true);
+await p.click('#cal button[data-d$="-20"]'); await p.waitForTimeout(400); console.log('day panel:', (await p.textContent('#dayPanel .title')).trim());
+await p.click('#acts [data-t="面试"]'); await p.waitForSelector('#cal .badge'); await p.waitForTimeout(1200); await shot(p, 'e2-pick', true); console.log('picks marked:', (await p.$$('#cal .badge')).length || 'in another month');
+step('guest oracle'); await p.click('.tabs a[data-tab=oracle]'); await p.waitForSelector('#hold'); await p.click('.suggest button'); await shot(p, 'o0-guest', true);
+step('guest friends'); await p.click('.tabs a[data-tab=friends]'); await p.waitForSelector('.sample'); await shot(p, 'g0-guest');
+step('guest you'); await p.click('.avatar'); await p.waitForSelector('.pillars'); await p.waitForTimeout(800); await shot(p, 'f0-guest', true);
+await p.goto(base + '#/settings'); await p.waitForSelector('[data-e=date]'); await shot(p, 'f0-settings', true);
+
+step('signup'); await p.goto(base + '#/today'); await p.waitForSelector('#tipSave'); await p.click('#tipSave');
+await p.fill('#signup [name=email]', AMY); await p.fill('#signup [name=pw]', 'password123'); await p.check('#signup [name=agree]'); await shot(p, 'h0-signup'); await p.click('#signup button[type=submit]');
+await p.waitForFunction(() => !document.querySelector('#signup')); await p.waitForSelector('#daycard .scoreline'); await p.waitForTimeout(900);
+console.log('signed in; tear on signup day (should be false):', !!(await p.$('#leaf')));
+await p.click('.moodrow button[data-m=calm]'); await p.waitForSelector('.moodrow button.on'); console.log('mood logged');
+if (dbPath) {
+  const { DatabaseSync } = await import('node:sqlite'); const db = new DatabaseSync(dbPath); const u = db.prepare('SELECT id FROM users WHERE username = ?').get(AMY);
+  db.prepare('UPDATE users SET created_at = ? WHERE id = ?').run(new Date(Date.now() - 3 * 864e5).toISOString(), u.id); db.prepare('DELETE FROM open_days WHERE user_id = ?').run(u.id); db.close();
+  await p.evaluate(() => localStorage.removeItem('sixty.torn')); await p.reload(); await p.waitForSelector('#daycard .scoreline'); await p.waitForTimeout(700);
+  console.log('yesterday page waiting:', !!(await p.$('#leaf'))); await shot(p, 'h1-leaf');
+  if (await p.$('#leaf')) { const bx = await (await p.$('#leaf')).boundingBox(); await p.mouse.move(bx.x + bx.width / 2, bx.y + 20); await p.mouse.down(); for (let i = 1; i <= 6; i++) { await p.mouse.move(bx.x + bx.width / 2, bx.y + 20 + i * 18); await p.waitForTimeout(16); } await p.mouse.up(); await p.waitForTimeout(1400); console.log('torn:', !(await p.$('#leaf'))); }
+}
+await shot(p, 'h2-today-signed', true);
+step('plan'); await p.goto(base + '#/calendar?t=' + encodeURIComponent('面试')); await p.waitForSelector('#cal .badge, #bestBox .item'); await p.waitForSelector('#savePlan'); await p.click('#savePlan'); await p.waitForFunction(() => document.querySelector('#savePlan')?.disabled); console.log('plan saved');
+await p.waitForSelector('#plans .item'); await shot(p, 'e3-plans', true);
+step('oracle'); await p.click('.tabs a[data-tab=oracle]'); await p.waitForSelector('#hold'); await p.fill('#q', 'Should I take the new job?'); await p.click('.topics .pill[data-k=work]'); await shot(p, 'o1-ask');
 { const h = await (await p.$('#hold')).boundingBox(); await p.mouse.move(h.x + h.width / 2, h.y + h.height / 2); await p.mouse.down(); await p.waitForTimeout(1500); await p.mouse.up(); }
 await p.waitForSelector('#toss', { timeout: 15000 }); await shot(p, 'o2-lot');
 await p.click('#toss'); await p.waitForTimeout(500); await shot(p, 'o3-flying');
@@ -45,24 +69,26 @@ await p.click('#toss'); await p.waitForTimeout(500); await shot(p, 'o3-flying');
 for (let i = 0; i < 4; i++) {
   await p.waitForFunction(() => document.querySelector('.reading, #hold, .orc-note') || (document.querySelector('#toss') && !document.querySelector('.toss-area.fly')), null, { timeout: 15000 });
   await p.waitForTimeout(1500);
-  if (i === 0) await shot(p, 'o4-after-first');
   if (!(await p.$('#toss')) || (await p.$('.reading'))) break;
   await p.click('#toss');
 }
-await p.waitForTimeout(2600); await shot(p, 'o5-result', true);
-console.log('oracle ended in:', (await p.$('.reading')) ? 'reading · ' + (await p.textContent('.rd-title')) + ' · asked first: ' + (await p.$eval('.topiclist .tp', (x) => x.classList.contains('asked'))) : (await p.$('#hold')) ? 'rephrase' : 'closed for today');
+await p.waitForTimeout(2600); await shot(p, 'o4-result', true);
+if (await p.$('.reading')) { await p.waitForFunction(() => /—/.test(document.querySelector('#actDay')?.textContent || ''), null, { timeout: 8000 }).catch(() => {}); console.log('oracle reading:', (await p.textContent('.rd-title')).trim(), '· answer:', (await p.textContent('.answer .h3 span')).trim(), '· act:', (await p.textContent('#actDay')).trim()); }
+else console.log('oracle ended in:', (await p.$('#hold')) ? 'rephrase' : 'closed for today');
 step('lockscreen'); await p.goto(base + '#/lockscreen'); await p.waitForFunction(() => document.querySelector('.phone img')?.naturalWidth > 0, null, { timeout: 20000 }); await shot(p, 'f5-lockscreen', true); console.log('lock screen preview loaded');
 step('recap'); await p.goto(base + '#/recap'); await p.waitForSelector('.recap h1'); await p.waitForTimeout(900); await shot(p, 'f3-recap', true);
-await p.goto(base + '#/collection'); await p.waitForSelector('.reward'); await shot(p, 'f4-reward');
 await p.goto(base + '#/collection'); await p.waitForSelector('.wall a'); await p.waitForTimeout(800); await shot(p, 'f2-collection');
+await p.goto(base + '#/me'); await p.waitForSelector('.stats'); await p.waitForTimeout(1000); await shot(p, 'f1-me', true);
 step('invite'); const code = await p.evaluate(async () => (await (await fetch('../api/me/invite')).json()).code);
 const q = await mk(); await q.goto(base + `#/i/${code}`); await q.waitForSelector('#pairForm'); await q.waitForTimeout(400); await shot(q, 'g1-invite');
-await q.type('#pday', '07041990'); await q.click('#pairForm button'); await q.waitForSelector('.mergebox'); await q.waitForTimeout(400); await shot(q, 'g2-merge'); await q.waitForTimeout(1600); await shot(q, 'g3-pair');
-await q.click('#pairSignup'); await q.fill('#signup [name=email]', ALEX); await q.fill('#signup [name=pw]', 'password123'); await q.check('#signup [name=agree]'); await q.click('#signup button[type=submit]'); await q.waitForSelector('#daycard .score');
-await q.goto(base + '#/friends'); await q.waitForSelector('.friend'); await shot(q, 'g4-friends');
+await q.click('#pday'); await wheelTo(q, 1990, 7, 4); await q.waitForSelector('.mergebox'); await q.waitForTimeout(400); await shot(q, 'g2-merge'); await q.waitForTimeout(1600); await shot(q, 'g3-pair');
+await q.click('#view a[href="#/today"]'); await q.waitForSelector('#daycard .scoreline'); console.log('friend sees their own day as a guest');
+await q.goto(base + `#/pair/${code}`); await q.waitForSelector('#pairSignup'); await q.click('#pairSignup'); await q.fill('#signup [name=email]', ALEX); await q.fill('#signup [name=pw]', 'password123'); await q.check('#signup [name=agree]'); await q.click('#signup button[type=submit]');
+await q.waitForFunction(() => !document.querySelector('#signup'));
+await q.goto(base + '#/friends'); await q.waitForSelector('.friend'); await shot(q, 'g4-friends', true);
 await q.click('.friend'); await q.waitForSelector('#fShare'); await shot(q, 'g5-friend');
-await q.goto(base + '#/today'); await q.waitForSelector('.people .face'); await shot(q, 'g6-people'); console.log('people today:', (await q.textContent('.people .small')).trim());
-step('dark'); await p.evaluate(() => localStorage.setItem('sixty.theme', '"dark"')); await p.goto(base + '#/today'); await p.reload(); await p.waitForSelector('#daycard .score'); await p.waitForTimeout(900); await shot(p, 'h1-dark');
+await q.goto(base + '#/today'); await q.waitForSelector('.people .face'); await shot(q, 'g6-people', true); console.log('people today:', (await q.textContent('.people .small')).trim());
+step('dark'); await p.evaluate(() => localStorage.setItem('sixty.theme', '"dark"')); await p.goto(base + '#/today'); await p.reload(); await p.waitForSelector('#daycard .scoreline'); await p.waitForTimeout(900); await shot(p, 'h3-dark');
 for (const pg of [p, q]) console.log('delete:', await pg.evaluate(async () => (await fetch('../api/me/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'password123' }) })).status));
 step('terms'); await p.goto(base + '#/terms'); await p.waitForSelector('.legal h3'); console.log('terms ok:', (await p.textContent('.legal h1')) === 'Terms of Use');
 console.log(errs.length ? 'ERRORS: ' + JSON.stringify(errs) : 'ERRORS: none');

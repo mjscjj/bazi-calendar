@@ -35,7 +35,7 @@ async function drawCard(o) {
   return cv;
 }
 export async function shareImage(make, filename, sign, link) {
-  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Your card</h2><p class="tip">Getting it ready…</p>`);
+  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h1">Share</h2><p class="tip">Getting it ready…</p>`);
   let cv;
   try { cv = await make(); } catch { toast('Could not make the image. Please try again.'); return; }
   const url = cv.toDataURL('image/jpeg', 0.9);
@@ -43,8 +43,8 @@ export async function shareImage(make, filename, sign, link) {
   const file = new File([blob], filename, { type: 'image/jpeg' });
   const canFiles = navigator.canShare && navigator.canShare({ files: [file] });
   const touch = matchMedia('(pointer: coarse)').matches;
-  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h2">Your card</h2><p class="muted" style="margin:0">Sized for Stories and TikTok.</p>
-    <img class="shot" src="${url}" alt="Your Flow Day card">
+  openSheet(`<button class="x" aria-label="Close">×</button><h2 class="h1">Share</h2><p class="muted" style="margin:0">Sized for Stories and TikTok.</p>
+    <img class="shot" src="${url}" alt="Your Flow Day image">
     ${touch ? '<p class="tip">Press and hold the image to save it to Photos.</p>' : ''}
     <div class="btns">${canFiles ? '<button class="btn block" id="doShare">Share image</button>' : ''}
     ${!touch || !canFiles ? `<a class="btn ${canFiles ? 'ghost ' : ''}block" id="doSave" href="${url}" download="${filename}">Download image</a>` : ''}
@@ -54,6 +54,6 @@ export async function shareImage(make, filename, sign, link) {
   $('#doSave')?.addEventListener('click', () => track('us_share', { sign, step: 'saved' }));
   $('#doLink')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(link); toast('Link copied'); } catch { prompt('Copy this link', link); } track('us_share', { sign, step: 'link' }); });
 }
-export const shareSign = (p) => shareImage(() => drawCard({ art: `../art/pillars/${p.art}`, el: elOf(p), kicker: 'My sign', title: signName(p), sub: p.name, meta: `${fullName(p)} · No. ${p.no} of 60`, body: p.intro }), `sixty-${p.slug}.jpg`, p.slug, `${shareBase()}s/${p.slug}`);
-export const sharePair = (o) => shareImage(() => drawCard(o), `sixty-pair.jpg`, 'pair');
+export const shareSign = (p) => shareImage(() => drawCard({ art: `../art/pillars/${p.art}`, el: elOf(p), kicker: 'My sign', title: signName(p), sub: p.name, meta: `${fullName(p)} · No. ${p.no} of 60`, body: p.intro }), `flowday-${p.slug}.jpg`, p.slug, `${shareBase()}s/${p.slug}`);
+export const sharePair = (o) => shareImage(() => drawCard(o), `flowday-pair.jpg`, 'pair');
 export const drawCardPublic = drawCard;

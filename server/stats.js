@@ -76,7 +76,7 @@ export function adminStats(db, now = Date.now()) {
   const usOpened = (k) => one(`SELECT COUNT(*) n FROM (${usRegs}) r WHERE (SELECT COUNT(*) FROM open_days d WHERE d.user_id = r.id) >= ${k}`);
   const pack = (rows) => rows.map(([label, n]) => ({ label, n }));
   const us = usN('us_visit') ? {
-    funnel: pack([['打开', usN('us_visit')], ['揭晓日柱', usN('us_reveal')], ['注册', one(`SELECT COUNT(*) n FROM (${usRegs})`)], ['第 2 天再来', usOpened(2)], ['第 7 天还在', usOpened(7)],
+    funnel: pack([['打开', usN('us_visit')], ['揭晓日柱', usN('us_reveal')], ['不注册看了今天', usN('us_guest_today')], ['注册', one(`SELECT COUNT(*) n FROM (${usRegs})`)], ['第 2 天再来', usOpened(2)], ['第 7 天还在', usOpened(7)],
       ['连上朋友', one('SELECT COUNT(*) n FROM invites WHERE created_at >= ?', usFrom) + one('SELECT COUNT(*) n FROM friend_links WHERE created_at >= ?', usFrom)]]),
     features: pack([['看 Why', usN('us_why')], ['拖表盘', usN('us_dial')], ['撕日历', usN('us_tear')], ['挑日子', usN('us_pick')], ['分享', usN('us_share')], ['发邀请', usN('us_invite')]]),
   } : null;
