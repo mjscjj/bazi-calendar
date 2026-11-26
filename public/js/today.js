@@ -53,7 +53,7 @@ function noticesHtml() {
   }
   // 系统提示同时只放一条，按重要程度：邀请到账 > 体验最后一天 / 会员快到期 > 补出生城市 > 加到主屏
   const today = localToday(), news = (t && t.news) || [], dn = dayN();
-  h += firstDayHtml(t, dn) + firstNightHtml(t, dn);
+  h += firstDayHtml(t, dn);
   if (news.length) h += `<div class="notice good"><p>${news.map((n) => esc(n.text)).join('；')}</p><button type="button" class="x" data-close-notice aria-label="关闭提示">×</button></div>`;
   else if (recapNotice(today)) h += recapNotice(today);
   else if (a && a.mode === 'free' && a.remaining === 0 && !seen('lastfree-' + today)) {
@@ -171,7 +171,7 @@ function youHtml(t) {
     + (art ? `<img class="today-art-bg" src="${esc(pillarArtSrc(art.art))}" alt="" width="600" height="600" decoding="async" draggable="false">` : '')
     + `<div class="th"><div class="today-date"><time datetime="${t.date}">${dname}</time>${context ? `<span>${context}</span>` : ''}${art ? dayArtButtonHtml(t, art, isToday) : ''}</div><span class="thr">${isToday ? '<button type="button" class="ic" data-share="today" aria-label="分享你的今天">分享</button>' : '<button type="button" class="ic" data-day-go="today">回到今天</button>'}${nav}</span></div>`
     + `<div class="hero3"><div class="day-theme"><h1 tabindex="-1">${theme}</h1>${theme === action + '日' ? '' : `<small>宜${action}</small>`}</div>`
-    + `<div class="ring" style="--p:${x.score}" role="img" aria-label="能量 ${x.score}，${x.level.p}"><b>${x.score}</b><small>${x.level.p}</small></div></div>`
+    + `<button type="button" class="ring" style="--p:${x.score}" data-day-why aria-label="能量 ${x.score}，${x.level.p}，看为什么"><b>${x.score}</b><small>${x.level.p}</small></button></div>`
     + `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`
     + comparisonHtml(t, dos, donts)
     + timelineHtml(x, isToday)
@@ -287,7 +287,7 @@ function selectDay(date, dir, reveal = false) {
   if (!t) return;
   if (tooFar(date)) { toast('再往后就翻不动了'); return; }
   S.tsel = date === t.date ? null : date;
-  if (date !== t.date && !seen('fd-swipe')) { mark('fd-swipe'); track('fd_task', { k: 'swipe' }); }
+  if (date !== t.date && dayN() === 0 && !seen('fd-swipe')) { mark('fd-swipe'); track('fd_task', { k: 'swipe' }); }
   slide = dir > 0 ? 'in-r' : dir < 0 ? 'in-l' : '';
   renderToday();
   if (reveal) {
@@ -389,12 +389,12 @@ export function renderToday() {
   else if (!S.today) h += '<div class="sk" style="height:44px"></div><div class="sk" style="height:420px"></div><div class="sk" style="height:84px"></div>';
   else {
     const e = entryOf(selDate());
-    h += `<div class="dgrid">${stripHtml()}<div class="dmain">${dayCardHtml(slide)}${recordHtml(e, S.today.moodKit)}</div>`
+    h += `<div class="dgrid">${stripHtml()}<div class="dmain">${dayCardHtml(slide)}${firstNightHtml(S.today, dayN())}${recordHtml(e, S.today.moodKit)}</div>`
       + `<aside class="dside">${tomorrowHtml(S.today)}${minisHtml(S.today)}${termHtml(S.today)}</aside></div>`;
     slide = '';
   }
   v.innerHTML = h + footHtml();
-  ghostHand();
+  fdHints();
 }
 
 export function pageToday() {
@@ -497,45 +497,54 @@ onClick('[data-today-detail]', () => { const t = dayView(); if (t) openHours(t.d
 onClick('[data-a2hs-later]', (el) => { localStorage.setItem('lrl:a2hs-later', String(Date.now())); el.closest('.notice').remove(); });
 
 
-// ---------- 新用户的第一周：第一天卡、第一晚、每天解锁一样（只看本机的标记和注册日期，不加接口） ----------
+// ---------- 新用户的第一周：第一天的细带、第一晚、每天一条提示（只看本机的标记和注册日期） ----------
 // 注册当天是第 0 天
 function dayN() {
   if (!S.me || !S.me.createdAt || isDemo()) return -1;
   const a = new Date(ymd(new Date(S.me.createdAt)) + 'T00:00:00'), b = new Date(localToday() + 'T00:00:00');
   return Math.round((b - a) / 86400000);
 }
-const FD = [['why', '看看为什么'], ['swipe', '滑到明天'], ['draw', '求今天的第一支签']];
+// 三件事按顺序一件件来：细带上只说下一件，对应的地方在原位发光
+const FD = [['why', (t) => `今天为什么是「${esc(t.day.level.p)}」？`], ['swipe', () => '滑到明天看看'], ['draw', () => '求今天的第一支签']];
 // 求签不论结果（圣杯、换个问题、时机未到），求过就算
 const fdOk = (k, t) => seen('fd-' + k) || (k === 'draw' && !!t?.draw && t.draw.status !== 'pending');
-// 最好的时段离现在还有多久
-function bestCountdown(x) {
-  const top = bestHours(x).top;
-  if (!top.length) return { h: null, txt: '' };
-  const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
-  for (const h of top.slice().sort((p, q) => p.i - q.i)) {
-    const st = ((h.i * 2 + 23) % 24) * 60, en = st + 120;
-    if (mins < st) { const m = st - mins; return { h, txt: m >= 60 ? `还有 ${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分` : ''}` : `还有 ${m} 分钟` }; }
-    if (mins < en) return { h, txt: '正在进行' };
-  }
-  return { h: top[0], txt: '已经过了' };
-}
+const fdNext = (t) => FD.find(([k]) => !fdOk(k, t));
 function firstDayHtml(t, dn) {
-  if (dn !== 0 || !t || t.demo) return '';
-  if (seen('fd-done')) {
-    return seen('fd-done-ack') ? '' : '<div class="notice fdcard done" data-notice="fd-done-ack"><p><b>第一天的三件事都做完了。</b>送你一枚「初见」御守，在「转运」里领。明天打开，会先撕掉今天这一页。</p><button type="button" class="x" data-dismiss aria-label="关闭">×</button></div>';
-  }
-  const { h, txt } = bestCountdown(t.day), n = FD.filter(([k]) => fdOk(k, t)).length;
-  return `<section class="fdcard" aria-label="第一天"><div class="fdhead"><span class="fdtag">第一天</span><span class="fdprog">${n} / 3</span></div>`
-    + `<p class="fdline">今天对你是「${esc(t.day.level.p)}」日${h ? `，最好的时段是 <b>${hhShort(h.i)}</b><em>${txt}</em>` : ''}</p>`
-    + `<div class="fdtasks">${FD.map(([k, label]) => `<button type="button" class="${fdOk(k, t) ? 'ok' : ''}" data-fd="${k}"><i aria-hidden="true"></i>${k === 'why' ? `为什么今天是「${esc(t.day.level.p)}」` : label}</button>`).join('')}</div>`
-    + '<p class="fdgift">三件做完，送你一枚御守</p></section>';
+  if (dn !== 0 || !t || t.demo || seen('fd-done')) return '';
+  const next = fdNext(t);
+  if (!next) return '';
+  return `<button type="button" class="fdbar" data-fd-go><b>第一天</b><span class="fddots" role="img" aria-label="做完 ${FD.filter(([k]) => fdOk(k, t)).length} / 3">${FD.map(([k]) => `<i class="${fdOk(k, t) ? 'on' : ''}"></i>`).join('')}</span>`
+    + `<span class="fdnext">${next[1](t)}</span><small>送御守</small><i class="go" aria-hidden="true">›</i></button>`;
 }
-// 第一天晚上：告诉我准不准
+// 当前这件事的位置发光；滑动那件用小手
+function fdHints() {
+  const t = S.today;
+  if (!t || t.demo || dayN() !== 0 || seen('fd-done') || selDate() !== t.date) return;
+  const k = fdNext(t)?.[0];
+  if (k === 'why') $('#dayswipe .cur .ring')?.classList.add('fdglow');
+  else if (k === 'draw') document.querySelector('.minis [data-draw]')?.classList.add('fdglow');
+  else if (k === 'swipe') ghostHand();
+}
+function fdDo(k, t) {
+  if (k === 'why') { mark('fd-why'); track('fd_task', { k }); openDay(t.day, t.chart, t.name, t.plans); setTimeout(firstDayCheck, 0); }
+  else if (k === 'swipe') { // 日卡可能在下面：先滚到眼前，再滑到明天
+    $('#dayswipe')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    setTimeout(() => { if (currentPath() === '/' && !moving) slideTo(1); }, 450);
+  } else if (k === 'draw') document.querySelector('.minis [data-draw]')?.click();
+}
+onClick('[data-fd-go]', () => { const t = S.today, n = t && fdNext(t); if (n) fdDo(n[0], t); });
+// 点能量环：看这一天为什么是这个档位
+onClick('[data-day-why]', () => {
+  const t = S.today, v = dayView();
+  if (!t || !v) return;
+  if (v.date === t.date && dayN() === 0 && !seen('fd-why')) return fdDo('why', t);
+  openDay(v.day, t.chart, t.name, t.plans);
+});
+// 第一天晚上：记录区上面一行，五个由冷到暖的点，过得顺不顺（和今天的档位对照，记进准确率）
 const RATE = ['很不顺', '有点难', '一般', '挺好', '很顺'];
 function firstNightHtml(t, dn) {
-  if (dn !== 0 || !t || t.demo || new Date().getHours() < 18 || seen('fd-rate')) return '';
-  return `<section class="fdnight" aria-label="第一天晚上"><p><b>第一天过得怎么样？</b>告诉我准不准，我会越来越懂你。</p>`
-    + `<div class="fdrate">${RATE.map((w, i) => `<button type="button" data-fd-rate="${i + 1}">${w}</button>`).join('')}</div></section>`;
+  if (dn !== 0 || !t || t.demo || selDate() !== t.date || new Date().getHours() < 18 || seen('fd-rate')) return '';
+  return `<div class="fdnight" role="group" aria-label="第一天过得顺吗"><span>第一天过得顺吗？</span><span class="fdrate"><small>不顺</small>${RATE.map((w, i) => `<button type="button" class="r${i + 1}" data-fd-rate="${i + 1}" aria-label="${w}" title="${w}"></button>`).join('')}<small>很顺</small></span></div>`;
 }
 // 按今天的档位回一句：对上了就说对上了，没对上就记下
 function rateReply(lv, score) {
@@ -544,43 +553,50 @@ function rateReply(lv, score) {
   if (score <= 2) return k <= 2 ? `今天本就是${p}日，辛苦了，明天会不一样。` : '今天比预想的难一些，我记下了，会慢慢更懂你。';
   return k === 3 ? '不好不坏，正是平稳的样子，对上了。' : '记下了，明天再看准不准。';
 }
-onClick('[data-fd-rate]', async (el) => {
+onClick('[data-fd-rate]', (el) => {
   const score = +el.getAttribute('data-fd-rate');
   mark('fd-rate'); track('fd_rate', { score });
   api('POST', 'ratings', { day: localToday(), score }).catch(() => {}); // 不带 note，免得清掉用户在记录里写的话
   toast(rateReply(S.today.day.level, score));
   renderToday();
 });
-onClick('[data-fd]', (el) => {
-  const k = el.getAttribute('data-fd'), t = S.today;
-  if (!t) return;
-  if (k === 'why') { mark('fd-why'); track('fd_task', { k }); openDay(t.day, t.chart, t.name, t.plans); setTimeout(firstDayCheck, 0); }
-  else if (k === 'swipe') { // 日卡在下面：先滚到眼前，再滑到明天
-    $('#dayswipe')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-    setTimeout(() => { if (currentPath() === '/' && !moving) slideTo(1); }, 450);
-  }
-  else if (k === 'draw') document.querySelector('.minis [data-draw]')?.click();
-});
-// 三件都做完：送一次御守（每次画今天页时检查，求签做完回来也会走到）
+// 三件都做完：送一次御守（每次画今天页时检查，求签做完回来也会走到），一枚小御守飞进「转运」
 function fdGift() {
   const t = S.today;
-  if (!t || t.demo || dayN() !== 0 || seen('fd-done') || !FD.every(([k]) => fdOk(k, t))) return;
+  if (!t || t.demo || dayN() !== 0 || seen('fd-done') || fdNext(t)) return;
   mark('fd-done'); track('fd_done');
-  api('POST', 'onboard/gift', {}).then((r) => { if (r.given) toast('三件事都做完了，送你一枚御守，在「转运」里领'); }).catch(() => {});
+  const from = document.querySelector('.fdbar')?.getBoundingClientRect();
+  api('POST', 'onboard/gift', {}).then((r) => {
+    if (!r.given) return;
+    mark('fd-gift');
+    toast('送你一枚御守，在「转运」');
+    flyGift(from);
+  }).catch(() => {});
+}
+function flyGift(from) {
+  const to = [...document.querySelectorAll('.tabbar a[href="#/luck"], .topnav a[href="#/luck"]')].find((x) => x.offsetParent);
+  const dot = () => to && !to.querySelector('.badge') && to.insertAdjacentHTML('beforeend', '<i class="badge"></i>');
+  if (!to || !from || matchMedia('(prefers-reduced-motion: reduce)').matches) { dot(); return; }
+  const b = to.getBoundingClientRect(), g = document.createElement('i');
+  g.className = 'fdfly'; g.setAttribute('aria-hidden', 'true');
+  g.style.left = from.left + from.width / 2 - 11 + 'px'; g.style.top = from.top + from.height / 2 - 15 + 'px';
+  document.body.appendChild(g);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    g.style.transform = `translate(${b.left + b.width / 2 - from.left - from.width / 2}px, ${b.top + b.height / 2 - from.top - from.height / 2}px) scale(.55)`;
+  }));
+  setTimeout(() => { g.remove(); dot(); }, 900);
 }
 function firstDayCheck() { if (currentPath() === '/') renderToday(); }
-// 第一天，日卡上一只小手左右划一下，提示可以滑（只出现一次；等注册后的全屏画退场再播，播了才记）
+// 第一天还没滑过时，日卡上一只小手左右划一下（等注册后的全屏画退场再播）
 let handTimer = 0;
 function ghostHand() {
-  const t = S.today;
-  if (handTimer || !t || t.demo || dayN() !== 0 || seen('hint-swipe') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (handTimer || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const play = () => {
     if (document.querySelector('.welcome')) { handTimer = setTimeout(play, 500); return; }
     handTimer = 0;
     const card = document.querySelector('#dayswipe .cur .tcard');
-    if (!card || currentPath() !== '/' || selDate() !== S.today?.date || seen('hint-swipe')) return;
-    mark('hint-swipe');
+    if (!card || currentPath() !== '/' || selDate() !== S.today?.date || seen('fd-swipe') || card.querySelector('.ghost-hand')) return;
     const g = document.createElement('i'); g.className = 'ghost-hand'; g.setAttribute('aria-hidden', 'true'); card.appendChild(g); setTimeout(() => g.remove(), 3200);
   };
-  handTimer = setTimeout(play, 1600);
+  handTimer = setTimeout(play, 1200);
 }

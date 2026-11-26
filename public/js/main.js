@@ -1,5 +1,5 @@
 // 入口：路由、顶栏、底部页签、全局点击、离线缓存与“加到主屏”。
-import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, track, localToday, isDarkNow, setTheme, applyTheme, toast, ENV_NAME } from './core.js';
+import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, seen, track, localToday, isDarkNow, setTheme, applyTheme, toast, ENV_NAME } from './core.js';
 import { S } from './state.js';
 import { pageToday } from './today.js';
 import { pageCalendar } from './calendar.js';
@@ -46,11 +46,13 @@ function activeTab(path) {
   return ['/amulets', '/wish'].includes(path) ? '/luck' : path;
 }
 
+// 页签上的小红点：「我的」有未读；「转运」里有新用户送的御守还没去看
+const dot = (p) => (p === '/me' && S.unread) || (p === '/luck' && seen('fd-gift') && !seen('fd-gift-seen'));
 function renderTop(r) {
   let tab = activeTab(r.path);
   if (S.me && ['/energy', '/profile', '/member', '/feedback', '/about', '/card', '/invite', '/ics', '/asks', '/ask', '/ask/result', '/lots', '/jiazi', '/recap'].includes(r.path)) tab = '/me';
   let h = '<button class="brand" type="button" data-go="/" aria-label="flowday 首页"><span class="mk"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span><b>flowday</b></button>'
-    + `<nav class="topnav" aria-label="主导航">${TABS.map(([p, label]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${label}${p === '/me' && S.unread ? '<i class="badge"></i>' : ''}</a>`).join('')}</nav><div class="sp-r">`
+    + `<nav class="topnav" aria-label="主导航">${TABS.map(([p, label]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${label}${dot(p) ? '<i class="badge"></i>' : ''}</a>`).join('')}</nav><div class="sp-r">`
     + `<button type="button" class="themebtn" data-theme-toggle aria-label="${isDarkNow() ? '切换到白色' : '切换到深色'}" title="${isDarkNow() ? '切换到白色' : '切换到深色'}">${isDarkNow() ? ICON.light : ICON.dark}</button>`;
   if (S.me) {
     const a = S.access || {};
@@ -71,7 +73,7 @@ function renderTabbar(r) {
   document.body.classList.toggle('has-tabs', show);
   $('#tabbar').hidden = !show;
   if (!show) return;
-  $('#tabbar').innerHTML = TABS.map(([p, label, ic]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${ICON[ic]}<span>${label}</span>${p === '/me' && S.unread ? '<i class="badge"></i>' : ''}</a>`).join('');
+  $('#tabbar').innerHTML = TABS.map(([p, label, ic]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${ICON[ic]}<span>${label}</span>${dot(p) ? '<i class="badge"></i>' : ''}</a>`).join('');
 }
 
 export function renderPage() {
@@ -81,6 +83,7 @@ export function renderPage() {
   if (!S.me && NEED_LOGIN.includes(r.path)) { try { sessionStorage.setItem('lrl:next', location.hash); } catch { /* 无痕模式 */ } return go('/login'); }
   if (S.me && GUEST_ONLY.includes(r.path)) return go(S.me.birth ? '/' : '/welcome');
   if (S.me && !S.me.birth && !['/welcome', '/about', '/card'].includes(r.path)) return go('/welcome');
+  if (r.path === '/luck' && seen('fd-gift')) mark('fd-gift-seen');
   renderTop(r);
   renderTabbar(r);
   $('#view').dataset.page = (r.path.slice(1) || 'today');
