@@ -561,18 +561,23 @@ onClick('[data-fd-rate]', (el) => {
   renderToday();
 });
 // 三件都做完：送一次御守（每次画今天页时检查，求签做完回来也会走到），一枚小御守飞进「转运」
+// 服务器确认了才记 fd-done，请求失败下次画今天页再送（服务器只送一次）
+let gifting = false;
 function fdGift() {
   const t = S.today;
-  if (!t || t.demo || dayN() !== 0 || seen('fd-done') || fdNext(t)) return;
-  mark('fd-done'); track('fd_done');
+  if (gifting || !t || t.demo || dayN() !== 0 || seen('fd-done') || fdNext(t)) return;
+  gifting = true;
   const from = document.querySelector('.fdbar')?.getBoundingClientRect();
   api('POST', 'onboard/gift', {}).then((r) => {
+    gifting = false;
+    mark('fd-done'); track('fd_done', { given: !!r.given });
     if (!r.given) return;
     mark('fd-gift');
-    toast('送你一枚御守，在「转运」');
-    flyGift(from);
-  }).catch(() => {});
+    afterSheet(() => { toast('送你一枚御守，在「转运」'); flyGift(from); });
+  }, () => { gifting = false; });
 }
+// 求签的弹层还开着时，等它关了再飞，不然飞在弹层后面看不见
+function afterSheet(fn, n = 0) { if (document.getElementById('sheet') && n < 600) setTimeout(() => afterSheet(fn, n + 1), 300); else fn(); }
 function flyGift(from) {
   const to = [...document.querySelectorAll('.tabbar a[href="#/luck"], .topnav a[href="#/luck"]')].find((x) => x.offsetParent);
   const dot = () => to && !to.querySelector('.badge') && to.insertAdjacentHTML('beforeend', '<i class="badge"></i>');

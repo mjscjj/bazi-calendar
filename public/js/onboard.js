@@ -407,13 +407,14 @@ export function openInstall() {
   if (k === 'no' && IN_APP) sheet(`在${IN_APP}里没法加到主屏，要先换到手机浏览器。`,
     [`点右上角「···」，选「在浏览器打开」${IS_IOS ? '或「在 Safari 中打开」' : ''}`, '在浏览器里用同一个账号登录，再到「我的 → 加到主屏」', '菜单里没有这个选项的话，点下面「复制链接」，粘贴到浏览器里打开'], false);
   else if (k === 'no' && IS_IOS) sheet('这个浏览器加不了主屏。点下面「复制链接」，粘贴到 Safari 里打开，再到「我的 → 加到主屏」。', [], false);
-  else if (k === 'no') sheet('这个浏览器不支持安装网页应用。可以把 flowday 加进书签，或者换 Chrome、Edge 打开。', [], false);
+  else if (k === 'no') sheet(/Firefox\//.test(navigator.userAgent) ? '这个浏览器不支持安装网页应用。可以把 flowday 加进书签，或者换 Chrome、Edge 打开。'
+    : '这个版本的 Safari 还不能添加到程序坞（要 Safari 17 以上）。可以先把 flowday 加进书签，或者换 Chrome、Edge 打开。', [], false);
   else if (k === 'ios-safari') sheet('', ['点 Safari 底部的「分享」按钮（方框加向上箭头）。看不到底栏的话，先往上轻滑一下页面', '往下滑，选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', relogin]);
   else if (k === 'ios-share') sheet('', ['点浏览器的「分享」按钮：Chrome 在地址栏右边，Edge、Firefox 在「···」菜单里', '选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', relogin]);
   else if (k === 'android') sheet('', ['点浏览器的菜单（右上角「⋮」或底部「≡」）', '找「添加到主屏幕」或「添加到桌面」，有的浏览器放在「工具箱」或「添加至」里', '加了没看到图标：去手机「设置 → 应用 → 这个浏览器 → 权限」，打开「桌面快捷方式」，再加一次', '菜单里找不到这一项的浏览器加不了，可以换一个浏览器试试']);
   else if (k === 'mac-safari') sheet('', ['点屏幕顶部菜单栏的「文件」', '选「添加到程序坞」', '以后从程序坞一点就开']);
-  else sheet('', ['点地址栏右侧的「安装」图标（一个电脑加箭头）', '或在浏览器菜单里选「安装 flowday」', '安装后可以从桌面或程序坞直接打开']);
+  else sheet('', ['点地址栏右侧的「安装」图标（一个电脑加箭头）', '或在浏览器菜单里选「安装 flowday」', '两处都找不到的话，这个浏览器不支持安装，可以把 flowday 加进书签，或者换 Chrome、Edge 打开']);
 }
 onClick('[data-install]', openInstall);
-onClick('[data-copy-url]', (el) => { track('a2hs_copy'); copyText(el.dataset.copyUrl, '已复制，粘贴到浏览器里打开'); });
+onClick('[data-copy-url]', (el) => { track('a2hs_copy', { env: ENV_NAME }); copyText(el.dataset.copyUrl, '已复制，粘贴到浏览器里打开'); });
 onClick('[data-a2hs-done-close]', () => { mark('a2hs-done'); track('a2hs_done'); dismissSheet(); const n = $('[data-notice="a2hs"]'); if (n) n.remove(); });

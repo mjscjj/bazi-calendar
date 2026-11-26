@@ -1,5 +1,5 @@
 // 邀请好友、订阅到手机日历两个子页，以及朋友点开邀请链接时的落地处理。
-import { $, esc, api, toast, openSheet, onClick, currentPath, dtText, readLocal, writeLocal, IS_IOS, IS_MOBILE, IN_APP, IOS_18, installKind, ENV_NAME, copyText, track } from './core.js';
+import { $, esc, api, toast, openSheet, onClick, currentPath, dtText, readLocal, writeLocal, IS_IOS, IS_MOBILE, IS_STANDALONE, IN_APP, IOS_18, installKind, ENV_NAME, copyText, track } from './core.js';
 import { S } from './state.js';
 import { footHtml } from './today.js';
 import { share } from './share.js';
@@ -103,7 +103,7 @@ export function pageIcs() {
     const copyBtn = (primary) => `<button type="button" class="btn ${primary ? 'primary' : 'ghost'} block" data-ics-copy>复制订阅链接</button>`;
     let how;
     // iPhone 上只有 Safari 确定能一键订阅；App 里和其他浏览器给手动粘贴的办法，哪里都能用
-    if (IS_IOS && installKind() !== 'ios-safari') how = `<p class="note" style="margin:0">${IN_APP ? `在${esc(IN_APP)}里不能一键订阅` : '这个浏览器不一定能一键订阅'}，按下面三步手动加，一分钟就好。</p>` + copyBtn(true) + `<section class="card">${iosSteps}</section>`;
+    if (IS_IOS && installKind() !== 'ios-safari') how = `<p class="note" style="margin:0">${IN_APP ? `在${esc(IN_APP)}里不能一键订阅` : IS_STANDALONE() ? '从桌面打开时不一定能一键订阅' : '这个浏览器不一定能一键订阅'}，按下面三步手动加，一分钟就好。</p>` + copyBtn(true) + `<section class="card">${iosSteps}</section>`;
     else if (apple && IN_APP) how = `<p class="note" style="margin:0">在${esc(IN_APP)}里不能一键订阅，点「复制订阅链接」，到 Mac 的「日历 → 文件 → 新建日历订阅」里粘贴。</p>` + copyBtn(true);
     else if (apple) how = `<a class="btn primary block" href="${esc(d.webcal)}" data-ics-sub>订阅到 ${IS_IOS ? 'iPhone' : 'Mac'} 日历</a>` + copyBtn(false)
       + (IS_IOS ? `<details class="icsmore"><summary>点了没反应？手动加</summary>${iosSteps}</details>` : '');

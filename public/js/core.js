@@ -26,18 +26,21 @@ const IN_APPS = [[/MicroMessenger/i, '微信'], [/DingTalk/i, '钉钉'], [/\bQQ\
 const navStandalone = navigator.standalone === true;
 export const IN_APP = (IN_APPS.find(([re]) => re.test(UA)) || [])[1]
   || ((IS_IOS && !navStandalone && /Mobile\//.test(UA) && !/Safari\//.test(UA)) || /; wv\)/.test(UA) ? '这个应用' : '');
-const IOS_VER = (() => { const m = UA.match(/OS (\d+)_(\d+)/); return m ? +m[1] + m[2] / 100 : 99; })();
-export const IOS_18 = IOS_VER >= 18;
+// 版本号记成 主*100+次（16.4 → 1604），免得 16_4 被当成 16.04
+const IOS_VER = (() => { const m = UA.match(/OS (\d+)_(\d+)/); return m ? +m[1] * 100 + +m[2] : 9999; })();
+export const IOS_18 = IOS_VER >= 1800;
 // 加到主屏怎么加：prompt（安卓 Chrome 等会弹安装框）/ ios-safari / ios-share（iOS 16.4+ 的 Chrome、Edge、Firefox）/ android / desktop / no（加不了）
 export function installKind() {
   if (IN_APP) return 'no';
   if (IS_IOS) {
-    if (/CriOS|EdgiOS|FxiOS/.test(UA)) return IOS_VER >= 16.4 ? 'ios-share' : 'no';
-    return /Safari\//.test(UA) && !/QQBrowser|UCBrowser|Quark|baiduboxapp|SogouMobile/i.test(UA) ? 'ios-safari' : 'no';
+    if (/CriOS|EdgiOS|FxiOS/.test(UA)) return IOS_VER >= 1604 ? 'ios-share' : 'no';
+    return /Safari\//.test(UA) && !/QQBrowser|UCBrowser|Quark|baiduboxapp|SogouMobile|GSA\//i.test(UA) ? 'ios-safari' : 'no';
   }
   if (IS_MOBILE) return 'android';
   if (/Firefox\//.test(UA)) return 'no';
-  return /Macintosh/.test(UA) && !/Chrome\/|Edg\//.test(UA) ? 'mac-safari' : 'desktop';
+  // Mac Safari 17 起才有「添加到程序坞」
+  if (/Macintosh/.test(UA) && !/Chrome\/|Edg\//.test(UA)) return +(UA.match(/Version\/(\d+)/) || [])[1] >= 17 ? 'mac-safari' : 'no';
+  return 'desktop';
 }
 // 埋点用：在什么环境里打开
 export const ENV_NAME = (IN_APP === '这个应用' ? (IS_IOS ? 'inapp-ios' : 'inapp-android') : IN_APP) || (IS_IOS ? (/CriOS|EdgiOS|FxiOS/.test(UA) ? 'ios-chrome' : installKind() === 'ios-safari' ? 'ios-safari' : 'ios-other')
