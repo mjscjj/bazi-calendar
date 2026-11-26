@@ -1,5 +1,5 @@
 // 新用户引导：填出生信息 → 能量卡揭晓（不用注册）→ 注册 → 三步引导 → 加到主屏。
-import { $, $$, esc, api, toast, openSheet, dismissSheet, onClick, currentPath, mark, seen, readLocal, writeLocal, IS_IOS, IS_STANDALONE, IN_APP, installKind, ENV_NAME, copyText, track } from './core.js';
+import { $, $$, esc, api, toast, openSheet, dismissSheet, onClick, currentPath, mark, seen, readLocal, writeLocal, IS_IOS, IS_IPAD, IS_MOBILE, SAFARI_VER, IS_STANDALONE, IN_APP, installKind, ENV_NAME, copyText, track } from './core.js';
 import { S } from './state.js';
 import { pillarArtSrc, setGlow, WX } from './data.js';
 import { wheelsHtml, mountWheels } from './wheel.js';
@@ -399,20 +399,24 @@ export function openInstall() {
     p.userChoice.then((c) => { if (c.outcome === 'accepted') { mark('a2hs-done'); track('a2hs_accept'); toast('已添加，可以从桌面打开了'); } });
     return;
   }
-  const k = installKind(), here = location.href.split('#')[0];
-  const sheet = (lead, steps, done = true) => openSheet('加到主屏', `<div class="guide">${lead ? `<p>${lead}</p>` : ''}${steps.length ? `<ol class="steps">${steps.map((x) => `<li>${x}</li>`).join('')}</ol>` : ''}<div class="acts">${done
+  const k = installKind(), here = location.href.split('#')[0], title = IS_MOBILE ? '加到主屏' : '安装到电脑';
+  const sheet = (lead, steps, done = true) => openSheet(title, `<div class="guide">${lead ? `<p>${lead}</p>` : ''}${steps.length ? `<ol class="steps">${steps.map((x) => `<li>${x}</li>`).join('')}</ol>` : ''}<div class="acts">${done
     ? '<button type="button" class="btn ghost" data-a2hs-done-close>已经加好了</button><button type="button" class="btn primary" data-close-sheet>知道了</button>'
     : `<button type="button" class="btn ghost" data-close-sheet>知道了</button><button type="button" class="btn primary" data-copy-url="${esc(here)}">复制链接</button>`}</div></div>`);
   const relogin = '从桌面第一次打开时如果要求登录，用同一个账号登录就好。';
-  if (k === 'no' && IN_APP) sheet(`在${IN_APP}里没法加到主屏，要先换到手机浏览器。`,
+  if (k === 'no' && IN_APP && !IS_MOBILE) sheet(`在${IN_APP}里没法安装，要先换到浏览器。`,
+    ['点窗口右上角的「在默认浏览器中打开」', '在浏览器里用同一个账号登录，再到「我的 → 安装到电脑」', '找不到这个按钮的话，点下面「复制链接」，粘贴到浏览器里打开'], false);
+  else if (k === 'no' && IN_APP) sheet(`在${IN_APP}里没法加到主屏，要先换到手机浏览器。`,
     [`点右上角「···」，选「在浏览器打开」${IS_IOS ? '或「在 Safari 中打开」' : ''}`, '在浏览器里用同一个账号登录，再到「我的 → 加到主屏」', '菜单里没有这个选项的话，点下面「复制链接」，粘贴到浏览器里打开'], false);
   else if (k === 'no' && IS_IOS) sheet('这个浏览器加不了主屏。点下面「复制链接」，粘贴到 Safari 里打开，再到「我的 → 加到主屏」。', [], false);
   else if (k === 'no') sheet(/Firefox\//.test(navigator.userAgent) ? '这个浏览器不支持安装网页应用。可以把 flowday 加进书签，或者换 Chrome、Edge 打开。'
     : '这个版本的 Safari 还不能添加到程序坞（要 Safari 17 以上）。可以先把 flowday 加进书签，或者换 Chrome、Edge 打开。', [], false);
-  else if (k === 'ios-safari') sheet('', ['点 Safari 底部的「分享」按钮（方框加向上箭头）。看不到底栏的话，先往上轻滑一下页面', '往下滑，选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', relogin]);
-  else if (k === 'ios-share') sheet('', ['点浏览器的「分享」按钮：Chrome 在地址栏右边，Edge、Firefox 在「···」菜单里', '选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', relogin]);
-  else if (k === 'android') sheet('', ['点浏览器的菜单（右上角「⋮」或底部「≡」）', '找「添加到主屏幕」或「添加到桌面」，有的浏览器放在「工具箱」或「添加至」里', '加了没看到图标：去手机「设置 → 应用 → 这个浏览器 → 权限」，打开「桌面快捷方式」，再加一次', '菜单里找不到这一项的浏览器加不了，可以换一个浏览器试试']);
-  else if (k === 'mac-safari') sheet('', ['点屏幕顶部菜单栏的「文件」', '选「添加到程序坞」', '以后从程序坞一点就开']);
+  // iPad 的分享按钮在右上角；iPhone 上 iOS 26 的 Safari 默认底栏没有分享，收在「···」里
+  else if (k === 'ios-safari') sheet('', [IS_IPAD ? '点 Safari 右上角的「分享」按钮（方框加向上箭头）' : SAFARI_VER >= 26 ? '点 Safari 底部的「···」，再点「分享」' : '点 Safari 底部的「分享」按钮（方框加向上箭头）。看不到底栏的话，先往上轻滑一下页面',
+    '往下滑，选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', '找不到「添加到主屏幕」的话，说明不是在 Safari 里打开的，先换到 Safari 打开这个网页', relogin]);
+  else if (k === 'ios-share') sheet('', ['点浏览器的「分享」按钮：Chrome 在地址栏右边，Edge 在「···」菜单里，Firefox 在「≡」菜单里', '选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', relogin]);
+  else if (k === 'android') sheet('', ['如果是从某个 App 里点开的，先在右上角菜单选「在浏览器打开」', '点浏览器的菜单（右上角「⋮」或底部「≡」）', '找「添加到主屏幕」或「添加到桌面」，有的浏览器放在「工具箱」或「添加至」里', '加了没看到图标：去手机「设置 → 应用 → 这个浏览器 → 权限」，打开「桌面快捷方式」，再加一次', '菜单里找不到这一项的浏览器加不了，可以换一个浏览器试试']);
+  else if (k === 'mac-safari') sheet('', ['点屏幕顶部菜单栏的「文件」', '选「添加到程序坞」，以后从程序坞一点就开', '「文件」里没有这一项的话，是系统低于 macOS 14，加不了；可以把 flowday 加进书签，或者换 Chrome、Edge 安装']);
   else sheet('', ['点地址栏右侧的「安装」图标（一个电脑加箭头）', '或在浏览器菜单里选「安装 flowday」', '两处都找不到的话，这个浏览器不支持安装，可以把 flowday 加进书签，或者换 Chrome、Edge 打开']);
 }
 onClick('[data-install]', openInstall);

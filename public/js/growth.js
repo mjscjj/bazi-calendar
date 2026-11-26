@@ -1,5 +1,5 @@
 // 邀请好友、订阅到手机日历两个子页，以及朋友点开邀请链接时的落地处理。
-import { $, esc, api, toast, openSheet, onClick, currentPath, dtText, readLocal, writeLocal, IS_IOS, IS_MOBILE, IS_STANDALONE, IN_APP, IOS_18, installKind, ENV_NAME, copyText, track } from './core.js';
+import { $, esc, api, toast, openSheet, onClick, currentPath, dtText, readLocal, writeLocal, IS_IOS, IS_IPAD, IS_MOBILE, IS_STANDALONE, IN_APP, installKind, ENV_NAME, copyText, track } from './core.js';
 import { S } from './state.js';
 import { footHtml } from './today.js';
 import { share } from './share.js';
@@ -98,20 +98,20 @@ export function pageIcs() {
     const wk = (e) => '日一二三四五六'[new Date(e.y, e.m - 1, e.d).getDay()];
     // 苹果设备一键订阅（webcal://）；App 内置浏览器会拦这个链接，就只给手动粘贴的办法；安卓自带日历大多不支持订阅网址，照实说
     const apple = IS_IOS || (!IS_MOBILE && /Macintosh/.test(navigator.userAgent)), android = IS_MOBILE && !IS_IOS;
-    const iosSteps = `<ol class="steps"><li>点下面的「复制订阅链接」。</li><li>打开手机「设置」，进入${IOS_18 ? '「App → 日历 → 日历账户」' : '「日历 → 账户」'}。</li><li>选「添加账户 → 其他 → 添加已订阅的日历」，粘贴链接，点「下一步」再点「存储」。</li></ol>`;
+    const iosSteps = `<ol class="steps"><li>点下面的「复制订阅链接」。</li><li>打开「设置」，进入「App → 日历 → 日历账户」（iOS 17 及更早是「日历 → 账户」）。</li><li>选「添加账户 → 其他 → 添加已订阅的日历」，粘贴链接，点「下一步」再点「存储」。</li></ol>`;
     const androidNote = '<section class="card"><ol class="steps"><li>点上面的「复制订阅链接」。</li><li>打开手机自带的日历，在设置里找「订阅日历」或「通过网址添加」，粘贴链接。</li><li>用 Google 日历的：在电脑上打开 calendar.google.com，左侧「其他日历」点「＋」，选「通过网址添加」，手机会自动同步。</li></ol><p class="note" style="margin:8px 0 0">很多安卓手机自带的日历没有订阅网址的功能，这种情况暂时订阅不了，每天打开 flowday 看就好。</p></section>';
     const copyBtn = (primary) => `<button type="button" class="btn ${primary ? 'primary' : 'ghost'} block" data-ics-copy>复制订阅链接</button>`;
     let how;
     // iPhone 上只有 Safari 确定能一键订阅；App 里和其他浏览器给手动粘贴的办法，哪里都能用
     if (IS_IOS && installKind() !== 'ios-safari') how = `<p class="note" style="margin:0">${IN_APP ? `在${esc(IN_APP)}里不能一键订阅` : IS_STANDALONE() ? '从桌面打开时不一定能一键订阅' : '这个浏览器不一定能一键订阅'}，按下面三步手动加，一分钟就好。</p>` + copyBtn(true) + `<section class="card">${iosSteps}</section>`;
     else if (apple && IN_APP) how = `<p class="note" style="margin:0">在${esc(IN_APP)}里不能一键订阅，点「复制订阅链接」，到 Mac 的「日历 → 文件 → 新建日历订阅」里粘贴。</p>` + copyBtn(true);
-    else if (apple) how = `<a class="btn primary block" href="${esc(d.webcal)}" data-ics-sub>订阅到 ${IS_IOS ? 'iPhone' : 'Mac'} 日历</a>` + copyBtn(false)
+    else if (apple) how = `<a class="btn primary block" href="${esc(d.webcal)}" data-ics-sub>订阅到 ${IS_IPAD ? 'iPad' : IS_IOS ? 'iPhone' : 'Mac'} 日历</a>` + copyBtn(false)
       + (IS_IOS ? `<details class="icsmore"><summary>点了没反应？手动加</summary>${iosSteps}</details>` : '');
     else if (android) how = copyBtn(true) + androidNote;
-    else how = `<a class="btn primary block" href="${esc(d.webcal)}" data-ics-sub>用电脑上的日历订阅</a>` + copyBtn(false)
-      + '<details class="icsmore"><summary>Google 日历怎么加</summary><ol class="steps"><li>点「复制订阅链接」。</li><li>打开 calendar.google.com，左侧「其他日历」点「＋」，选「通过网址添加」，粘贴后添加。</li></ol></details>';
+    // Windows、Linux 没有系统日历接 webcal://，点了常常没反应，只给手动的办法
+    else how = copyBtn(true) + '<section class="card"><ol class="steps"><li>点上面的「复制订阅链接」。</li><li>Google 日历：打开 calendar.google.com，左侧「其他日历」点「＋」，选「通过网址添加」，粘贴后添加。</li><li>Outlook：在日历里点「添加日历 → 从 Internet 订阅」，粘贴链接。</li></ol></section>';
     v.innerHTML = phead(T)
-      + `<p class="lead">订阅一次，${android ? '支持订阅的' : '手机自带的'}日历里每天都会出现你的这一天，不用打开 flowday 也能看到。</p>`
+      + `<p class="lead">订阅一次，${android ? '支持订阅的' : IS_MOBILE ? '手机自带的' : '你电脑上的'}日历里每天都会出现你的这一天，不用打开 flowday 也能看到。</p>`
       + `<div class="calmock"><div class="hd"><span>日历 · 预览</span><span>flowday</span></div>${d.preview.map((e) => `<div class="ev"><span class="d">周${wk(e)}<b>${e.d}</b></span><span class="t k${e.level}">${esc(e.summary)}<small>${esc(e.desc.split('\n')[0])}</small></span></div>`).join('')}</div>`
       + how
       + `<p class="note" style="margin:0">每天自动更新未来 60 天，你定下的计划也会同步。${d.fetchedAt ? `最近一次同步：${dtText(d.fetchedAt)}。` : ''}链接只属于你，<button type="button" class="tbtn" data-ics-reset>重置链接</button>后旧的会失效。</p>` + footHtml();

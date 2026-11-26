@@ -17,18 +17,20 @@ export const price = (cents) => (cents / 100).toFixed(2).replace(/\.00$/, '').re
 const UA = navigator.userAgent || '';
 export const IS_WECHAT = /MicroMessenger/i.test(UA);
 export const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(UA));
-export const IS_MOBILE = IS_IOS || /Android|Mobile|HarmonyOS/i.test(UA);
+export const IS_IPAD = /iPad/.test(UA) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(UA));
+export const IS_MOBILE = IS_IOS || /Android|Mobile|HarmonyOS|OpenHarmony/i.test(UA);
 export const IS_STANDALONE = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
 // 在哪个 App 里打开（App 内置浏览器加不了主屏，也会拦 webcal:// 链接）
-// 常见的点名；其余 App 按通用特征认：iPhone 上内置浏览器的标识没有「Safari/」，安卓上带「; wv)」
+// 常见的点名；其余 App 按通用特征认：iPhone、Mac 上内置网页的标识没有「Safari/」，安卓上带「; wv)」
 const IN_APPS = [[/MicroMessenger/i, '微信'], [/DingTalk/i, '钉钉'], [/\bQQ\/\d/, 'QQ'], [/Weibo/i, '微博'], [/xhsdiscover|XiaoHongShu/i, '小红书'], [/AlipayClient/i, '支付宝']];
 const navStandalone = navigator.standalone === true;
 export const IN_APP = (IN_APPS.find(([re]) => re.test(UA)) || [])[1]
-  || ((IS_IOS && !navStandalone && /Mobile\//.test(UA) && !/Safari\//.test(UA)) || /; wv\)/.test(UA) ? '这个应用' : '');
-// 版本号记成 主*100+次（16.4 → 1604），免得 16_4 被当成 16.04
+  || ((IS_IOS && !navStandalone && /Mobile\//.test(UA) && !/Safari\//.test(UA)) || /; wv\)/.test(UA)
+    || (!IS_IOS && /Macintosh/.test(UA) && !/Safari\/|Firefox\//.test(UA)) ? '这个应用' : '');
+// 版本号记成 主*100+次（16.4 → 1604），免得 16_4 被当成 16.04；iOS 26 起系统号固定写 18_6，要看 Safari 的 Version/
 const IOS_VER = (() => { const m = UA.match(/OS (\d+)_(\d+)/); return m ? +m[1] * 100 + +m[2] : 9999; })();
-export const IOS_18 = IOS_VER >= 1800;
+export const SAFARI_VER = +(UA.match(/Version\/(\d+)/) || [])[1] || 0;
 // 加到主屏怎么加：prompt（安卓 Chrome 等会弹安装框）/ ios-safari / ios-share（iOS 16.4+ 的 Chrome、Edge、Firefox）/ android / desktop / no（加不了）
 export function installKind() {
   if (IN_APP) return 'no';
@@ -39,11 +41,11 @@ export function installKind() {
   if (IS_MOBILE) return 'android';
   if (/Firefox\//.test(UA)) return 'no';
   // Mac Safari 17 起才有「添加到程序坞」
-  if (/Macintosh/.test(UA) && !/Chrome\/|Edg\//.test(UA)) return +(UA.match(/Version\/(\d+)/) || [])[1] >= 17 ? 'mac-safari' : 'no';
+  if (/Macintosh/.test(UA) && !/Chrome\/|Edg\//.test(UA)) return SAFARI_VER >= 17 ? 'mac-safari' : 'no';
   return 'desktop';
 }
 // 埋点用：在什么环境里打开
-export const ENV_NAME = (IN_APP === '这个应用' ? (IS_IOS ? 'inapp-ios' : 'inapp-android') : IN_APP) || (IS_IOS ? (/CriOS|EdgiOS|FxiOS/.test(UA) ? 'ios-chrome' : installKind() === 'ios-safari' ? 'ios-safari' : 'ios-other')
+export const ENV_NAME = (IN_APP === '这个应用' ? (IS_IOS ? 'inapp-ios' : IS_MOBILE ? 'inapp-android' : 'inapp-desktop') : IN_APP) || (IS_IOS ? (/CriOS|EdgiOS|FxiOS/.test(UA) ? 'ios-chrome' : installKind() === 'ios-safari' ? 'ios-safari' : 'ios-other')
   : IS_MOBILE ? 'android-' + (['HuaweiBrowser', 'MiuiBrowser', 'HeyTapBrowser', 'VivoBrowser', 'Quark', 'UCBrowser', 'MQQBrowser', 'baiduboxapp', 'SamsungBrowser', 'EdgA', 'Firefox', 'Chrome'].find((x) => UA.includes(x)) || 'other').toLowerCase()
   : 'desktop');
 
