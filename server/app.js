@@ -1655,7 +1655,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
         revenueUsdCents: one("SELECT COALESCE(SUM(amount_cents),0) n FROM orders WHERE status = 'paid' AND currency = 'USD'").n,
         openFeedback: one("SELECT COUNT(*) n FROM feedback WHERE status = 'open'").n,
       },
-      series,
+      series, beta: settings.get('beta_member') === '1',
     };
   });
 
@@ -1713,7 +1713,15 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id AND o.status = 'paid') paid_orders,
       (SELECT COALESCE(SUM(amount_cents),0) FROM orders o WHERE o.user_id = u.id AND o.status = 'paid' AND o.currency = 'CNY') paid_cents
       FROM users u ${where} ORDER BY u.id DESC LIMIT 50 OFFSET ?`, ...args, (page - 1) * 50);
-    return { total, page, list };
+    return { total, page, list, beta: settings.get('beta_member') === '1' };
+  });
+  // 一个用户的操作路径：前台埋点按时间倒序，最近 300 条
+  route('GET', '/api/admin/users/:id/events', async ({ req, params }) => {
+    requireAdmin(req);
+    const u = db.get('SELECT id, username, nickname, created_at FROM users WHERE id = ?', +params.id);
+    if (!u) throw new HttpError(404, '没有这个用户');
+    const list = db.all('SELECT name, props, created_at FROM events WHERE user_id = ? ORDER BY id DESC LIMIT 300', u.id).map((e) => ({ name: e.name, props: JSON.parse(e.props || '{}'), at: e.created_at }));
+    return { user: u, list };
   });
   route('POST', '/api/admin/users/:id/reset-password', async ({ req, params }) => {
     requireAdmin(req);

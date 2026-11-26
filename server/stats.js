@@ -21,6 +21,7 @@ export function adminStats(db, now = Date.now()) {
       ['打开', one("SELECT COUNT(DISTINCT anon_id) n FROM events WHERE name = 'visit' AND created_at >= ?", fromIso)],
       ['测能量卡', one("SELECT COUNT(DISTINCT anon_id) n FROM events WHERE name = 'card_preview' AND created_at >= ?", fromIso)],
       ['注册', one(`SELECT COUNT(*) n FROM (${regs})`)],
+      ['做完第一天三件事', one(`SELECT COUNT(*) n FROM (${regs}) r WHERE EXISTS (SELECT 1 FROM events e WHERE e.user_id = r.id AND e.name = 'fd_done')`)],
       ['第 2 天再来', one(`SELECT COUNT(*) n FROM (${regs}) r WHERE (SELECT COUNT(*) FROM usage_days d WHERE d.user_id = r.id) >= 2`)],
       ['付费', one(`SELECT COUNT(*) n FROM (${regs}) r WHERE EXISTS (SELECT 1 FROM orders o WHERE o.user_id = r.id AND o.status = 'paid')`)],
     ].map(([label, n]) => ({ label, n }));

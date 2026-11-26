@@ -32,7 +32,7 @@ function dialog(title, desc, fields, okText) {
   });
 }
 
-var TABS = [['overview', '概览'], ['users', '用户'], ['orders', '订单'], ['feedback', '反馈'], ['compare', '规则对比'], ['settings', '设置'], ['logs', '操作日志']];
+var TABS = [['overview', '概览'], ['users', '用户'], ['feedback', '反馈'], ['orders', '订单'], ['settings', '设置'], ['logs', '操作日志'], ['compare', '规则对比']];
 var openFb = 0;
 function tab() { var h = location.hash.replace(/^#\/?/, ''); var t = h.split('?')[0]; return TABS.some(function (x) { return x[0] === t; }) ? t : 'overview'; }
 function qparam(k) { var h = location.hash; var i = h.indexOf('?'); return i < 0 ? '' : (new URLSearchParams(h.slice(i + 1)).get(k) || ''); }
@@ -75,11 +75,12 @@ function pageOverview() {
     openFb = d.totals.openFeedback;
     var t = d.today, m = d.last30, a = d.totals;
     shell('<div class="bar2"><h1>概览</h1><span class="sub2">北京时间 · 实时</span></div>'
-      + '<div class="grp">今天</div><div class="kpis">' + kpi('新注册', t.signups) + kpi('活跃用户', t.active) + kpi('新付费订单', t.paid) + kpi('收入', yuan(t.revenueCents)) + '</div>'
-      + '<div class="grp">近 30 天</div><div class="kpis">' + kpi('新注册', m.signups) + kpi('活跃用户', m.active) + kpi('付费订单', m.paid) + kpi('收入', yuan(m.revenueCents)) + '</div>'
-      + '<div class="grp">累计</div><div class="kpis">' + kpi('用户', a.users) + kpi('付费用户', a.payingUsers, '付费转化 ' + (a.conversion * 100).toFixed(1) + '%') + kpi('有效会员', a.activeMembers) + kpi('累计收入', yuan(a.revenueCents), '海外 $' + ((a.revenueUsdCents || 0) / 100).toFixed(2) + ' · 待处理反馈 ' + a.openFeedback + ' 条') + '</div>'
-      + '<div class="charts">' + barChart('每日新注册', d.series, 'signups', function (v) { return Math.round(v); }) + barChart('每日活跃用户', d.series, 'active', function (v) { return Math.round(v); }) + barChart('每日收入（元）', d.series, 'revenueCents', function (v) { return (v / 100).toFixed(v % 100 ? 1 : 0); }) + '</div>'
-      + '<div id="stats"><div class="sk" style="height:260px"></div></div>');
+      + (d.beta ? '<div class="betabar">体验版开着：所有人免费当会员，不收费。<a href="#/settings">去设置</a></div>' : '')
+      + '<div class="grp">用户</div><div class="kpis">' + kpi('今天新注册', t.signups) + kpi('今天活跃', t.active) + kpi('近 30 天新注册', m.signups) + kpi('累计用户', a.users, a.openFeedback ? '<a href="#/feedback">待处理反馈 ' + a.openFeedback + ' 条</a>' : '') + '</div>'
+      + '<div class="charts">' + barChart('每日新注册', d.series, 'signups', function (v) { return Math.round(v); }) + barChart('每日活跃用户', d.series, 'active', function (v) { return Math.round(v); }) + '</div>'
+      + '<div id="stats"><div class="sk" style="height:260px"></div></div>'
+      + '<div class="grp">收入</div><div class="kpis">' + kpi('今天收入', yuan(t.revenueCents), '新付费订单 ' + t.paid) + kpi('近 30 天收入', yuan(m.revenueCents), '付费订单 ' + m.paid) + kpi('付费用户', a.payingUsers, '付费转化 ' + (a.conversion * 100).toFixed(1) + '% · 有效会员 ' + a.activeMembers) + kpi('累计收入', yuan(a.revenueCents), '海外 $' + ((a.revenueUsdCents || 0) / 100).toFixed(2)) + '</div>'
+      + '<div class="charts">' + barChart('每日收入（元）', d.series, 'revenueCents', function (v) { return (v / 100).toFixed(v % 100 ? 1 : 0); }) + '</div>');
     return api('GET', 'admin/stats').then(function (st) { var el = $('#stats'); if (el) el.innerHTML = statsHtml(st); });
   });
 }
@@ -117,8 +118,8 @@ function pageUsers() {
   api('GET', 'admin/users?q=' + encodeURIComponent(q) + '&page=' + page).then(function (d) {
     var now = new Date().toISOString();
     var rows = d.list.map(function (u) {
-      var mem = u.member_until && u.member_until > now ? '<span class="tag2 ok">会员至 ' + day(u.member_until) + '</span>' : (u.member_until ? '<span class="tag2">已到期 ' + day(u.member_until) + '</span>' : '<span class="tag2">免费 · 用了 ' + u.uses + ' 次</span>');
-      return '<tr><td><b>' + esc(u.username) + '</b>' + (u.nickname ? '<div class="sub2">' + esc(u.nickname) + '</div>' : '') + (u.bio ? '<div class="sub2" style="max-width:220px">' + esc(u.bio) + '</div>' : '') + '</td>'
+      var mem = d.beta ? '<span class="tag2 ok">体验版 · 用了 ' + u.uses + ' 天</span>' : u.member_until && u.member_until > now ? '<span class="tag2 ok">会员至 ' + day(u.member_until) + '</span>' : (u.member_until ? '<span class="tag2">已到期 ' + day(u.member_until) + '</span>' : '<span class="tag2">免费 · 用了 ' + u.uses + ' 次</span>');
+      return '<tr><td><a href="#" class="ulink" data-path="' + u.id + '"><b>' + esc(u.username) + '</b></a>' + (u.nickname ? '<div class="sub2">' + esc(u.nickname) + '</div>' : '') + (u.bio ? '<div class="sub2" style="max-width:220px">' + esc(u.bio) + '</div>' : '') + '</td>'
         + '<td class="nw">' + (u.birth_date ? esc(u.birth_date) + ' ' + esc(u.birth_time || '时辰不详') + ' · ' + esc(u.gender) + '<div class="sub2">' + esc(u.birth_city || '未填城市') + '</div>' : '<span class="sub2">未填</span>') + '</td>'
         + '<td>' + mem + (u.status !== 'active' ? ' <span class="tag2 bad">已停用</span>' : '') + (u.locked_until && u.locked_until > now ? ' <span class="tag2 warn">登录锁定中</span>' : '') + '</td>'
         + '<td class="num">' + u.paid_orders + ' 笔<div class="sub2">' + yuan(u.paid_cents) + '</div></td>'
@@ -128,9 +129,42 @@ function pageUsers() {
     }).join('');
     var pages = Math.max(1, Math.ceil(d.total / 50));
     shell('<div class="bar2"><h1>用户</h1><span class="sub2">共 ' + d.total + ' 人</span><form id="uq"><input name="q" placeholder="搜用户名或称呼" value="' + esc(q) + '"></form></div>'
-      + '<div class="tbl"><table><tr><th>用户</th><th>出生信息</th><th>状态</th><th style="text-align:right">付费</th><th>注册 / 最近使用</th><th>操作</th></tr>' + (rows || '<tr><td colspan="6" class="sub2" style="text-align:center;padding:30px">没有找到用户</td></tr>') + '</table></div>'
+      + '<div class="tbl"><table><tr><th>用户 <span class="sub2">点名字看操作路径</span></th><th>出生信息</th><th>状态</th><th style="text-align:right">付费</th><th>注册 / 最近使用</th><th>操作</th></tr>' + (rows || '<tr><td colspan="6" class="sub2" style="text-align:center;padding:30px">没有找到用户</td></tr>') + '</table></div>'
       + (pages > 1 ? '<div class="pager">第 ' + page + ' / ' + pages + ' 页 ' + (page > 1 ? '<a class="btn sm ghost" href="#/users?q=' + encodeURIComponent(q) + '&page=' + (page - 1) + '">上一页</a>' : '') + (page < pages ? '<a class="btn sm ghost" href="#/users?q=' + encodeURIComponent(q) + '&page=' + (page + 1) + '">下一页</a>' : '') + '</div>' : ''));
   });
+}
+
+// 一个用户的操作路径：埋点按天分组，翻成中文
+var EV = {
+  visit: '打开网站', landing: '从分享或邀请链接进来', card_preview: '测能量卡', card_step: '翻能量卡', register: '注册', onboard_welcome: '看到注册后的全屏画',
+  today_open: '打开今天页', today_swipe: '滑日卡', day_art_open: '看画', outfit_open: '看幸运色', term_open: '看节气', calendar_tear: '撕日历', theme: '切换深浅色', pro_toggle: '切换专业模式',
+  fd_task: '第一天任务', fd_done: '做完第一天三件事', fd_rate: '第一晚打分',
+  draw_shake: '摇签', draw: '求到签', draw_toss: '掷筊', draw_reask: '换个问题再求',
+  ask_done: '问事', ask_follow: '问事追问', ask_review: '回看问事', ask_replay: '同一个问题再问', ask_to_pick: '问事后去挑日子',
+  pick_open: '打开挑日子', pick_create: '挑日子', pick_pin: '定下日子', cal_yi: '日历切换宜', mood_stick: '记心情',
+  luck_tab: '转运切页签', deed_add: '记善行', deed_exchange: '善行换御守', energy_exchange: '静心换御守', amulet_buy: '领或买御守', practice_meditate_start: '开始冥想', practice_meditate: '完成冥想', practice_meditate_quit: '中途退出冥想', practice_release: '完成释放练习',
+  jiazi_open: '看一甲子', recap_open: '看月度回顾', share_create: '生成分享图', share_save: '保存分享图', share_done: '分享出去',
+  invite_copy: '复制邀请链接', invite_poster: '生成邀请海报', friend_link: '和朋友连上', pair_view: '看两人的画',
+  ics_open: '看订阅日历', ics_subscribe: '订阅日历', a2hs_open: '看加到主屏', a2hs_copy: '复制主屏链接', a2hs_accept: '同意加到主屏', a2hs_done: '加到主屏', a2hs_installed: '已装到主屏',
+  pay_open: '打开付款', pay_success: '付款成功', pay_intl: '海外付款'
+};
+var TOSS = { sheng: '圣杯', xiao: '笑杯', yin: '阴杯' };
+function evProps(p) { p = p || {}; if (TOSS[p.toss]) p.toss = TOSS[p.toss]; var k = Object.keys(p); return k.length ? '<span class="sub2">' + esc(k.map(function (x) { return x + ' ' + (typeof p[x] === 'object' ? JSON.stringify(p[x]) : p[x]); }).join(' · ')) + '</span>' : ''; }
+function openPath(id) {
+  var bg = document.createElement('div'); bg.className = 'dlg-bg';
+  bg.innerHTML = '<div class="dlg wide"><h2>操作路径</h2><div class="sk" style="height:200px"></div></div>';
+  $('#layer').appendChild(bg);
+  bg.addEventListener('click', function (e) { if (e.target === bg || e.target.closest('[data-x]')) bg.remove(); });
+  api('GET', 'admin/users/' + id + '/events').then(function (d) {
+    var by = {}, days = [];
+    d.list.forEach(function (e) { var k = day(e.at); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(e); });
+    $('.dlg', bg).innerHTML = '<h2>' + esc(d.user.username) + (d.user.nickname ? ' <span class="sub2">' + esc(d.user.nickname) + '</span>' : '') + '</h2>'
+      + '<p class="sub2" style="margin:0">' + day(d.user.created_at) + ' 注册 · 最近 ' + d.list.length + ' 条操作，新的日子在上，同一天从早到晚</p>'
+      + '<div class="path">' + (days.length ? days.map(function (k) {
+        return '<div class="pday"><b>' + k.slice(5) + '</b>' + by[k].slice().reverse().map(function (e) { return '<div class="pev"><span class="t">' + dt(e.at).slice(11) + '</span><span>' + esc(EV[e.name] || e.name) + ' ' + evProps(e.props) + '</span></div>'; }).join('') + '</div>';
+      }).join('') : '<div class="empty">还没有记录</div>') + '</div>'
+      + '<div class="row"><button class="btn ghost" data-x>关闭</button></div>';
+  }, function (er) { bg.remove(); toast(er.message); });
 }
 
 // ---------- 订单 ----------
@@ -180,23 +214,26 @@ function pageSettings() {
   api('GET', 'admin/settings').then(function (d) {
     var s = d.settings;
     shell('<div class="bar2"><h1>设置</h1><button class="btn primary" form="sf">保存设置</button></div><form id="sf" class="setg">'
-      + '<label class="field"><span>月度会员价格（元）</span><input name="price" type="number" step="0.01" min="0.01" value="' + (s.price_cents / 100).toFixed(2) + '"><span class="hint">只影响之后新下的订单</span></label>'
       + '<label class="field"><span>体验版会员</span><select name="beta_member"><option value="1"' + (s.beta_member === '1' ? ' selected' : '') + '>打开：所有人免费当会员</option><option value="0"' + (s.beta_member === '1' ? '' : ' selected') + '>关闭：按免费次数和付费会员</option></select><span class="hint">测试阶段打开；关闭后恢复收费，已付费的会员不受影响</span></label>'
+      + '<label class="field"><span>打分规则</span><select name="engine"><option value="v1"' + (s.engine === 'v1' ? ' selected' : '') + '>v1（现在线上用的）</option><option value="v2"' + (s.engine === 'v2' ? ' selected' : '') + '>v2（加大运流年、冲克分喜忌）</option></select><span class="hint">会改变所有人每天的分数。先在「规则对比」里看过、发起人点头后再切，最好在月初切</span></label>'
+      + '<div class="grp full">收费与邀请</div>'
+      + '<label class="field"><span>月度会员价格（元）</span><input name="price" type="number" step="0.01" min="0.01" value="' + (s.price_cents / 100).toFixed(2) + '"><span class="hint">只影响之后新下的订单</span></label>'
       + '<label class="field"><span>免费体验次数</span><input name="free_uses" type="number" min="0" max="30" value="' + esc(s.free_uses) + '"><span class="hint">按使用日计，同一天只算 1 次</span></label>'
       + '<label class="field"><span>特别款御守单价（元）</span><input name="amulet_price" type="number" step="0.01" min="0.01" value="' + (s.amulet_price_cents / 100).toFixed(2) + '"><span class="hint">节气款、生日款</span></label>'
-      + '<label class="field"><span>打分规则</span><select name="engine"><option value="v1"' + (s.engine === 'v1' ? ' selected' : '') + '>v1（现在线上用的）</option><option value="v2"' + (s.engine === 'v2' ? ' selected' : '') + '>v2（加大运流年、冲克分喜忌）</option></select><span class="hint">会改变所有人每天的分数。先在「规则对比」里看过、发起人点头后再切，最好在月初切</span></label>'
       + '<label class="field"><span>邀请奖励天数</span><input name="invite_days" type="number" min="0" max="60" value="' + esc(s.invite_days) + '"><span class="hint">邀请人和被邀请人各得的会员天数</span></label>'
       + '<label class="field"><span>每人每月邀请奖励上限</span><input name="invite_cap" type="number" min="0" max="100" value="' + esc(s.invite_cap) + '"><span class="hint">超过后被邀请人仍有奖励，邀请人没有</span></label>'
       + '<label class="field"><span>支付宝订单名称</span><input name="order_subject" maxlength="60" value="' + esc(s.order_subject) + '"><span class="hint">不要出现八字、算命等字样</span></label>'
+      + '<details class="full texts"><summary>声明、用户协议、隐私政策</summary>'
       + '<label class="field full"><span>娱乐声明</span><textarea name="disclaimer" style="min-height:80px">' + esc(s.disclaimer) + '</textarea></label>'
       + '<label class="field full"><span>用户协议</span><textarea name="terms">' + esc(s.terms) + '</textarea></label>'
-      + '<label class="field full"><span>隐私政策</span><textarea name="privacy">' + esc(s.privacy) + '</textarea></label>'
+      + '<label class="field full"><span>隐私政策</span><textarea name="privacy">' + esc(s.privacy) + '</textarea></label></details>'
       + '<div class="err full" id="serr"></div></form>');
     $('#sf').onsubmit = function (e) {
       e.preventDefault(); var f = e.target;
       if (f.engine.value !== s.engine && !confirm('切换打分规则会改变所有人每天的分数和档位，确定现在切换吗？')) return;
+      if (f.beta_member.value !== (s.beta_member === '1' ? '1' : '0') && !confirm(f.beta_member.value === '1' ? '打开体验版后，所有人马上免费当会员。确定吗？' : '关闭体验版后马上恢复收费：体验期间用过的天数也算免费次数，大部分人会立刻需要开通会员。确定吗？')) return;
       api('PUT', 'admin/settings', { price_cents: Math.round(parseFloat(f.price.value) * 100), free_uses: +f.free_uses.value, beta_member: f.beta_member.value === '1', amulet_price_cents: Math.round(parseFloat(f.amulet_price.value) * 100), engine: f.engine.value, invite_days: +f.invite_days.value, invite_cap: +f.invite_cap.value, order_subject: f.order_subject.value, disclaimer: f.disclaimer.value, terms: f.terms.value, privacy: f.privacy.value })
-        .then(function () { $('#serr').textContent = ''; toast('已保存'); }, function (er) { $('#serr').textContent = er.message; });
+        .then(function (r) { s = r.settings; $('#serr').textContent = ''; toast('已保存'); }, function (er) { $('#serr').textContent = er.message; });
     };
   });
 }
@@ -265,6 +302,7 @@ document.addEventListener('change', function (e) {
 });
 document.addEventListener('click', function (e) {
   var el;
+  if ((el = e.target.closest('[data-path]'))) { e.preventDefault(); openPath(el.dataset.path); return; }
   if ((el = e.target.closest('#adLogout'))) { e.preventDefault(); api('POST', 'admin/logout', {}).then(renderLogin); return; }
   if ((el = e.target.closest('[data-reset]'))) {
     dialog('重置「' + el.dataset.name + '」的密码', '会生成一个随机新密码，并让这个用户所有设备退出登录。', [], '重置').then(function (ok) {

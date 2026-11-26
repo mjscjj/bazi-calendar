@@ -447,10 +447,17 @@ test('后台数据看板', async () => {
   await c('POST', '/api/admin/login', { username: 'admin', password: 'adminpass123' });
   const s = await c('GET', '/api/admin/stats');
   assert.equal(s.status, 200);
-  assert.equal(s.data.funnel7.length, 5);
+  assert.equal(s.data.funnel7.length, 6);
   assert.equal(s.data.cohorts.length, 14);
   assert.ok(s.data.features.some((f) => f.key === 'rate'));
   assert.equal(s.data.ratings.length, 6);
+  // 用户的操作路径
+  const us = await c('GET', '/api/admin/users');
+  const p = await c('GET', `/api/admin/users/${us.data.list[0].id}/events`);
+  assert.equal(p.status, 200);
+  assert.ok(Array.isArray(p.data.list));
+  assert.equal((await c('GET', '/api/admin/users/999999/events')).status, 404);
+  assert.equal((await client()('GET', `/api/admin/users/${us.data.list[0].id}/events`)).status, 401);
 });
 
 test('问事：起卦、体验期 1 次、拒答、同一件事不重复扣、会员不限次', async () => {
