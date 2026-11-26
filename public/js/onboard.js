@@ -234,7 +234,7 @@ export function checkBirth(b) {
   if (b.cal === 'lunar' ? !(b.lunar && b.lunar.y && b.lunar.m && b.lunar.d) : !b.date) return '请填写出生日期';
   if (b.date) {
     const age = (Date.now() - Date.parse(b.date)) / (365.25 * 86400000);
-    if (age < 14) return '流日历暂不面向 14 岁以下的朋友';
+    if (age < 14) return 'flowday 暂不面向 14 岁以下的朋友';
   }
   if (b.cityText && !b.city) return '出生城市请从列表里选一个，不确定就清空';
   if (!b.gender) return '请选择性别';
@@ -364,7 +364,7 @@ const STEPS = [
 export function openGuide() {
   if (seen('guide')) return;
   let i = 0;
-  const body = openSheet('欢迎来到流日历', '', { onClose: () => mark('guide') });
+  const body = openSheet('欢迎来到 flowday', '', { onClose: () => mark('guide') });
   const render = () => {
     const [t, d] = STEPS[i];
     body.innerHTML = `<div class="guide"><div class="dots3">${STEPS.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div><h2>${t}</h2><p>${d}</p>`
@@ -394,9 +394,9 @@ export function openInstall() {
   }
   let steps;
   if (IS_WECHAT) steps = ['点右上角「···」，选择「在浏览器打开」', '在浏览器里再按下面的步骤添加'];
-  else if (IS_IOS) steps = ['点 Safari 底部的「分享」按钮（方框加向上箭头）', '往下滑，选「添加到主屏幕」', '点右上角「添加」，桌面上就有流日历了'];
-  else if (IS_MOBILE) steps = ['点浏览器右上角或底部的「菜单」', '选「添加到主屏幕」或「添加到桌面」', '确认添加，桌面上就有流日历了'];
-  else steps = ['点地址栏右侧的「安装」图标（一个电脑加箭头）', '或在浏览器菜单里选「安装流日历」', '安装后可以从桌面或程序坞直接打开'];
+  else if (IS_IOS) steps = ['点 Safari 底部的「分享」按钮（方框加向上箭头）', '往下滑，选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了'];
+  else if (IS_MOBILE) steps = ['点浏览器右上角或底部的「菜单」', '选「添加到主屏幕」或「添加到桌面」', '确认添加，桌面上就有 flowday 了'];
+  else steps = ['点地址栏右侧的「安装」图标（一个电脑加箭头）', '或在浏览器菜单里选「安装 flowday」', '安装后可以从桌面或程序坞直接打开'];
   openSheet('加到主屏', `<div class="guide"><ol class="steps">${steps.map((s) => `<li>${s}</li>`).join('')}</ol><div class="acts"><button type="button" class="btn ghost" data-a2hs-done-close>已经加好了</button><button type="button" class="btn primary" data-close-sheet>知道了</button></div></div>`);
 }
 onClick('[data-install]', openInstall);

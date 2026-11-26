@@ -1,4 +1,4 @@
-/* 流日历样式。两套主题：白色（默认浅色）和深色，可在顶栏或「我的 · 外观」切换。基础部分沿用原单页的组件；文末是产品化新增的组件。 */
+/* flowday 样式。两套主题：白色（默认浅色）和深色，可在顶栏或「我的 · 外观」切换。基础部分沿用原单页的组件；文末是产品化新增的组件。 */
 :root{
   --bg:#FFFFFF; --surface:#FFFFFF; --sunk:#F3F3F5; --line:rgba(17,17,26,.09);
   --fg:#15151C; --muted:#6B6B76; --accent:#15151C; --cinnabar:#C2412D;
@@ -2255,3 +2255,7 @@ button.tluck{cursor:pointer;padding-inline-end:26px}
 .energy-goal progress::-moz-progress-bar{background:#776b9a}
 .energy-goal .deed-preview{background:color-mix(in srgb,#9587b6 8%,var(--paper))}
 .practice-result:not(:empty){font:500 .875rem/1.5 var(--f-body);margin-top:8px}
+
+/* flowday 标志：太阳（day）从水波（flow）上升起；太阳跟着 .mk 的文字色（橙），水波是米白 */
+.brand .mk svg,.lockmark svg{width:78%;height:78%;display:block}
+.lockmark{display:grid;place-items:center}

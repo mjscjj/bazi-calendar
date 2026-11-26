@@ -51,7 +51,7 @@ function wrap(ctx, s, x, y, maxW, lineH, maxLines, opts) {
 }
 function footer(ctx, kind) {
   ctx.fillStyle = P.line; ctx.fillRect(80, 1600, W - 160, 2);
-  text(ctx, '流日历', 80, 1730, { size: 64, font: SERIF, weight: 900, align: 'left' });
+  text(ctx, 'flowday', 80, 1730, { size: 64, font: SERIF, weight: 900, align: 'left' });
   text(ctx, kind === 'invite' ? '扫码测测你是什么型' : '按你的出生信息，算你的每一天', 80, 1792, { size: 34, color: P.muted, align: 'left' });
   text(ctx, 'mindflow.zone/bazi', 80, 1846, { size: 30, color: P.muted, align: 'left' });
   const code = S.me && S.me.inviteCode;
@@ -201,7 +201,7 @@ const DRAW = {
   recap(ctx, d) {
     const MCN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
     text(ctx, `${d.name || '我'}的${MCN[d.m - 1]}月`, W / 2, 210, { size: 76, font: SERIF, weight: 900 });
-    text(ctx, `${d.y} · 流日历月度回顾${d.inProgress ? '（到今天为止）' : ''}`, W / 2, 272, { size: 34, color: P.muted });
+    text(ctx, `${d.y} · flowday 月度回顾${d.inProgress ? '（到今天为止）' : ''}`, W / 2, 272, { size: 34, color: P.muted });
     const items = [[d.opened, '天打开'], [d.arts.length, '张画'], [d.notes, '条记录'], [d.lots, '支签'], [d.deeds, '件好事'], [d.amulets, '枚御守']];
     items.forEach(([n, l], i) => {
       const cx = 240 + (i % 3) * 300, cy = 400 + Math.floor(i / 3) * 150;
@@ -238,7 +238,7 @@ const DRAW = {
     text(ctx, `今天是你的${THEME[x.ssG][0]}`, cw / 2, ay + s + 236, { size: 80, font: SERIF, weight: 900 });
     const { top } = bestHours(x);
     if (top[0]) text(ctx, `最好的时段 ${hhmm(top[0].i)}`, cw / 2, ay + s + 330, { size: 46, weight: 600, color: glowText() });
-    text(ctx, '流日历', cw / 2, ch - 170, { size: 34, font: SERIF, color: P.muted });
+    text(ctx, 'flowday', cw / 2, ch - 170, { size: 34, font: SERIF, color: P.muted });
   },
   amulet(ctx, { img, a, art, message, recipient }) {
     const night = mode === 'dark';

@@ -32,7 +32,7 @@ export function pageRecap() {
       + `<b>${esc(d.name || '你')}的${monthCn(d.m)}</b><span>${d.opened ? `这个月打开了 ${d.opened} 天` : '这个月还没打开过'}</span></div></section>`;
     const wall = d.arts.length
       ? `<div class="rcwall">${d.arts.map((a) => `<figure><img src="${esc(pillarArtSrc(a.art))}" alt="" loading="lazy"><figcaption>${esc(a.gz)}</figcaption></figure>`).join('')}</div>`
-      : '<p class="note" style="margin:0">这个月还没收到画。每天打开流日历，就收下当天的那张。</p>';
+      : '<p class="note" style="margin:0">这个月还没收到画。每天打开 flowday，就收下当天的那张。</p>';
     const moods = d.moods.length
       ? `<div class="rcmoods">${d.moods.map((m) => `<span><i style="background:${dark ? m.dark : m.light}">${esc(m.char)}</i>${esc(m.word)} <b>× ${m.n}</b></span>`).join('')}</div>`
         + (d.match && d.match.rated ? `<p class="note" style="margin:0">有 ${d.match.rated} 天记了心情，其中 ${d.match.match} 天和系统的判断差不多。</p>` : '')

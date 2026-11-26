@@ -35,7 +35,7 @@ export function omamoriSvg(a, key = 'x') {
     + `<circle cx="90" cy="34" r="5" fill="${gold}"/>`
     + text.map((ch, i) => `<text x="90" y="${118 + i * 52}" text-anchor="middle" font-family="${SERIF}" font-weight="900" font-size="44" fill="${ink}">${esc(ch)}</text>`).join('')
     + `<text x="90" y="${118 + text.length * 52 - 8}" text-anchor="middle" font-family="${SERIF}" font-size="13" fill="${gold}">守 · ${esc(L.monthCn)}</text>`
-    + `<text x="90" y="240" text-anchor="middle" font-family="sans-serif" font-size="10" fill="${gold}" opacity=".8">流日历</text>`
+    + `<text x="90" y="240" text-anchor="middle" font-family="sans-serif" font-size="10" fill="${gold}" opacity=".8">flowday</text>`
     + (seal ? `<g transform="translate(132 58) rotate(5)"><rect x="-13" y="-14" width="26" height="28" rx="3" fill="#C2412D"/><text x="0" y="-2" text-anchor="middle" font-family="${SERIF}" font-weight="900" font-size="10.5" fill="#FFF4EC">${esc(seal[0])}</text><text x="0" y="10" text-anchor="middle" font-family="${SERIF}" font-weight="900" font-size="10.5" fill="#FFF4EC">${esc(seal[1] || '')}</text></g>` : '')
     + '</svg>';
 }

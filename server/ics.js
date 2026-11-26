@@ -39,8 +39,8 @@ export function dayEvent(c, C, y, m, d) {
 
 export function buildIcs({ c, C, userId, name, today, plans, expired, url, days = 60 }) {
   const now = stamp(Date.now());
-  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MindFlow//流日历//ZH', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-    `X-WR-CALNAME:${escText('流日历' + (name ? ' · ' + name : ''))}`, 'X-WR-TIMEZONE:Asia/Shanghai',
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MindFlow//flowday//ZH', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    `X-WR-CALNAME:${escText('flowday' + (name ? ' · ' + name : ''))}`, 'X-WR-TIMEZONE:Asia/Shanghai',
     'REFRESH-INTERVAL;VALUE=DURATION:PT6H', 'X-PUBLISHED-TTL:PT6H'];
   const allDay = (uid, y, m, d, summary, desc) => {
     const next = new Date(Date.UTC(y, m - 1, d) + DAY_MS);
@@ -51,7 +51,7 @@ export function buildIcs({ c, C, userId, name, today, plans, expired, url, days 
   const [ty, tm, td] = today.split('-').map(Number);
   const t0 = Date.UTC(ty, tm - 1, td);
   if (expired) {
-    allDay(`expired-${userId}@mindflow.zone`, ty, tm, td, '流日历会员已到期', '续费后，这里会恢复每天的安排。\n' + url);
+    allDay(`expired-${userId}@mindflow.zone`, ty, tm, td, 'flowday 会员已到期', '续费后，这里会恢复每天的安排。\n' + url);
   } else {
     for (let k = 0; k < days; k++) {
       const dt = new Date(t0 + k * DAY_MS), y = dt.getUTCFullYear(), m = dt.getUTCMonth() + 1, d = dt.getUTCDate();

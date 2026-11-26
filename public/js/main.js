@@ -49,7 +49,7 @@ function activeTab(path) {
 function renderTop(r) {
   let tab = activeTab(r.path);
   if (S.me && ['/energy', '/profile', '/member', '/feedback', '/about', '/card', '/invite', '/ics', '/asks', '/ask', '/ask/result', '/lots', '/jiazi', '/recap'].includes(r.path)) tab = '/me';
-  let h = '<button class="brand" type="button" data-go="/" aria-label="流日历首页"><span class="mk">流</span><b>流日历</b></button>'
+  let h = '<button class="brand" type="button" data-go="/" aria-label="flowday 首页"><span class="mk"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span><b>flowday</b></button>'
     + `<nav class="topnav" aria-label="主导航">${TABS.map(([p, label]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${label}${p === '/me' && S.unread ? '<i class="badge"></i>' : ''}</a>`).join('')}</nav><div class="sp-r">`
     + `<button type="button" class="themebtn" data-theme-toggle aria-label="${isDarkNow() ? '切换到白色' : '切换到深色'}" title="${isDarkNow() ? '切换到白色' : '切换到深色'}">${isDarkNow() ? ICON.light : ICON.dark}</button>`;
   if (S.me) {

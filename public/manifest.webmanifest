@@ -1,6 +1,6 @@
 {
-  "name": "流日历",
-  "short_name": "流日历",
+  "name": "flowday",
+  "short_name": "flowday",
   "description": "按你的出生信息，告诉你每天适合做什么、几点做、穿什么。",
   "start_url": "./?from=pwa",
   "scope": "./",

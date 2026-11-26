@@ -1,4 +1,4 @@
-// 流日历管理后台。
+// flowday 管理后台。
 (function () {
 'use strict';
 var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -39,12 +39,12 @@ function qparam(k) { var h = location.hash; var i = h.indexOf('?'); return i < 0
 
 function shell(content) {
   var t = tab();
-  $('#app').innerHTML = '<div class="ad"><nav><div class="brand"><span class="mk">流</span><b>流日历</b><small>后台</small></div>'
+  $('#app').innerHTML = '<div class="ad"><nav><div class="brand"><span class="mk"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span><b>flowday</b><small>后台</small></div>'
     + TABS.map(function (x) { return '<a href="#/' + x[0] + '"' + (x[0] === t ? ' aria-current="page"' : '') + '>' + x[1] + (x[0] === 'feedback' && openFb ? '<span class="cnt">' + openFb + '</span>' : '') + '</a>'; }).join('')
     + '<div class="bottom"><a href="./" target="_blank" rel="noopener">打开前台 ↗</a><a href="#" id="adLogout">退出后台</a></div></nav><main id="main">' + content + '</main></div>';
 }
 function renderLogin() {
-  $('#app').innerHTML = '<div class="login2"><div class="brand" style="justify-content:center"><span class="mk">流</span><b>流日历 · 后台</b></div><section class="card"><form class="form" id="lf"><label class="field"><span>账号</span><input name="username" autocomplete="username"></label><label class="field"><span>密码</span><input name="password" type="password" autocomplete="current-password"></label><div class="err" id="lerr"></div><button class="btn primary block">登录</button></form></section></div>';
+  $('#app').innerHTML = '<div class="login2"><div class="brand" style="justify-content:center"><span class="mk"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span><b>flowday · 后台</b></div><section class="card"><form class="form" id="lf"><label class="field"><span>账号</span><input name="username" autocomplete="username"></label><label class="field"><span>密码</span><input name="password" type="password" autocomplete="current-password"></label><div class="err" id="lerr"></div><button class="btn primary block">登录</button></form></section></div>';
   $('#lf').onsubmit = function (e) {
     e.preventDefault(); var fd = new FormData(e.target);
     fetch('api/admin/login', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: fd.get('username'), password: fd.get('password') }) })

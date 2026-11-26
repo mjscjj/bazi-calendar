@@ -70,7 +70,7 @@ function friendsHtml(list) {
       + (x.pair ? `<img src="${esc(x.pair.art)}" alt="">` : '<span class="frnone" aria-hidden="true">画</span>')
       + `<span><b>${esc(x.name)}</b><small>${SRC[x.src]} · ${x.pair ? esc(x.pair.tag) : '测完能量卡后就有你们俩的画'}</small></span>${x.pair ? '<i aria-hidden="true">›</i>' : ''}</button>`).join('')}</div>`
       : '<div class="empty">还没有朋友。把下面的链接发给朋友，TA 测完能量卡就会出现在这里。</div>')
-    + '<p class="note" style="margin:0">链接发给新朋友：注册后你们各得会员；发给已经在用流日历的朋友：TA 点开，你们也会在这里看到彼此的画。双方只看到对方的本命形象，看不到生日。</p></section>';
+    + '<p class="note" style="margin:0">链接发给新朋友：注册后你们各得会员；发给已经在用 flowday 的朋友：TA 点开，你们也会在这里看到彼此的画。双方只看到对方的本命形象，看不到生日。</p></section>';
 }
 onClick('[data-friend]', (el) => {
   const x = S.friends && S.friends[+el.getAttribute('data-friend')];
@@ -78,7 +78,7 @@ onClick('[data-friend]', (el) => {
   track('pair_view', { from: 'friends', src: x.src, kind: x.pair.kind });
   openSheet('你们俩的画', pairHtml(x.pair, x.pair.best, x.name));
 });
-onClick('[data-inv-copy]', () => { track('invite_copy'); copy(`我在用流日历，按出生信息算每天适合做什么。测测你是什么型：${S.inviteUrl}`, '已复制，发给朋友吧'); });
+onClick('[data-inv-copy]', () => { track('invite_copy'); copy(`我在用 flowday，按出生信息算每天适合做什么。测测你是什么型：${S.inviteUrl}`, '已复制，发给朋友吧'); });
 onClick('[data-inv-poster]', (el) => {
   if (el.disabled) return;
   track('invite_poster');
@@ -101,8 +101,8 @@ export function pageIcs() {
     const android = IS_MOBILE && !IS_IOS;
     const steps = '<ol class="steps"><li>点上面的「复制订阅链接」。</li><li>在电脑浏览器打开 calendar.google.com，左侧「其他日历」点「＋」，选「通过网址添加」。</li><li>粘贴链接后添加，手机上的 Google 日历会自动同步。有的手机自带日历也支持「订阅日历」，粘贴同一个链接即可。</li></ol>';
     v.innerHTML = phead(T)
-      + '<p class="lead">订阅一次，手机自带的日历和日历小组件里，每天都会出现你的这一天。不用打开流日历也能看到。</p>'
-      + `<div class="calmock"><div class="hd"><span>日历 · 预览</span><span>流日历</span></div>${d.preview.map((e) => `<div class="ev"><span class="d">周${wk(e)}<b>${e.d}</b></span><span class="t k${e.level}">${esc(e.summary)}<small>${esc(e.desc.split('\n')[0])}</small></span></div>`).join('')}</div>`
+      + '<p class="lead">订阅一次，手机自带的日历和日历小组件里，每天都会出现你的这一天。不用打开 flowday 也能看到。</p>'
+      + `<div class="calmock"><div class="hd"><span>日历 · 预览</span><span>flowday</span></div>${d.preview.map((e) => `<div class="ev"><span class="d">周${wk(e)}<b>${e.d}</b></span><span class="t k${e.level}">${esc(e.summary)}<small>${esc(e.desc.split('\n')[0])}</small></span></div>`).join('')}</div>`
       + (android ? '' : `<a class="btn primary block" href="${esc(d.webcal)}" data-ics-sub>订阅到 iPhone / Mac 日历</a>`)
       + `<button type="button" class="btn ${android ? 'primary' : 'ghost'} block" data-ics-copy>复制订阅链接（安卓、Google 日历）</button>`
       + (android ? `<section class="card">${steps}</section>` : `<details class="icsmore"><summary>安卓和 Google 日历怎么加</summary>${steps}</details>`)

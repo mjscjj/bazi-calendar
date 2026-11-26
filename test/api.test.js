@@ -50,7 +50,7 @@ const month = '/api/calendar?y=2026&m=11&today=2026-11-23';
 test('静态页面和示例日历', async () => {
   const r = await fetch(base + '/');
   assert.equal(r.status, 200);
-  assert.match(await r.text(), /流日历/);
+  assert.match(await r.text(), /flowday/);
   const c = client();
   const d = await c('GET', '/api/demo/calendar?y=2026&m=11&today=2026-11-23');
   assert.equal(d.status, 200);

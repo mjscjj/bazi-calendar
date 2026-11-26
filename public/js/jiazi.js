@@ -1,4 +1,4 @@
-// 我的一甲子：每一天也有自己的日柱，60 天一轮。每天打开流日历，就收下当天那张画；集满 60 张送一枚御守（转运页直接领）。
+// 我的一甲子：每一天也有自己的日柱，60 天一轮。每天打开 flowday，就收下当天那张画；集满 60 张送一枚御守（转运页直接领）。
 import { pillarArtSrc } from './data.js';
 import { $, esc, api, toast, openSheet, onClick, localToday, ymd, track, currentPath } from './core.js';
 import { footHtml } from './today.js';
@@ -30,7 +30,7 @@ export function pageJiazi() {
     }).join('');
     v.innerHTML = head + `<section class="card jzhead"><div class="jzn"><b>${d.n}</b><span>/ 60</span></div>`
       + `<div class="jzbar" aria-hidden="true"><i style="width:${Math.round((d.n / 60) * 100)}%"></i></div>`
-      + `<p>${d.done ? `已经集满一轮。送你一枚御守，${d.member ? '' : '开通会员后'}在「转运」的「直接买一枚」里免费领。` : '每一天也有自己的天干地支，60 天一轮。每天打开流日历，就收下当天的那张画；集满 60 张，送你一枚御守。'}</p></section>`
+      + `<p>${d.done ? `已经集满一轮。送你一枚御守，${d.member ? '' : '开通会员后'}在「转运」的「直接买一枚」里免费领。` : '每一天也有自己的天干地支，60 天一轮。每天打开 flowday，就收下当天的那张画；集满 60 张，送你一枚御守。'}</p></section>`
       + `<div class="jzgrid">${cells}</div>` + footHtml();
   }, (e) => { v.innerHTML = head + `<div class="errbox"><p>${esc(e.message)}</p></div>`; });
 }

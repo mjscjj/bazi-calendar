@@ -1,4 +1,4 @@
-// 八字流日历打分引擎：从原单页 HTML 的 BZ 模块原样搬到服务端（规则为假设，可调）。
+// 八字 flowday 打分引擎：从原单页 HTML 的 BZ 模块原样搬到服务端（规则为假设，可调）。
 // 页面只拿这里算好的结果，不再在浏览器里排盘。
 import lunar from 'lunar-javascript';
 import { resolveBirth } from './solar.js';

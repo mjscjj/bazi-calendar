@@ -1,4 +1,4 @@
-// 流日历服务端：账号、资料、日历（服务端排盘）、计划、免费次数、月度会员与支付宝、反馈、管理后台。
+// flowday 服务端：账号、资料、日历（服务端排盘）、计划、免费次数、月度会员与支付宝、反馈、管理后台。
 import http from 'node:http';
 import crypto from 'node:crypto';
 import fs from 'node:fs';

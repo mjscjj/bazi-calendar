@@ -23,7 +23,7 @@ export function loadToday() {
   });
 }
 
-const footHtml = () => '<footer class="foot"><span>仅供娱乐参考，不构成任何决策依据</span><span><a href="#/about?s=terms">用户协议</a> · <a href="#/about?s=privacy">隐私政策</a> · <a href="#/about">关于流日历</a></span></footer>';
+const footHtml = () => '<footer class="foot"><span>仅供娱乐参考，不构成任何决策依据</span><span><a href="#/about?s=terms">用户协议</a> · <a href="#/about?s=privacy">隐私政策</a> · <a href="#/about">关于 flowday</a></span></footer>';
 export { footHtml };
 
 function almanacLine(a) {
@@ -93,7 +93,7 @@ function lockArtHtml(L) {
 function lockHtml(L) {
   const a = L.access || {};
   return almanacLine(L.almanac) + termHtml(L) + lockArtHtml(L) + '<div class="lock2"><div class="pw">'
-    + '<span class="lockmark" aria-hidden="true">流</span>'
+    + '<span class="lockmark" aria-hidden="true"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span>'
     + `<h2>${a.expired ? '会员已到期' : '免费体验已用完'}</h2>`
     + `<p>${a.expired ? '续费后，继续看每天的你、好时段、每日一签和挑日子。' : `你已经体验了 ${a.freeLimit} 次。开通会员后，今天、日历、挑日子、每日一签都能继续用。`}</p>`
     + `<div class="price"><b>¥${price(L.priceCents || S.priceCents)}</b><span>/ ${L.memberDays || S.memberDays} 天 · 不自动续费</span></div>`
@@ -104,7 +104,7 @@ function lockHtml(L) {
 // 到期或体验用完时，问事、祈愿这些子页也显示同一张开通卡，价格只说会员的
 export function memberLockHtml(what) {
   const a = S.access || {};
-  return '<div class="lock2"><div class="pw"><span class="lockmark">流</span>'
+  return '<div class="lock2"><div class="pw"><span class="lockmark"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span>'
     + `<h2>${a.expired ? '会员已到期' : '免费体验已用完'}</h2><p>${a.expired ? '续费' : '开通会员'}后可以${what}，每天的你、日历和挑日子也都能继续用。</p>`
     + `<div class="price"><b>¥${price(S.priceCents)}</b><span>/ ${S.memberDays} 天 · 不自动续费</span></div>`
     + `<button type="button" class="btn primary block" data-pay>${a.expired ? '续费会员' : '开通月度会员'}</button></div></div>`;
