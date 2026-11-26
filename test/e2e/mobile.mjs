@@ -124,7 +124,7 @@ await page.evaluate(async () => {
 });
 await page.goto(base + '/#/'); await page.reload();
 await page.waitForSelector('.tcard');
-check('计划定在今天时显示提醒', !!(await page.$('.notice.plan')), await page.$eval('.notice.plan', (el) => el.innerText).catch(() => '无'));
+check('计划定在今天时显示「今日计划」', !!(await page.$('.today-plan')), await page.$eval('.today-plan', (el) => el.innerText).catch(() => '无'));
 
 console.log(results.join('\n'));
 console.log('ERRORS:', errors.length ? errors : 'none');

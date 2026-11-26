@@ -19,7 +19,7 @@ const cols = await page.$eval('.dgrid', (el) => getComputedStyle(el).gridTemplat
 check('今天页两栏', cols === 2, `${cols} 栏`);
 await shot('d1-visitor-today');
 
-await page.click('.notice a[href="#/start"]');
+await page.click('a.day-start'); // 访客入口：日期旁的「测测我的」
 await page.waitForSelector('#bForm');
 await shot('d2-start');
 await page.fill('input[name=nickname]', '阿杰');

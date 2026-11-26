@@ -264,7 +264,7 @@ check('注销前提示会员作废', (await bp.textContent('#delForm')).includes
 await bp.screenshot({ path: `${out}/b22-delete.png` });
 await bp.fill('#delForm input[name=password]', 'friend1234');
 await bp.click('#delForm button[type=submit]');
-await bp.waitForSelector('.notice.demo, .invban');
+await bp.waitForSelector('.day-start, .invban');
 check('注销后回到示例页', !db.prepare('SELECT 1 FROM users WHERE id = ?').get(fid));
 
 // 撕日历：老用户每天第一次打开，先撕掉昨天那页；注册当天、同一天再打开都不出现

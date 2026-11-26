@@ -23,7 +23,7 @@ const uid = () => db.prepare('SELECT id FROM users WHERE username = ?').get(user
 // 两块筊杯现在哪一面朝上：0 平面，1 凸面
 const faces = (pg) => pg.$$eval('#sheet .rbd', (els) => els.map((e) => { const m = /rotateX\((-?[\d.]+)deg\)/.exec(e.style.transform); return Math.round((((+m[1] % 360) + 360) % 360) / 180) % 2; }));
 await p.reload(); await p.waitForSelector('[data-draw]');
-check('小卡写着摇签、掷筊、解签', (await p.textContent('[data-draw]')).includes('掷筊'));
+check('小卡写着每日一签', (await p.textContent('[data-draw]')).includes('每日一签'));
 await p.click('[data-draw]'); await p.waitForSelector('#sheet .rit #drawForm');
 check('第一步：默念所求', (await p.textContent('#sheet .rsteps li.on')).includes('默念所求'));
 check('星盘正中是自己的日柱', (await p.textContent('#sheet .rcore small')).includes('日柱') && (await p.textContent('#sheet .rcore b')).length === 2);

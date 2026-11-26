@@ -29,7 +29,7 @@ await shot('01b-guest-ask');
 await closeSheet();
 
 step('测测我的能量卡（不用注册）');
-await page.click('.notice a[href="#/start"]');
+await page.click('a.day-start'); // 访客入口：日期旁的「测测我的」
 await page.waitForSelector('#bForm'); await shot('02a-start');
 await page.fill('input[name=nickname]', '阿杰');
 await setBirth(page, '1992-06-08', '08:30');
