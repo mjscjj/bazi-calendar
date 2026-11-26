@@ -287,7 +287,7 @@ function selectDay(date, dir, reveal = false) {
   if (!t) return;
   if (tooFar(date)) { toast('再往后就翻不动了'); return; }
   S.tsel = date === t.date ? null : date;
-  if (date !== t.date && !seen('fd-swipe')) { mark('fd-swipe'); track('fd_task', { k: 'swipe' }); setTimeout(firstDayCheck, 0); }
+  if (date !== t.date && !seen('fd-swipe')) { mark('fd-swipe'); track('fd_task', { k: 'swipe' }); }
   slide = dir > 0 ? 'in-r' : dir < 0 ? 'in-l' : '';
   renderToday();
   if (reveal) {
@@ -505,7 +505,8 @@ function dayN() {
   return Math.round((b - a) / 86400000);
 }
 const FD = [['why', '看看为什么'], ['swipe', '滑到明天'], ['draw', '求今天的第一支签']];
-const fdOk = (k, t) => seen('fd-' + k) || (k === 'draw' && t?.draw?.status === 'done');
+// 求签不论结果（圣杯、换个问题、时机未到），求过就算
+const fdOk = (k, t) => seen('fd-' + k) || (k === 'draw' && !!t?.draw && t.draw.status !== 'pending');
 // 最好的时段离现在还有多久
 function bestCountdown(x) {
   const top = bestHours(x).top;
@@ -536,23 +537,28 @@ function firstNightHtml(t, dn) {
   return `<section class="fdnight" aria-label="第一天晚上"><p><b>第一天过得怎么样？</b>告诉我准不准，我会越来越懂你。</p>`
     + `<div class="fdrate">${RATE.map((w, i) => `<button type="button" data-fd-rate="${i + 1}">${w}</button>`).join('')}</div></section>`;
 }
-function rateReply(k, score) {
-  if (score >= 4) return k >= 4 ? '顺的日子你也觉得顺，我们对上了。' : k <= 2 ? `今天本是「${S.today.day.level.p}」日，你却过得不错——说明你稳住了。` : '平稳的一天被你过成了好日子。';
-  if (score <= 2) return k <= 2 ? '今天本就要留神，辛苦了。明天会不一样。' : '今天比预想的难一些，我记下了，会慢慢更懂你。';
-  return '不好不坏，正是平稳的样子。';
+// 按今天的档位回一句：对上了就说对上了，没对上就记下
+function rateReply(lv, score) {
+  const k = lv.k, p = `「${lv.p}」`;
+  if (score >= 4) return k >= 4 ? `${p}的日子你也觉得顺，我们对上了。` : k <= 2 ? `今天本是${p}日，你却过得不错——说明你稳住了。` : '平稳的一天被你过成了好日子。';
+  if (score <= 2) return k <= 2 ? `今天本就是${p}日，辛苦了，明天会不一样。` : '今天比预想的难一些，我记下了，会慢慢更懂你。';
+  return k === 3 ? '不好不坏，正是平稳的样子，对上了。' : '记下了，明天再看准不准。';
 }
 onClick('[data-fd-rate]', async (el) => {
   const score = +el.getAttribute('data-fd-rate');
   mark('fd-rate'); track('fd_rate', { score });
-  api('POST', 'ratings', { day: localToday(), score, note: '' }).catch(() => {});
-  toast(rateReply(S.today.day.level.k, score));
+  api('POST', 'ratings', { day: localToday(), score }).catch(() => {}); // 不带 note，免得清掉用户在记录里写的话
+  toast(rateReply(S.today.day.level, score));
   renderToday();
 });
 onClick('[data-fd]', (el) => {
   const k = el.getAttribute('data-fd'), t = S.today;
   if (!t) return;
   if (k === 'why') { mark('fd-why'); track('fd_task', { k }); openDay(t.day, t.chart, t.name, t.plans); setTimeout(firstDayCheck, 0); }
-  else if (k === 'swipe') slideTo(1);
+  else if (k === 'swipe') { // 日卡在下面：先滚到眼前，再滑到明天
+    $('#dayswipe')?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    setTimeout(() => { if (currentPath() === '/' && !moving) slideTo(1); }, 450);
+  }
   else if (k === 'draw') document.querySelector('.minis [data-draw]')?.click();
 });
 // 三件都做完：送一次御守（每次画今天页时检查，求签做完回来也会走到）
@@ -563,12 +569,18 @@ function fdGift() {
   api('POST', 'onboard/gift', {}).then((r) => { if (r.given) toast('三件事都做完了，送你一枚御守，在「转运」里领'); }).catch(() => {});
 }
 function firstDayCheck() { if (currentPath() === '/') renderToday(); }
-// 第一天，日卡上一只小手左右划一下，提示可以滑（只出现一次）
+// 第一天，日卡上一只小手左右划一下，提示可以滑（只出现一次；等注册后的全屏画退场再播，播了才记）
+let handTimer = 0;
 function ghostHand() {
   const t = S.today;
-  if (!t || t.demo || dayN() !== 0 || seen('hint-swipe') || !seen('guide') || selDate() !== t.date || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const card = document.querySelector('.dslot.cur .tcard') || document.querySelector('.tcard');
-  if (!card) return;
-  mark('hint-swipe');
-  setTimeout(() => { if (!card.isConnected) return; const g = document.createElement('i'); g.className = 'ghost-hand'; g.setAttribute('aria-hidden', 'true'); card.appendChild(g); setTimeout(() => g.remove(), 3200); }, 2600);
+  if (handTimer || !t || t.demo || dayN() !== 0 || seen('hint-swipe') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const play = () => {
+    if (document.querySelector('.welcome')) { handTimer = setTimeout(play, 500); return; }
+    handTimer = 0;
+    const card = document.querySelector('#dayswipe .cur .tcard');
+    if (!card || currentPath() !== '/' || selDate() !== S.today?.date || seen('hint-swipe')) return;
+    mark('hint-swipe');
+    const g = document.createElement('i'); g.className = 'ghost-hand'; g.setAttribute('aria-hidden', 'true'); card.appendChild(g); setTimeout(() => g.remove(), 3200);
+  };
+  handTimer = setTimeout(play, 1600);
 }

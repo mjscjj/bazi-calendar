@@ -359,7 +359,7 @@ export function pageCard() {
 export function openWelcome(tries = 0) {
   if (seen('guide')) return;
   const p = S.today && S.today.card && S.today.card.pillar;
-  if (!p) { if (tries < 20) setTimeout(() => openWelcome(tries + 1), 150); else mark('guide'); return; }
+  if (!p) { if (tries < 40) setTimeout(() => openWelcome(tries + 1), 150); else mark('guide'); return; }
   mark('guide');
   track('onboard_welcome');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
