@@ -145,11 +145,11 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   function access(u) {
     const today = bjDay();
     const until = u.member_until;
+    // 体验版：所有人免费当会员，没有到期日。放在最前，体验期间加过天数（邀请奖励、后台调整）的人也照样按体验版显示；真实到期日留着，关掉体验版后照常生效
+    if (settings.get('beta_member') === '1') return { mode: 'member', beta: true, memberUntil: null, daysLeft: null };
     if (until && until > nowIso()) {
       return { mode: 'member', memberUntil: until, daysLeft: Math.ceil((new Date(until) - Date.now()) / DAY_MS) };
     }
-    // 体验版：所有人免费当会员，没有到期日
-    if (settings.get('beta_member') === '1') return { mode: 'member', beta: true, memberUntil: null, daysLeft: null };
     const freeLimit = settings.int('free_uses');
     const used = db.get('SELECT COUNT(*) n FROM usage_days WHERE user_id = ?', u.id).n;
     const todayCounted = !!db.get('SELECT 1 x FROM usage_days WHERE user_id = ? AND day = ?', u.id, today);
@@ -229,14 +229,14 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   // 今天页的一次性消息：邀请生效
   function newsFor(u) {
     const out = [];
-    const days = settings.int('invite_days');
+    const days = settings.int('invite_days'), beta = settings.get('beta_member') === '1'; // 体验版人人都是会员，不提奖励天数
     for (const r of db.all("SELECT i.id, u.nickname, u.username FROM invites i JOIN users u ON u.id = i.invitee_id WHERE i.inviter_id = ? AND i.inviter_seen = 0", u.id)) {
-      out.push({ kind: 'invite_done', text: `${shownName(r)}加入了，你们各得 ${days} 天会员` });
+      out.push({ kind: 'invite_done', text: beta ? `${shownName(r)}加入了，去「我的 › 邀请好友」看你们俩的画` : `${shownName(r)}加入了，你们各得 ${days} 天会员` });
       db.run('UPDATE invites SET inviter_seen = 1 WHERE id = ?', r.id);
     }
     const mine = db.get("SELECT i.id, u.nickname, u.username FROM invites i JOIN users u ON u.id = i.inviter_id WHERE i.invitee_id = ? AND i.invitee_seen = 0", u.id);
     if (mine) {
-      out.push({ kind: 'invited_done', text: `你和${shownName(mine)}各得 ${days} 天会员，已经加到你的会员里` });
+      out.push({ kind: 'invited_done', text: beta ? `你和${shownName(mine)}成了朋友，去「我的 › 邀请好友」看你们俩的画` : `你和${shownName(mine)}各得 ${days} 天会员，已经加到你的会员里` });
       db.run('UPDATE invites SET invitee_seen = 1 WHERE id = ?', mine.id);
     }
     return out;
@@ -306,7 +306,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     const [y, m, d] = day.split('-').map(Number);
     const x = dayOut(chartOf(u), y, m, d, false);
     db.run(`INSERT INTO ratings(user_id, day, score, sys_score, sys_level, note, src, created_at) VALUES(?,?,?,?,?,'','mood',?)
-      ON CONFLICT(user_id, day) DO UPDATE SET score = excluded.score, src = 'mood', created_at = excluded.created_at`, u.id, day, score, x.score, x.level.k, nowIso());
+      ON CONFLICT(user_id, day) DO UPDATE SET score = excluded.score, src = 'mood', created_at = excluded.created_at WHERE ratings.src = 'mood'`, u.id, day, score, x.score, x.level.k, nowIso()); // 用户自己打的分（src = 'score'）不被心情覆盖
   }
 
   const publicUser = (u) => ({
@@ -1333,7 +1333,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     const note = str(body.note, 60, '这句话');
     const [y, m, d] = day.split('-').map(Number);
     const x = dayOut(chartOf(u), y, m, d, false);
-    db.run(`INSERT INTO ratings(user_id, day, score, sys_score, sys_level, note, created_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id, day) DO UPDATE SET score = excluded.score${'note' in body ? ', note = excluded.note' : ''}, created_at = excluded.created_at`,
+    db.run(`INSERT INTO ratings(user_id, day, score, sys_score, sys_level, note, created_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id, day) DO UPDATE SET score = excluded.score, src = 'score'${'note' in body ? ', note = excluded.note' : ''}, created_at = excluded.created_at`,
       u.id, day, score, x.score, x.level.k, note, nowIso());
     return { summary: rateMonth(u, day) };
   });
@@ -1488,7 +1488,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       c, C, userId: u.id, name: u.nickname, today: bjDay(), plans: plansOf(u, null),
       expired: access(u).mode === 'blocked', url: publicBase(req) + '/',
     });
-    return { __raw: body, __type: 'text/calendar; charset=utf-8', __headers: { 'Cache-Control': 'private, max-age=1800', 'Content-Disposition': 'inline; filename="liurili.ics"' } };
+    return { __raw: body, __type: 'text/calendar; charset=utf-8', __headers: { 'Cache-Control': 'private, max-age=1800', 'Content-Disposition': 'inline; filename="flowday.ics"' } };
   });
 
   // 注销账号：删掉这个人的全部数据；订单只留金额、时间和支付宝交易号用于对账

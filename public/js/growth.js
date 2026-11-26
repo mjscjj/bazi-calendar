@@ -50,7 +50,8 @@ export function pageInvite() {
     const url = inviteUrl(d.code);
     const st = (r) => (r.status === 'done' ? `<em class="ok">已生效 +${d.days} 天</em>` : r.status === 'capped' ? '<em>已生效 · 本月奖励已满</em>' : r.status === 'blocked' ? '<em>同一台设备注册，不计奖励</em>' : `<em>${esc(r.need)}</em>`);
     v.innerHTML = phead(T)
-      + `<section class="invhero"><b>每邀请一位朋友<br>你们各得 ${d.days} 天会员</b><span>朋友测完能量卡、注册，第二天再打开一次就生效。</span>`
+      + (S.access?.beta ? '<section class="invhero"><b>邀请朋友一起来<br>看看你们俩的画</b><span>朋友测完能量卡、注册后，就在这里看你们俩的画。</span>' // 体验版人人都是会员，不提奖励天数
+        : `<section class="invhero"><b>每邀请一位朋友<br>你们各得 ${d.days} 天会员</b><span>朋友测完能量卡、注册，第二天再打开一次就生效。</span>`)
       + `<div class="linkbox"><span>${esc(url.replace(/^https?:\/\//, ''))}</span><button type="button" class="btn sm primary" data-inv-copy>复制</button></div>`
       + '<button type="button" class="btn ghost block" data-inv-poster>生成邀请海报</button></section>'
       + friendsHtml(fr.list)

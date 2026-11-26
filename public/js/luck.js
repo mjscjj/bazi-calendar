@@ -119,7 +119,10 @@ function renderLuck() {
   const d = S.luck, v = $('#view');
   if (!d || !S.me || currentPath() !== '/luck') return;
   const a = d.amulets, price = `¥${(a.priceCents / 100).toFixed(1)}`;
-  const buy = `<section class="lsec lbuy"><div><b>特别款御守</b><small>转运款 · 节气款${a.birthdayMonth ? ' · 生日款' : ''}，${price} 一枚</small></div><button type="button" class="btn ghost sm" data-om-buy>买一枚</button></section>`;
+  // 手里有送的（新用户、集齐一甲子）或买过没领的，先让人看见能领
+  const buy = a.credits
+    ? `<section class="lsec lbuy"><div><b>你有 ${a.credits} 枚御守可以领</b><small>选个心愿和款式，绣成你的那一枚</small></div><button type="button" class="btn primary sm" data-om-buy>领取</button></section>`
+    : `<section class="lsec lbuy"><div><b>特别款御守</b><small>转运款 · 节气款${a.birthdayMonth ? ' · 生日款' : ''}，${price} 一枚</small></div><button type="button" class="btn ghost sm" data-om-buy>买一枚</button></section>`;
   const mine = `<section class="lsec lmine"><a class="lkrow" href="#/amulets"><span>我的御守</span><b>${a.count} 枚 ›</b></a></section>`;
   if (d.mode === 'blocked') { v.innerHTML = heading + exhibit() + memberLockHtml('记录善行或完成练习，收下御守') + mine + footHtml(); return; }
   const z = d.deeds;
@@ -199,8 +202,8 @@ function amuletSheet() {
 }
 const redrawOx = () => { const b = $('#sheet .sbody'); if (b && $('.omx', b)) b.innerHTML = amuletSheet(); };
 function openAmuletSheet(mode) {
-  X.mode = mode; X.wish = mode === 'buy' ? X.wish : selectedWish;
-  openSheet(mode === 'buy' ? '直接买一枚御守' : '换一枚御守', amuletSheet());
+  X.mode = mode; X.wish = selectedWish; // 心愿跟挂架上选的一致
+  openSheet(mode !== 'buy' ? '换一枚御守' : S.luck.amulets.credits ? '领一枚御守' : '直接买一枚御守', amuletSheet());
 }
 onClick('[data-deed-exchange]', async el => {
   el.disabled = true;

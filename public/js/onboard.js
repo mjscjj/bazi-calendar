@@ -354,6 +354,10 @@ export function pageCard() {
   show(p.card, p.nickname, '<button type="button" class="btn ghost" data-share="card">分享</button><a class="btn primary" href="#/register">保存并看我的今天</a>');
 }
 
+// 新注册的账号：清掉这台设备上上一个账号的第一周进度（本机标记不分账号，同一台设备反复注册时引导要从头来）
+const FIRST_WEEK = ['guide', 'fd-why', 'fd-swipe', 'fd-rate', 'fd-done', 'fd-gift', 'fd-gift-seen', 'beta-member', 'drip-pick', 'drip-time', 'drip-week', 'city-tip'];
+export function freshStart() { for (const k of FIRST_WEEK) { try { localStorage.removeItem('lrl:' + k); } catch { /* 无痕模式 */ } } }
+
 // ---------- 注册成功：你的画铺满全屏，约 2 秒后飞进「我的」页签 ----------
 // 不弹说明、不加按钮；看过记成 guide（撕日历、收画提示、加到主屏都以它为前提）
 export function openWelcome(tries = 0) {

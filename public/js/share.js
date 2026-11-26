@@ -383,7 +383,7 @@ function pvHtml(url, kind, theme, data) {
     + `<img src="${url}" alt="${esc(NAMES[kind])}分享图">`
     + (IS_MOBILE
       ? `<p class="savetip">${tip}${kind === 'wall' || kind === 'amuletWall' ? '，再在手机设置里设为锁屏' : ''}</p>${!IS_WECHAT && navigator.share ? '<button type="button" class="btn ghost block" data-share-go>发给朋友</button>' : ''}`
-      : `<a class="btn primary block" href="${url}" download="liurili-${SLUG[kind]}.jpg" data-share-save>保存图片</a>${navigator.share ? '<button type="button" class="btn ghost block" data-share-go>分享</button>' : ''}`)
+      : `<a class="btn primary block" href="${url}" download="flowday-${SLUG[kind]}.jpg" data-share-save>保存图片</a>${navigator.share ? '<button type="button" class="btn ghost block" data-share-go>分享</button>' : ''}`)
     + '</div>';
 }
 // data 不传时从当前页面的数据里取（邀请海报由邀请页传进来）
@@ -451,7 +451,7 @@ onClick('[data-share-go]', () => {
   const src = $('.sharepv img')?.src;
   if (!src) return;
   const bytes = Uint8Array.from(atob(src.split(',')[1]), c => c.charCodeAt(0));
-  const file = new File([bytes], `liurili-${SLUG[s.kind]}.jpg`, { type:'image/jpeg' });
+  const file = new File([bytes], `flowday-${SLUG[s.kind]}.jpg`, { type:'image/jpeg' });
   if (navigator.canShare?.({files:[file]})) {
     navigator.share({files:[file]}).then(() => track('share_done',{kind:s.kind}), e => {
       if (e.name !== 'AbortError') toast('可以先保存图片，再发送给朋友');

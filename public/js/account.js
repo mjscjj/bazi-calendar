@@ -1,9 +1,9 @@
 // 账号相关页面：登录注册、忘记密码、我的资料、会员与订单、意见反馈、关于与声明。
-import { $, $$, esc, api, toast, openSheet, onClick, dtText, ymdText, price, readLocal, writeLocal, track, currentPath, anonId } from './core.js';
+import { $, $$, esc, api, toast, openSheet, onClick, dtText, ymdText, price, readLocal, writeLocal, track, currentPath, anonId, mark } from './core.js';
 import { THEME, THEME_DESC, ADVICE } from './data.js';
 import { S } from './state.js';
 import { footHtml } from './today.js';
-import { birthFields, readBirth, wireBirth, checkBirth, cardArt, cardTitle } from './onboard.js';
+import { birthFields, readBirth, wireBirth, checkBirth, cardArt, cardTitle, freshStart } from './onboard.js';
 import { resetCard } from './me.js';
 import { linkFriend } from './growth.js';
 
@@ -42,7 +42,8 @@ export function pageAuth(r) {
       .then(() => api('GET', 'me'))
       .then((d) => {
         S.me = d.user; S.access = d.access; S.unread = d.unread; S.today = null; S.cal = null; resetCard();
-        if (reg) { S.justRegistered = true; track('register', { withCard: !!p }); }
+        if (reg) { freshStart(); S.justRegistered = true; track('register', { withCard: !!p }); }
+        else mark('guide'); // 老账号在新设备登录：不再放注册时的全屏画，撕日历、收画提示照常出现
         if (p && !reg && (!S.me.birth || confirm('要用刚才填的出生信息替换账号里的吗？'))) {
           return api('PUT', 'me/profile', { nickname: p.nickname || S.me.nickname, bio: S.me.bio || '', birth: p.birth }).then((x) => { S.me = x.user; });
         }
@@ -127,7 +128,7 @@ export function pageMember() {
     S.access = d.access; S.priceCents = d.priceCents; S.memberDays = d.memberDays;
     const a = d.access;
     let card;
-    if (a.beta) card = '<div class="mcard"><small>体验版</small><b>你很幸运，会员免费送</b><span>现在是体验版，所有功能随便用，不用付钱</span></div>';
+    if (a.beta) card = '<div class="mcard"><small>体验版</small><b>你很幸运，会员免费送</b><span>现在是体验版，会员功能随便用，不用付钱</span></div>';
     else if (a.mode === 'member') card = `<div class="mcard"><small>月度会员</small><b>有效期至 ${ymdText(a.memberUntil)}</b><span>还剩 ${a.daysLeft} 天${a.daysLeft <= 3 ? '，快到期了' : ''}</span></div>`;
     else if (a.mode === 'free') card = `<div class="mcard"><small>免费体验中</small><b>还剩 ${a.remaining} 次</b><span>同一天里随便看只算 1 次，共 ${a.freeLimit} 次</span></div>`;
     else card = `<div class="mcard"><small>${a.expired ? '会员已到期' : '免费体验已用完'}</small><b>开通后继续使用</b><span>你的资料和计划都还在</span></div>`;

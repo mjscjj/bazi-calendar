@@ -58,8 +58,6 @@ function noticesHtml() {
   else if (recapNotice(today)) h += recapNotice(today);
   else if (a && a.mode === 'free' && a.remaining === 0 && !seen('lastfree-' + today)) {
     h += `<div class="notice" data-notice="lastfree-${today}"><p>今天是最后一次免费体验，之后 ¥${price(S.priceCents)}/月。</p><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
-  } else if (a && a.beta && !seen('beta-member')) {
-    h += '<div class="notice good" data-notice="beta-member"><p><b>你很幸运</b>：现在是体验版，会员免费送你，所有功能随便用。</p><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
   } else if (a && a.mode === 'member' && !a.beta && a.daysLeft <= 3 && !seen('expiring-' + today)) {
     h += `<div class="notice" data-notice="expiring-${today}"><p>会员还有 ${a.daysLeft} 天到期（${mdText(a.memberUntil)}）。</p><a class="btn sm primary" href="#/member">续费</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>`;
   } else if (dn === 2 && !seen('drip-pick')) {
@@ -68,6 +66,8 @@ function noticesHtml() {
     h += '<div class="notice" data-notice="drip-time"><p>补上出生时间，时辰和每天的分数会算得更准。</p><a class="btn sm ghost" href="#/profile" data-dismiss-go>去补上</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
   } else if (dn === 6 && !seen('drip-week')) {
     h += '<div class="notice" data-notice="drip-week"><p>第一周过完了，看看这个月你收了几张画、哪天最顺。</p><a class="btn sm ghost" href="#/recap" data-dismiss-go>看看</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
+  } else if (a && a.beta && !seen('beta-member')) { // 排在第一周提示后面：没关掉它也不会挡住第 3/5/7 天那条
+    h += '<div class="notice good" data-notice="beta-member"><p><b>你很幸运</b>：现在是体验版，会员免费送你，会员功能随便用。</p><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
   } else if (S.me && S.me.birth && S.me.birth.time && !S.me.birth.city && !seen('city-tip')) {
     h += '<div class="notice" data-notice="city-tip"><p>补上出生城市，按真太阳时排盘，时辰更准。</p><a class="btn sm ghost" href="#/profile" data-dismiss-go>去补上</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
   } else if (!IS_STANDALONE() && installKind() !== 'no' && !seen('a2hs-done') && (Date.now() - (readLocal('a2hs-later') || 0)) > 7 * 86400000 && seen('guide') && (dn >= 1 || t?.draw?.status === 'done')) {
