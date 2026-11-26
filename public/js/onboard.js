@@ -1,5 +1,5 @@
 // 新用户引导：填出生信息 → 能量卡揭晓（不用注册）→ 注册 → 三步引导 → 加到主屏。
-import { $, $$, esc, api, toast, openSheet, dismissSheet, onClick, currentPath, mark, seen, readLocal, writeLocal, IS_IOS, IS_WECHAT, IS_MOBILE, IS_STANDALONE, track } from './core.js';
+import { $, $$, esc, api, toast, openSheet, dismissSheet, onClick, currentPath, mark, seen, readLocal, writeLocal, IS_IOS, IS_STANDALONE, IN_APP, installKind, ENV_NAME, copyText, track } from './core.js';
 import { S } from './state.js';
 import { pillarArtSrc, setGlow, WX } from './data.js';
 import { wheelsHtml, mountWheels } from './wheel.js';
@@ -391,7 +391,7 @@ onClick('[data-card-next]', () => {
 
 // ---------- 加到主屏 ----------
 export function openInstall() {
-  track('a2hs_open');
+  track('a2hs_open', { env: ENV_NAME });
   if (S.installPrompt) {
     const p = S.installPrompt; S.installPrompt = null;
     dismissSheet();
@@ -399,12 +399,21 @@ export function openInstall() {
     p.userChoice.then((c) => { if (c.outcome === 'accepted') { mark('a2hs-done'); track('a2hs_accept'); toast('已添加，可以从桌面打开了'); } });
     return;
   }
-  let steps;
-  if (IS_WECHAT) steps = ['点右上角「···」，选择「在浏览器打开」', '在浏览器里再按下面的步骤添加'];
-  else if (IS_IOS) steps = ['点 Safari 底部的「分享」按钮（方框加向上箭头）', '往下滑，选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了'];
-  else if (IS_MOBILE) steps = ['点浏览器右上角或底部的「菜单」', '选「添加到主屏幕」或「添加到桌面」', '确认添加，桌面上就有 flowday 了'];
-  else steps = ['点地址栏右侧的「安装」图标（一个电脑加箭头）', '或在浏览器菜单里选「安装 flowday」', '安装后可以从桌面或程序坞直接打开'];
-  openSheet('加到主屏', `<div class="guide"><ol class="steps">${steps.map((s) => `<li>${s}</li>`).join('')}</ol><div class="acts"><button type="button" class="btn ghost" data-a2hs-done-close>已经加好了</button><button type="button" class="btn primary" data-close-sheet>知道了</button></div></div>`);
+  const k = installKind(), here = location.href.split('#')[0];
+  const sheet = (lead, steps, done = true) => openSheet('加到主屏', `<div class="guide">${lead ? `<p>${lead}</p>` : ''}${steps.length ? `<ol class="steps">${steps.map((x) => `<li>${x}</li>`).join('')}</ol>` : ''}<div class="acts">${done
+    ? '<button type="button" class="btn ghost" data-a2hs-done-close>已经加好了</button><button type="button" class="btn primary" data-close-sheet>知道了</button>'
+    : `<button type="button" class="btn ghost" data-close-sheet>知道了</button><button type="button" class="btn primary" data-copy-url="${esc(here)}">复制链接</button>`}</div></div>`);
+  const relogin = '从桌面第一次打开时如果要求登录，用同一个账号登录就好。';
+  if (k === 'no' && IN_APP) sheet(`在${IN_APP}里没法加到主屏，要先换到手机浏览器。`,
+    [`点右上角「···」，选「在浏览器打开」${IS_IOS ? '或「在 Safari 中打开」' : ''}`, '在浏览器里用同一个账号登录，再到「我的 → 加到主屏」', '菜单里没有这个选项的话，点下面「复制链接」，粘贴到浏览器里打开'], false);
+  else if (k === 'no' && IS_IOS) sheet('这个浏览器加不了主屏。点下面「复制链接」，粘贴到 Safari 里打开，再到「我的 → 加到主屏」。', [], false);
+  else if (k === 'no') sheet('这个浏览器不支持安装网页应用。可以把 flowday 加进书签，或者换 Chrome、Edge 打开。', [], false);
+  else if (k === 'ios-safari') sheet('', ['点 Safari 底部的「分享」按钮（方框加向上箭头）。看不到底栏的话，先往上轻滑一下页面', '往下滑，选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', relogin]);
+  else if (k === 'ios-share') sheet('', ['点浏览器的「分享」按钮：Chrome 在地址栏右边，Edge、Firefox 在「···」菜单里', '选「添加到主屏幕」', '点右上角「添加」，桌面上就有 flowday 了', relogin]);
+  else if (k === 'android') sheet('', ['点浏览器的菜单（右上角「⋮」或底部「≡」）', '找「添加到主屏幕」或「添加到桌面」，有的浏览器放在「工具箱」或「添加至」里', '加了没看到图标：去手机「设置 → 应用 → 这个浏览器 → 权限」，打开「桌面快捷方式」，再加一次', '菜单里找不到这一项的浏览器加不了，可以换一个浏览器试试']);
+  else if (k === 'mac-safari') sheet('', ['点屏幕顶部菜单栏的「文件」', '选「添加到程序坞」', '以后从程序坞一点就开']);
+  else sheet('', ['点地址栏右侧的「安装」图标（一个电脑加箭头）', '或在浏览器菜单里选「安装 flowday」', '安装后可以从桌面或程序坞直接打开']);
 }
 onClick('[data-install]', openInstall);
+onClick('[data-copy-url]', (el) => { track('a2hs_copy'); copyText(el.dataset.copyUrl, '已复制，粘贴到浏览器里打开'); });
 onClick('[data-a2hs-done-close]', () => { mark('a2hs-done'); track('a2hs_done'); dismissSheet(); const n = $('[data-notice="a2hs"]'); if (n) n.remove(); });

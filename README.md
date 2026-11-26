@@ -67,6 +67,7 @@ PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/today.mjs http://127.0.0.1:3210/b
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/mood.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots     # 心情便签
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/follow.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots   # 追问和回看，服务端加 ASK_AI=fake
 PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/batch2.mjs http://127.0.0.1:3210/bazi /tmp/lrl/dev.db /tmp/lrl/shots dev
+PLAYWRIGHT_MODULE=... CHROME=... node test/e2e/install.mjs http://127.0.0.1:3210/bazi /tmp/lrl/shots             # 加到主屏、订阅日历在微信等 App 里、iPhone、安卓、电脑各环境的说明
 ```
 
 ## 线上（腾讯云 150）

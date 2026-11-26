@@ -1,5 +1,5 @@
 // 今天页：本周趋势 → 每日卡片（公共与个人宜忌、时辰）→ 记录与工具。
-import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, IS_MOBILE, track, currentPath, ymd } from './core.js';
+import { $, esc, guestAsk, api, toast, openSheet, onClick, localToday, mdText, price, seen, mark, readLocal, IS_STANDALONE, installKind, IS_MOBILE, track, currentPath, ymd } from './core.js';
 import { pillarArtSrc, THEME, setGlow, gwx, actOf, weekday, dosDonts, bestHours, hhShort, luckVars, GRADE_CLS } from './data.js';
 import { S, isDemo } from './state.js';
 import { openHours, openDay, timelineHtml } from './day.js';
@@ -68,7 +68,7 @@ function noticesHtml() {
     h += '<div class="notice" data-notice="drip-week"><p>第一周过完了，看看这个月你收了几张画、哪天最顺。</p><a class="btn sm ghost" href="#/recap" data-dismiss-go>看看</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
   } else if (S.me && S.me.birth && S.me.birth.time && !S.me.birth.city && !seen('city-tip')) {
     h += '<div class="notice" data-notice="city-tip"><p>补上出生城市，按真太阳时排盘，时辰更准。</p><a class="btn sm ghost" href="#/profile" data-dismiss-go>去补上</a><button type="button" class="x" data-dismiss aria-label="关闭提示">×</button></div>';
-  } else if (!IS_STANDALONE() && !seen('a2hs-done') && (Date.now() - (readLocal('a2hs-later') || 0)) > 7 * 86400000 && seen('guide') && (dn >= 1 || t?.draw?.status === 'done')) {
+  } else if (!IS_STANDALONE() && installKind() !== 'no' && !seen('a2hs-done') && (Date.now() - (readLocal('a2hs-later') || 0)) > 7 * 86400000 && seen('guide') && (dn >= 1 || t?.draw?.status === 'done')) {
     h += `<div class="notice" data-notice="a2hs"><p>${IS_MOBILE ? '加到主屏，像 App 一样一点就开。' : '安装到电脑，以后从桌面一点就开。'}</p><button type="button" class="btn sm ghost" data-install>${IS_MOBILE ? '怎么加' : '怎么装'}</button><button type="button" class="x" data-a2hs-later aria-label="以后再说">×</button></div>`;
   }
   return h;

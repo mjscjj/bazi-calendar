@@ -20,6 +20,35 @@ export const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.maxTouchPoints 
 export const IS_MOBILE = IS_IOS || /Android|Mobile|HarmonyOS/i.test(UA);
 export const IS_STANDALONE = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
+// 在哪个 App 里打开（App 内置浏览器加不了主屏，也会拦 webcal:// 链接）
+// 常见的点名；其余 App 按通用特征认：iPhone 上内置浏览器的标识没有「Safari/」，安卓上带「; wv)」
+const IN_APPS = [[/MicroMessenger/i, '微信'], [/DingTalk/i, '钉钉'], [/\bQQ\/\d/, 'QQ'], [/Weibo/i, '微博'], [/xhsdiscover|XiaoHongShu/i, '小红书'], [/AlipayClient/i, '支付宝']];
+const navStandalone = navigator.standalone === true;
+export const IN_APP = (IN_APPS.find(([re]) => re.test(UA)) || [])[1]
+  || ((IS_IOS && !navStandalone && /Mobile\//.test(UA) && !/Safari\//.test(UA)) || /; wv\)/.test(UA) ? '这个应用' : '');
+const IOS_VER = (() => { const m = UA.match(/OS (\d+)_(\d+)/); return m ? +m[1] + m[2] / 100 : 99; })();
+export const IOS_18 = IOS_VER >= 18;
+// 加到主屏怎么加：prompt（安卓 Chrome 等会弹安装框）/ ios-safari / ios-share（iOS 16.4+ 的 Chrome、Edge、Firefox）/ android / desktop / no（加不了）
+export function installKind() {
+  if (IN_APP) return 'no';
+  if (IS_IOS) {
+    if (/CriOS|EdgiOS|FxiOS/.test(UA)) return IOS_VER >= 16.4 ? 'ios-share' : 'no';
+    return /Safari\//.test(UA) && !/QQBrowser|UCBrowser|Quark|baiduboxapp|SogouMobile/i.test(UA) ? 'ios-safari' : 'no';
+  }
+  if (IS_MOBILE) return 'android';
+  if (/Firefox\//.test(UA)) return 'no';
+  return /Macintosh/.test(UA) && !/Chrome\/|Edg\//.test(UA) ? 'mac-safari' : 'desktop';
+}
+// 埋点用：在什么环境里打开
+export const ENV_NAME = (IN_APP === '这个应用' ? (IS_IOS ? 'inapp-ios' : 'inapp-android') : IN_APP) || (IS_IOS ? (/CriOS|EdgiOS|FxiOS/.test(UA) ? 'ios-chrome' : installKind() === 'ios-safari' ? 'ios-safari' : 'ios-other')
+  : IS_MOBILE ? 'android-' + (['HuaweiBrowser', 'MiuiBrowser', 'HeyTapBrowser', 'VivoBrowser', 'Quark', 'UCBrowser', 'MQQBrowser', 'baiduboxapp', 'SamsungBrowser', 'EdgA', 'Firefox', 'Chrome'].find((x) => UA.includes(x)) || 'other').toLowerCase()
+  : 'desktop');
+
+// 复制：剪贴板不可用（部分 App 内置浏览器）时弹出文字让人手动复制
+export function copyText(text, ok) {
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast(ok), () => prompt('复制这段文字：', text));
+}
+
 export function api(method, path, body) {
   return fetch('api/' + path, {
     method, credentials: 'same-origin',

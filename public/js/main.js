@@ -1,5 +1,5 @@
 // 入口：路由、顶栏、底部页签、全局点击、离线缓存与“加到主屏”。
-import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, track, localToday, isDarkNow, setTheme, applyTheme, toast } from './core.js';
+import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, track, localToday, isDarkNow, setTheme, applyTheme, toast, ENV_NAME } from './core.js';
 import { S } from './state.js';
 import { pageToday } from './today.js';
 import { pageCalendar } from './calendar.js';
@@ -154,7 +154,7 @@ function boot() {
   const from = new URLSearchParams(location.search).get('from');
   if (from) track('landing', { from });
   // 每次打开记一次（转化漏斗的第一步）
-  try { if (!sessionStorage.getItem('lrl:visit')) { sessionStorage.setItem('lrl:visit', '1'); track('visit', { standalone: matchMedia('(display-mode: standalone)').matches }); } } catch { /* 无痕模式 */ }
+  try { if (!sessionStorage.getItem('lrl:visit')) { sessionStorage.setItem('lrl:visit', '1'); track('visit', { standalone: matchMedia('(display-mode: standalone)').matches, env: ENV_NAME }); } } catch { /* 无痕模式 */ }
   return api('GET', 'me').then((d) => {
     S.me = d.user; S.access = d.access || null; S.unread = d.unread || 0;
     S.priceCents = d.priceCents; S.memberDays = d.memberDays; S.inviteDays = d.inviteDays; S.planTypes = d.planTypes;
