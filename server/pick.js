@@ -33,7 +33,7 @@ export function pickDays(c, type, allJi, today, range) {
     return {
       date: `${o.x.y}-${o.x.m}-${o.x.d}`, y: o.x.y, m: o.x.m, d: o.x.d,
       ssG: o.x.ssG, level: o.x.level, score: o.x.score, fit: o.fit, tag: o.tag ? type.tag : null, yiHits: o.yiHits,
-      guiren: o.x.why.some((w) => /贵人日/.test(w.p)),
+      guiren: !!o.x.guiren,
       hours: bestHours(full).top.map((h) => h.i),
     };
   });

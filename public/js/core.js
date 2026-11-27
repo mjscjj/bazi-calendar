@@ -1,4 +1,6 @@
 // 公共工具：选择器、转义、接口请求、提示、底部弹层、点击分发、埋点。
+import { EN, LANG, t } from './i18n.js';
+export { EN, LANG, t };
 export const $ = (s, r) => (r || document).querySelector(s);
 export const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 export function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -9,8 +11,10 @@ export const localToday = () => ymd(new Date());
 export const isDesk = () => matchMedia('(min-width: 960px)').matches;
 // 当前所在页面（异步数据回来时用来确认用户还在这一页）
 export const currentPath = () => (location.hash.replace(/^#/, '') || '/').split('?')[0];
-export const mdText = (iso) => { const d = new Date(iso); return (d.getMonth() + 1) + '月' + d.getDate() + '日'; };
-export const ymdText = (iso) => { const d = new Date(iso); return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'; };
+// 英文月份缩写；日期格式按语言出
+export const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export const mdText = (iso) => { const d = new Date(iso); return EN ? MON[d.getMonth()] + ' ' + d.getDate() : (d.getMonth() + 1) + '月' + d.getDate() + '日'; };
+export const ymdText = (iso) => { const d = new Date(iso); return EN ? MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() : d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'; };
 export const dtText = (iso) => { const d = new Date(iso); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
 export const price = (cents) => (cents / 100).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
 
@@ -57,7 +61,7 @@ export function copyText(text, ok) {
 export function api(method, path, body) {
   return fetch('api/' + path, {
     method, credentials: 'same-origin',
-    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+    headers: Object.assign({ 'X-Lang': LANG }, body === undefined ? {} : { 'Content-Type': 'application/json' }),
     body: body === undefined ? undefined : JSON.stringify(body),
   }).then((r) => r.text().then((t) => {
     let data; try { data = t ? JSON.parse(t) : {}; } catch { data = { message: '服务器返回异常' }; }

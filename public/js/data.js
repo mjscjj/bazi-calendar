@@ -77,7 +77,7 @@ export function specials(x, chart) {
   if (x.m === b[1] && x.d === b[2]) r.push({ k: 'bd', t: '生日' });
   if (Math.abs(x.lunar.month) === Math.abs(chart.birth.lunarMonth) && x.lunar.day === chart.birth.lunarDay) r.push({ k: 'bd', t: '农历生日' });
   if (x.gz === chart.pillars[2]) r.push({ k: 'me', t: '本命日' });
-  if (x.why.some((w) => /贵人日/.test(w.p))) r.push({ k: 'gr', t: '贵人日' });
+  if (x.guiren) r.push({ k: 'gr', t: '贵人日' });
   if (x.chongDay) r.push({ k: 'cg', t: '本命冲' });
   return r;
 }

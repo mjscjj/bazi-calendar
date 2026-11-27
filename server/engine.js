@@ -129,6 +129,7 @@ function scoreDay(c, y, m, d) {
   const s = l.getSolar();
   return {
     y, m, d, gz, mgz, ygz, ssG, ssZ, score: sc, level: level(sc), why, tags,
+    guiren: GUIREN[c.dm].indexOf(z) >= 0, // 贵人日：前端和挑日子认这个，不去匹配理由里的文字（英文版理由是英文）
     chongDay: rel(z, c.natalZhi[2]) === '冲',
     lunar: {
       month: l.getMonth(), day: l.getDay(), monthCn: l.getMonthInChinese(), dayCn: l.getDayInChinese(),
@@ -194,14 +195,14 @@ export function rawDayV2(c, y, m, d) {
   const tags = [];
   if (taohua(c.natalZhi[0]) === z || taohua(c.natalZhi[2]) === z) tags.push('桃花');
   if (yima(c.natalZhi[0]) === z || yima(c.natalZhi[2]) === z) tags.push('驿马');
-  return { l, gz, mgz, ygz, ssG, ssZ, score: sc, why, tags, chongBad };
+  return { l, gz, mgz, ygz, ssG, ssZ, score: sc, why, tags, chongBad, guiren: GUIREN[c.dm].indexOf(z) >= 0 };
 }
 function scoreDayV2(c, y, m, d) {
   const r = rawDayV2(c, y, m, d);
   const sc = Math.max(15, Math.min(98, r.score));
   const l = r.l, s = l.getSolar();
   return {
-    y, m, d, gz: r.gz, mgz: r.mgz, ygz: r.ygz, ssG: r.ssG, ssZ: r.ssZ, score: sc, level: levelV2(sc), why: r.why, tags: r.tags,
+    y, m, d, gz: r.gz, mgz: r.mgz, ygz: r.ygz, ssG: r.ssG, ssZ: r.ssZ, score: sc, level: levelV2(sc), why: r.why, tags: r.tags, guiren: r.guiren,
     chongDay: r.chongBad,
     lunar: {
       month: l.getMonth(), day: l.getDay(), monthCn: l.getMonthInChinese(), dayCn: l.getDayInChinese(),

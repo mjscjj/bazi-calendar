@@ -1,7 +1,7 @@
 // 离线缓存：页面和脚本先走网络（保证总是最新版本），断网时用缓存；今天页和用户信息断网时显示上一次的结果。
 const CACHE = 'lrl-v4';
 const SHELL = ['./', 'index.html', 'app.css', 'icon.svg', 'manifest.webmanifest', 'vendor/qrcode.js',
-  'js/main.js', 'js/core.js', 'js/state.js', 'js/data.js', 'js/day.js', 'js/today.js', 'js/calendar.js', 'js/me.js',
+  'js/main.js', 'js/i18n.js', 'js/core.js', 'js/state.js', 'js/data.js', 'js/day.js', 'js/today.js', 'js/calendar.js', 'js/me.js',
   'js/onboard.js', 'js/account.js', 'js/pay.js', 'js/share.js'];
 const OFFLINE_API = /\/api\/(today|demo\/today|me)(\?|$)/;
 

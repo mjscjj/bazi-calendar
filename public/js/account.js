@@ -2,6 +2,7 @@
 import { $, $$, esc, api, toast, openSheet, onClick, dtText, ymdText, price, readLocal, writeLocal, track, currentPath, anonId, mark } from './core.js';
 import { THEME, THEME_DESC, ADVICE } from './data.js';
 import { S } from './state.js';
+import { syncAccountLang } from './i18n.js';
 import { footHtml } from './today.js';
 import { birthFields, readBirth, wireBirth, checkBirth, cardArt, cardTitle, freshStart } from './onboard.js';
 import { resetCard } from './me.js';
@@ -42,6 +43,7 @@ export function pageAuth(r) {
       .then(() => api('GET', 'me'))
       .then((d) => {
         S.me = d.user; S.access = d.access; S.unread = d.unread; S.today = null; S.cal = null; resetCard();
+        if (syncAccountLang(S.me, (lang) => api('PUT', 'me/settings', { lang }).catch(() => {}))) return;
         if (reg) { freshStart(); S.justRegistered = true; track('register', { withCard: !!p }); }
         else mark('guide'); // 老账号在新设备登录：不再放注册时的全屏画，撕日历、收画提示照常出现
         if (p && !reg && (!S.me.birth || confirm('要用刚才填的出生信息替换账号里的吗？'))) {

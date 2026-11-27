@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { GAN, ZHI, WX, bornDay } from './engine.js';
+import { overlay } from './i18n.js';
 
 const DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../content');
 // 日柱插画放在 public/art/pillars/，和文案目录无关（测试会把 content 拷到别处）
@@ -19,9 +20,21 @@ const XIANJI = ['家宅', '自身', '求财', '交易', '婚姻', '六甲', '行
 const TEN = ['正财', '偏财', '正官', '七杀', '正印', '偏印', '比肩', '劫财', '食神', '伤官'];
 
 function need(cond, msg) { if (!cond) throw new Error(`[content] ${msg}`); }
-const read = (dir, f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+// lang = 'en' 时把 content/en/ 里的同名文件叠上去（只翻了一部分也能用，没翻的仍是中文）
+let LANG_DIR = null;
+const readRaw = (dir, f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+const read = (dir, f) => {
+  const base = readRaw(dir, f);
+  return LANG_DIR && fs.existsSync(path.join(LANG_DIR, f)) ? overlay(base, readRaw(LANG_DIR, f)) : base;
+};
 
-export function loadContent(dir = DIR) {
+const readText = (dir, f) => fs.readFileSync(LANG_DIR && fs.existsSync(path.join(LANG_DIR, f)) ? path.join(LANG_DIR, f) : path.join(dir, f), 'utf8');
+
+export function loadContent(dir = DIR, lang = 'zh') {
+  LANG_DIR = lang === 'en' ? path.join(dir, 'en') : null;
+  try { return loadContentInner(dir); } finally { LANG_DIR = null; }
+}
+function loadContentInner(dir) {
   const cards = read(dir, 'energy-cards.json').cards;
   for (const g of GAN) {
     const c = cards[g];
@@ -104,13 +117,13 @@ export function loadContent(dir = DIR) {
   need(Array.isArray(ask.categories) && ask.categories.length, '问事缺少方面');
   for (const x of ask.categories) need(!x.pick || pick.types.some((t) => t.name === x.pick), `问事方面「${x.name}」对应的挑日子事项不存在`);
   need(ask.refuse && ask.refuse_text && Array.isArray(ask.banned), '问事缺少 refuse、refuse_text 或 banned');
-  const askPrompt = fs.readFileSync(path.join(dir, 'ask-prompt.md'), 'utf8');
+  const askPrompt = readText(dir, 'ask-prompt.md');
   for (const k of ['question', 'ben', 'bian', 'tendency']) need(askPrompt.includes(`{{${k}}}`), `问事提示词缺少 {{${k}}}`);
   const fo = ask.follow;
   need(fo && [fo.max, fo.days, fo.review_days, fo.review_window].every((n) => Number.isInteger(n) && n >= 0), '问事缺少 follow 的 max、days、review_days 或 review_window');
   need(Array.isArray(fo.outcomes) && fo.outcomes.length && fo.outcomes.every((o) => /^[a-z]+$/.test(o.key || '') && o.text && o.hint), '问事回看的 outcomes 每条要有 key（小写字母）、text、hint');
   need(new Set(fo.outcomes.map((o) => o.key)).size === fo.outcomes.length, '问事回看的 outcomes 的 key 有重复');
-  const askFollowPrompt = fs.readFileSync(path.join(dir, 'ask-follow-prompt.md'), 'utf8');
+  const askFollowPrompt = readText(dir, 'ask-follow-prompt.md');
   for (const k of ['question', 'tendency', 'reading', 'history', 'follow']) need(askFollowPrompt.includes(`{{${k}}}`), `追问提示词缺少 {{${k}}}`);
   const moods = read(dir, 'moods.json');
   need(Number.isInteger(moods.max_per_day) && moods.max_per_day >= 1, '心情便签缺少 max_per_day');

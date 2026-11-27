@@ -232,6 +232,7 @@ CREATE TABLE IF NOT EXISTS admin_logs (
 
 // 老库补字段：表已存在时 CREATE TABLE 不会加新列，这里逐个补上
 const COLUMNS = [
+  ['users', 'lang', "TEXT NOT NULL DEFAULT 'zh'"], // 界面语言（zh / en），日历订阅这类不带请求头的地方按它出
   ['users', 'welcome_gift', 'TEXT'], // 新用户做完「第一天的三件事」送的那枚御守，记领取时间，只送一次
   ['users', 'birth_cal', "TEXT NOT NULL DEFAULT 'solar'"],
   ['users', 'birth_city', 'TEXT'],

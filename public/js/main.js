@@ -1,6 +1,7 @@
 // 入口：路由、顶栏、底部页签、全局点击、离线缓存与“加到主屏”。
 import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, seen, track, localToday, isDarkNow, setTheme, applyTheme, toast, ENV_NAME } from './core.js';
 import { S } from './state.js';
+import { syncAccountLang } from './i18n.js';
 import { pageToday } from './today.js';
 import { pageCalendar } from './calendar.js';
 import { pageMe, pageEnergy } from './me.js';
@@ -160,6 +161,7 @@ function boot() {
   try { if (!sessionStorage.getItem('lrl:visit')) { sessionStorage.setItem('lrl:visit', '1'); track('visit', { standalone: matchMedia('(display-mode: standalone)').matches, env: ENV_NAME }); } } catch { /* 无痕模式 */ }
   return api('GET', 'me').then((d) => {
     S.me = d.user; S.access = d.access || null; S.unread = d.unread || 0;
+    if (syncAccountLang(S.me, (lang) => api('PUT', 'me/settings', { lang }).catch(() => {}))) return;
     S.priceCents = d.priceCents; S.memberDays = d.memberDays; S.inviteDays = d.inviteDays; S.planTypes = d.planTypes;
     return catchInvite().then(renderPage);
   }, (e) => {

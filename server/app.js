@@ -7,6 +7,7 @@ import qrcode from 'qrcode-generator';
 import { chart, calendar, dayOut, almanac, lunarToSolar, solarToLunar, lunarMonths, termOf, jieqiOn, ZHI, WX, dayGz } from './engine.js';
 import { makeSettings } from './settings.js';
 import { loadContent, makeContent } from './content.js';
+import { T, langOf, withLang, isEn } from './i18n.js';
 import { searchCities, cityByName, resolveBirth } from './solar.js';
 import { pickDays } from './pick.js';
 import { buildIcs, dayEvent } from './ics.js';
@@ -96,9 +97,12 @@ const str = (v, max, name) => {
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
 
 // ---------- 应用 ----------
-export function createApp({ db, alipay, gumroad = null, env = process.env, log = console, content, ai }) {
+export function createApp({ db, alipay, gumroad = null, env = process.env, log = console, content, contentEn, ai }) {
   const settings = makeSettings(db);
-  const C = content || makeContent(loadContent());
+  // 内容库按这次请求的语言取：英文用 content/en/ 叠过的那份（测试只传中文时英文也用它）
+  const CZ = content || makeContent(loadContent());
+  const CE = contentEn || (content ? CZ : makeContent(loadContent(undefined, 'en')));
+  const C = new Proxy({}, { get: (_, k) => (isEn() ? CE : CZ)[k] });
   const M = makeMeihua(C.ask);
   const AI = ai || makeAi(env, log);
   const BASE = (env.BASE_PATH || '/bazi').replace(/\/$/, '');
@@ -315,7 +319,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       date: u.birth_date, time: u.birth_time || null, gender: u.gender,
       cal: u.birth_cal || 'solar', lunar: solarToLunar(u.birth_date), city: u.birth_city || null, zhi: u.birth_zhi || null,
     } : null,
-    proMode: !!u.pro_mode, xiOverride: u.xi_override ? JSON.parse(u.xi_override) : null, inviteCode: u.invite_code || null,
+    proMode: !!u.pro_mode, lang: u.lang || 'zh', xiOverride: u.xi_override ? JSON.parse(u.xi_override) : null, inviteCode: u.invite_code || null,
     createdAt: u.created_at,
   });
   const unreadCount = (u) => db.get("SELECT COUNT(*) n FROM feedback WHERE user_id = ? AND user_seen = 0", u.id).n;
@@ -572,6 +576,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     const r = db.run('INSERT INTO users(username, pass_hash, nickname, birth_date, birth_time, gender, birth_cal, birth_city, birth_lng, birth_tz, birth_zhi, invite_code, created_at, last_seen_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
       username, hashPassword(password), nickname, ...(b ? birthCols(b) : [null, null, null, 'solar', null, null, null, null]), newInviteCode(), nowIso(), nowIso());
     const uid = Number(r.lastInsertRowid);
+    if (isEn()) db.run("UPDATE users SET lang = 'en' WHERE id = ?", uid); // 用英文界面注册的，账号记成英文
     newSession(res, 'user', uid);
     linkInvite(uid, body.invite, body.anonId);
     return { ok: true };
@@ -665,6 +670,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   route('PUT', '/api/me/settings', async ({ req, body }) => {
     const u = requireUser(req);
     if ('proMode' in body) db.run('UPDATE users SET pro_mode = ? WHERE id = ?', body.proMode ? 1 : 0, u.id);
+    if ('lang' in body) db.run('UPDATE users SET lang = ? WHERE id = ?', body.lang === 'en' ? 'en' : 'zh', u.id);
     if ('xiOverride' in body) {
       const x = body.xiOverride;
       if (x === null) db.run('UPDATE users SET xi_override = NULL WHERE id = ?', u.id);
@@ -1484,10 +1490,11 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (!u || !u.birth_date) throw new HttpError(404, '订阅链接已失效');
     db.run('UPDATE users SET cal_fetched_at = ? WHERE id = ?', nowIso(), u.id);
     const c = chartOf(u);
-    const body = buildIcs({
+    // 日历软件来取时不带语言，按账号上存的语言出
+    const body = withLang(u.lang, () => buildIcs({
       c, C, userId: u.id, name: u.nickname, today: bjDay(), plans: plansOf(u, null),
       expired: access(u).mode === 'blocked', url: publicBase(req) + '/',
-    });
+    }));
     return { __raw: body, __type: 'text/calendar; charset=utf-8', __headers: { 'Cache-Control': 'private, max-age=1800', 'Content-Disposition': 'inline; filename="flowday.ics"' } };
   });
 
@@ -1882,13 +1889,16 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   }
 
   // ---------- 处理请求 ----------
-  return async function handler(req, res) {
+  async function handler(req, res) {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'same-origin');
     const url = new URL(req.url, 'http://x');
     let p = url.pathname;
     if (BASE && (p === BASE || p.startsWith(BASE + '/'))) p = p.slice(BASE.length) || '/';
     const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    return withLang(langOf(req, url), () => serve(req, res, url, p, ip));
+  };
+  async function serve(req, res, url, p, ip) {
     try {
       if (p.startsWith('/api/')) {
         const r = routes.find((x) => (x.method === req.method || (req.method === 'HEAD' && x.method === 'GET')) && x.re.test(p));
@@ -1920,9 +1930,10 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       const status = e instanceof HttpError ? e.status : 500;
       if (status === 500) log.error(e);
       if (!res.headersSent) res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
-      res.end(JSON.stringify({ error: e.extra?.error || 'error', message: status === 500 ? '服务器出了点问题，请稍后再试' : e.message, ...(e.extra || {}) }));
+      res.end(JSON.stringify({ error: e.extra?.error || 'error', message: T(status === 500 ? '服务器出了点问题，请稍后再试' : e.message), ...(e.extra || {}) }));
     }
-  };
+  }
+  return handler;
 }
 
 export function createServer(opts) {

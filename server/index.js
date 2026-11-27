@@ -28,6 +28,6 @@ if (!env.ADMIN_PASSWORD) console.warn('[admin] 未设置 ADMIN_PASSWORD，后台
 
 const port = parseInt(env.PORT || '3200', 10);
 const host = env.HOST || '127.0.0.1';
-createServer({ db, alipay, gumroad, env, content: makeContent(loadContent(env.CONTENT_DIR || undefined)) }).listen(port, host, () => {
+createServer({ db, alipay, gumroad, env, content: makeContent(loadContent(env.CONTENT_DIR || undefined)), contentEn: makeContent(loadContent(env.CONTENT_DIR || undefined, 'en')) }).listen(port, host, () => {
   console.log(`[bazi-calendar] listening on http://${host}:${port}${env.BASE_PATH ?? '/bazi'}/`);
 });
