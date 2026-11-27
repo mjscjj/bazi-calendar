@@ -453,7 +453,7 @@
  "补记一笔": "Add a note",
  "记个心情": "Log a mood",
  "当天的心情记录": "Mood notes for the day",
- "这个月有 {n} 天记了心情，其中 <b>{m} 天</b>和系统的判断差不多。只用来帮你观察自己，不代表准不准。": "You logged your mood on {n} days this month, and <b>{m}</b> of them roughly matched our read. It's just a mirror — not a test of accuracy.",
+ "这个月有 {n} 天记了心情，其中 <b>{m} 天</b>和系统的判断差不多。只用来帮你观察自己，不代表准不准。": "Days with a mood logged this month: {n}. Roughly matched our read: <b>{m}</b>. It's just a mirror — not a test of accuracy.",
  "凌晨": "Late night",
  "早上": "Morning",
  "中午": "Midday",

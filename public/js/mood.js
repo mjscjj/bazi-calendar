@@ -73,7 +73,7 @@ const ready = () => !!(ui.mood || ui.note.trim());
 function sheetBody() {
   const kit = kitOf(), [, m, d] = ui.day.split('-').map(Number), now = new Date();
   return '<form class="mrecf" id="moodForm" novalidate>'
-    + `<div class="mrhead"><span>${mdOf(m, d)}${ui.day === localToday() ? '' : T('（补记）')}</span><span>${period(now.getHours())} ${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')}</span></div>`
+    + `<div class="mrhead"><span>${mdOf(m, d)}${ui.day === localToday() ? '' : T('（补记）')}</span><span>${EN ? `${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')} ${now.getHours() < 12 ? 'AM' : 'PM'}` : `${period(now.getHours())} ${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')}`}</span></div>`
     + `<textarea name="note" maxlength="${kit.noteMax || 80}" rows="4" placeholder="${T('今天发生了什么？记下来就好')}" aria-label="${T('今天发生了什么')}">${esc(ui.note)}</textarea>`
     + `<div class="mrgrid" role="group" aria-label="${T('此刻的心情')}"><small>${T('此刻的心情（可以不选，再点一次取消）')}</small><div>${kit.moods.map((x) => chip(kit, x, 'data-mood-pick', x.key === ui.mood)).join('')}</div></div>`
     + `<div class="mcolors-wrap"><small>${T('便签颜色')}</small><div class="mcolors" role="group" aria-label="${T('便签颜色')}">${kit.colors.map((c) => `<button type="button" data-mood-color="${c.key}" aria-pressed="${c.key === ui.color}" style="${paper(c)}" aria-label="${T('{c}色便签', { c: esc(c.name) })}"></button>`).join('')}</div></div>`

@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { isEn } from './i18n.js';
+import { isEn, hasTerm } from './i18n.js';
 
 const SCHEMAS = {
   reading: {
@@ -25,7 +25,7 @@ const DISABLE = ['shell_tool', 'unified_exec', 'shell_snapshot', 'apps', 'plugin
 function checkText(all, banned) {
   if (all.some((s) => typeof s !== 'string' || !s.trim())) throw new Error('有空段落');
   const text = all.join('\n');
-  const hit = banned.find((w) => text.toLowerCase().includes(w.toLowerCase()));
+  const hit = banned.find((w) => hasTerm(text, w));
   if (hit) throw new Error('出现了不该出现的词：' + hit);
   if (/-----BEGIN|[A-Za-z0-9+/]{40,}|ALIPAY|PASSWORD/i.test(text)) throw new Error('疑似泄露');
 }

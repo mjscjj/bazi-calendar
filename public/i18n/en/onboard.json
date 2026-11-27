@@ -30,7 +30,7 @@
  "慢 {n} 分钟": "{n} min behind",
  "钟表是{zone} {clock}": "Clock time {clock} ({zone})",
  "那年夏天实行夏令时，钟表拨快了 {n} 分钟，要减回来": "daylight saving was in effect that summer, so {n} minutes come off",
- "{city}在{lng}，太阳比{zone}{fast}": "{city} is at {lng}, so the sun there runs {fast} of {zone}",
+ "{city}在{lng}，太阳比{zone}{fast}": "{city} is at {lng}; compared with {zone}, the sun there runs {fast}",
  "这个季节太阳走得{fast}": "at this time of year the sun runs {fast}",
  "真太阳时 {when}": "True solar time {when}",
  "；": "; ",

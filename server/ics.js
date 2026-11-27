@@ -12,7 +12,8 @@ let WEB = null, webAt = 0;
 function webDict() {
   if (!WEB || Date.now() - webAt > 600000) {
     WEB = {};
-    try { for (const f of fs.readdirSync(WEB_DIR)) if (f.endsWith('.json')) Object.assign(WEB, JSON.parse(fs.readFileSync(path.join(WEB_DIR, f), 'utf8'))); } catch { /* 没有对照表就用中文 */ }
+    // 日历订阅里用短标签：公共词表 data.json 最后合并、优先
+    try { for (const f of fs.readdirSync(WEB_DIR).filter((x) => x.endsWith('.json')).sort((a, b) => (a === 'data.json') - (b === 'data.json'))) Object.assign(WEB, JSON.parse(fs.readFileSync(path.join(WEB_DIR, f), 'utf8'))); } catch { /* 没有对照表就用中文 */ }
     webAt = Date.now();
   }
   return WEB;

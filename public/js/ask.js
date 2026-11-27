@@ -230,7 +230,7 @@ function castHtml(a, tris) {
     // 最后一步：八卦环淡出，结论就显示在环的位置上（矮屏也不会被截）
     + `<div class="cend"><div class="crel ${now.dir}"><span class="${wxc(g.ti.wx)}"><i></i>${t('你')}<small>${esc(g.ti.label || g.ti.name)} · ${wxT(g.ti.wx)}</small></span><em>${dirTxt} ${esc(now.verb)}</em><span class="${wxc(g.yong.wx)}"><i></i>${t('这件事')}<small>${esc(g.yong.label || g.yong.name)} · ${wxT(g.yong.wx)}</small></span></div>`
     + `<p class="ctend t-${TEND[g.tendency] || 'mid'}"><small>${t('倾向')}</small><b>${esc(t(g.tendency))}</b></p><button type="button" class="btn primary" data-cast-skip>${t('看解读')}</button></div></div>`
-    + `<div class="crows">${row('up', t('上卦'), c.up, `${esc(T(c.up.r).name)} · ${esc(T(c.up.r).image)}`)}${row('low', t('下卦'), c.low, `${esc(T(c.low.r).name)} · ${esc(T(c.low.r).image)}`)}${row('mv', t('动爻'), c.mv, t('第 {n} 爻', { n: c.mv.r }))}</div></div>`;
+    + `<div class="crows">${row('up', t('上卦'), c.up, EN ? esc(T(c.up.r).image) : `${esc(T(c.up.r).name)} · ${esc(T(c.up.r).image)}`)}${row('low', t('下卦'), c.low, EN ? esc(T(c.low.r).image) : `${esc(T(c.low.r).name)} · ${esc(T(c.low.r).image)}`)}${row('mv', t('动爻'), c.mv, t('第 {n} 爻', { n: c.mv.r }))}</div></div>`;
 }
 // 数字像计数器一样滚到目标值
 function rollTo(el, to, ms = 520) {
@@ -392,7 +392,7 @@ function followHtml(a) {
   const fo = a.follow, list = a.follows || [];
   if (!list.length && !fo.open) return '';
   const pending = list.some((f) => f.status === 'pending');
-  const items = list.map((f) => `<div class="fitem"><p class="fq">${esc(f.question)}</p>`
+  const items = list.map((f) => `<div class="fitem"><p class="fq"><em class="fqk">${t('追问')}</em>${esc(f.question)}</p>`
     + (f.status === 'done' ? `<p class="fa">${esc(f.reading.answer)}</p><div class="adv"><small>${t('接下来可以做')}</small><p>${esc(f.reading.advice)}</p></div>`
       : f.status === 'failed' ? `<p class="muted fa">${t('这次没写出来，不占追问次数，可以再问一次。')}</p>`
         : `<div class="writing short"><div class="wbar"><i></i></div><small>${t('正在写，十几秒。')}</small></div>`) + '</div>').join('');

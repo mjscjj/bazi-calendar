@@ -313,22 +313,25 @@
       "cancer",
       "tumor",
       "surgery",
-      "pregnan",
       "miscarriage",
       "medication",
       "hospital",
-      "diagnos",
       "depression",
       "anxiety disorder",
-      "treatment for",
-      "chemo",
       "health",
       "sick",
       "medicine",
       "doctor",
       "recover from",
       "symptom",
-      "cure"
+      "cure",
+      "pregnant",
+      "pregnancy",
+      "diagnosis",
+      "diagnosed",
+      "chemo",
+      "chemotherapy",
+      "treatment"
     ],
     "investments": [
       "stock market",
@@ -341,7 +344,9 @@
       "lottery",
       "gambling",
       "betting",
-      "invest"
+      "invest",
+      "investment",
+      "investing"
     ],
     "legal matters": [
       "lawsuit",
@@ -389,10 +394,8 @@
     "as an ai",
     "language model",
     "artificial intelligence",
-    "guarantee",
     "definitely will",
-    "certainly will",
-    "for sure"
+    "certainly will"
   ],
   "follow": {
     "outcomes": [

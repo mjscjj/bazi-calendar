@@ -87,7 +87,7 @@ export function shishen(dm, g) {
   return [['比肩', '劫财'], ['食神', '伤官'], ['偏财', '正财'], ['七杀', '正官'], ['偏印', '正印']][(eb - ea + 5) % 5][same ? 0 : 1];
 }
 export function dishi(g, z) { const s = DISHI_START[g], zi = ZHI.indexOf(z), yang = GAN.indexOf(g) % 2 === 0; return DS[yang ? (zi - s + 12) % 12 : (s - zi + 12) % 12]; }
-export const hhmm = (i) => { const a = (i * 2 + 23) % 24, b = (i * 2 + 1) % 24; return String(a).padStart(2, '0') + ':00–' + String(b).padStart(2, '0') + ':00'; };
+export const hhmm = (i) => { if (EN) return hhShort(i); const a = (i * 2 + 23) % 24, b = (i * 2 + 1) % 24; return String(a).padStart(2, '0') + ':00–' + String(b).padStart(2, '0') + ':00'; };
 // 7–9 点；英文 7–9 AM、11 AM–1 PM
 const ap = (h) => (h < 12 ? 'AM' : 'PM'), h12 = (h) => (h % 12 || 12);
 export const hhShort = (i) => {
@@ -116,7 +116,7 @@ export function lunarText(l) {
 export function lunarLabel(x) {
   if (x.lunar.festival) return { t: t(x.lunar.festival), c: 'fe' };
   if (x.lunar.jieqi) return { t: t(x.lunar.jieqi), c: 'jq' };
-  if (EN) { const n = lunarNum(x.lunar); return { t: `${n.m}/${n.d}`, c: '' }; }
+  if (EN) { const n = lunarNum(x.lunar); return { t: n.d === 1 ? `Lunar ${n.m}` : `L${n.d}`, c: '' }; } // 9/24 会被当成公历
   return { t: x.lunar.day === 1 ? (x.lunar.monthCn + '月') : x.lunar.dayCn, c: '' };
 }
 // 生日、农历生日、本命日、贵人日、本命冲

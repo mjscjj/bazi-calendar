@@ -175,7 +175,7 @@ function youHtml(t) {
   // 今日一句写的是「今天…」，看别的日子时换成明天、昨天或这天（英文是 today）
   const rel = REL[diff] || T('这天');
   // 英文今日一句里是 today / Today：换成 tomorrow / yesterday / that day，句首大写
-  const fix = (txt) => (isToday ? txt : EN ? txt.replace(/\b([Tt])oday\b/g, (m, c) => (c === 'T' ? rel[0].toUpperCase() + rel.slice(1) : rel.toLowerCase())) : txt.replace(/今天/g, rel));
+  const fix = (txt) => (isToday ? txt : EN ? txt.replace(/\b([Tt])oday\b/g, (m, c) => (c === 'T' ? rel[0].toUpperCase() + rel.slice(1) : rel.toLowerCase())).replace(/\bis in charge\b/g, diff < 0 ? 'was in charge' : 'is in charge') : txt.replace(/今天/g, rel));
   const nav = `<button type="button" class="ic nav" data-day-step="-1" aria-label="${T('前一天')}">‹</button><button type="button" class="ic nav" data-day-step="1" aria-label="${T('后一天')}">›</button>`;
   // 卡片的光晕和能量环跟着这一天的幸运色走
   const lk = luckVars(t.outfit && t.outfit.colors);
@@ -184,7 +184,7 @@ function youHtml(t) {
   return `<section class="tcard k${x.level.k}${lk ? ' luck' : ''}"${lk ? ` style="${lk}"` : ''} aria-label="${isToday ? T('你的今天') : dname}">`
     + (art ? `<img class="today-art-bg" src="${esc(pillarArtSrc(art.art))}" alt="" width="600" height="600" decoding="async" draggable="false">` : '')
     + `<div class="th"><div class="today-date"><time datetime="${t.date}">${dname}</time>${context ? `<span>${context}</span>` : ''}${art ? dayArtButtonHtml(t, art, isToday) : ''}</div><span class="thr">${isToday ? `<button type="button" class="ic" data-share="today" aria-label="${T('分享你的今天')}">${T('分享')}</button>` : `<button type="button" class="ic" data-day-go="today">${T('回到今天')}</button>`}${nav}</span></div>`
-    + `<div class="hero3"><div class="day-theme"><h1 tabindex="-1">${W(theme)}</h1>${theme === action + '日' || (EN && W(theme).toLowerCase().startsWith(W(action).toLowerCase())) ? '' : `<small>${T('宜{a}', { a: EN ? W(action).toLowerCase() : action })}</small>`}</div>`
+    + `<div class="hero3"><div class="day-theme"><h1 tabindex="-1">${W(theme)}</h1>${EN || theme === action + '日' ? '' : `<small>${T('宜{a}', { a: action })}</small>`}</div>`
     + `<button type="button" class="ring" style="--p:${x.score}" data-day-why aria-label="${T('能量 {n}，{lv}，看为什么', { n: x.score, lv: W(x.level.p) })}"><b>${x.score}</b><small>${W(x.level.p)}</small></button></div>`
     + `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`
     + comparisonHtml(t, dos, donts)
@@ -383,7 +383,7 @@ onClick('[data-dismiss-go]', (el) => { const n = el.closest('[data-notice]'); if
 function minisHtml(t) {
   const d = t.draw;
   const draw = d && d.status === 'done'
-    ? `<button type="button" class="mini" data-draw><span class="mk lot">${d.no}</span><span class="mt"><b>${esc(d.keyword)}</b><small>${esc(d.title)}</small><span class="mx">${esc(d.poem[0])}，${esc(d.poem[1])}</span></span></button>`
+    ? `<button type="button" class="mini" data-draw><span class="mk lot">${d.no}</span><span class="mt"><b>${esc(d.keyword)}</b><small>${esc(d.title)}</small><span class="mx">${esc(d.poem[0])}${EN ? ' / ' : '，'}${esc(d.poem[1])}</span></span></button>`
     : d && d.status === 'pending'
       ? `<button type="button" class="mini" data-draw><span class="mk lot">${d.no}</span><span class="mt"><b>${T('第 {n} 签', { n: d.no })}</b><small>${T('还没掷筊确认')}</small><span class="mx">${T('掷出圣杯，才能看签文')}</span></span></button>`
       : d && d.status === 'reask'

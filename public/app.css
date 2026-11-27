@@ -1456,7 +1456,7 @@ body.in-ritual{overflow:hidden}
 .follows .fitem{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
 .follows h3 + .fitem{padding-top:0;border-top:0}
 .follows .fq{margin:0;font-weight:700;font-size:14.5px;line-height:1.6}
-.follows .fq::before{content:"追问";font-size:11px;font-weight:600;color:var(--ak);margin-right:8px;letter-spacing:.06em}
+.follows .fq .fqk{font-style:normal;font-size:11px;font-weight:600;color:var(--ak);margin-right:8px;letter-spacing:.06em}
 .follows .fa{margin:0;font-size:14.5px;line-height:1.8}
 .followf{display:flex;gap:8px}
 .followf input,.rvnote{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
@@ -2310,3 +2310,8 @@ html[lang=en] .mrow .r{min-width:0;text-align:right;justify-content:flex-end}
 html[lang=en] .akhold .hlbl b{white-space:nowrap}
 html[lang=en] .akhold .hlbl small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .langbtn{height:36px;min-width:36px;padding:0 10px;border:0;border-radius:999px;background:var(--sunk);color:var(--fg);font:inherit;font-size:13px;font-weight:600;flex:none}
+@media (max-width:480px){html[lang=en] .fdbar small{display:none}}
+html[lang=en] .hero3 h1{font-size:clamp(1.6rem,7vw,1.9rem)}
+html[lang=en] .crow{grid-template-columns:auto 1fr auto auto}
+html[lang=en] .crow .ck{white-space:nowrap}
+html[lang=en] .cell .ss{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}

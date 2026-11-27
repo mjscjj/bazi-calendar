@@ -7,7 +7,7 @@ import qrcode from 'qrcode-generator';
 import { chart, calendar, dayOut, almanac, lunarToSolar, solarToLunar, lunarMonths, termOf, jieqiOn, ZHI, WX, dayGz } from './engine.js';
 import { makeSettings } from './settings.js';
 import { loadContent, makeContent } from './content.js';
-import { T, langOf, withLang, isEn } from './i18n.js';
+import { T, langOf, withLang, isEn, hasTerm, inRequest } from './i18n.js';
 import { searchCities, cityByName, cityLabel, cityView, resolveBirth } from './solar.js';
 import { pickDays } from './pick.js';
 import { buildIcs, dayEvent, hourText } from './ics.js';
@@ -939,7 +939,8 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   // 追问和回看：次数、天数、回看选项都在 content/ask.json 的 follow 里
   const FO = live(() => C.ask.follow);
   // 八卦按先天数排好（页面演推算时转的那个八卦环）
-  const TRIS = Object.entries(C.ask.trigrams).sort((x, y) => x[1].num - y[1].num).map(([name, t]) => ({ name, num: t.num, lines: t.lines, image: t.image, wx: t.wx }));
+  // 八卦按这次请求的语言给（英文没有单字卦名，name 也用象：Heaven、Lake…）
+  const tris = () => Object.entries(C.ask.trigrams).sort((x, y) => x[1].num - y[1].num).map(([name, t]) => ({ key: name, name: isEn() ? t.image : name, num: t.num, lines: t.lines, image: t.image, wx: t.wx }));
   const bjAfter = (iso, days) => bjDay(new Date(Date.parse(iso) + days * DAY_MS));
   const outcomeOf = (key) => C.ask.follow.outcomes.find((o) => o.key === key) || null;
   function reviewOf(a) {
@@ -964,7 +965,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     const [y, mo, d, h] = m.inputs, hr = hourText(h.n - 1);
     return { text: `Lunar ${mo.n}/${d.n}, ${hr}`, inputs: [{ ...y, label: `${ZHI_ANIMAL[y.label[0]] || y.label} year` }, { ...mo, label: `Lunar month ${mo.n}` }, { ...d, label: `Day ${d.n}` }, { ...h, label: hr }] };
   }
-  function guaView(g) {
+  function guaView(g, at) {
     if (!isEn()) return g;
     const H = C.ask.hexagrams, TR = C.ask.trigrams;
     const hx = (h) => ({ ...h, name: H[h.key]?.name || h.name, gist: H[h.key]?.gist || h.gist });
@@ -974,7 +975,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     if (c.method === 'time' && ins.length === 4) ({ text, inputs } = momentView({ text, inputs: ins }));
     else if (c.method === 'nums') {
       inputs = ins.map((x, i) => ({ ...x, label: ['First number', 'Second number', 'Third number'][i] || x.label }));
-      text = c.nums ? `Your numbers: ${c.nums.join(', ')}` : text;
+      text = at ? momentView(momentOf(Date.parse(at))).text : text; // 报数起卦也显示问的那一刻
     }
     return {
       ...g, ben: hx(g.ben), hu: hx(g.hu), bian: hx(g.bian), ti: tri(g.ti), yong: tri(g.yong), bianYong: tri(g.bianYong),
@@ -983,7 +984,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
     };
   }
   const askOut = (a) => ({
-    id: a.id, question: a.question, category: a.category, gua: guaView(JSON.parse(a.gua)), days: JSON.parse(a.days),
+    id: a.id, question: a.question, category: a.category, gua: guaView(JSON.parse(a.gua), a.created_at), days: JSON.parse(a.days),
     categoryLabel: catLabel(a.category), pickType: (catOf(a.category) || {}).pick || null,
     status: a.status, reading: a.reading ? JSON.parse(a.reading) : null, createdAt: a.created_at, review: reviewOf(a),
   });
@@ -1016,7 +1017,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   }
   const asking = new Set();
   // 解读用问的人的语言写：请求里带的语言；后台补跑（启动时、重试）时用账号上存的语言
-  const langFor = (uid) => (isEn() ? 'en' : (db.get('SELECT lang FROM users WHERE id = ?', uid) || {}).lang || 'zh');
+  const langFor = (uid) => (inRequest() ? (isEn() ? 'en' : 'zh') : (db.get('SELECT lang FROM users WHERE id = ?', uid) || {}).lang || 'zh');
   function runAsk(id) {
     const a = db.get("SELECT user_id FROM asks WHERE id = ? AND status = 'pending'", id);
     if (a) withLang(langFor(a.user_id), () => runAskIn(id));
@@ -1083,7 +1084,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
   }, 1000).unref?.();
   const refuseCheck = (question) => {
     for (const [kind, words] of Object.entries(C.ask.refuse)) {
-      if (words.some((w) => question.toLowerCase().includes(String(w).toLowerCase()))) throw new HttpError(400, C.ask.refuse_text.replace('{kind}', kind), { error: 'refused' });
+      if (words.some((w) => hasTerm(question, w))) throw new HttpError(400, C.ask.refuse_text.replace('{kind}', kind), { error: 'refused' });
     }
   };
 
@@ -1105,7 +1106,7 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
       runAsk(a.id);
       a = db.get('SELECT * FROM asks WHERE id = ?', a.id);
     }
-    return { ask: askDetail(a), outcomes: FO.outcomes.map(({ key, text, hint }) => ({ key, text, hint })), trigrams: TRIS };
+    return { ask: askDetail(a), outcomes: FO.outcomes.map(({ key, text, hint }) => ({ key, text, hint })), trigrams: tris() };
   });
   // 追问：同一卦里再问细节，不重新起卦、不另收费；起卦后 FO.days 天内最多 FO.max 次
   route('POST', '/api/asks/:id/follows', async ({ req, body, params }) => {

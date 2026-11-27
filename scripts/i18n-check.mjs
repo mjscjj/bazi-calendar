@@ -1,7 +1,7 @@
 // 英文版检查：node scripts/i18n-check.mjs [文件…]
 // 1. 用 t('…') / T('…') 包了、但对照表里还没有英文的文案
 // 2. 代码里还没包起来的中文字符串（注释不算）
-// 3. 对照表里英文和中文的 {变量} 对不上的
+// 3. 对照表里英文用了中文没有的 {变量}
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -43,7 +43,9 @@ export function rawOf(src) {
   return body.split('\n').map((l, i) => [i + 1, l.trim()]).filter(([, l]) => HAN.test(l));
 }
 
-const vars = (s) => [...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join(',');
+const vars = (s) => new Set([...String(s).matchAll(/\{(\w+)\}/g)].map((m) => m[1]));
+// 英文可以少用变量（比如不插名字），但不能出现中文里没有的变量
+const extra = (zh, en) => [...vars(en)].some((v) => !vars(zh).has(v));
 
 export function check(files) {
   const { web, server } = loadDicts();
@@ -54,7 +56,7 @@ export function check(files) {
     for (const k of keysOf(src)) if (HAN.test(k) && dict[k] == null) missing.push([path.relative(ROOT, f), k]);
     for (const [n, l] of rawOf(src)) raw.push([path.relative(ROOT, f) + ':' + n, l.slice(0, 120)]);
   }
-  for (const d of [web, server]) for (const [k, v] of Object.entries(d)) if (vars(k) !== vars(v)) bad.push([k, v]);
+  for (const d of [web, server]) for (const [k, v] of Object.entries(d)) if (extra(k, v)) bad.push([k, v]);
   return { missing, raw, bad };
 }
 

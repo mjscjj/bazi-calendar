@@ -12,6 +12,7 @@ export const normLang = (l) => (l === 'en' ? 'en' : 'zh');
 export const langOf = (req, url) => normLang(String(req.headers['x-lang'] || url?.searchParams.get('lang') || ''));
 export const withLang = (lang, fn) => als.run(normLang(lang), fn);
 export const curLang = () => als.getStore() || 'zh';
+export const inRequest = () => als.getStore() != null; // 是否在某次请求里（后台任务里没有）
 export const isEn = () => curLang() === 'en';
 
 export function T(zh, vars) {
@@ -26,4 +27,13 @@ export function overlay(base, top) {
   const out = { ...base };
   for (const k of Object.keys(top)) out[k] = overlay(base[k], top[k]);
   return out;
+}
+
+// 词表匹配：中文按片段；纯英文的词按整词（允许 s / es / ed / ing 词尾），免得 studying 里的 dying、secure 里的 cure 被误认
+export function hasTerm(text, w) {
+  const s = String(text || '').toLowerCase(), k = String(w || '').toLowerCase().trim();
+  if (!k) return false;
+  if (!/^[a-z][a-z' -]*$/.test(k)) return s.includes(k);
+  const re = new RegExp(`(^|[^a-z])${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(s|es|ed|ing)?(?![a-z])`);
+  return re.test(s);
 }
