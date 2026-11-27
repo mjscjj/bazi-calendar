@@ -537,7 +537,7 @@ function showResult(d) {
     bell([392, 587.3, 784], 0.1, 4.5); buzz([16, 70, 16, 120, 40]);
     const tb = $('.rtable', R.el).getBoundingClientRect(), e = R.el.getBoundingClientRect();
     burst(tb.left - e.left + tb.width / 2, tb.top - e.top + tb.height - 60, 110, true);
-    setCtl(`<button type="button" class="rbtn" data-jiao-read>${t('看签文')}</button>`);
+    setCtl(`<button type="button" class="rbtn" data-jiao-read>${t('解签')}</button>`);
     return;
   }
   bell([233], 0.045, 1.6); buzz(20);
@@ -564,6 +564,7 @@ function toLot(fast) {
   box.innerHTML = `<div class="rlh"><span>${t('观音灵签 · 第 {n} 签', { n: d.no })}</span><em class="${GRADE_CLS(d.grade)}">${esc(t(d.grade))}</em></div>`
     + `<h2 class="rv rtitle">${spans(d.title, 0.15, 0.14)}</h2>`
     + `<div class="rv rpoem">${d.poem.map((l, i) => `<p>${spans(l, p0 + i * gap, 0.05)}</p>`).join('')}</div>`
+    + `<h2 class="rreading rcard" style="--d:${after}s">${t('解签')}</h2>`
     + (d.hint ? `<p class="rhl rcard" style="--d:${after}s">${esc(d.hint)}</p>` : '')
     + (main ? `<div class="rans rcard" style="--d:${after + 0.15}s"><div class="q"><span>${d.question ? `${esc(T.asked || t('你问的'))} · ${esc(d.question)}` : t('今天的{name}', { name: esc(main.name) })}</span>${d.question ? `<em>${esc(main.name)}</em>` : ''}</div>`
       + `<h3>${esc(main.say)}${dots(main.stars)}</h3>${items(main)}<p class="radv"><b>${esc(T.advice || t('建议'))}</b>${tipsText(main.tips)}</p>${main.note ? `<p class="ritems">${esc(main.note)}</p>` : ''}</div>` : '')
