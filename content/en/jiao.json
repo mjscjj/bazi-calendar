@@ -1,0 +1,31 @@
+{
+ "steps": [
+  "Hold your question",
+  "Shake",
+  "Toss",
+  "Read"
+ ],
+ "intro": "Hold the question quietly in mind, then shake the tube.",
+ "drawn": "Toss the moon blocks to ask if this is your lot.",
+ "rules": "Up to three tosses. Yes (one up, one down): read your lot. Ask again (both up): say your question more clearly and toss again. Not yet (both down): the time isn't right — pause, then toss again. Three \"not yet\" in a row means it's time to ask something else.",
+ "results": {
+  "sheng": {
+   "name": "Yes",
+   "face": "One up, one down",
+   "text": "The answer is yes — this lot is yours."
+  },
+  "xiao": {
+   "name": "Ask again",
+   "face": "Both face up",
+   "text": "It isn't clear yet. Put your question a little more plainly and toss again."
+  },
+  "yin": {
+   "name": "Not yet",
+   "face": "Both face down",
+   "text": "A sign the time isn't right. Take a breath, then toss again."
+  }
+ },
+ "reask": "Three \"not yet\" in a row — this isn't the moment for that question. Ask something else and draw a new lot.",
+ "give_up": "No \"yes\" in three tosses. Let it rest for today and come back tomorrow.",
+ "rounds_out": "You've rephrased a few times today. Set it down for now and come back tomorrow."
+}

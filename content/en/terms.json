@@ -1,0 +1,82 @@
+{
+ "_note": "English solar terms. line: what this term means and how to spend it. mine is said to you: {term} is the term name and {wx} its element; xi = your lucky element is in season, ji = a draining one, neutral = neither.",
+ "mine": {
+  "xi": "From {term}, {wx} is in season — and it's one of your lucky elements. A good time to take the lead and push your plans forward.",
+  "ji": "From {term}, {wx} is in season, and it tends to drain you. Slow your pace these two weeks and look after yourself first.",
+  "neutral": "From {term}, {wx} is in season. It neither helps nor drains you — just go at your own pace."
+ },
+ "terms": {
+  "立春": {
+   "line": "Spring starts today. The world is just waking up — set a small goal for the year and take the first step."
+  },
+  "雨水": {
+   "line": "The rains pick up and the ground softens. Build your strength slowly; water your plans well and don't rush the results."
+  },
+  "惊蛰": {
+   "line": "The first spring thunder wakes the sleeping insects. Get moving and restart whatever you've been putting off."
+  },
+  "春分": {
+   "line": "Day and night are equal and spring is half over. Find your balance — half for work, half for life."
+  },
+  "清明": {
+   "line": "Clear skies, fresh green everywhere. Get outside, sort through old things, and think of the people far away."
+  },
+  "谷雨": {
+   "line": "Rain that feeds the grain — the last stop of spring. Tend what you've planted and let it grow."
+  },
+  "立夏": {
+   "line": "Summer begins and everything grows. Put in a little extra and let your ideas take shape."
+  },
+  "小满": {
+   "line": "The grain is filling out but not yet ripe. A little full is just right — be content, and leave room to grow."
+  },
+  "芒种": {
+   "line": "Busy harvesting one crop and planting the next. Wrap things up while you start something new; don't drop either."
+  },
+  "夏至": {
+   "line": "The longest day of the year, when the light is strongest. Express yourself boldly — and take an afternoon break."
+  },
+  "小暑": {
+   "line": "The heat is building. Slow down a little and find a cool corner to settle your mind."
+  },
+  "大暑": {
+   "line": "The hottest stretch of the year. Do less, drink more water, and save your strength for what matters."
+  },
+  "立秋": {
+   "line": "Autumn begins and the heat starts to fade. Refocus and sort out the first half of the year."
+  },
+  "处暑": {
+   "line": "The heat ends here. Get back into rhythm, go to bed a little earlier, and welcome the crisp autumn."
+  },
+  "白露": {
+   "line": "Dew turns white and mornings grow cool. Add a layer, and look after the people around you."
+  },
+  "秋分": {
+   "line": "Day and night are equal again, and autumn is half over. Gather your harvest, and tell yourself: well done."
+  },
+  "寒露": {
+   "line": "The dew grows cold and autumn deepens. Settle in with a book and set your worries down for a while."
+  },
+  "霜降": {
+   "line": "The first frost — the last leg of autumn. Wrap up and file away; finish what needs finishing."
+  },
+  "立冬": {
+   "line": "Winter begins and everything is stored away. Rest and recharge, and keep this year's gains safe."
+  },
+  "小雪": {
+   "line": "The first light snow. Gather by the fire, talk slowly, and stay a little longer with the people who matter."
+  },
+  "大雪": {
+   "line": "Heavy snow and a quiet world. Keep a low profile, rest well, and save your strength for next year."
+  },
+  "冬至": {
+   "line": "The shortest day of the year — from here, every day gets longer. Be with family, and make a wish for the year ahead."
+  },
+  "小寒": {
+   "line": "The cold deepens and the plum blossoms open. Hang in there: the coldest days mean you're nearly through."
+  },
+  "大寒": {
+   "line": "The last solar term of the year — winter ends and spring is on its way. Say goodbye to the old and close out the year well."
+  }
+ }
+}

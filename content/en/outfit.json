@@ -1,0 +1,15 @@
+{
+  "_note": "English lucky colors. Six traditional colors per element (names translated, hex unchanged). In lines, {day} and {el} are element names and {mood} is an adjective phrase (\"…and you'll feel more {mood}\").",
+  "elements": {
+    "木": { "colors": [{ "name": "Bamboo Green", "hex": "#789262" }, { "name": "Mugwort Green", "hex": "#A4E2C6" }, { "name": "Pine Green", "hex": "#21A675" }, { "name": "Pea Green", "hex": "#9ED048" }, { "name": "Deep Moss", "hex": "#4F6F46" }, { "name": "Jade Teal", "hex": "#48C0A3" }], "accessories": ["a wooden bead bracelet", "turquoise", "a linen scarf"], "mood": "open and alive" },
+    "火": { "colors": [{ "name": "Cinnabar", "hex": "#C8463D" }, { "name": "Crabapple Red", "hex": "#DB5A6B" }, { "name": "Rouge", "hex": "#9D2933" }, { "name": "Lilac", "hex": "#CCA4E3" }, { "name": "Plum", "hex": "#8C4356" }, { "name": "Blush", "hex": "#F9906F" }], "accessories": ["a red string bracelet", "garnet", "a warm-toned silk scarf"], "mood": "warm and energized" },
+    "土": { "colors": [{ "name": "Camel", "hex": "#B08A5B" }, { "name": "Ivory", "hex": "#EEDEB0" }, { "name": "Amber", "hex": "#CA6924" }, { "name": "Mustard", "hex": "#F0C239" }, { "name": "Ochre", "hex": "#845A33" }, { "name": "Autumn Gold", "hex": "#D9B611" }], "accessories": ["jade", "citrine", "ceramic earrings"], "mood": "grounded and gentle" },
+    "金": { "colors": [{ "name": "Moon White", "hex": "#D6ECF0" }, { "name": "Silver Gray", "hex": "#A3A8B0" }, { "name": "Raw Silk", "hex": "#F2ECDE" }, { "name": "Slate", "hex": "#75878A" }, { "name": "Frost", "hex": "#E9F1F6" }, { "name": "Gold", "hex": "#EACD76" }], "accessories": ["silver jewelry", "pearls", "a metal watch band"], "mood": "crisp and clear" },
+    "水": { "colors": [{ "name": "Ink", "hex": "#50616D" }, { "name": "Ultramarine", "hex": "#4C8DAE" }, { "name": "Midnight", "hex": "#3D3B4F" }, { "name": "Lake Teal", "hex": "#5AA4AE" }, { "name": "Navy", "hex": "#2E4E7E" }, { "name": "Indigo", "hex": "#177CB0" }], "accessories": ["aquamarine", "obsidian", "a navy shirt"], "mood": "calm and flexible" }
+  },
+  "lines": {
+    "follow": "{day} rules today, and it's one of your lucky elements. Lean into it with {el} tones and you'll feel more {mood}.",
+    "balance": "{day} rules today and tends to drain you. Wear {el} tones to top yourself up and you'll feel more {mood}.",
+    "neutral": "{day} rules today but barely touches you. Wear {el} tones to feel more {mood}."
+  }
+}

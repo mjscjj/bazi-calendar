@@ -1,7 +1,30 @@
 // 手机日历订阅（iCalendar）：未来 60 天每天一条全天日程，定了时段的计划是一条带时间的日程。
 // 手机日历按自己的节奏来拉，所以每次请求现算。
 import { dayOut } from './engine.js';
+import fs from 'node:fs';
+import path from 'node:path';
 import { ACT, hhShort, bestHours, dosDonts } from '../public/js/data.js';
+import { T, isEn } from './i18n.js';
+
+// 英文：宜忌、行动词这些前端写好的文案（data.js 在 Node 里出中文），按前端的英文对照表翻，和页面上说法一致
+const WEB_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../public/i18n/en');
+let WEB = null, webAt = 0;
+function webDict() {
+  if (!WEB || Date.now() - webAt > 600000) {
+    WEB = {};
+    try { for (const f of fs.readdirSync(WEB_DIR)) if (f.endsWith('.json')) Object.assign(WEB, JSON.parse(fs.readFileSync(path.join(WEB_DIR, f), 'utf8'))); } catch { /* 没有对照表就用中文 */ }
+    webAt = Date.now();
+  }
+  return WEB;
+}
+const W = (s) => (isEn() ? webDict()[s] ?? T(s) : s);
+// 时段的说法：中文「7–9 点」，英文「7–9 AM」（服务端自己出，不靠 data.js）
+const h12 = (h) => ({ n: h % 12 || 12, ap: h < 12 ? 'AM' : 'PM' });
+export function hourText(i) {
+  if (!isEn()) return hhShort(i);
+  const a = h12((i * 2 + 23) % 24), b = h12((i * 2 + 1) % 24);
+  return a.ap === b.ap ? `${a.n}–${b.n} ${b.ap}` : `${a.n} ${a.ap}–${b.n} ${b.ap}`;
+}
 
 const DAY_MS = 86400000;
 const pad = (n) => String(n).padStart(2, '0');
@@ -22,8 +45,9 @@ function fold(line) {
   return out.join('\r\n ');
 }
 
-const act = (x) => (x.level.k <= 1 ? '休整' : ACT[x.ssG]);
-const short = (items) => items.map((s) => s.split(/[、，（]/)[0]).join('、');
+const act = (x) => W(x.level.k <= 1 ? '休整' : ACT[x.ssG]);
+// 每条只取第一个短语：中文按顿号、逗号、括号切；英文按逗号、括号、分号切
+const short = (items) => (isEn() ? items.map((s) => W(s).split(/[,(;]/)[0].trim()).join(', ') : items.map((s) => s.split(/[、，（]/)[0]).join('、'));
 
 // 一天的日程标题和备注（订阅页的预览也用它）
 export function dayEvent(c, C, y, m, d) {
@@ -32,8 +56,8 @@ export function dayEvent(c, C, y, m, d) {
   const { dos, donts } = dosDonts(x, false);
   return {
     y, m, d, level: x.level.k,
-    summary: `${x.level.p} · ${act(x)}${top[0] ? ' · ' + hhShort(top[0].i) : ''}`,
-    desc: `${C.dailyLine(c, x).head}\n${C.dailyLine(c, x).why}\n宜 ${short(dos.slice(0, 3))}\n忌 ${short(donts.slice(0, 2))}`,
+    summary: `${T(x.level.p)} · ${act(x)}${top[0] ? ' · ' + hourText(top[0].i) : ''}`,
+    desc: `${C.dailyLine(c, x).head}\n${C.dailyLine(c, x).why}\n${T('宜 {x}', { x: short(dos.slice(0, 3)) })}\n${T('忌 {x}', { x: short(donts.slice(0, 2)) })}`,
   };
 }
 
@@ -51,12 +75,12 @@ export function buildIcs({ c, C, userId, name, today, plans, expired, url, days 
   const [ty, tm, td] = today.split('-').map(Number);
   const t0 = Date.UTC(ty, tm - 1, td);
   if (expired) {
-    allDay(`expired-${userId}@mindflow.zone`, ty, tm, td, 'flowday 会员已到期', '续费后，这里会恢复每天的安排。\n' + url);
+    allDay(`expired-${userId}@mindflow.zone`, ty, tm, td, T('flowday 会员已到期'), T('续费后，这里会恢复每天的安排。') + '\n' + url);
   } else {
     for (let k = 0; k < days; k++) {
       const dt = new Date(t0 + k * DAY_MS), y = dt.getUTCFullYear(), m = dt.getUTCMonth() + 1, d = dt.getUTCDate();
       const e = dayEvent(c, C, y, m, d);
-      allDay(`day-${dateVal(y, m, d)}-${userId}@mindflow.zone`, y, m, d, e.summary, e.desc + '\n\n仅供娱乐参考');
+      allDay(`day-${dateVal(y, m, d)}-${userId}@mindflow.zone`, y, m, d, e.summary, e.desc + '\n\n' + T('仅供娱乐参考'));
     }
     for (const p of plans) {
       if (!p.date) continue;

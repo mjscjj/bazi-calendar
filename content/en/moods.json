@@ -1,0 +1,84 @@
+{
+ "moods": [
+  {
+   "key": "happy",
+   "word": "Joy",
+   "char": "J",
+   "score": 5,
+   "color": "apricot"
+  },
+  {
+   "key": "full",
+   "word": "Good",
+   "char": "G",
+   "score": 4,
+   "color": "sage"
+  },
+  {
+   "key": "calm",
+   "word": "Calm",
+   "char": "C",
+   "score": 3,
+   "color": "sky"
+  },
+  {
+   "key": "tired",
+   "word": "Beat",
+   "char": "B",
+   "score": 2,
+   "color": "paper"
+  },
+  {
+   "key": "upset",
+   "word": "Ugh",
+   "char": "U",
+   "score": 2,
+   "color": "blush"
+  },
+  {
+   "key": "low",
+   "word": "Down",
+   "char": "D",
+   "score": 1,
+   "color": "wisteria"
+  }
+ ],
+ "colors": [
+  {
+   "key": "apricot",
+   "name": "Apricot",
+   "light": "#F6E4C8",
+   "dark": "#4A3C2A"
+  },
+  {
+   "key": "blush",
+   "name": "Blush",
+   "light": "#F6DAD5",
+   "dark": "#4C302D"
+  },
+  {
+   "key": "sage",
+   "name": "Sage",
+   "light": "#DAE9DE",
+   "dark": "#2A3D30"
+  },
+  {
+   "key": "sky",
+   "name": "Sky",
+   "light": "#D9E5F2",
+   "dark": "#28354B"
+  },
+  {
+   "key": "wisteria",
+   "name": "Wisteria",
+   "light": "#E5DDF0",
+   "dark": "#3A3149"
+  },
+  {
+   "key": "paper",
+   "name": "Paper",
+   "light": "#EDEBE6",
+   "dark": "#36352F"
+  }
+ ]
+}

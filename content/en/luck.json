@@ -1,0 +1,64 @@
+{
+ "deeds": {
+  "examples": [
+   "Called my parents",
+   "Helped a coworker solve a problem",
+   "Thanked the delivery driver",
+   "Gave up my seat",
+   "Donated a little",
+   "Gave someone a sincere compliment",
+   "Picked up litter on the way",
+   "Listened to a friend vent, all the way through"
+  ]
+ },
+ "release": {
+  "name": "Release practice",
+  "intro": "Don't push the feeling down or pick it apart. Just let it be here, then choose to let it go. About 3 minutes.",
+  "topic": {
+   "title": "Think of something that's on your mind right now",
+   "hint": "Write a line, or just hold it in mind",
+   "placeholder": "e.g. Presenting tomorrow and a bit nervous"
+  },
+  "before": {
+   "title": "How strong is this feeling right now?",
+   "hint": "0 is nothing, 10 is very strong"
+  },
+  "steps": [
+   {
+    "title": "First, let it be here",
+    "text": "No need to chase it away or figure out why. Notice where you feel it — chest, shoulders, stomach. Take three slow breaths.",
+    "wait": 12
+   },
+   {
+    "title": "Could I let it go?",
+    "text": "Yes or no — both are fine. Just answer honestly.",
+    "choices": [
+     "Yes",
+     "No"
+    ]
+   },
+   {
+    "title": "Would I let it go?",
+    "text": "This is about whether you're willing, not whether you should.",
+    "choices": [
+     "Yes",
+     "Not yet"
+    ]
+   },
+   {
+    "title": "When?",
+    "text": "If you're willing, now. Breathe out gently and let it loosen a little.",
+    "choices": [
+     "Now"
+    ]
+   }
+  ],
+  "after": {
+   "title": "How strong is it now?",
+   "hint": "Compare it with before"
+  },
+  "again": "Some of it is still here, and that's normal. Want to go another round?",
+  "done": "Well done. Feelings come and go — you don't have to keep holding on.",
+  "note": "This is a relaxation exercise, not therapy. If your feelings are heavy or last a long time, talk to someone close to you or a professional."
+ }
+}

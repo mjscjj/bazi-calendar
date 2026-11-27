@@ -1,18 +1,24 @@
 // 每日一签的仪式：默念（按住三秒）→ 摇签（真的摇手机，或点一下）→ 起签（星盘三圈依次停下）→ 掷筊（按住往上抛）→ 解签。
 // 全屏深色，不跟白色 / 深色主题走，点缀色是今天的幸运色。签号和掷筊结果都由服务端定，这里只把过程演出来：
 // 星盘中间是你的日柱，天干、地支两圈停在今天的日子上，最外一圈停在服务端给的那支签；筊杯落地的正反面按服务端的结果来。
-import { $, esc, api, toast, openSheet, dismissSheet, onClick, track, readLocal, writeLocal } from './core.js';
+import { $, esc, api, toast, openSheet, dismissSheet, onClick, track, readLocal, writeLocal, EN } from './core.js';
 import { luckVars, GRADE_CLS } from './data.js';
 import { S } from './state.js';
+import { tm } from './i18n.js';
+const t = tm('rite'); // 先查 i18n/en/rite.json
 
 const GAN = '甲乙丙丁戊己庚辛壬癸', ZHI = '子丑寅卯辰巳午未申酉戌亥';
+// 英文界面：干支写拼音（辛亥 → Xin Hai）
+const PY_G = ['Jia', 'Yi', 'Bing', 'Ding', 'Wu', 'Ji', 'Geng', 'Xin', 'Ren', 'Gui'], PY_Z = ['Zi', 'Chou', 'Yin', 'Mao', 'Chen', 'Si', 'Wu', 'Wei', 'Shen', 'You', 'Xu', 'Hai'];
+const gzText = (gz) => (EN && gz ? `${PY_G[GAN.indexOf(gz[0])] || gz[0]} ${PY_Z[ZHI.indexOf(gz[1])] || gz[1]}` : gz);
 const FACES = { sheng: [0, 180], xiao: [0, 0], yin: [180, 180] }; // 0：平面朝上；180：凸面朝上
 const HOLD_S = 2.6, G = 2700;
 const RM = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const COARSE = () => matchMedia('(pointer: coarse)').matches;
 const buzz = (p) => { try { if (navigator.vibrate) navigator.vibrate(p); } catch { /* 不支持震动就算了 */ } };
-const spans = (s, d0, per) => [...s].map((ch, i) => `<span style="--d:${(d0 + i * per).toFixed(2)}s">${esc(ch)}</span>`).join('');
-const dots = (n) => `<span class="rdots" role="img" aria-label="${n} 颗星">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? 'f' : ''}"></i>`).join('')}</span>`;
+// 一个字一个字浮现；英文按词浮现（span 是 inline-block，单独的空格会被吞掉，词之间的空格留在外面）
+const spans = (s, d0, per) => (EN ? String(s).split(/(\s+)/).filter(Boolean) : [...s]).map((ch, i) => (/^\s+$/.test(ch) ? ' ' : `<span style="--d:${(d0 + i * per * (EN ? 1.6 : 1)).toFixed(2)}s">${esc(ch)}</span>`)).join('');
+const dots = (n) => `<span class="rdots" role="img" aria-label="${t('{n} 颗星', { n })}">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? 'f' : ''}"></i>`).join('')}</span>`;
 let R = null; // 当前这一场；弹层关掉就清空
 
 // ---------------- 声音：全部现场合成，不用音频文件 ----------------
@@ -61,27 +67,27 @@ function droneOff() { if (!A.drone) return; const d = A.drone; A.drone = null; d
 
 // ---------------- 打开、关闭 ----------------
 export function openRite(onChange) {
-  const t = S.today, J = t.jiao;
-  const body = openSheet('每日一签', '<div class="rit" style="' + luckVars(t.outfit && t.outfit.colors) + '">'
+  const td = S.today, J = td.jiao;
+  const body = openSheet(t('每日一签'), '<div class="rit" style="' + luckVars(td.outfit && td.outfit.colors) + '">'
     + '<canvas class="rdust" aria-hidden="true"></canvas><div class="rbloom" aria-hidden="true"></div>'
     + `<ol class="rsteps">${J.steps.map((x) => `<li><i></i>${esc(x)}</li>`).join('')}</ol>`
     + '<div class="rdial" data-nodrag><div class="rdin"><div class="rhalo"></div><svg viewBox="-215 -215 430 430" aria-hidden="true"></svg><div class="rcore"><b></b><small></small></div></div></div>'
     + '<div class="rcap" aria-live="polite"><p></p><small></small></div>'
-    + '<div class="rtable" data-nodrag><div class="rfloor"></div><p class="rhint">按住筊杯，往上一抛</p></div>'
+    + `<div class="rtable" data-nodrag><div class="rfloor"></div><p class="rhint">${t('按住筊杯，往上一抛')}</p></div>`
     + '<div class="rres" aria-live="polite"><b></b><small></small><div class="rtries"></div></div>'
     + '<div class="rctl"></div><div class="rlot"></div></div>', { cls: 'lotrite', onClose: stop });
   const el = $('.rit', body), sheet = el.closest('.sheet');
   if (R) stop();
-  R = { t, J, onChange, el, sheet, phase: '', spin: 1, hold: { on: false, p: 0, done: false, q: 0 }, energy: 0, J0: { x: 0, y: 0, vx: 0, vy: 0 },
-    dust: [], D: { pull: 0, swirl: 0, cx: 0, cy: 0 }, timers: [], question: (t.draw && t.draw.question) || '', last: performance.now(), raf: 0, tossing: null, grab: null, lastTick: 0 };
+  R = { t: td, J, onChange, el, sheet, phase: '', spin: 1, hold: { on: false, p: 0, done: false, q: 0 }, energy: 0, J0: { x: 0, y: 0, vx: 0, vy: 0 },
+    dust: [], D: { pull: 0, swirl: 0, cx: 0, cy: 0 }, timers: [], question: (td.draw && td.draw.question) || '', last: performance.now(), raf: 0, tossing: null, grab: null, lastTick: 0 };
   // 声音开关放在弹层标题栏里，关掉的人以后都不响
   const sh = $('.sh', sheet), snd = document.createElement('button');
-  snd.type = 'button'; snd.className = 'rsnd'; snd.setAttribute('data-rite-snd', ''); snd.textContent = soundOn() ? '声音 开' : '声音 关';
+  snd.type = 'button'; snd.className = 'rsnd'; snd.setAttribute('data-rite-snd', ''); snd.textContent = soundOn() ? t('声音 开') : t('声音 关');
   sh.insertBefore(snd, $('.close', sh));
   buildDial(); buildBlocks(); sizeDust();
   $('.rdial', el).addEventListener('pointerdown', holdStart);
   bindTable();
-  const d = t.draw;
+  const d = td.draw;
   if (!d) toAsk();
   else { lockAll(d.no); if (d.status === 'done') toLot(true); else toToss(true); }
   R.raf = requestAnimationFrame(frame);
@@ -143,8 +149,8 @@ function buildDial() {
 }
 function coreMine() {
   const me = R.t.card && R.t.card.pillar;
-  $('.rcore b', R.el).textContent = me ? me.gz : '你';
-  $('.rcore small', R.el).textContent = me ? '你的日柱' : '';
+  $('.rcore b', R.el).textContent = me ? gzText(me.gz) : t('你');
+  $('.rcore small', R.el).textContent = me ? t('你的日柱') : '';
 }
 // 停下来：像真的转盘一样恒定减速。按当时的速度推算大约停在哪，挑离那里最近、方向一致的那一格；
 // 停点比格子多冲一点，最后由一个小弹簧「咔」地拉回格子里
@@ -200,7 +206,7 @@ function lockAll(no) {
     ring.g.setAttribute('transform', `rotate(${ring.ang})`);
   });
   numberMark(no);
-  $('.rcore b', R.el).textContent = no; $('.rcore small', R.el).textContent = `第 ${no} 签`;
+  $('.rcore b', R.el).textContent = no; $('.rcore small', R.el).textContent = t('第 {n} 签', { n: no });
   R.el.classList.add('locked'); R.spin = 1;
 }
 function unlockAll() {
@@ -255,9 +261,9 @@ function stepDust(dt, t) {
 function toAsk() {
   setPhase('ask'); setStep(0);
   Object.assign(R.hold, { on: false, p: 0, done: false, q: 0 });
-  setCap('心里想着一件事', R.J.intro);
-  setCtl('<form class="rform" id="drawForm"><input class="rq" name="q" maxlength="30" placeholder="想问哪件事？比如：这周的面试（可以不写）" enterkeyhint="go" aria-label="想问的事">'
-    + '<button type="button" class="rbtn hold" data-rite-hold><span class="fill"></span><span class="lb">按住，默念</span></button></form>', (box) => {
+  setCap(t('心里想着一件事'), R.J.intro);
+  setCtl(`<form class="rform" id="drawForm"><input class="rq" name="q" maxlength="${EN ? 60 : 30}" placeholder="${t('想问哪件事？比如：这周的面试（可以不写）')}" enterkeyhint="go" aria-label="${t('想问的事')}">`
+    + `<button type="button" class="rbtn hold" data-rite-hold><span class="fill"></span><span class="lb">${t('按住，默念')}</span></button></form>`, (box) => {
     const q = $('input', box); q.value = R.question;
     $('[data-rite-hold]', box).addEventListener('pointerdown', holdStart);
   });
@@ -268,12 +274,12 @@ function holdStart(e) {
   try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* 拿不到也照样按 */ }
   ac(); droneOn(); R.hold.on = true; R.hold.q = 0; buzz(8);
   const q = $('#drawForm input', R.el); if (q) { R.question = q.value.trim(); q.blur(); }
-  setCap(R.question ? `「${R.question}」` : '想着那件事', '默念着它，别松手');
+  setCap(R.question ? (EN ? `“${R.question}”` : `「${R.question}」`) : t('想着那件事'), t('默念着它，别松手'));
 }
 function holdEnd() {
   if (!R || !R.hold.on) return;
   R.hold.on = false;
-  if (R.hold.done) toShake(); else setCap('再来一次', '按住不放，默念三秒');
+  if (R.hold.done) toShake(); else setCap(t('再来一次'), t('按住不放，默念三秒'));
 }
 addEventListener('pointerup', holdEnd); addEventListener('pointercancel', holdEnd);
 // iPhone 要在手指抬起的这一下里请求「运动与方向」权限，下一步才能真的摇
@@ -283,7 +289,7 @@ function stepHold(dt) {
   if (h.on && !h.done) {
     h.p = Math.min(1, h.p + dt / HOLD_S);
     const q = Math.floor(h.p * 4); if (q > h.q) { h.q = q; buzz(6); tick(0.18); }
-    if (h.p >= 1) { h.done = true; buzz(28); bell([294, 440], 0.05, 2.4); setCap('好', '松开手指'); }
+    if (h.p >= 1) { h.done = true; buzz(28); bell([294, 440], 0.05, 2.4); setCap(t('好'), t('松开手指')); }
   } else if (!h.done) h.p += (0 - h.p) * (1 - Math.exp(-dt * 7));
   R.prog.setAttribute('stroke-dashoffset', (R.CP * (1 - h.p)).toFixed(1));
   R.el.style.setProperty('--hp', h.p.toFixed(3));
@@ -294,7 +300,7 @@ document.addEventListener('submit', (e) => {
   e.preventDefault();
   const q = e.target.elements.q.value.trim();
   if (e.target.id === 'reaskForm') {
-    if (!q || q === R.t.draw.question) { toast('换一个想问的事'); return; }
+    if (!q || q === R.t.draw.question) { toast(t('换一个想问的事')); return; }
     track('draw_reask', { round: R.t.draw.round + 1 });
     R.question = q; unlockAll(); resetBlocks(); toShake();
     return;
@@ -323,8 +329,8 @@ function toShake() {
   R.prog.style.transition = 'stroke-dashoffset .8s'; R.prog.setAttribute('stroke-dashoffset', R.CP); R.el.style.setProperty('--hp', 0);
   R.D.pull = 0; R.D.swirl = 0.7; R.spin = 16; droneOn(); droneLevel(0.035);
   const coarse = COARSE();
-  setCap(coarse ? '摇一摇手机' : '摇签', coarse ? '签在里面翻动，摇到它自己跳出来' : '点一下，签会在里面翻动');
-  setCtl(`<button type="button" class="rbtn${coarse ? ' ghost' : ''}" data-shake>${coarse ? '摇不了？点这里' : '摇签'}</button>`);
+  setCap(coarse ? t('摇一摇手机') : t('摇签'), coarse ? t('签在里面翻动，摇到它自己跳出来') : t('点一下，签会在里面翻动'));
+  setCtl(`<button type="button" class="rbtn${coarse ? ' ghost' : ''}" data-shake>${coarse ? t('摇不了？点这里') : t('摇签')}</button>`);
   if (coarse && !(window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function')) listenMotion();
   // 签号由服务端定：一进来就去要，摇完时多半已经回来了
   const r = R;
@@ -357,16 +363,16 @@ onClick('[data-shake]', () => {
 // ---------------- 3 起签：天干、地支停在今天，最外一圈停在你这一支 ----------------
 function startLock() {
   setPhase('lock'); R.D.swirl = 0.25; R.spin = 10; droneLevel(0.02);
-  setCtl('<p class="rsub">起签中</p>');
-  setCap('……', '你 × 今天');
+  setCtl(`<p class="rsub">${t('起签中')}</p>`);
+  setCap('……', t('你 × 今天'));
   const gz = R.t.almanac.gz, [nr, zr, gr] = R.rings;
   R.pending.then((d) => {
     if (!d || !R) return;
     if (d.status === 'done') { lockAll(d.no); toLot(false); return; }
     lockRing(gr, GAN.indexOf(gz[0]), () => {});
     later(() => lockRing(zr, ZHI.indexOf(gz[1]), () => {
-      setCap(`今天 · ${gz}日`, '你 × 今天，起一支签');
-      const b = $('.rcore b', R.el); $('.rcore small', R.el).textContent = '起签';
+      setCap(t('今天 · {gz}日', { gz: gzText(gz) }), t('你 × 今天，起一支签'));
+      const b = $('.rcore b', R.el); $('.rcore small', R.el).textContent = t('起签');
       R.scr = setInterval(() => { b.textContent = String(1 + Math.floor(Math.random() * 100)).padStart(2, '0'); }, 60);
       later(() => lockRing(nr, d.no - 1, () => revealNo(d), 2.2), 200);
     }), 560);
@@ -375,10 +381,10 @@ function startLock() {
 function revealNo(d) {
   clearInterval(R.scr); numberMark(d.no);
   const b = $('.rcore b', R.el); b.textContent = d.no; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
-  $('.rcore small', R.el).textContent = `第 ${d.no} 签`;
+  $('.rcore small', R.el).textContent = t('第 {n} 签', { n: d.no });
   R.el.classList.add('locked'); bell([262, 392], 0.09, 3.2); buzz([18, 60, 18]);
   burst(R.D.cx, R.D.cy, 50, false); droneOff();
-  setCap(`第 ${d.no} 签`, '你 × 今天，只有这一支。同一天里不会变');
+  setCap(t('第 {n} 签', { n: d.no }), t('你 × 今天，只有这一支。同一天里不会变'));
   setCtl('<p class="rsub">&nbsp;</p>');
   later(() => toToss(false), 2000);
 }
@@ -415,13 +421,13 @@ function toToss(resume) {
 }
 function triesHtml() {
   const d = R.t.draw;
-  $('.rtries', R.el).innerHTML = Array.from({ length: R.J.maxTries }, (_, i) => `<i class="${d.tosses[i] || ''}" title="${d.tosses[i] ? `第 ${i + 1} 次 · ${esc(R.J.results[d.tosses[i]].name)}` : ''}"></i>`).join('');
+  $('.rtries', R.el).innerHTML = Array.from({ length: R.J.maxTries }, (_, i) => `<i class="${d.tosses[i] || ''}" title="${d.tosses[i] ? `${t('第 {n} 次', { n: i + 1 })} · ${esc(R.J.results[d.tosses[i]].name)}` : ''}"></i>`).join('');
 }
 function tossCtl() {
   const d = R.t.draw, J = R.J, last = d.tosses[d.tosses.length - 1], n = d.tosses.length;
-  setCtl((last === 'xiao' ? `<input class="rq" id="jQuestion" maxlength="30" value="${esc(d.question || '')}" placeholder="把问题说得更清楚些（可以不改）" aria-label="所问之事">` : '')
-    + `<button type="button" class="rbtn" data-toss>${last ? `再掷一次（第 ${n + 1}/${J.maxTries} 次）` : '掷筊'}</button>`
-    + `<details class="rrules"><summary>掷筊的规矩${n ? ` · 还能掷 ${J.maxTries - n} 次` : ''}</summary><p>${esc(J.rules)}</p></details>`);
+  setCtl((last === 'xiao' ? `<input class="rq" id="jQuestion" maxlength="${EN ? 60 : 30}" value="${esc(d.question || '')}" placeholder="${t('把问题说得更清楚些（可以不改）')}" aria-label="${t('所问之事')}">` : '')
+    + `<button type="button" class="rbtn" data-toss>${last ? t('再掷一次（第 {n}/{max} 次）', { n: n + 1, max: J.maxTries }) : t('掷筊')}</button>`
+    + `<details class="rrules"><summary>${t('掷筊的规矩')}${n ? t(' · 还能掷 {n} 次', { n: J.maxTries - n }) : ''}</summary><p>${esc(J.rules)}</p></details>`);
 }
 function showWord(kind, animate) {
   const W = R.J.results[kind], b = $('.rres b', R.el);
@@ -431,15 +437,15 @@ function showWord(kind, animate) {
 function reaskView() {
   setPhase('reask');
   $('.rres small', R.el).textContent = R.J.reask;
-  setCtl('<form class="rform" id="reaskForm"><input class="rq" name="q" maxlength="30" placeholder="换一个想问的事" aria-label="换一个想问的事" required>'
-    + '<button type="submit" class="rbtn">换个问题，重新摇签</button></form>'
-    + `<p class="rsub">今天还能换 ${R.t.draw.roundsLeft} 次问题</p>`);
+  setCtl(`<form class="rform" id="reaskForm"><input class="rq" name="q" maxlength="${EN ? 60 : 30}" placeholder="${t('换一个想问的事')}" aria-label="${t('换一个想问的事')}" required>`
+    + `<button type="submit" class="rbtn">${t('换个问题，重新摇签')}</button></form>`
+    + `<p class="rsub">${t('今天还能换 {n} 次问题', { n: R.t.draw.roundsLeft })}</p>`);
 }
 function closedView() {
   setPhase('closed');
   const d = R.t.draw;
   $('.rres small', R.el).textContent = d.tosses.every((x) => x === 'yin') ? R.J.roundsOut : R.J.giveUp;
-  setCtl(`<p class="rsub">第 ${d.no} 签今天没有求成。明天再来摇一支。</p><button type="button" class="rbtn ghost" data-close-sheet>好的，改日再来</button>`);
+  setCtl(`<p class="rsub">${t('第 {n} 签今天没有求成。明天再来摇一支。', { n: d.no })}</p><button type="button" class="rbtn ghost" data-close-sheet>${t('好的，改日再来')}</button>`);
 }
 function bindTable() {
   const table = $('.rtable', R.el);
@@ -531,7 +537,7 @@ function showResult(d) {
     bell([392, 587.3, 784], 0.1, 4.5); buzz([16, 70, 16, 120, 40]);
     const tb = $('.rtable', R.el).getBoundingClientRect(), e = R.el.getBoundingClientRect();
     burst(tb.left - e.left + tb.width / 2, tb.top - e.top + tb.height - 60, 110, true);
-    setCtl('<button type="button" class="rbtn" data-jiao-read>看签文</button>');
+    setCtl(`<button type="button" class="rbtn" data-jiao-read>${t('看签文')}</button>`);
     return;
   }
   bell([233], 0.045, 1.6); buzz(20);
@@ -541,29 +547,35 @@ function showResult(d) {
 }
 onClick('[data-jiao-read]', () => { if (R) toLot(false); });
 
+// 签的分项「断语」、建议：英文用冒号和分号
+// 英文界面不显示中文原文断语，服务端给了 gloss（英文意思）就显示它，没有就不显示
+const item = (it) => (EN ? esc(it.gloss || '') : `${esc(it.k)}「${esc(it.v)}」`);
+const itemsOf = (list) => (EN ? list.filter((it) => it.gloss) : list);
+const tipsText = (tips) => (EN ? tips.map(esc).join('; ') + '.' : tips.map(esc).join('；') + '。');
 // ---------------- 5 解签：签名、四句诗一字一字浮现；先回答你问的事，其余几项收成小格 ----------------
 function toLot(fast) {
   setPhase('lot'); setStep(3); R.el.classList.add('locked'); droneOff();
   const d = R.t.draw, T = d.titles || {}, topics = d.topics || [];
   const main = topics.find((x) => x.asked) || topics[0], rest = topics.filter((x) => x !== main);
   const p0 = 0.9, gap = 0.62, after = p0 + d.poem.length * gap + 0.3;
-  const items = (x) => (x.items.length ? `<p class="ritems">${x.items.map((it) => `${esc(it.k)}「${esc(it.v)}」`).join(' · ')}</p>` : '');
+  const items = (x) => (itemsOf(x.items).length ? `<p class="ritems">${itemsOf(x.items).map(item).join(' · ')}</p>` : '');
   const box = $('.rlot', R.el);
   box.classList.toggle('fast', !!fast || RM());
-  box.innerHTML = `<div class="rlh"><span>观音灵签 · 第 ${d.no} 签</span><em class="${GRADE_CLS(d.grade)}">${esc(d.grade)}</em></div>`
+  box.innerHTML = `<div class="rlh"><span>${t('观音灵签 · 第 {n} 签', { n: d.no })}</span><em class="${GRADE_CLS(d.grade)}">${esc(t(d.grade))}</em></div>`
     + `<h2 class="rv rtitle">${spans(d.title, 0.15, 0.14)}</h2>`
     + `<div class="rv rpoem">${d.poem.map((l, i) => `<p>${spans(l, p0 + i * gap, 0.05)}</p>`).join('')}</div>`
     + (d.hint ? `<p class="rhl rcard" style="--d:${after}s">${esc(d.hint)}</p>` : '')
-    + (main ? `<div class="rans rcard" style="--d:${after + 0.15}s"><div class="q"><span>${d.question ? `${esc(T.asked || '你问的')} · ${esc(d.question)}` : `今天的${esc(main.name)}`}</span>${d.question ? `<em>${esc(main.name)}</em>` : ''}</div>`
-      + `<h3>${esc(main.say)}${dots(main.stars)}</h3>${items(main)}<p class="radv"><b>${esc(T.advice || '建议')}</b>${main.tips.map(esc).join('；')}。</p>${main.note ? `<p class="ritems">${esc(main.note)}</p>` : ''}</div>` : '')
+    + (main ? `<div class="rans rcard" style="--d:${after + 0.15}s"><div class="q"><span>${d.question ? `${esc(T.asked || t('你问的'))} · ${esc(d.question)}` : t('今天的{name}', { name: esc(main.name) })}</span>${d.question ? `<em>${esc(main.name)}</em>` : ''}</div>`
+      + `<h3>${esc(main.say)}${dots(main.stars)}</h3>${items(main)}<p class="radv"><b>${esc(T.advice || t('建议'))}</b>${tipsText(main.tips)}</p>${main.note ? `<p class="ritems">${esc(main.note)}</p>` : ''}</div>` : '')
     + (rest.length ? `<div class="rtiles rcard" style="--d:${after + 0.35}s">${rest.map((x) => `<button type="button" data-rtopic="${esc(x.key)}">${esc(x.name)}${dots(x.stars)}</button>`).join('')}</div><div class="rtdet"></div>` : '')
-    + `<details class="rmore rcard" style="--d:${after + 0.5}s"><summary>细读这支签</summary><div>`
-    + (d.jieqian ? `<b>解曰</b><p>${d.jieqian.map(esc).join('　')}</p>` : '')
-    + `<b>白话</b><p>${esc(d.plain)}</p><b>关键词</b><p>${esc(d.keyword)}</p>`
-    + (d.xianji && d.xianji.some((x) => x.v) ? `<b>${esc(T.table || '签谱原文 · 仙机')}</b><div class="rxj">${d.xianji.map((x) => `<span><small>${esc(x.k)}</small>${esc(x.v || '—')}</span>`).join('')}</div>` : '')
+    + `<details class="rmore rcard" style="--d:${after + 0.5}s"><summary>${t('细读这支签')}</summary><div>`
+    + (d.jieqian ? `<b>${t('解曰')}</b><p>${d.jieqian.map(esc).join(EN ? ' / ' : '　')}</p>` : '')
+    + `<b>${t('白话')}</b><p>${esc(d.plain)}</p><b>${t('关键词')}</b><p>${esc(d.keyword)}</p>`
+    + (EN ? (d.xianji && d.xianji.some((x) => x.gloss) ? `<b>${esc(T.table || t('签谱原文 · 仙机'))}</b><div class="rxj">${d.xianji.filter((x) => x.gloss).map((x) => `<span>${esc(x.gloss)}</span>`).join('')}</div>` : '')
+      : d.xianji && d.xianji.some((x) => x.v) ? `<b>${esc(T.table || t('签谱原文 · 仙机'))}</b><div class="rxj">${d.xianji.map((x) => `<span><small>${esc(x.k)}</small>${esc(x.v || '—')}</span>`).join('')}</div>` : '')
     + '</div></details>'
-    + `<div class="racts rcard" style="--d:${after + 0.65}s"><button type="button" class="rbtn" data-rite-keep>收下这支签</button><button type="button" class="rbtn sq" data-share="lot" aria-label="分享这支签">↗</button></div>`
-    + `<div class="rlinks rcard" style="--d:${after + 0.75}s"><a href="#/lots" data-close-sheet>我的签谱 ›</a><a href="#/ask" data-close-sheet>想问一件具体的事 ›</a></div>`;
+    + `<div class="racts rcard" style="--d:${after + 0.65}s"><button type="button" class="rbtn" data-rite-keep>${t('收下这支签')}</button><button type="button" class="rbtn sq" data-share="lot" aria-label="${t('分享这支签')}">↗</button></div>`
+    + `<div class="rlinks rcard" style="--d:${after + 0.75}s"><a href="#/lots" data-close-sheet>${t('我的签谱 ›')}</a><a href="#/ask" data-close-sheet>${t('想问一件具体的事 ›')}</a></div>`;
   R.sheet.scrollTop = 0;
   if (!fast && !RM()) {
     ac(); bell([523.3], 0.035, 3);
@@ -577,7 +589,7 @@ onClick('[data-rtopic]', (el) => {
   const on = !el.classList.contains('on');
   R.el.querySelectorAll('[data-rtopic]').forEach((b) => b.classList.toggle('on', on && b === el));
   det.classList.toggle('on', on);
-  det.innerHTML = on && x ? `<h4>${esc(x.name)}${dots(x.stars)}</h4>${x.items.length ? `<p class="ritems">${x.items.map((it) => `${esc(it.k)}「${esc(it.v)}」`).join(' · ')}</p>` : ''}<p>${esc(x.say)}</p><p class="radv"><b>${esc(T.advice || '建议')}</b>${x.tips.map(esc).join('；')}。</p>` : '';
+  det.innerHTML = on && x ? `<h4>${esc(x.name)}${dots(x.stars)}</h4>${itemsOf(x.items).length ? `<p class="ritems">${itemsOf(x.items).map(item).join(' · ')}</p>` : ''}<p>${esc(x.say)}</p><p class="radv"><b>${esc(T.advice || t('建议'))}</b>${tipsText(x.tips)}</p>` : '';
 });
 // 点一下诗：不等，直接全部显出来
 document.addEventListener('click', (e) => { if (R && R.phase === 'lot' && e.target.closest('.rtitle, .rpoem')) $('.rlot', R.el).classList.add('fast'); });
@@ -590,11 +602,11 @@ onClick('[data-rite-keep]', (el) => {
   document.body.appendChild(chip);
   requestAnimationFrame(() => requestAnimationFrame(() => { chip.style.transform = `translate(${to.left - (from.left + from.width / 2 - 60)}px,${to.top - from.top - 6}px) scale(.3)`; chip.style.opacity = 0; }));
   ac(); later(() => { tock(); buzz(10); }, 700);
-  setTimeout(() => { chip.remove(); toast('收进「我的签谱」了'); dismissSheet(); }, 850);
+  setTimeout(() => { chip.remove(); toast(t('收进「我的签谱」了')); dismissSheet(); }, 850);
 });
 onClick('[data-rite-snd]', (el) => {
   const on = !soundOn(); writeLocal('rite-mute', on ? null : true);
-  el.textContent = on ? '声音 开' : '声音 关';
+  el.textContent = on ? t('声音 开') : t('声音 关');
   if (A.master) A.master.gain.value = on ? 1 : 0;
 });
 

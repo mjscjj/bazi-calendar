@@ -2,6 +2,7 @@
 // 页面只拿这里算好的结果，不再在浏览器里排盘。
 import lunar from 'lunar-javascript';
 import { resolveBirth } from './solar.js';
+import { T, isEn } from './i18n.js';
 
 const { Solar, Lunar, LunarYear, LunarMonth } = lunar;
 
@@ -12,6 +13,16 @@ const WXP = ['木（Wood）', '火（Fire）', '土（Earth）', '金（Metal）
 const ZHI_WX = [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4];
 const HIDE = { 子: '癸', 丑: '己癸辛', 寅: '甲丙戊', 卯: '乙', 辰: '戊乙癸', 巳: '丙庚戊', 午: '丁己', 未: '己丁乙', 申: '庚壬戊', 酉: '辛', 戌: '戊辛丁', 亥: '壬甲' };
 const HIDE_W = [1, 0.5, 0.3];
+
+// 展示用的名字：中文请求原样；英文请求干支写拼音、五行和十神写英文（标识本身仍是中文，前端和数据都按中文认）
+const PY = { 甲: 'Jia', 乙: 'Yi', 丙: 'Bing', 丁: 'Ding', 戊: 'Wu', 己: 'Ji', 庚: 'Geng', 辛: 'Xin', 壬: 'Ren', 癸: 'Gui', 子: 'Zi', 丑: 'Chou', 寅: 'Yin', 卯: 'Mao', 辰: 'Chen', 巳: 'Si', 午: 'Wu', 未: 'Wei', 申: 'Shen', 酉: 'You', 戌: 'Xu', 亥: 'Hai' };
+const WX_EN = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'];
+const GZ = (x) => (isEn() ? [...x].map((ch) => PY[ch] || ch).join(' ') : x);
+const W = (i) => (isEn() ? WX_EN[i] : WX[i]);
+const WP = (i) => (isEn() ? WX_EN[i] : WXP[i]);
+const SS = (name) => (isEn() ? T(name) : name);
+const RL = (r) => (isEn() ? T(r) : r);
+const PN = (i) => (isEn() ? T(PILLAR_NAME[i]) : PILLAR_NAME[i]);
 
 const gwx = (g) => Math.floor(GAN.indexOf(g) / 2);
 const zwx = (z) => ZHI_WX[ZHI.indexOf(z)];
@@ -106,22 +117,22 @@ function scoreDay(c, y, m, d) {
   const why = [];
   const add = (v, t, pl) => { if (v) { sc += v; why.push({ v, t, p: pl || t }); } };
   const ssG = shishen(c.dm, g), ssZ = shishen(c.dm, HIDE[z][0]);
-  add(wxScore(c, gwx(g), 9), '日干' + g + '（' + WX[gwx(g)] + '）为' + ssG + '，' + (c.xi.indexOf(gwx(g)) >= 0 ? '属喜用' : '属忌神'), '今天的主能量是' + WXP[gwx(g)] + '，' + (c.xi.indexOf(gwx(g)) >= 0 ? '正是你的幸运元素' : '对你来说偏消耗'));
-  add(wxScore(c, zwx(z), 8), '日支' + z + '（' + WX[zwx(z)] + '）为' + ssZ + '，' + (c.xi.indexOf(zwx(z)) >= 0 ? '属喜用' : '属忌神'), '今天的底层能量是' + WXP[zwx(z)] + '，' + (c.xi.indexOf(zwx(z)) >= 0 ? '也在帮你' : '有点拖后腿'));
-  if (ganHe(g, c.dm)) add(5, '日干' + g + '合日主' + c.dm + '：有人缘、易得助力', '今天容易遇到合拍的人');
+  add(wxScore(c, gwx(g), 9), T('日干{g}（{wx}）为{ss}，{xi}', { g: GZ(g), wx: W(gwx(g)), ss: SS(ssG), xi: T(c.xi.indexOf(gwx(g)) >= 0 ? '属喜用' : '属忌神') }), T('今天的主能量是{wx}，{xi}', { wx: WP(gwx(g)), xi: T(c.xi.indexOf(gwx(g)) >= 0 ? '正是你的幸运元素' : '对你来说偏消耗') }));
+  add(wxScore(c, zwx(z), 8), T('日支{z}（{wx}）为{ss}，{xi}', { z: GZ(z), wx: W(zwx(z)), ss: SS(ssZ), xi: T(c.xi.indexOf(zwx(z)) >= 0 ? '属喜用' : '属忌神') }), T('今天的底层能量是{wx}，{xi}', { wx: WP(zwx(z)), xi: T(c.xi.indexOf(zwx(z)) >= 0 ? '也在帮你' : '有点拖后腿') }));
+  if (ganHe(g, c.dm)) add(5, T('日干{g}合日主{dm}：有人缘、易得助力', { g: GZ(g), dm: GZ(c.dm) }), T('今天容易遇到合拍的人'));
   c.natalZhi.forEach((nz, i) => {
     const r = rel(z, nz); if (!r) return;
     const isDay = i === 2;
     const tbl = isDay ? { 冲: -15, 六合: 8, 半合: 6, 刑: -6, 害: -5 } : { 冲: -6, 六合: 3, 半合: 3, 刑: -3, 害: -2 };
-    add(tbl[r], z + nz + r + '（原局' + PILLAR_NAME[i] + (isDay ? '·自身/伴侣宫' : '') + '）', (isDay
+    add(tbl[r], T('{z}{nz}{r}（原局{pn}{self}）', { z: GZ(z), nz: GZ(nz), r: RL(r), pn: PN(i), self: isDay ? T('·自身/伴侣宫') : '' }), T((isDay
       ? { 冲: '今天和你的本命能量正面相冲，情绪和亲密关系容易起波动', 六合: '今天和你的本命能量特别合拍', 半合: '今天和你的本命能量很合拍', 刑: '和本命能量有摩擦，说话做事多留余地', 害: '容易有小误会，重要的事多确认一遍' }
-      : { 冲: '和你出生时的某股能量有轻微冲突', 六合: '和你出生时的能量有呼应', 半合: '和你出生时的能量有呼应', 刑: '有点小摩擦', 害: '有点小摩擦' })[r]);
+      : { 冲: '和你出生时的某股能量有轻微冲突', 六合: '和你出生时的能量有呼应', 半合: '和你出生时的能量有呼应', 刑: '有点小摩擦', 害: '有点小摩擦' })[r]));
   });
-  if (Math.abs(zi(z) - zi(ygz[1])) === 6) add(-4, '日支' + z + '冲流年太岁' + ygz[1], '和今年的大环境有点逆着来');
-  if (GUIREN[c.dm].indexOf(z) >= 0) add(8, '逢天乙贵人（' + z + '）：易遇贵人相助', '贵人日：更容易得到别人帮忙');
-  if (WENCHANG[c.dm] === z) add(4, '逢文昌（' + z + '）：利学习、文书', '学习和写作的灵感更足');
+  if (Math.abs(zi(z) - zi(ygz[1])) === 6) add(-4, T('日支{z}冲流年太岁{y}', { z: GZ(z), y: GZ(ygz[1]) }), T('和今年的大环境有点逆着来'));
+  if (GUIREN[c.dm].indexOf(z) >= 0) add(8, T('逢天乙贵人（{z}）：易遇贵人相助', { z: GZ(z) }), T('贵人日：更容易得到别人帮忙'));
+  if (WENCHANG[c.dm] === z) add(4, T('逢文昌（{z}）：利学习、文书', { z: GZ(z) }), T('学习和写作的灵感更足'));
   const mAdj = Math.round(wxScore(c, gwx(mgz[0]), 2) + wxScore(c, zwx(mgz[1]), 2));
-  if (mAdj) add(mAdj, '流月' + mgz + (mAdj > 0 ? '整体偏顺' : '整体偏逆'), mAdj > 0 ? '这个月整体顺风' : '这个月整体逆风');
+  if (mAdj) add(mAdj, T('流月{gz}{dir}', { gz: GZ(mgz), dir: T(mAdj > 0 ? '整体偏顺' : '整体偏逆') }), T(mAdj > 0 ? '这个月整体顺风' : '这个月整体逆风'));
   const tags = [];
   if (taohua(c.natalZhi[0]) === z || taohua(c.natalZhi[2]) === z) tags.push('桃花');
   if (yima(c.natalZhi[0]) === z || yima(c.natalZhi[2]) === z) tags.push('驿马');
@@ -161,9 +172,9 @@ export function rawDayV2(c, y, m, d) {
   const why = [];
   const add = (v, t, pl) => { if (v) { sc += v; why.push({ v, t, p: pl || t }); } };
   const ssG = shishen(c.dm, g), ssZ = shishen(c.dm, HIDE[z][0]);
-  add(wxScore(c, gwx(g), 9), '日干' + g + '（' + WX[gwx(g)] + '）为' + ssG + '，' + (c.xi.indexOf(gwx(g)) >= 0 ? '属喜用' : '属忌神'), '今天的主能量是' + WXP[gwx(g)] + '，' + (c.xi.indexOf(gwx(g)) >= 0 ? '正是你的幸运元素' : '对你来说偏消耗'));
-  add(wxScore(c, zwx(z), 8), '日支' + z + '（' + WX[zwx(z)] + '）为' + ssZ + '，' + (c.xi.indexOf(zwx(z)) >= 0 ? '属喜用' : '属忌神'), '今天的底层能量是' + WXP[zwx(z)] + '，' + (c.xi.indexOf(zwx(z)) >= 0 ? '也在帮你' : '有点拖后腿'));
-  if (ganHe(g, c.dm)) add(4, '日干' + g + '合日主' + c.dm + '：有人缘、易得助力', '今天容易遇到合拍的人');
+  add(wxScore(c, gwx(g), 9), T('日干{g}（{wx}）为{ss}，{xi}', { g: GZ(g), wx: W(gwx(g)), ss: SS(ssG), xi: T(c.xi.indexOf(gwx(g)) >= 0 ? '属喜用' : '属忌神') }), T('今天的主能量是{wx}，{xi}', { wx: WP(gwx(g)), xi: T(c.xi.indexOf(gwx(g)) >= 0 ? '正是你的幸运元素' : '对你来说偏消耗') }));
+  add(wxScore(c, zwx(z), 8), T('日支{z}（{wx}）为{ss}，{xi}', { z: GZ(z), wx: W(zwx(z)), ss: SS(ssZ), xi: T(c.xi.indexOf(zwx(z)) >= 0 ? '属喜用' : '属忌神') }), T('今天的底层能量是{wx}，{xi}', { wx: WP(zwx(z)), xi: T(c.xi.indexOf(zwx(z)) >= 0 ? '也在帮你' : '有点拖后腿') }));
+  if (ganHe(g, c.dm)) add(4, T('日干{g}合日主{dm}：有人缘、易得助力', { g: GZ(g), dm: GZ(c.dm) }), T('今天容易遇到合拍的人'));
   let chongBad = false;
   c.natalZhi.forEach((nz, i) => {
     const r = rel(z, nz); if (!r) return;
@@ -172,26 +183,26 @@ export function rawDayV2(c, y, m, d) {
       const t = toneOf(c, zwx(nz));
       const v = t === 'ji' ? (isDay ? 6 : 4) : t === 'xi' ? (isDay ? -8 : -5) : (isDay ? -5 : -3);
       if (isDay && v < 0) chongBad = true;
-      add(v, z + '冲' + nz + '（原局' + PILLAR_NAME[i] + '，' + WX[zwx(nz)] + (t === 'ji' ? '为忌，冲去为吉' : t === 'xi' ? '为喜，被冲为凶' : '为闲神') + '）',
-        t === 'ji' ? '冲走了对你不利的本命能量，反倒轻松一些' : (isDay ? '和你的本命能量正面相冲，情绪和关系容易起波动' : '和你出生时的某股能量有冲突'));
+      add(v, T('{z}冲{nz}（原局{pn}，{wx}{tone}）', { z: GZ(z), nz: GZ(nz), pn: PN(i), wx: W(zwx(nz)), tone: T(t === 'ji' ? '为忌，冲去为吉' : t === 'xi' ? '为喜，被冲为凶' : '为闲神') }),
+        T(t === 'ji' ? '冲走了对你不利的本命能量，反倒轻松一些' : (isDay ? '和你的本命能量正面相冲，情绪和关系容易起波动' : '和你出生时的某股能量有冲突')));
       return;
     }
     const tbl = isDay ? { 六合: 6, 半合: 4, 刑: -4, 害: -3 } : { 六合: 2, 半合: 2, 刑: -2, 害: -1 };
-    add(tbl[r], z + nz + r + '（原局' + PILLAR_NAME[i] + '）', { 六合: '今天和你的本命能量很合拍', 半合: '今天和你的本命能量合拍', 刑: '有点小摩擦，说话做事多留余地', 害: '容易有小误会，重要的事多确认一遍' }[r]);
+    add(tbl[r], T('{z}{nz}{r}（原局{pn}）', { z: GZ(z), nz: GZ(nz), r: RL(r), pn: PN(i) }), T({ 六合: '今天和你的本命能量很合拍', 半合: '今天和你的本命能量合拍', 刑: '有点小摩擦，说话做事多留余地', 害: '容易有小误会，重要的事多确认一遍' }[r]));
   });
-  if (Math.abs(zi(z) - zi(ygz[1])) === 6) add(-3, '日支' + z + '冲流年太岁' + ygz[1], '和今年的大环境有点逆着来');
-  if (GUIREN[c.dm].indexOf(z) >= 0) add(3, '逢天乙贵人（' + z + '）', '贵人日：更容易得到别人帮忙');
-  if (WENCHANG[c.dm] === z) add(2, '逢文昌（' + z + '）', '学习和写作的灵感更足');
+  if (Math.abs(zi(z) - zi(ygz[1])) === 6) add(-3, T('日支{z}冲流年太岁{y}', { z: GZ(z), y: GZ(ygz[1]) }), T('和今年的大环境有点逆着来'));
+  if (GUIREN[c.dm].indexOf(z) >= 0) add(3, T('逢天乙贵人（{z}）', { z: GZ(z) }), T('贵人日：更容易得到别人帮忙'));
+  if (WENCHANG[c.dm] === z) add(2, T('逢文昌（{z}）', { z: GZ(z) }), T('学习和写作的灵感更足'));
   const mAdj = Math.round(wxScore(c, gwx(mgz[0]), 2) + wxScore(c, zwx(mgz[1]), 2));
-  if (mAdj) add(mAdj, '流月' + mgz + (mAdj > 0 ? '整体偏顺' : '整体偏逆'), mAdj > 0 ? '这个月整体顺风' : '这个月整体逆风');
+  if (mAdj) add(mAdj, T('流月{gz}{dir}', { gz: GZ(mgz), dir: T(mAdj > 0 ? '整体偏顺' : '整体偏逆') }), T(mAdj > 0 ? '这个月整体顺风' : '这个月整体逆风'));
   // 底色：所在大运和流年对你是喜是忌
   const dy = c.dayuns.find((x) => y >= x.startYear && y <= x.endYear);
   if (dy) {
     const v = wxScore(c, gwx(dy.gz[0]), 3) + wxScore(c, zwx(dy.gz[1]), 2);
-    add(v, '大运' + dy.gz + (v > 0 ? '偏喜' : '偏忌'), v > 0 ? '这几年的大运在帮你' : '这几年的大运有些消耗');
+    add(v, T('大运{gz}{dir}', { gz: GZ(dy.gz), dir: T(v > 0 ? '偏喜' : '偏忌') }), T(v > 0 ? '这几年的大运在帮你' : '这几年的大运有些消耗'));
   }
   const yv = wxScore(c, gwx(ygz[0]), 2) + wxScore(c, zwx(ygz[1]), 2);
-  add(yv, '流年' + ygz + (yv > 0 ? '偏喜' : '偏忌'), yv > 0 ? '今年整体顺风' : '今年整体逆风');
+  add(yv, T('流年{gz}{dir}', { gz: GZ(ygz), dir: T(yv > 0 ? '偏喜' : '偏忌') }), T(yv > 0 ? '今年整体顺风' : '今年整体逆风'));
   const tags = [];
   if (taohua(c.natalZhi[0]) === z || taohua(c.natalZhi[2]) === z) tags.push('桃花');
   if (yima(c.natalZhi[0]) === z || yima(c.natalZhi[2]) === z) tags.push('驿马');
@@ -220,16 +231,16 @@ function scoreHours(c, day) {
     const gz = t.getGanZhi(), g = gz[0], z = gz[1];
     let sc = 60;
     const why = [];
-    const add = (v, s, pl) => { if (v) { sc += v; why.push({ v, t: s, p: pl || s }); } };
-    add(wxScore(c, gwx(g), 10), '时干' + g + '·' + shishen(c.dm, g), '这个时段的主能量是' + WXP[gwx(g)] + '，' + (c.xi.indexOf(gwx(g)) >= 0 ? '对你有帮助' : '对你偏消耗'));
-    add(wxScore(c, zwx(z), 8), '时支' + z + '·' + shishen(c.dm, HIDE[z][0]), '这个时段的底层能量是' + WXP[zwx(z)] + '，' + (c.xi.indexOf(zwx(z)) >= 0 ? '对你有帮助' : '对你偏消耗'));
-    if (Math.abs(zi(z) - zi(day.gz[1])) === 6) add(-12, z + '冲当日' + day.gz[1] + '（日破时）', '这个时段和当天的能量相冲');
+    const add = (v, s, pl, chong) => { if (v) { sc += v; why.push({ v, t: s, p: pl || s, ...(chong ? { chong: true } : {}) }); } };
+    add(wxScore(c, gwx(g), 10), T('时干{g}·{ss}', { g: GZ(g), ss: SS(shishen(c.dm, g)) }), T('这个时段的主能量是{wx}，{xi}', { wx: WP(gwx(g)), xi: T(c.xi.indexOf(gwx(g)) >= 0 ? '对你有帮助' : '对你偏消耗') }));
+    add(wxScore(c, zwx(z), 8), T('时支{z}·{ss}', { z: GZ(z), ss: SS(shishen(c.dm, HIDE[z][0])) }), T('这个时段的底层能量是{wx}，{xi}', { wx: WP(zwx(z)), xi: T(c.xi.indexOf(zwx(z)) >= 0 ? '对你有帮助' : '对你偏消耗') }));
+    if (Math.abs(zi(z) - zi(day.gz[1])) === 6) add(-12, T('{z}冲当日{dz}（日破时）', { z: GZ(z), dz: GZ(day.gz[1]) }), T('这个时段和当天的能量相冲'), true);
     const r = rel(z, c.natalZhi[2]);
-    if (r === '冲') add(-10, z + '冲原局日支' + c.natalZhi[2], '这个时段和你的本命能量相冲');
-    if (r === '六合' || r === '半合') add(6, z + c.natalZhi[2] + r, '这个时段和你的本命能量合拍');
-    if (GUIREN[c.dm].indexOf(z) >= 0) add(6, '贵人时', '贵人时段：容易得到帮助');
+    if (r === '冲') add(-10, T('{z}冲原局日支{nz}', { z: GZ(z), nz: GZ(c.natalZhi[2]) }), T('这个时段和你的本命能量相冲'), true);
+    if (r === '六合' || r === '半合') add(6, T('{z}{nz}{r}', { z: GZ(z), nz: GZ(c.natalZhi[2]), r: RL(r) }), T('这个时段和你的本命能量合拍'));
+    if (GUIREN[c.dm].indexOf(z) >= 0) add(6, T('贵人时'), T('贵人时段：容易得到帮助'));
     const luck = t.getTianShenLuck();
-    add(luck === '吉' ? 4 : -4, '黄历' + t.getTianShen() + (luck === '吉' ? '（黄道）' : '（黑道）'), luck === '吉' ? '传统黄历的吉时' : '传统黄历的非吉时');
+    add(luck === '吉' ? 4 : -4, T('黄历{ts}{dir}', { ts: isEn() ? T(t.getTianShen()) : t.getTianShen(), dir: T(luck === '吉' ? '（黄道）' : '（黑道）') }), T(luck === '吉' ? '传统黄历的吉时' : '传统黄历的非吉时'));
     sc = Math.max(15, Math.min(98, sc));
     return { i, gz, range: HOUR_RANGE[i], name: z + '时', ss: shishen(c.dm, g), score: sc, level: level(sc), why, night: i <= 2 };
   });
@@ -276,10 +287,10 @@ export const isChong = (a, b) => Math.abs(zi(a) - zi(b)) === 6;
 // 农历生日 → 公历日期。出错时返回 { error } 给用户看
 const CN_MONTH = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
 export function lunarToSolar(y, m, d, leap) {
-  if (!(y >= 1901 && y <= 2099 && m >= 1 && m <= 12 && d >= 1 && d <= 30)) return { error: '请选择正确的农历日期' };
-  if (leap && LunarYear.fromYear(y).getLeapMonth() !== m) return { error: `农历${y}年没有闰${CN_MONTH[m - 1]}月` };
+  if (!(y >= 1901 && y <= 2099 && m >= 1 && m <= 12 && d >= 1 && d <= 30)) return { error: T('请选择正确的农历日期') };
+  if (leap && LunarYear.fromYear(y).getLeapMonth() !== m) return { error: T('农历{y}年没有闰{m}月', { y, m: isEn() ? m : CN_MONTH[m - 1] }) };
   const days = LunarMonth.fromYm(y, leap ? -m : m).getDayCount();
-  if (d > days) return { error: `农历${y}年${leap ? '闰' : ''}${CN_MONTH[m - 1]}月只有 ${days} 天` };
+  if (d > days) return { error: T(leap ? '农历{y}年闰{m}月只有 {days} 天' : '农历{y}年{m}月只有 {days} 天', { y, m: isEn() ? m : CN_MONTH[m - 1], days }) };
   return { date: Lunar.fromYmd(y, leap ? -m : m, d).getSolar().toYmd() };
 }
 // 农历某一年的月份（含闰月）和每月天数，日期滚轮用
@@ -298,13 +309,15 @@ export function bornDay(date) {
   const [y, m, d] = date.split('-').map(Number);
   const l = Solar.fromYmd(y, m, d).getLunar(), jq = l.getPrevJieQi(true), js = jq.getSolar();
   const days = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(js.getYear(), js.getMonth() - 1, js.getDay())) / 86400000);
+  // 英文：农历写成 Lunar 10/18，月相和节气名用英文（term 只用于展示）
+  if (isEn()) return { lunar: `Lunar ${l.getMonth() < 0 ? 'leap ' : ''}${Math.abs(l.getMonth())}/${l.getDay()}`, moon: T(MOON(l.getDay())), term: T(jq.getName()), days };
   return { lunar: `${l.getMonthInChinese()}月${l.getDayInChinese()}`, moon: MOON(l.getDay()), term: jq.getName(), days };
 }
 
 export function solarToLunar(date) {
   const [y, m, d] = date.split('-').map(Number);
   const l = Solar.fromYmd(y, m, d).getLunar();
-  return { y: l.getYear(), m: Math.abs(l.getMonth()), d: l.getDay(), leap: l.getMonth() < 0, text: `${l.getYearInChinese()}年${l.getMonthInChinese()}月${l.getDayInChinese()}` };
+  return { y: l.getYear(), m: Math.abs(l.getMonth()), d: l.getDay(), leap: l.getMonth() < 0, text: isEn() ? `Lunar ${l.getYear()}, ${l.getMonth() < 0 ? 'leap ' : ''}${Math.abs(l.getMonth())}/${l.getDay()}` : `${l.getYearInChinese()}年${l.getMonthInChinese()}月${l.getDayInChinese()}` };
 }
 
 // 某天所在的节气（最近一个已经到了的节气）

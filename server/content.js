@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { GAN, ZHI, WX, bornDay } from './engine.js';
-import { overlay } from './i18n.js';
+import { overlay, T, isEn } from './i18n.js';
+import { cityLabel } from './solar.js';
 
 const DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../content');
 // 日柱插画放在 public/art/pillars/，和文案目录无关（测试会把 content 拷到别处）
@@ -130,7 +131,7 @@ function loadContentInner(dir) {
   need(Number.isInteger(moods.note_max) && moods.note_max >= 10 && moods.note_max <= 200, '心情便签的 note_max 要在 10–200 之间');
   need(moods.colors?.some?.((c) => c.key === moods.event_color), '心情便签的 event_color 不在 colors 里');
   need(Array.isArray(moods.moods) && moods.moods.length >= 2, '心情便签至少要两种心情');
-  for (const x of moods.moods) need(/^[a-z]+$/.test(x.key || '') && x.word && x.word.length <= 4 && x.char && x.char.length === 1 && [1, 2, 3, 4, 5].includes(x.score), `心情「${x.word || x.key}」要有 key（小写字母）、word（4 个字以内）、char（一个字）、score（1–5）`);
+  for (const x of moods.moods) need(/^[a-z]+$/.test(x.key || '') && x.word && x.word.length <= (LANG_DIR ? 10 : 4) && x.char && x.char.length === 1 && [1, 2, 3, 4, 5].includes(x.score), `心情「${x.word || x.key}」要有 key（小写字母）、word（4 个字以内）、char（一个字）、score（1–5）`);
   need(Array.isArray(moods.colors) && moods.colors.length >= 2, '心情便签至少要两种颜色');
   for (const x of moods.colors) need(/^[a-z]+$/.test(x.key || '') && x.name && /^#[0-9A-Fa-f]{6}$/.test(x.light || '') && /^#[0-9A-Fa-f]{6}$/.test(x.dark || ''), `便签颜色「${x.name || x.key}」要有 key、name、light、dark（#RRGGBB）`);
   for (const x of moods.moods) need(moods.colors.some((c) => c.key === x.color), `心情「${x.word}」的默认颜色 ${x.color} 不在 colors 里`);
@@ -171,7 +172,7 @@ export function makeContent(c) {
       const t = c.solarTerms.terms[name];
       if (!t) return null;
       const w = WX.indexOf(t.element), kind = chart.xi.includes(w) ? 'xi' : chart.ji.includes(w) ? 'ji' : 'neutral';
-      return { name, element: t.element, line: t.line, art: 'art/terms/' + t.art, mine: c.solarTerms.mine[kind].replace('{term}', name).replace('{wx}', t.element), kind };
+      return { name, element: t.element, line: t.line, art: 'art/terms/' + t.art, mine: c.solarTerms.mine[kind].replace('{term}', T(name)).replace('{wx}', T(t.element)), kind };
     },
     // 两个人的画：me 是「你」的日干，you 是对方的
     pair(me, you) {
@@ -194,19 +195,20 @@ export function makeContent(c) {
         force: chart.force.map((v, i) => ({ el: WX[i], pct: Math.round((v / total) * 100) })),
         lucky: chart.xi.map((i) => WX[i]), noTime: chart.noTime,
         // 排盘用的时间：按真太阳时（填了城市）或北京时间
-        basis: chart.noTime ? null : { time: chart.birth.solar ? chart.birth.solar.time : chart.birth.time, zhi: chart.birth.timeZhi, city: chart.birth.city, solar: !!chart.birth.solar },
+        basis: chart.noTime ? null : { time: chart.birth.solar ? chart.birth.solar.time : chart.birth.time, zhi: chart.birth.timeZhi, city: cityLabel(chart.birth.city), solar: !!chart.birth.solar },
       };
     },
     // 今日一句：先一句按档位说的行动话，再说为什么（今天当家的天干对你是什么十神）
     dailyLine(chart, day) {
       const g = day.gz[0], w = gwx(g), card = c.cards[chart.dm];
       const head = pick(c.line.heads[day.level.k], dayNum(day));
-      const why = `今天是${g}${WX[w]}当家，对你这${card.measure}${card.image}来说，${WX[w]}是${c.line.relations[day.ssG]}。`;
-      return { head, why, text: `${head}${why}`, tone: tone(chart, w), ten: day.ssG };
+      // 英文版 card.image 是不带冠词的名词（Candle Flame），relations 是接在「{wx} is」后面的短语
+      const why = T('今天是{g}{wx}当家，对你这{measure}{image}来说，{wx}是{rel}。', { g: T(g), wx: T(WX[w]), measure: card.measure, image: card.image, rel: c.line.relations[day.ssG] });
+      return { head, why, text: isEn() ? `${head} ${why}` : `${head}${why}`, tone: tone(chart, w), ten: day.ssG };
     },
     // 明天寄语：按明天的档位给一句今晚能做的准备话
     tomorrowPrep(day, theme, hour) {
-      return pick(c.line.tomorrow[day.level.k], dayNum(day)).replace(/\{theme\}/g, theme).replace(/\{hour\}/g, hour || '好时段');
+      return pick(c.line.tomorrow[day.level.k], dayNum(day)).replace(/\{theme\}/g, theme).replace(/\{hour\}/g, hour || T('好时段'));
     },
     // 今日幸运色：今天的五行是幸运元素就顺着它，否则用第一幸运元素来平衡；
     // 这个五行的颜色每天取两个（第 n 个和第 n+2 个），按连续的天数轮，6 个颜色 6 天一轮
@@ -219,7 +221,7 @@ export function makeContent(c) {
       const n = e.colors.length, k = Math.floor(Date.UTC(day.y, day.m - 1, day.d) / 86400000) % n;
       return {
         element: WX[el], colors: [e.colors[k], e.colors[(k + 2) % n]], accessory: pick(e.accessories, dayNum(day)), mood: e.mood,
-        text: c.outfit.lines[kind].replace('{day}', WX[dw]).replace('{el}', WX[el]).replace('{mood}', e.mood),
+        text: c.outfit.lines[kind].replace('{day}', T(WX[dw])).replace('{el}', T(WX[el])).replace('{mood}', e.mood),
       };
     },
     // 每日一签：由「用户 + 日期」决定，当天固定

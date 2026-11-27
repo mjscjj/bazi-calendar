@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { isEn } from './i18n.js';
 
 const SCHEMAS = {
   reading: {
@@ -31,13 +32,15 @@ function checkText(all, banned) {
 export function checkReading(r, banned) {
   if (!r || typeof r.headline !== 'string' || !Array.isArray(r.body) || r.body.length !== 2 || typeof r.advice !== 'string') throw new Error('结构不对');
   checkText([r.headline, ...r.body, r.advice], banned);
-  if (r.headline.length > 40 || r.body.some((s) => s.length > 160) || r.advice.length > 80) throw new Error('太长');
+  const k = isEn() ? 3 : 1; // 英文按字母算，长度上限放宽到三倍
+  if (r.headline.length > 40 * k || r.body.some((s) => s.length > 160 * k) || r.advice.length > 80 * k) throw new Error('太长');
   return { headline: r.headline.trim(), body: r.body.map((s) => s.trim()), advice: r.advice.trim() };
 }
 export function checkFollow(r, banned) {
   if (!r || typeof r.answer !== 'string' || typeof r.advice !== 'string') throw new Error('结构不对');
   checkText([r.answer, r.advice], banned);
-  if (r.answer.length > 200 || r.advice.length > 80) throw new Error('太长');
+  const k = isEn() ? 3 : 1;
+  if (r.answer.length > 200 * k || r.advice.length > 80 * k) throw new Error('太长');
   return { answer: r.answer.trim(), advice: r.advice.trim() };
 }
 
@@ -85,6 +88,13 @@ function fakeWriter() {
   return {
     model: 'fake',
     write(prompt, kind = 'reading') {
+      // 英文请求给英文的假回答
+      if (isEn()) {
+        const reply = kind === 'follow'
+          ? { answer: 'Same reading as before. On this detail, start with the part you can control, then watch how the other side responds.', advice: 'Write what you want to say in three sentences, then reread it tomorrow somewhere quiet.' }
+          : { headline: 'Go ahead, but prepare well first', body: ['The reading says the situation roughly matches what you have in mind; timing and approach are what matter.', 'Test the waters on a small scale first, see how people react, then decide whether to take the next step.'], advice: 'Today, write down the one result you most want and the line you will not go below.' };
+        return new Promise((r) => setTimeout(() => r(reply), 300));
+      }
       const tend = (/倾向：(\S+)/.exec(prompt) || [])[1] || '顺';
       if (kind === 'follow') {
         return new Promise((r) => setTimeout(() => r({

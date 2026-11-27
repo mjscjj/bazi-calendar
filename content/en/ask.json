@@ -1,0 +1,426 @@
+{
+  "trigrams": {
+    "乾": {
+      "image": "Heaven"
+    },
+    "兑": {
+      "image": "Lake"
+    },
+    "离": {
+      "image": "Fire"
+    },
+    "震": {
+      "image": "Thunder"
+    },
+    "巽": {
+      "image": "Wind"
+    },
+    "坎": {
+      "image": "Water"
+    },
+    "艮": {
+      "image": "Mountain"
+    },
+    "坤": {
+      "image": "Earth"
+    }
+  },
+  "hexagrams": {
+    "乾乾": {
+      "name": "Heaven over Heaven",
+      "gist": "Strong and tireless — take the initiative"
+    },
+    "乾兑": {
+      "name": "Treading Carefully",
+      "gist": "Like stepping on a tiger's tail — go carefully and respectfully"
+    },
+    "乾离": {
+      "name": "Fellowship",
+      "gist": "Common ground with others brings help"
+    },
+    "乾震": {
+      "name": "Innocence",
+      "gist": "No reckless moves; stay honest and skip shortcuts"
+    },
+    "乾巽": {
+      "name": "Unexpected Meeting",
+      "gist": "Watch for people and things that turn up out of nowhere"
+    },
+    "乾坎": {
+      "name": "Conflict",
+      "gist": "A dispute — settle it rather than fight it out"
+    },
+    "乾艮": {
+      "name": "Retreat",
+      "gist": "Step back for now and stay out of the line of fire"
+    },
+    "乾坤": {
+      "name": "Standstill",
+      "gist": "Things aren't flowing for now"
+    },
+    "兑乾": {
+      "name": "Breakthrough",
+      "gist": "Decide when it's time and clear the blockage"
+    },
+    "兑兑": {
+      "name": "Joy",
+      "gist": "Open, warm talk — keep the peace"
+    },
+    "兑离": {
+      "name": "Change",
+      "gist": "Time for change — swap out the old"
+    },
+    "兑震": {
+      "name": "Following",
+      "gist": "Move with the moment and go with the flow"
+    },
+    "兑巽": {
+      "name": "Heavy Load",
+      "gist": "Carrying too much — do only what you can"
+    },
+    "兑坎": {
+      "name": "Hemmed In",
+      "gist": "Boxed in for now — hold to yourself and wait"
+    },
+    "兑艮": {
+      "name": "Attraction",
+      "gist": "Mutual feeling — talk honestly"
+    },
+    "兑坤": {
+      "name": "Gathering",
+      "gist": "People come together — good for meetups and teamwork"
+    },
+    "离乾": {
+      "name": "Abundance",
+      "gist": "A rich harvest — stay humble"
+    },
+    "离兑": {
+      "name": "Opposition",
+      "gist": "Different views — find common ground"
+    },
+    "离离": {
+      "name": "Radiance",
+      "gist": "Light that clings — lean on support"
+    },
+    "离震": {
+      "name": "Biting Through",
+      "gist": "An obstacle to bite through — go by the rules"
+    },
+    "离巽": {
+      "name": "The Cauldron",
+      "gist": "Steady renewal — big things can be done"
+    },
+    "离坎": {
+      "name": "Not Yet Across",
+      "gist": "Not finished yet — see it through to the end"
+    },
+    "离艮": {
+      "name": "The Traveler",
+      "gist": "Away from home — small things go well"
+    },
+    "离坤": {
+      "name": "Rising Light",
+      "gist": "Bright and moving up, step by step"
+    },
+    "震乾": {
+      "name": "Great Strength",
+      "gist": "Strong momentum — don't overpush"
+    },
+    "震兑": {
+      "name": "Out of Place",
+      "gist": "The position isn't right — don't rush"
+    },
+    "震离": {
+      "name": "Fullness",
+      "gist": "At the peak — watch for the turn"
+    },
+    "震震": {
+      "name": "Thunder",
+      "gist": "A sudden shake-up — stay calm"
+    },
+    "震巽": {
+      "name": "Endurance",
+      "gist": "Keep at it — steady wins"
+    },
+    "震坎": {
+      "name": "Release",
+      "gist": "Trouble eases — act soon"
+    },
+    "震艮": {
+      "name": "Small Steps",
+      "gist": "Small things yes, big things not yet"
+    },
+    "震坤": {
+      "name": "Ease",
+      "gist": "Smooth and pleasant — prepare ahead"
+    },
+    "巽乾": {
+      "name": "Small Gains",
+      "gist": "A little saved up — the time isn't here yet"
+    },
+    "巽兑": {
+      "name": "Inner Truth",
+      "gist": "Lead with honesty and sincerity"
+    },
+    "巽离": {
+      "name": "Family",
+      "gist": "A happy home, everyone doing their part"
+    },
+    "巽震": {
+      "name": "Increase",
+      "gist": "A time of gain — good for action"
+    },
+    "巽巽": {
+      "name": "Gentle Wind",
+      "gist": "Soft and steady — go one step at a time"
+    },
+    "巽坎": {
+      "name": "Dispersing",
+      "gist": "People drift apart — bring them together"
+    },
+    "巽艮": {
+      "name": "Gradual Progress",
+      "gist": "Little by little — take it slow"
+    },
+    "巽坤": {
+      "name": "Watching",
+      "gist": "Wait and observe — see the whole picture first"
+    },
+    "坎乾": {
+      "name": "Waiting",
+      "gist": "Wait for the right time and prepare patiently"
+    },
+    "坎兑": {
+      "name": "Limits",
+      "gist": "Know your limits and pace yourself"
+    },
+    "坎离": {
+      "name": "Already Across",
+      "gist": "It's done — protect what you've gained"
+    },
+    "坎震": {
+      "name": "Difficult Start",
+      "gist": "Beginnings are hard — build the base first"
+    },
+    "坎巽": {
+      "name": "The Well",
+      "gist": "Look after yourself; keep a steady supply"
+    },
+    "坎坎": {
+      "name": "Deep Water",
+      "gist": "Danger on danger — be careful and keep your word"
+    },
+    "坎艮": {
+      "name": "Obstruction",
+      "gist": "A hard road ahead — ask others for help"
+    },
+    "坎坤": {
+      "name": "Union",
+      "gist": "Stay close and choose the right partners"
+    },
+    "艮乾": {
+      "name": "Great Reserve",
+      "gist": "Build your strength; it pays off later"
+    },
+    "艮兑": {
+      "name": "Decrease",
+      "gist": "Give first, and it comes back"
+    },
+    "艮离": {
+      "name": "Grace",
+      "gist": "Polish matters, but not only the surface"
+    },
+    "艮震": {
+      "name": "Nourishment",
+      "gist": "Look after yourself — mind your words and what you eat"
+    },
+    "艮巽": {
+      "name": "Repair",
+      "gist": "Old problems need fixing from the root"
+    },
+    "艮坎": {
+      "name": "Beginner's Mind",
+      "gist": "Still unclear — ask and learn"
+    },
+    "艮艮": {
+      "name": "Mountain",
+      "gist": "Know when to stop; stay still"
+    },
+    "艮坤": {
+      "name": "Wearing Away",
+      "gist": "Slowly wearing down — hold, don't push"
+    },
+    "坤乾": {
+      "name": "Peace",
+      "gist": "Things flow smoothly; everyone in harmony"
+    },
+    "坤兑": {
+      "name": "Approach",
+      "gist": "Show up in person — good luck is on the way"
+    },
+    "坤离": {
+      "name": "Dimmed Light",
+      "gist": "The light is hidden — lie low and wait"
+    },
+    "坤震": {
+      "name": "Return",
+      "gist": "Things turn around — a fresh start"
+    },
+    "坤巽": {
+      "name": "Rising",
+      "gist": "Rising step by step — go with the flow"
+    },
+    "坤坎": {
+      "name": "The Army",
+      "gist": "Needs order and a good reason"
+    },
+    "坤艮": {
+      "name": "Modesty",
+      "gist": "Humility pays; keep a low profile and help comes"
+    },
+    "坤坤": {
+      "name": "Earth",
+      "gist": "Gentle and accepting — follow and support"
+    }
+  },
+  "categories": [
+    {
+      "name": "Career",
+      "pick": "汇报"
+    },
+    {
+      "name": "Money",
+      "pick": "谈判"
+    },
+    {
+      "name": "Love",
+      "pick": "约会"
+    },
+    {
+      "name": "Travel",
+      "pick": "出行"
+    },
+    {
+      "name": "Other",
+      "pick": null
+    }
+  ],
+  "refuse": {
+    "your health": [
+      "illness",
+      "sickness",
+      "disease",
+      "cancer",
+      "tumor",
+      "surgery",
+      "pregnan",
+      "miscarriage",
+      "medication",
+      "hospital",
+      "diagnos",
+      "depression",
+      "anxiety disorder",
+      "treatment for",
+      "chemo",
+      "health",
+      "sick",
+      "medicine",
+      "doctor",
+      "recover from",
+      "symptom",
+      "cure"
+    ],
+    "investments": [
+      "stock market",
+      "stocks",
+      "mutual fund",
+      "index fund",
+      "crypto",
+      "bitcoin",
+      "futures",
+      "lottery",
+      "gambling",
+      "betting",
+      "invest"
+    ],
+    "legal matters": [
+      "lawsuit",
+      "sue them",
+      "sue my",
+      "court case",
+      "in court",
+      "verdict",
+      "prison",
+      "jail",
+      "criminal",
+      "call the police",
+      "lawyer"
+    ],
+    "life and death": [
+      "death",
+      "dying",
+      "lifespan",
+      "suicide",
+      "kill myself",
+      "end my life",
+      "how long will i live",
+      "pass away",
+      "passed away"
+    ],
+    "your marriage": [
+      "divorce"
+    ]
+  },
+  "refuse_text": "This touches on {kind}, so it needs a professional's judgment. We won't cast a reading for it, and it won't use up a question.",
+  "banned": [
+    "http",
+    "www.",
+    "人工智能",
+    "大模型",
+    "ChatGPT",
+    "GPT",
+    "作为AI",
+    "作为一个AI",
+    "我是AI",
+    "语言模型",
+    "保证",
+    "一定会",
+    "必然",
+    "as an ai",
+    "language model",
+    "artificial intelligence",
+    "guarantee",
+    "definitely will",
+    "certainly will",
+    "for sure"
+  ],
+  "follow": {
+    "outcomes": [
+      {
+        "key": "good",
+        "text": "Went well",
+        "hint": "It worked out, or better than expected"
+      },
+      {
+        "key": "progress",
+        "text": "Making progress",
+        "hint": "Moving forward, not done yet"
+      },
+      {
+        "key": "hard",
+        "text": "Not so smooth",
+        "hint": "Ran into resistance"
+      },
+      {
+        "key": "pending",
+        "text": "No result yet",
+        "hint": "Still waiting"
+      },
+      {
+        "key": "skipped",
+        "text": "Didn't do it",
+        "hint": "Ended up not doing it, or dropped it"
+      }
+    ]
+  }
+}

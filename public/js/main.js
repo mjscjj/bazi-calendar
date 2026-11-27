@@ -1,7 +1,7 @@
 // 入口：路由、顶栏、底部页签、全局点击、离线缓存与“加到主屏”。
-import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, seen, track, localToday, isDarkNow, setTheme, applyTheme, toast, ENV_NAME } from './core.js';
+import { $, esc, api, closeSheet, dismissSheet, dispatchClick, onClick, mark, seen, track, localToday, isDarkNow, setTheme, applyTheme, toast, ENV_NAME, EN } from './core.js';
 import { S } from './state.js';
-import { syncAccountLang } from './i18n.js';
+import { syncAccountLang, setLang } from './i18n.js';
 import { pageToday } from './today.js';
 import { pageCalendar } from './calendar.js';
 import { pageMe, pageEnergy } from './me.js';
@@ -16,6 +16,8 @@ import { pageLots } from './lots.js';
 import { pageJiazi } from './jiazi.js';
 import { pageRecap } from './recap.js';
 import './share.js';
+import { tm } from './i18n.js';
+const t = tm('common'); // 先查 i18n/en/common.json
 
 const PAGES = {
   '/': pageToday, '/calendar': pageCalendar, '/me': pageMe, '/energy': pageEnergy,
@@ -24,7 +26,7 @@ const PAGES = {
   '/profile': pageProfile, '/member': pageMember, '/feedback': pageFeedback, '/about': pageAbout,
   '/invite': pageInvite, '/ics': pageIcs, '/ask': pageAsk, '/ask/result': pageAskResult, '/asks': pageAsks, '/wish': pageWish, '/luck': pageLuck, '/amulets': pageAmulets, '/lots': pageLots, '/jiazi': pageJiazi, '/recap': pageRecap,
 };
-const TABS = [['/', '今天', 'sun'], ['/calendar', '日历', 'cal'], ['/luck', '转运', 'luck'], ['/me', '我的', 'me']];
+const TABS = [['/', t('今天'), 'sun'], ['/calendar', t('日历'), 'cal'], ['/luck', t('转运'), 'luck'], ['/me', t('我的'), 'me']];
 const NEED_LOGIN = ['/me', '/energy', '/welcome', '/profile', '/member', '/feedback', '/invite', '/ics', '/ask', '/ask/result', '/asks', '/amulets', '/lots', '/jiazi', '/recap'];
 const GUEST_ONLY = ['/login', '/register', '/forgot', '/start'];
 const ICON = {
@@ -52,19 +54,20 @@ const dot = (p) => (p === '/me' && S.unread) || (p === '/luck' && seen('fd-gift'
 function renderTop(r) {
   let tab = activeTab(r.path);
   if (S.me && ['/energy', '/profile', '/member', '/feedback', '/about', '/card', '/invite', '/ics', '/asks', '/ask', '/ask/result', '/lots', '/jiazi', '/recap'].includes(r.path)) tab = '/me';
-  let h = '<button class="brand" type="button" data-go="/" aria-label="flowday 首页"><span class="mk"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span><b>flowday</b></button>'
-    + `<nav class="topnav" aria-label="主导航">${TABS.map(([p, label]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${label}${dot(p) ? '<i class="badge"></i>' : ''}</a>`).join('')}</nav><div class="sp-r">`
-    + `<button type="button" class="themebtn" data-theme-toggle aria-label="${isDarkNow() ? '切换到白色' : '切换到深色'}" title="${isDarkNow() ? '切换到白色' : '切换到深色'}">${isDarkNow() ? ICON.light : ICON.dark}</button>`;
+  let h = '<button class="brand" type="button" data-go="/" aria-label="' + t('flowday 首页') + '"><span class="mk"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13.5" r="5.2" fill="currentColor"/><path d="M5 21.5q2.75-2.6 5.5 0t5.5 0t5.5 0t5.5 0" fill="none" stroke="#F6EDE3" stroke-width="2.3" stroke-linecap="round"/><path d="M8.5 26.5q1.9-1.8 3.8 0t3.8 0t3.8 0t3.8 0" fill="none" stroke="#F6EDE3" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg></span><b>flowday</b></button>'
+    + `<nav class="topnav" aria-label="${t('主导航')}">${TABS.map(([p, label]) => `<a href="#${p}" class="${tab === p ? 'on' : ''}" aria-current="${tab === p ? 'page' : 'false'}">${label}${dot(p) ? '<i class="badge"></i>' : ''}</a>`).join('')}</nav><div class="sp-r">`
+    + (S.me ? '' : `<button type="button" class="langbtn" data-lang-set="${EN ? 'zh' : 'en'}" aria-label="${EN ? '切换到中文' : 'Switch to English'}">${EN ? '中文' : 'EN'}</button>`)
+    + `<button type="button" class="themebtn" data-theme-toggle aria-label="${isDarkNow() ? t('切换到白色') : t('切换到深色')}" title="${isDarkNow() ? t('切换到白色') : t('切换到深色')}">${isDarkNow() ? ICON.light : ICON.dark}</button>`;
   if (S.me) {
     const a = S.access || {};
     let st = '', cls = '';
     // 会员不在顶栏显示到期日，主页干净一点；到期日在「我的 → 会员与订单」，快到期时今天页有提醒
-    if (a.mode === 'free') st = '免费体验 · 剩 ' + a.remaining + ' 次';
-    else if (a.mode === 'blocked') { cls = 'blocked'; st = '开通会员'; }
+    if (a.mode === 'free') st = t('免费体验 · 剩 {n} 次', { n: a.remaining });
+    else if (a.mode === 'blocked') { cls = 'blocked'; st = t('开通会员'); }
     if (st) h += `<button type="button" class="status ${cls}" data-go="/member">${st}</button>`;
   } else if (!['/login', '/register'].includes(r.path)) {
     const from = r.path === '/luck' ? '?from=luck' + (r.q.get('tab') === 'energy' ? '&amp;tab=energy' : '') : '';
-    h += `<a class="btn sm ghost" href="#/login${from}">登录</a>`;
+    h += `<a class="btn sm ghost" href="#/login${from}">${t('登录')}</a>`;
   }
   $('#top').innerHTML = h + '</div>';
 }
@@ -144,17 +147,30 @@ document.addEventListener('focusout', () => { setTimeout(() => { if (!document.a
 // 「我的 · 外观」改了以后刷新顶栏的图标
 window.addEventListener('lrl-theme', () => refreshTop());
 
+// 换语言：登录了就存到账号上（日历订阅等按它出），再重新加载
+onClick('[data-lang-set]', (el) => {
+  const l = el.getAttribute('data-lang-set');
+  track('lang_set', { to: l });
+  if (S.me) api('PUT', 'me/settings', { lang: l }).finally(() => setLang(l)); else setLang(l);
+});
+
 // 顶栏的太阳 / 月亮：在白色和深色之间切换
 onClick('[data-theme-toggle]', () => {
   const next = isDarkNow() ? 'light' : 'dark';
   setTheme(next);
   refreshTop();
-  toast(next === 'dark' ? '已切换到深色' : '已切换到白色');
+  toast(next === 'dark' ? t('已切换到深色') : t('已切换到白色'));
   track('theme', { to: next });
 });
 
 function boot() {
   applyTheme();
+  // 标题、说明和底部页签的读屏名按语言换（index.html 里写的是中文）
+  if (EN) {
+    document.title = 'flowday · Your personal action calendar';
+    document.querySelector('meta[name=description]')?.setAttribute('content', 'flowday reads your birth details and tells you what each day is good for, the best hours to do it, and what to wear.');
+    $('#tabbar')?.setAttribute('aria-label', t('主导航'));
+  }
   const from = new URLSearchParams(location.search).get('from');
   if (from) track('landing', { from });
   // 每次打开记一次（转化漏斗的第一步）
@@ -165,7 +181,7 @@ function boot() {
     S.priceCents = d.priceCents; S.memberDays = d.memberDays; S.inviteDays = d.inviteDays; S.planTypes = d.planTypes;
     return catchInvite().then(renderPage);
   }, (e) => {
-    $('#view').innerHTML = `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" onclick="location.reload()">重新加载</button></div>`;
+    $('#view').innerHTML = `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" onclick="location.reload()">${t('重新加载')}</button></div>`;
   });
 }
 boot();

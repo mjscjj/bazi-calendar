@@ -1,0 +1,55 @@
+{
+ "wishes": [
+  {
+   "name": "学业",
+   "text": "Study",
+   "char": "S"
+  },
+  {
+   "name": "事业",
+   "text": "Career",
+   "char": "C"
+  },
+  {
+   "name": "平安",
+   "text": "Safety",
+   "char": "S"
+  },
+  {
+   "name": "姻缘",
+   "text": "Love",
+   "char": "L"
+  },
+  {
+   "name": "财运",
+   "text": "Wealth",
+   "char": "W"
+  },
+  {
+   "name": "健康",
+   "text": "Health",
+   "char": "H"
+  },
+  {
+   "name": "家宅",
+   "text": "Home",
+   "char": "H"
+  },
+  {
+   "name": "厄除",
+   "text": "Protection",
+   "char": "P"
+  },
+  {
+   "name": "胜运",
+   "text": "Victory",
+   "char": "V"
+  }
+ ],
+ "breath": [
+  "Breathe in slowly…",
+  "Hold for a moment",
+  "Breathe out slowly…",
+  "Let your shoulders drop"
+ ]
+}

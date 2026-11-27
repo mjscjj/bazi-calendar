@@ -1,0 +1,76 @@
+{
+  "_note": "English daily line. heads: one short line by the day's level (1 Low-key … 5 Excellent), three variants rotated by date. relations finish the 'why' sentence (\"For a Candle like you, Wood is {relation}.\") so they are noun phrases. tomorrow may use {theme} (e.g. \"a Challenge Day\") and {hour} (e.g. \"1–3 PM\").",
+  "relations": {
+    "正财": "money you can count on",
+    "偏财": "a surprise opportunity, maybe a windfall",
+    "正官": "the people who set the rules and give you credit",
+    "七杀": "the pressure that pushes you to step up",
+    "正印": "a helper who looks after you and recharges you",
+    "偏印": "the pull toward thinking things through more deeply",
+    "比肩": "a friend standing right beside you",
+    "劫财": "a rival competing for the same things",
+    "食神": "an easy, good mood that makes you want to create",
+    "伤官": "the urge to speak up and break the mold"
+  },
+  "heads": {
+    "5": [
+      "Things are flowing today. Whatever you've been meaning to push, push it now.",
+      "A good day — don't hold back. If something needs saying, say it.",
+      "Full energy. A great day to make the call and close things out."
+    ],
+    "4": [
+      "The wind is at your back. Go one step further today.",
+      "You can handle a lot today, so put what matters most first.",
+      "You're in good shape. Take the initiative and it will pay off."
+    ],
+    "3": [
+      "An even day. Do what's in front of you well and you've won.",
+      "Go at your own pace. No need to force anything.",
+      "Stick to what's already on your plan — skip the impulse moves."
+    ],
+    "2": [
+      "A day to hold back: finish what's in hand and save new things for tomorrow.",
+      "Speak a beat slower, and double-check anything important.",
+      "Don't get into a tug-of-war. Save your energy for your own things."
+    ],
+    "1": [
+      "A day to slow down: stick to what you know and get to bed early.",
+      "If it can wait, let it wait. Look after yourself first.",
+      "Keep a low profile — no big calls, no arguments. Tomorrow is another day."
+    ]
+  },
+  "draw_hints": {
+    "5": "Your energy is flowing today too, so go after the good things this lot points to.",
+    "4": "Today is going well overall. Take one step forward in the spirit of the lot.",
+    "3": "An even day. Treat the lot as a reminder — no need to rush to conclusions.",
+    "2": "Take care today. If the lot tells you to wait, wait a little.",
+    "1": "Keep it low-key today. Look after yourself first; what the lot speaks of can wait."
+  },
+  "tomorrow": {
+    "5": [
+      "Tomorrow is {theme}, and you'll be in top form. Tonight, get the thing you most want to move forward ready, then do it at {hour}.",
+      "Tomorrow flows — don't waste it. Tonight, list what you need to ask for or decide, and handle it first thing.",
+      "Full energy tomorrow. Get to bed early tonight and save your spark for {hour}."
+    ],
+    "4": [
+      "Tomorrow is {theme}, with the wind at your back. Tonight, decide on the one step you'll take first.",
+      "You'll handle a lot tomorrow. Put what matters most around {hour}.",
+      "You'll be in good shape tomorrow. Get your materials ready tonight so nothing catches you off guard."
+    ],
+    "3": [
+      "An even day tomorrow. Write a clear to-do list tonight, then just work through it.",
+      "Tomorrow is {theme}. Go at your own pace and put the important things at {hour}.",
+      "Tomorrow suits what's already on your plan. Don't add anything new tonight."
+    ],
+    "2": [
+      "Take care tomorrow. Tonight, double-check anything you need to say or hand in.",
+      "Tomorrow is a day to hold back. Move important plans if you can; if not, prepare ahead.",
+      "Tomorrow could turn into a tug-of-war. Decide tonight where you're happy to give a little."
+    ],
+    "1": [
+      "Keep it low-key tomorrow. Get to bed early and stick to familiar things.",
+      "Energy runs low tomorrow. Trim tomorrow's plans tonight and leave yourself some room.",
+      "If it can wait, let it wait — keep big things off tomorrow and rest well tonight."
+    ]
+  }
+}

@@ -1,16 +1,18 @@
 // 御守的样子、冥想（全屏静坐：点香 / 颂钵、倒计时、呼吸引导，切出去自动暂停）、我的御守。
 // 御守现在只靠做好事换（善缘款），节气款、生日款单独买；转运页在 luck.js。
-import { $, $$, esc, api, toast, onClick, currentPath, openSheet, price, track } from './core.js';
+import { $, $$, esc, api, toast, onClick, currentPath, openSheet, price, track, EN } from './core.js';
 import { S } from './state.js';
 import { footHtml, memberLockHtml } from './today.js';
 import { editionOf, photoSrc, hangingSrc } from './omamori-art.js';
 import { share } from './share.js';
+import { tm } from './i18n.js';
+const t = tm('luck'); // 先查 i18n/en/luck.json
 
-const phead = (title) => `<div class="phead"><button type="button" class="back" data-back aria-label="返回">‹</button><h1>${title}</h1></div>`;
-export const STYLE_NAME = { basic: '转运款', deed: '善缘款', energy: '静心款', term: '节气款', birthday: '生日款', pool: '善意池限定' };
-const WAY_NAME = { incense: '点一炷香', bowl: '敲颂钵' };
+const phead = (title) => `<div class="phead"><button type="button" class="back" data-back aria-label="${t('返回')}">‹</button><h1>${title}</h1></div>`;
+export const STYLE_NAME = { basic: t('转运款'), deed: t('善缘款'), energy: t('静心款'), term: t('节气款'), birthday: t('生日款'), pool: t('善意池限定') };
+const WAY_NAME = { incense: t('点一炷香'), bowl: t('敲颂钵') };
 // 御守下面那行小字：怎么来的
-export const amuletFrom = (a) => a.style === 'pool' ? `善意池限定 · 累计 ${a.look.goal.toLocaleString('en-US')} 件` : a.look.dropKind ? ({deed:"善行带来的好运", meditate:"静心冥想掉落", release:"释放练习掉落"}[a.look.dropKind]) : (a.way === 'deed' ? `${STYLE_NAME[a.style]} · 5 件善行换的` : a.way === 'energy' ? `${STYLE_NAME[a.style]} · ${a.minutes} 分钟静心换的` : a.way === 'buy' ? `${STYLE_NAME[a.style]} · 买的` : `${STYLE_NAME[a.style]} · ${WAY_NAME[a.way]} ${a.minutes} 分钟`);
+export const amuletFrom = (a) => a.style === 'pool' ? t('善意池限定 · 累计 {n} 件', { n: a.look.goal.toLocaleString('en-US') }) : a.look.dropKind ? ({ deed: t('善行带来的好运'), meditate: t('静心冥想掉落'), release: t('释放练习掉落') }[a.look.dropKind]) : (a.way === 'deed' ? `${STYLE_NAME[a.style]} · ${t('5 件善行换的')}` : a.way === 'energy' ? `${STYLE_NAME[a.style]} · ${t('{n} 分钟静心换的', { n: a.minutes })}` : a.way === 'buy' ? `${STYLE_NAME[a.style]} · ${t('买的')}` : `${STYLE_NAME[a.style]} · ${WAY_NAME[a.way]} ${t('{n} 分钟', { n: a.minutes })}`);
 const SERIF = 'Songti SC,STSong,Noto Serif CJK SC,Source Han Serif SC,serif';
 
 // ---------- 御守的样子（SVG） ----------
@@ -24,9 +26,10 @@ const MOTIF = {
 export function omamoriSvg(a, key = 'x') {
   const L = a.look, [c1, c2] = L.colors, bd = a.style === 'birthday';
   const ink = bd ? L.ink : '#F6EFDC', gold = bd ? '#A8781F' : '#E9D9A8', g = 'om' + key;
-  const text = (a.wish || '').split('');
-  const seal = a.style === 'term' ? L.term : bd ? '生辰' : a.style === 'deed' ? '善行' : a.style === 'energy' ? '静心' : '';
-  return `<svg viewBox="0 0 180 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(L.monthCn)}${esc(a.wish)}御守"><defs><linearGradient id="${g}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`
+  // 中文把心愿竖着一个字一个字写；英文横着写一行，不盖汉字印章
+  const text = EN ? [] : (a.wish || '').split('');
+  const seal = EN ? '' : a.style === 'term' ? L.term : bd ? '生辰' : a.style === 'deed' ? '善行' : a.style === 'energy' ? '静心' : '';
+  return `<svg viewBox="0 0 180 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(t('{month}{wish}御守', { month: t(L.monthCn), wish: t(a.wish || '') }))}"><defs><linearGradient id="${g}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`
     + (L.motif ? `<pattern id="${g}p" width="26" height="26" patternUnits="userSpaceOnUse">${MOTIF[L.motif]}</pattern>` : '') + '</defs>'
     + `<path d="M90 6C110 6 118 18 118 30v4H62v-4C62 18 70 6 90 6Z" fill="none" stroke="${gold}" stroke-width="3"/>`
     + `<rect x="20" y="30" width="140" height="232" rx="22" fill="url(#${g}g)"/>`
@@ -34,7 +37,8 @@ export function omamoriSvg(a, key = 'x') {
     + `<rect x="30" y="40" width="120" height="212" rx="16" fill="none" stroke="${gold}" stroke-width="${bd ? 2.5 : 1.5}" opacity=".85"/>`
     + `<circle cx="90" cy="34" r="5" fill="${gold}"/>`
     + text.map((ch, i) => `<text x="90" y="${118 + i * 52}" text-anchor="middle" font-family="${SERIF}" font-weight="900" font-size="44" fill="${ink}">${esc(ch)}</text>`).join('')
-    + `<text x="90" y="${118 + text.length * 52 - 8}" text-anchor="middle" font-family="${SERIF}" font-size="13" fill="${gold}">守 · ${esc(L.monthCn)}</text>`
+    + (EN ? `<text x="90" y="138" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="${t(a.wish || '').length > 9 ? 17 : 22}" fill="${ink}">${esc(t(a.wish || ''))}</text><text x="90" y="166" text-anchor="middle" font-family="Georgia,serif" font-size="12" fill="${gold}">${esc(t(L.monthCn))}</text>`
+      : `<text x="90" y="${118 + text.length * 52 - 8}" text-anchor="middle" font-family="${SERIF}" font-size="13" fill="${gold}">守 · ${esc(L.monthCn)}</text>`)
     + `<text x="90" y="240" text-anchor="middle" font-family="sans-serif" font-size="10" fill="${gold}" opacity=".8">flowday</text>`
     + (seal ? `<g transform="translate(132 58) rotate(5)"><rect x="-13" y="-14" width="26" height="28" rx="3" fill="#C2412D"/><text x="0" y="-2" text-anchor="middle" font-family="${SERIF}" font-weight="900" font-size="10.5" fill="#FFF4EC">${esc(seal[0])}</text><text x="0" y="10" text-anchor="middle" font-family="${SERIF}" font-weight="900" font-size="10.5" fill="#FFF4EC">${esc(seal[1] || '')}</text></g>` : '')
     + '</svg>';
@@ -58,8 +62,8 @@ export async function shareAmulet(a, wallpaper = false) {
     : 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(omamoriSvg(a, 's' + a.id));
   try {
     const img = await loadImage(src);
-    await share(wallpaper ? 'amuletWall' : 'amulet', { img, a, art, landscape, message: art?.message || '愿这枚御守，陪你心想事成。' });
-  } catch { toast('图片生成失败，请再试一次'); }
+    await share(wallpaper ? 'amuletWall' : 'amulet', { img, a, art, landscape, message: art?.message || t('愿这枚御守，陪你心想事成。') });
+  } catch { toast(t('图片生成失败，请再试一次')); }
 }
 
 // 以前的「本月祈愿」页，现在都去转运页
@@ -103,9 +107,9 @@ export function startRitual(cfg) {
   el.innerHTML = `<div class="rtop"><span class="guide2" id="rGuide">${esc(cfg.breath[0])}</span></div>`
     + (cfg.way === 'incense'
       ? '<div class="stage"><div class="incense"><div class="burn"><span class="smoke s1"></span><span class="smoke s2"></span><span class="smoke s3"></span><span class="ember"></span><span class="stick"></span></div><span class="censer"></span></div></div>'
-      : '<div class="stage"><button type="button" class="sbowl" data-strike aria-label="敲一下颂钵"><span class="ripples"></span><span class="bw"></span></button><p class="btip">点一下颂钵，听它慢慢散开</p></div>')
-    + `<div class="rbottom"><div class="timer" id="rTimer">${mmss(total)}</div><span class="rwish">冥想 · ${cfg.minutes} 分钟</span><button type="button" class="rend" data-ritual-end>提前结束</button></div>`
-    + '<div class="rpause" hidden><p>已暂停</p><button type="button" class="btn primary" data-ritual-resume>继续</button></div>';
+      : `<div class="stage"><button type="button" class="sbowl" data-strike aria-label="${t('敲一下颂钵')}"><span class="ripples"></span><span class="bw"></span></button><p class="btip">${t('点一下颂钵，听它慢慢散开')}</p></div>`)
+    + `<div class="rbottom"><div class="timer" id="rTimer">${mmss(total)}</div><span class="rwish">${t('冥想 · {n} 分钟', { n: cfg.minutes })}</span><button type="button" class="rend" data-ritual-end>${t('提前结束')}</button></div>`
+    + `<div class="rpause" hidden><p>${t('已暂停')}</p><button type="button" class="btn primary" data-ritual-resume>${t('继续')}</button></div>`;
   document.body.appendChild(el);
   document.body.classList.add('in-ritual');
   history.pushState({ lrlRitual: 1 }, '');
@@ -149,11 +153,11 @@ addEventListener('popstate', () => {
   if (!R || (history.state && history.state.lrlRitual)) return;
   const done = R.done;
   closeRitual(true);
-  if (!done) toast('已结束，这次不算');
+  if (!done) toast(t('已结束，这次不算'));
 });
 onClick('[data-strike]', () => strike());
 onClick('[data-ritual-resume]', () => { audio(); pause(false); });
-onClick('[data-ritual-end]', () => { if (confirm('提前结束这次就不算了，确定结束吗？')) { track('practice_meditate_quit'); closeRitual(); toast('已结束，这次不算'); } });
+onClick('[data-ritual-end]', () => { if (confirm(t('提前结束这次就不算了，确定结束吗？'))) { track('practice_meditate_quit'); closeRitual(); toast(t('已结束，这次不算')); } });
 
 // Wait until the full-screen exercise closes before showing the updated balance.
 export function returnFromPractice(close, note) {
@@ -173,9 +177,9 @@ function finishRitual() {
     track('practice_meditate', { way: cfg.way, minutes: cfg.minutes });
     if (S.luck) S.luck.practice = d.practice;
     if (S.today && S.today.luck) S.today.luck.energy = d.practice.have;
-    if (R === session) returnFromPractice(closeRitual, `冥想完成，本次 +${d.minutes} 分钟`);
+    if (R === session) returnFromPractice(closeRitual, t('冥想完成，本次 +{n} 分钟', { n: d.minutes }));
   }, (e) => {
-    el.innerHTML = `<div class="reveal2"><p class="sub">${esc(e.message)}</p><div class="acts"><button type="button" class="btn ghost" data-ritual-close>先回去</button><button type="button" class="btn primary" data-ritual-retry>再试一次</button></div></div>`;
+    el.innerHTML = `<div class="reveal2"><p class="sub">${esc(e.message)}</p><div class="acts"><button type="button" class="btn ghost" data-ritual-close>${t('先回去')}</button><button type="button" class="btn primary" data-ritual-retry>${t('再试一次')}</button></div></div>`;
   });
 }
 onClick('[data-ritual-retry]', () => { if (R) { R.done = false; finishRitual(); } });
@@ -184,20 +188,20 @@ onClick('[data-ritual-close]', () => { closeRitual(); if (currentPath() === '/lu
 // ---------- 我的御守 ----------
 export function pageAmulets() {
   const v = $('#view');
-  v.innerHTML = phead('我的御守') + '<div class="sk" style="height:300px"></div>';
+  v.innerHTML = phead(t('我的御守')) + '<div class="sk" style="height:300px"></div>';
   api('GET', 'amulets').then((d) => {
     if (currentPath() !== '/amulets') return;
     S.amuList = d.list;
-    v.innerHTML = phead('我的御守')
-      + '<a class="omnew" href="#/luck"><span>攒 5 件好事换御守，或累计静心 20 分钟</span><small>去转运页 ›</small></a>'
-      + (d.list.length ? `<div class="omgrid">${d.list.map((a) => `<button type="button" class="omcard" data-om="${a.id}"><span class="pv">${amuletVisual(a, 'g' + a.id)}</span><b>${esc(a.look.monthCn)} · ${esc(editionOf(a)?.title || a.wish)}</b><small>${esc(amuletFrom(a))}</small></button>`).join('')}</div>`
-        : '<div class="empty">还没有御守。攒满 5 件好事可换一枚，也可以累计静心 20 分钟兑换。</div>')
-      + '<p style="margin:0;text-align:center"><button type="button" class="tbtn" data-om-buy>直接买一枚 ›</button></p>' + footHtml();
-  }, (e) => { v.innerHTML = phead('我的御守') + `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" data-reload>重新加载</button></div>`; });
+    v.innerHTML = phead(t('我的御守'))
+      + `<a class="omnew" href="#/luck"><span>${t('攒 5 件好事换御守，或累计静心 20 分钟')}</span><small>${t('去转运页 ›')}</small></a>`
+      + (d.list.length ? `<div class="omgrid">${d.list.map((a) => `<button type="button" class="omcard" data-om="${a.id}"><span class="pv">${amuletVisual(a, 'g' + a.id)}</span><b>${esc(t(a.look.monthCn))} · ${esc(editionOf(a)?.title || t(a.wish))}</b><small>${esc(amuletFrom(a))}</small></button>`).join('')}</div>`
+        : `<div class="empty">${t('还没有御守。攒满 5 件好事可换一枚，也可以累计静心 20 分钟兑换。')}</div>`)
+      + `<p style="margin:0;text-align:center"><button type="button" class="tbtn" data-om-buy>${t('直接买一枚 ›')}</button></p>` + footHtml();
+  }, (e) => { v.innerHTML = phead(t('我的御守')) + `<div class="errbox"><p>${esc(e.message)}</p><button class="btn ghost" type="button" data-reload>${t('重新加载')}</button></div>`; });
 }
 onClick('[data-om]', (el) => {
   const a = (S.amuList || []).find((x) => x.id === +el.getAttribute('data-om'));
   if (!a) return;
-  openSheet(`${a.look.monthCn} · ${editionOf(a)?.title || a.wish}`, `<div class="omview"><div class="omamori">${amuletVisual(a, 'v' + a.id)}</div><p class="note" style="margin:0;text-align:center">${esc(amuletFrom(a))} · ${esc(a.createdAt.slice(0, 10))}</p><div class="acts2"><button type="button" class="btn ghost" data-om-share2="${a.id}">送个祝福</button><button type="button" class="btn primary" data-om-share2="${a.id}" data-wallpaper>存为壁纸</button></div></div>`);
+  openSheet(`${t(a.look.monthCn)} · ${editionOf(a)?.title || t(a.wish)}`, `<div class="omview"><div class="omamori">${amuletVisual(a, 'v' + a.id)}</div><p class="note" style="margin:0;text-align:center">${esc(amuletFrom(a))} · ${esc(a.createdAt.slice(0, 10))}</p><div class="acts2"><button type="button" class="btn ghost" data-om-share2="${a.id}">${t('送个祝福')}</button><button type="button" class="btn primary" data-om-share2="${a.id}" data-wallpaper>${t('存为壁纸')}</button></div></div>`);
 });
 onClick('[data-om-share2]', (el) => { const a = (S.amuList || []).find((x) => x.id === +el.getAttribute('data-om-share2')); if (a) shareAmulet(a, el.hasAttribute('data-wallpaper')); });

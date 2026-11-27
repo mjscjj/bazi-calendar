@@ -1,0 +1,210 @@
+{
+  "_note": "English pick types. name, ss, avoid, tag, yi and ji are logic keys (stored in plans, matched against the almanac) and must stay identical to content/pick.json — copy any change there here too. char is the one-letter badge; label is the English display name.",
+  "types": [
+    {
+      "name": "汇报",
+      "char": "P",
+      "ss": [
+        "正官",
+        "正印"
+      ],
+      "avoid": [
+        "伤官",
+        "劫财"
+      ],
+      "yi": [
+        "赴任"
+      ],
+      "ji": [],
+      "label": "A presentation"
+    },
+    {
+      "name": "面试",
+      "char": "I",
+      "ss": [
+        "正官",
+        "正印"
+      ],
+      "avoid": [
+        "伤官",
+        "劫财"
+      ],
+      "yi": [
+        "赴任",
+        "入学"
+      ],
+      "ji": [
+        "赴任"
+      ],
+      "label": "A job interview"
+    },
+    {
+      "name": "谈判",
+      "char": "N",
+      "ss": [
+        "偏财",
+        "正财"
+      ],
+      "avoid": [
+        "劫财",
+        "伤官"
+      ],
+      "yi": [
+        "交易",
+        "立券",
+        "订盟",
+        "会亲友"
+      ],
+      "ji": [
+        "交易"
+      ],
+      "label": "A negotiation"
+    },
+    {
+      "name": "签约",
+      "char": "S",
+      "ss": [
+        "正财",
+        "正官"
+      ],
+      "avoid": [
+        "劫财",
+        "伤官"
+      ],
+      "yi": [
+        "立券",
+        "交易",
+        "订盟"
+      ],
+      "ji": [
+        "立券",
+        "交易",
+        "订盟"
+      ],
+      "label": "Signing a contract"
+    },
+    {
+      "name": "开业",
+      "char": "O",
+      "ss": [
+        "偏财",
+        "正财"
+      ],
+      "avoid": [
+        "劫财"
+      ],
+      "yi": [
+        "开市",
+        "挂匾",
+        "纳财",
+        "开仓"
+      ],
+      "ji": [
+        "开市",
+        "挂匾",
+        "纳财"
+      ],
+      "label": "Opening a business"
+    },
+    {
+      "name": "搬家",
+      "char": "M",
+      "ss": [
+        "正财",
+        "正印"
+      ],
+      "avoid": [
+        "劫财"
+      ],
+      "yi": [
+        "移徙",
+        "入宅",
+        "安床",
+        "安香"
+      ],
+      "ji": [
+        "移徙",
+        "入宅"
+      ],
+      "label": "Moving house"
+    },
+    {
+      "name": "出行",
+      "char": "T",
+      "ss": [
+        "食神",
+        "比肩"
+      ],
+      "avoid": [],
+      "tag": "驿马",
+      "yi": [
+        "出行"
+      ],
+      "ji": [
+        "出行"
+      ],
+      "label": "A trip"
+    },
+    {
+      "name": "约会",
+      "char": "D",
+      "ss": [
+        "食神",
+        "偏财"
+      ],
+      "avoid": [
+        "七杀"
+      ],
+      "tag": "桃花",
+      "yi": [
+        "会亲友",
+        "嫁娶",
+        "纳采",
+        "订盟"
+      ],
+      "ji": [
+        "会亲友"
+      ],
+      "label": "A date"
+    },
+    {
+      "name": "发布",
+      "char": "L",
+      "ss": [
+        "伤官",
+        "食神"
+      ],
+      "avoid": [
+        "偏印"
+      ],
+      "yi": [
+        "开市",
+        "挂匾",
+        "开光"
+      ],
+      "ji": [
+        "开市"
+      ],
+      "label": "A launch or big post"
+    },
+    {
+      "name": "休息",
+      "char": "R",
+      "ss": [
+        "正印",
+        "食神"
+      ],
+      "avoid": [
+        "七杀"
+      ],
+      "yi": [
+        "沐浴",
+        "解除",
+        "扫舍",
+        "理发"
+      ],
+      "ji": [],
+      "label": "A day off"
+    }
+  ]
+}

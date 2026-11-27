@@ -2301,3 +2301,12 @@ button.ring{border:0;background:none;padding:0;font:inherit;color:inherit;cursor
   background:rgba(255,255,255,.55);box-shadow:0 0 0 8px rgba(255,255,255,.18);animation:ghost-swipe 1.5s ease-in-out 2 both}
 @keyframes ghost-swipe{0%{opacity:0;transform:translateX(30px)}20%{opacity:1}70%{opacity:1;transform:translateX(-50px)}100%{opacity:0;transform:translateX(-60px)}}
 @media (prefers-reduced-motion:reduce){.welcome,.welcome img,.welcome .wtxt,.ghost-hand,.fdglow{animation:none}}
+
+/* ---------- 英文版：英文词更长，几处收一收 ---------- */
+html[lang=en] .hero3 h1{font-size:clamp(1.8rem,8vw,2.05rem);letter-spacing:-.01em}
+@media (min-width:960px){html[lang=en] .hero3 h1{font-size:2.4rem}}
+html[lang=en] .mrow > span:first-child{flex:none;white-space:nowrap}
+html[lang=en] .mrow .r{min-width:0;text-align:right;justify-content:flex-end}
+html[lang=en] .akhold .hlbl b{white-space:nowrap}
+html[lang=en] .akhold .hlbl small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.langbtn{height:36px;min-width:36px;padding:0 10px;border:0;border-radius:999px;background:var(--sunk);color:var(--fg);font:inherit;font-size:13px;font-weight:600;flex:none}

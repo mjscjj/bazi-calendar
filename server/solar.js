@@ -2,6 +2,7 @@
 // 时区库自带历史偏移和夏令时（如中国 1986–1991 年），所以修正拆成三部分：夏令时、经度时差、均时差。
 // 时区和夏令时用系统自带的时区库（Intl），均时差用 Meeus 公式。
 import fs from 'node:fs';
+import { isEn } from './i18n.js';
 
 const MINUTE = 60000;
 const ZHI = '子丑寅卯辰巳午未申酉戌亥';
@@ -10,13 +11,19 @@ export const EDGE_MINUTES = 15;
 export const CITIES = JSON.parse(fs.readFileSync(new URL('./cities.json', import.meta.url), 'utf8'));
 const BY_NAME = new Map(CITIES.map((c) => [c.name, c]));
 export const cityByName = (name) => BY_NAME.get(String(name || '').trim()) || null;
+// 给人看的城市名和省份：英文界面用英文名（存的仍是 name）
+export const cityLabel = (name) => { const c = cityByName(name); return c && isEn() ? c.en : (c ? c.name : name || null); };
+export const cityView = (c) => ({ name: c.name, label: isEn() ? c.en : c.name, province: isEn() ? c.province_en : c.province, lng: c.lng });
 
 // 城市联想：名字开头匹配的排前面，其次是名字或省份里包含
 export function searchCities(q, limit = 8) {
   const s = String(q || '').trim();
   if (!s) return [];
-  const head = CITIES.filter((c) => c.name.startsWith(s));
-  const rest = CITIES.filter((c) => !c.name.startsWith(s) && (c.name.includes(s) || c.province.includes(s)));
+  // 输入的是英文（拼音或英文名）就按英文名找，不分大小写
+  const L = (x) => String(x || '').toLowerCase(), en = /[a-z]/i.test(s);
+  const nm = (c) => (en ? L(c.en) : c.name), pv = (c) => (en ? L(c.province_en) : c.province), key = en ? L(s) : s;
+  const head = CITIES.filter((c) => nm(c).startsWith(key));
+  const rest = CITIES.filter((c) => !nm(c).startsWith(key) && (nm(c).includes(key) || pv(c).includes(key)));
   return head.concat(rest).slice(0, limit);
 }
 

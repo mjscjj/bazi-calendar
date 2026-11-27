@@ -1,0 +1,1888 @@
+{
+ "tones": {
+  "g": "Favorable",
+  "m": "Mixed",
+  "b": "Slow"
+ },
+ "list_title": "Area by area",
+ "asked_tag": "You asked",
+ "advice_label": "Try this",
+ "table_title": "From the original lot",
+ "missing": {
+  "text": "The original lot has no line for this, so it reads from the whole lot. "
+ },
+ "topics": [
+  {
+   "key": "self",
+   "name": "Overall",
+   "items": [
+    "自身"
+   ],
+   "words": [
+    "my luck",
+    "lately",
+    "recently",
+    "this year",
+    "this month",
+    "how am i doing",
+    "overall",
+    "in general",
+    "my life",
+    "运势",
+    "运气",
+    "最近",
+    "今年",
+    "这个月",
+    "本月",
+    "自己",
+    "状态",
+    "整体"
+   ],
+   "advice": {
+    "1": {
+     "say": "This is a low stretch, so pushing hard may drain you; hold steady for now.",
+     "do": [
+      "Put big decisions on hold for now",
+      "Talk it through with someone you trust"
+     ]
+    },
+    "2": {
+     "say": "Momentum is slow right now, so effort may stretch thin; build your energy first.",
+     "do": [
+      "Skip new projects; focus on one or two",
+      "Rest, move your body, and leave some slack"
+     ]
+    },
+    "3": {
+     "say": "Neither good nor bad, just steady; daily effort is what carries you.",
+     "do": [
+      "Do the work in front of you well",
+      "Keep regular hours and leave room to breathe"
+     ]
+    },
+    "4": {
+     "say": "Things lean your way, but the momentum still needs your push.",
+     "do": [
+      "Set one goal this month; check it weekly",
+      "Say yes to a good fit, then adjust"
+     ]
+    },
+    "5": {
+     "say": "Your energy is strong and efforts tend to land; a good time to go bold.",
+     "do": [
+      "Revive a shelved plan; start with the top one",
+      "Reach out to people who can help you"
+     ]
+    }
+   }
+  },
+  {
+   "key": "work",
+   "name": "Work & Career",
+   "items": [
+    "交易"
+   ],
+   "words": [
+    "work",
+    "job",
+    "interview",
+    "offer",
+    "promotion",
+    "a raise",
+    "pay raise",
+    "career",
+    "project",
+    "my boss",
+    "manager",
+    "coworker",
+    "colleague",
+    "client",
+    "customer",
+    "partnership",
+    "contract",
+    "negotiat",
+    "business",
+    "startup",
+    "open a shop",
+    "exam",
+    "school",
+    "college",
+    "university",
+    "grad school",
+    "thesis",
+    "presentation",
+    "quit my",
+    "quitting",
+    "resign",
+    "get hired",
+    "apply for",
+    "application",
+    "pitch",
+    "competition",
+    "工作",
+    "面试",
+    "offer",
+    "跳槽",
+    "升职",
+    "加薪",
+    "晋升",
+    "项目",
+    "老板",
+    "领导",
+    "同事",
+    "客户",
+    "合作",
+    "签约",
+    "合同",
+    "谈判",
+    "生意",
+    "创业",
+    "开店",
+    "考试",
+    "考研",
+    "升学",
+    "学业",
+    "论文",
+    "汇报",
+    "岗位",
+    "入职",
+    "离职",
+    "辞职",
+    "事业",
+    "求职",
+    "找工作",
+    "方案",
+    "比赛",
+    "申请"
+   ],
+   "advice": {
+    "1": {
+     "say": "This is hard to land right now, and forcing it may cost you.",
+     "do": [
+      "Hold off on big changes; keep your footing",
+      "Build your skills so you're ready later"
+     ]
+    },
+    "2": {
+     "say": "There's real resistance now; a yes may come slowly, and things may drag.",
+     "do": [
+      "Don't rush to decide or quit; compare options",
+      "Do your homework, then push when timing improves"
+     ]
+    },
+    "3": {
+     "say": "Progress is possible, but expect several rounds before it comes together.",
+     "do": [
+      "Pin down terms and dates in writing",
+      "Keep a backup plan so you feel steady"
+     ]
+    },
+    "4": {
+     "say": "This can come together smoothly; a good time to take the lead.",
+     "do": [
+      "Schedule interviews, pitches, or talks soon",
+      "Make your case clearly on one page"
+     ]
+    },
+    "5": {
+     "say": "Your projects and talks look promising, and helpful people are close by.",
+     "do": [
+      "Ask for what you need; don't concede first",
+      "Settle key points now and put them in writing"
+     ]
+    }
+   }
+  },
+  {
+   "key": "money",
+   "name": "Money",
+   "items": [
+    "求财"
+   ],
+   "words": [
+    "money",
+    "income",
+    "salary",
+    "paycheck",
+    "earning",
+    "bonus",
+    "side hustle",
+    "loan",
+    "debt",
+    "mortgage",
+    "buy a house",
+    "buy a home",
+    "finances",
+    "savings",
+    "pay back",
+    "lend money",
+    "borrow",
+    "invest",
+    "lottery",
+    "钱",
+    "财",
+    "投资",
+    "股票",
+    "基金",
+    "理财",
+    "收入",
+    "赚",
+    "买房",
+    "贷款",
+    "奖金",
+    "副业",
+    "彩票",
+    "借钱",
+    "还钱",
+    "工资",
+    "报酬",
+    "回款"
+   ],
+   "advice": {
+    "1": {
+     "say": "Money may slip away easily now; protecting what you have matters most.",
+     "do": [
+      "Avoid loans, co-signing, and chasing hot buys",
+      "Keep emergency savings separate and untouched"
+     ]
+    },
+    "2": {
+     "say": "Earning feels harder now, and spending may outpace what comes in.",
+     "do": [
+      "Pause big outlays and lending to others",
+      "Double-check before you sign or pay"
+     ]
+    },
+    "3": {
+     "say": "Some income comes in, but modestly; steady earning and careful spending matter most.",
+     "do": [
+      "Track your spending for one week",
+      "Skip investments you don't understand yet"
+     ]
+    },
+    "4": {
+     "say": "There's room to grow your money, and effort tends to be rewarded.",
+     "do": [
+      "Focus on your main, steady income",
+      "Small experiments are fine; stay within your means"
+     ]
+    },
+    "5": {
+     "say": "Money paths look open now, with chances from steady work and side sources.",
+     "do": [
+      "Collect what you're owed; negotiate prices now",
+      "Save a portion before you spend"
+     ]
+    }
+   }
+  },
+  {
+   "key": "love",
+   "name": "Love",
+   "items": [
+    "婚姻"
+   ],
+   "words": [
+    "love",
+    "relationship",
+    "dating",
+    "a date",
+    "go out with",
+    "boyfriend",
+    "girlfriend",
+    "my partner",
+    "crush",
+    "get back together",
+    "breakup",
+    "break up",
+    "marry",
+    "marriage",
+    "wedding",
+    "engaged",
+    "husband",
+    "wife",
+    "spouse",
+    "confess",
+    "my ex",
+    "soulmate",
+    "text me back",
+    "like me",
+    "感情",
+    "恋爱",
+    "对象",
+    "男朋友",
+    "女朋友",
+    "男友",
+    "女友",
+    "喜欢",
+    "暗恋",
+    "复合",
+    "分手",
+    "结婚",
+    "婚",
+    "相亲",
+    "桃花",
+    "另一半",
+    "老公",
+    "老婆",
+    "伴侣",
+    "表白",
+    "约会",
+    "缘分",
+    "前任",
+    "婚姻",
+    "婚事",
+    "喜欢的人",
+    "回我消息"
+   ],
+   "advice": {
+    "1": {
+     "say": "This relationship faces many obstacles now; forcing it may leave you drained.",
+     "do": [
+      "Give each other space; don't decide while upset",
+      "Turn your attention back to your own life"
+     ]
+    },
+    "2": {
+     "say": "Your rhythms are out of sync, so misunderstandings or delays are likely.",
+     "do": [
+      "Let disagreements cool before you talk",
+      "Care for yourself; don't push the other person"
+     ]
+    },
+    "3": {
+     "say": "The connection is there, but it needs time; don't rush it.",
+     "do": [
+      "Keep talking; don't demand a firm answer",
+      "If single, get out and notice who's around"
+     ]
+    },
+    "4": {
+     "say": "The connection is warm and mutual; a good time to take a step forward.",
+     "do": [
+      "Plan a proper date; leave work talk out",
+      "Show you care; don't keep score"
+     ]
+    },
+    "5": {
+     "say": "You two are deeply in sync; it feels right, and good things may be near.",
+     "do": [
+      "Say what's in your heart; don't wait",
+      "Consider meeting family or talking about the future"
+     ]
+    }
+   }
+  },
+  {
+   "key": "health",
+   "name": "Health",
+   "items": [
+    "疾病"
+   ],
+   "words": [
+    "health",
+    "sick",
+    "illness",
+    "surgery",
+    "checkup",
+    "sleep",
+    "insomnia",
+    "recover",
+    "hospital",
+    "doctor",
+    "身体",
+    "健康",
+    "病",
+    "手术",
+    "检查",
+    "体检",
+    "睡眠",
+    "失眠",
+    "康复",
+    "医院",
+    "看医生",
+    "疼",
+    "痛",
+    "生病",
+    "住院",
+    "恢复"
+   ],
+   "advice": {
+    "1": {
+     "say": "Pay close attention now; don't let small issues grow into big ones.",
+     "do": [
+      "See a doctor soon; consider a second opinion",
+      "Let family know how you're doing"
+     ]
+    },
+    "2": {
+     "say": "Your body is asking you to slow down; don't push through.",
+     "do": [
+      "If you need a doctor, go; don't wait",
+      "Cut back on late nights and social events"
+     ]
+    },
+    "3": {
+     "say": "Recovery takes some time; it won't happen all at once.",
+     "do": [
+      "Keep regular hours, eat light, attend follow-ups",
+      "Note any discomfort and tell your doctor"
+     ]
+    },
+    "4": {
+     "say": "Recovery looks on track; keep up the care that's working.",
+     "do": [
+      "Finish the treatment your doctor prescribed",
+      "Prioritize sleep; it helps more than supplements"
+     ]
+    },
+    "5": {
+     "say": "Your baseline is strong, and you tend to bounce back from small things.",
+     "do": [
+      "Keep your current sleep and exercise habits",
+      "Stay on schedule with regular checkups"
+     ]
+    }
+   },
+   "note": "A lot can offer peace of mind, but if you feel unwell, please see a doctor."
+  },
+  {
+   "key": "home",
+   "name": "Home & Family",
+   "items": [
+    "家宅"
+   ],
+   "words": [
+    "my home",
+    "family",
+    "parents",
+    "my mom",
+    "my dad",
+    "mother",
+    "father",
+    "my house",
+    "apartment",
+    "renovat",
+    "my kids",
+    "my child",
+    "roommate",
+    "landlord",
+    "renting",
+    "家",
+    "家人",
+    "父母",
+    "爸",
+    "妈",
+    "房子",
+    "装修",
+    "家庭",
+    "孩子",
+    "租房",
+    "室友",
+    "长辈"
+   ],
+   "advice": {
+    "1": {
+     "say": "Home feels unsettled right now; aim for calm first.",
+     "do": [
+      "Hold off on big family decisions",
+      "Ask an elder or trusted friend to help mediate"
+     ]
+    },
+    "2": {
+     "say": "Something at home may feel off; give it extra attention.",
+     "do": [
+      "Listen and be present more than you advise",
+      "Check doors, windows, water, and power"
+     ]
+    },
+    "3": {
+     "say": "Home is mostly steady, with the occasional small friction.",
+     "do": [
+      "Let small things go; skip dinner-table debates",
+      "Tidy up regularly; a clear space clears the mind"
+     ]
+    },
+    "4": {
+     "say": "Home is settled, and everyone looks out for each other.",
+     "do": [
+      "Make time for family, even a quick call",
+      "Handle small repairs as you notice them"
+     ]
+    },
+    "5": {
+     "say": "Home is warm and thriving, with something to celebrate.",
+     "do": [
+      "Host a family gathering; take a group photo",
+      "Start planning a move or renovation if you wish"
+     ]
+    }
+   }
+  },
+  {
+   "key": "move",
+   "name": "Travel & Moving",
+   "items": [
+    "移徙",
+    "行人"
+   ],
+   "words": [
+    "travel",
+    "trip",
+    "vacation",
+    "business trip",
+    "moving",
+    "move to",
+    "move out",
+    "relocat",
+    "abroad",
+    "visa",
+    "flight",
+    "journey",
+    "long distance",
+    "new city",
+    "study abroad",
+    "transfer",
+    "出行",
+    "旅行",
+    "旅游",
+    "出差",
+    "搬家",
+    "搬迁",
+    "出国",
+    "回国",
+    "签证",
+    "航班",
+    "行程",
+    "回来",
+    "异地",
+    "换城市",
+    "留学",
+    "外派",
+    "调动"
+   ],
+   "advice": {
+    "1": {
+     "say": "This isn't a great time for long trips or moving.",
+     "do": [
+      "If you must go, confirm every step ahead",
+      "Stay alert and keep valuables on you"
+     ]
+    },
+    "2": {
+     "say": "Getting on the move meets obstacles now, and delays are likely.",
+     "do": [
+      "Postpone a move if you can; plan a backup",
+      "Others may run late; don't just wait around"
+     ]
+    },
+    "3": {
+     "say": "You can go, but there's no rush; leave room in your plans.",
+     "do": [
+      "Keep a half day open for flexibility",
+      "Before moving, clarify the lease and costs"
+     ]
+    },
+    "4": {
+     "say": "Travel tends to go smoothly, and it's a fine time to move.",
+     "do": [
+      "Book tickets and lodging early for an easy trip",
+      "Be open to help from people you meet"
+     ]
+    },
+    "5": {
+     "say": "Travel and moves flow well; a new place may bring a fresh start.",
+     "do": [
+      "Lock in that trip or move you've wanted",
+      "Watch for news from someone you're awaiting"
+     ]
+    }
+   }
+  },
+  {
+   "key": "dispute",
+   "name": "Conflicts",
+   "items": [
+    "公讼"
+   ],
+   "words": [
+    "lawsuit",
+    "dispute",
+    "argument",
+    "a fight",
+    "conflict",
+    "complain",
+    "compensation",
+    "lawyer",
+    "in court",
+    "官司",
+    "纠纷",
+    "诉讼",
+    "仲裁",
+    "吵架",
+    "是非",
+    "投诉",
+    "维权",
+    "矛盾",
+    "争执",
+    "赔偿",
+    "律师"
+   ],
+   "advice": {
+    "1": {
+     "say": "This situation doesn't favor you; cutting losses early is wise.",
+     "do": [
+      "Don't start fights; step back when you can",
+      "Keep your records and protect your rights"
+     ]
+    },
+    "2": {
+     "say": "Going head-to-head may cost you time and energy.",
+     "do": [
+      "Stay calm; don't speak while angry",
+      "Get professional advice before your next step"
+     ]
+    },
+    "3": {
+     "say": "Both sides have a point; meeting halfway likely serves you better.",
+     "do": [
+      "Settle if you can; save time and stress",
+      "Find a mediator both sides trust"
+     ]
+    },
+    "4": {
+     "say": "You have the upper hand, but leave the other side a graceful exit.",
+     "do": [
+      "State what you want; keep messages and receipts",
+      "Negotiate first; use formal steps if needed"
+     ]
+    },
+    "5": {
+     "say": "You stand on solid ground, and things may lean your way.",
+     "do": [
+      "Gather your evidence and make your case",
+      "Have a professional review your position"
+     ]
+    }
+   }
+  },
+  {
+   "key": "find",
+   "name": "Lost & Found",
+   "items": [
+    "失物",
+    "寻人"
+   ],
+   "words": [
+    "lost my",
+    "missing",
+    "find my",
+    "can't find",
+    "my keys",
+    "wallet",
+    "my phone",
+    "can't reach",
+    "disappeared",
+    "left behind",
+    "丢",
+    "找",
+    "遗失",
+    "失物",
+    "钥匙",
+    "钱包",
+    "寻人",
+    "联系不上",
+    "失联",
+    "不见了",
+    "落下"
+   ],
+   "advice": {
+    "1": {
+     "say": "Recovery looks unlikely; letting go can also limit your loss.",
+     "do": [
+      "Focus on minimizing the damage",
+      "Give important items one fixed home"
+     ]
+    },
+    "2": {
+     "say": "This may be hard to find and could take a while.",
+     "do": [
+      "Report it lost and replace what's needed",
+      "Don't let it consume your energy"
+     ]
+    },
+    "3": {
+     "say": "It can likely be found, but it'll take some effort; be patient.",
+     "do": [
+      "Search your usual spots one by one",
+      "Try another way to reach the person"
+     ]
+    },
+    "4": {
+     "say": "There's a good chance of recovery; follow the clues.",
+     "do": [
+      "Search in the direction your reading suggests",
+      "Ask people nearby if they've seen it"
+     ]
+    },
+    "5": {
+     "say": "Things look likely to turn up soon, and people can be reached.",
+     "do": [
+      "Retrace where you last used it",
+      "Reach out; they may be waiting too"
+     ]
+    }
+   }
+  }
+ ],
+ "words": {
+  "吉": [
+   "g",
+   "favorable"
+  ],
+  "大吉": [
+   "g",
+   "very favorable"
+  ],
+  "大利": [
+   "g",
+   "very much in your favor"
+  ],
+  "利": [
+   "g",
+   "in your favor"
+  ],
+  "有利": [
+   "g",
+   "in your favor"
+  ],
+  "得利": [
+   "g",
+   "you can gain"
+  ],
+  "顺": [
+   "g",
+   "smooth"
+  ],
+  "顺利": [
+   "g",
+   "goes smoothly"
+  ],
+  "顺遂": [
+   "g",
+   "goes your way"
+  ],
+  "遂": [
+   "g",
+   "you get your wish"
+  ],
+  "遂意": [
+   "g",
+   "as you wish"
+  ],
+  "如意": [
+   "g",
+   "as you wish"
+  ],
+  "随意": [
+   "g",
+   "arrange it as you like"
+  ],
+  "成": [
+   "g",
+   "it comes together"
+  ],
+  "成就": [
+   "g",
+   "it comes together"
+  ],
+  "有成": [
+   "g",
+   "it comes together"
+  ],
+  "成合": [
+   "g",
+   "it comes together"
+  ],
+  "允": [
+   "g",
+   "it can be agreed"
+  ],
+  "就": [
+   "g",
+   "it comes together"
+  ],
+  "合": [
+   "g",
+   "a good match"
+  ],
+  "和合": [
+   "g",
+   "warm and harmonious"
+  ],
+  "好合": [
+   "g",
+   "a happy union"
+  ],
+  "双配": [
+   "g",
+   "well matched"
+  ],
+  "再合": [
+   "g",
+   "you can come back together"
+  ],
+  "安": [
+   "g",
+   "safe and sound"
+  ],
+  "平安": [
+   "g",
+   "safe and sound"
+  ],
+  "安然": [
+   "g",
+   "safe and sound"
+  ],
+  "即安": [
+   "g",
+   "better soon"
+  ],
+  "康泰": [
+   "g",
+   "healthy and well"
+  ],
+  "泰": [
+   "g",
+   "at peace"
+  ],
+  "清吉": [
+   "g",
+   "clear and favorable"
+  ],
+  "安吉": [
+   "g",
+   "steady and favorable"
+  ],
+  "吉利": [
+   "g",
+   "favorable"
+  ],
+  "旺": [
+   "g",
+   "thriving"
+  ],
+  "昌盛": [
+   "g",
+   "flourishing"
+  ],
+  "兴": [
+   "g",
+   "flourishing"
+  ],
+  "好": [
+   "g",
+   "good"
+  ],
+  "胜": [
+   "g",
+   "you have the upper hand"
+  ],
+  "正胜": [
+   "g",
+   "momentum is with you"
+  ],
+  "有理": [
+   "g",
+   "right is on your side"
+  ],
+  "散": [
+   "g",
+   "it can be defused"
+  ],
+  "和": [
+   "g",
+   "it can be settled"
+  ],
+  "宜和": [
+   "g",
+   "better to settle"
+  ],
+  "和即止讼": [
+   "g",
+   "settling ends it"
+  ],
+  "有贵人": [
+   "g",
+   "someone will help"
+  ],
+  "贵人": [
+   "g",
+   "help from the right people"
+  ],
+  "至": [
+   "g",
+   "they will arrive"
+  ],
+  "到": [
+   "g",
+   "they will arrive"
+  ],
+  "回": [
+   "g",
+   "it comes back"
+  ],
+  "有信": [
+   "g",
+   "news is coming"
+  ],
+  "见": [
+   "g",
+   "you will see it"
+  ],
+  "得见": [
+   "g",
+   "you can find it"
+  ],
+  "即见": [
+   "g",
+   "found soon"
+  ],
+  "在": [
+   "g",
+   "still there"
+  ],
+  "遇": [
+   "g",
+   "you will meet"
+  ],
+  "近": [
+   "g",
+   "not far away"
+  ],
+  "有": [
+   "g",
+   "yes"
+  ],
+  "颇有": [
+   "g",
+   "quite a lot"
+  ],
+  "喜": [
+   "g",
+   "good news"
+  ],
+  "解": [
+   "g",
+   "it eases"
+  ],
+  "遇良方": [
+   "g",
+   "you will find the right way"
+  ],
+  "遇良医": [
+   "g",
+   "you will find a good doctor"
+  ],
+  "即痊愈": [
+   "g",
+   "better soon"
+  ],
+  "延安": [
+   "g",
+   "slowly getting better"
+  ],
+  "十足": [
+   "g",
+   "in full"
+  ],
+  "熟": [
+   "g",
+   "a good harvest"
+  ],
+  "发": [
+   "g",
+   "thriving"
+  ],
+  "宜迁": [
+   "g",
+   "a good time to move"
+  ],
+  "更新": [
+   "g",
+   "time for something new"
+  ],
+  "宜早": [
+   "g",
+   "sooner is better"
+  ],
+  "早断": [
+   "g",
+   "decide early"
+  ],
+  "急断": [
+   "g",
+   "settle it quickly"
+  ],
+  "速寻": [
+   "g",
+   "look right away"
+  ],
+  "急寻": [
+   "g",
+   "look right away"
+  ],
+  "去": [
+   "g",
+   "you can go"
+  ],
+  "远可": [
+   "g",
+   "farther is fine too"
+  ],
+  "中吉": [
+   "g",
+   "mildly favorable"
+  ],
+  "秋冬大利": [
+   "g",
+   "very favorable in autumn and winter"
+  ],
+  "秋冬旺": [
+   "g",
+   "strong in autumn and winter"
+  ],
+  "秋冬吉": [
+   "g",
+   "favorable in autumn and winter"
+  ],
+  "秋吉": [
+   "g",
+   "favorable in autumn"
+  ],
+  "秋利": [
+   "g",
+   "in your favor in autumn"
+  ],
+  "秋旺": [
+   "g",
+   "strong in autumn"
+  ],
+  "冬吉": [
+   "g",
+   "favorable in winter"
+  ],
+  "夏秋吉": [
+   "g",
+   "favorable in summer and autumn"
+  ],
+  "春利": [
+   "g",
+   "in your favor in spring"
+  ],
+  "春旺": [
+   "g",
+   "strong in spring"
+  ],
+  "先凶后吉": [
+   "g",
+   "hard at first, then smooth"
+  ],
+  "改向吉": [
+   "g",
+   "change direction and it improves"
+  ],
+  "守旧大吉": [
+   "g",
+   "best to keep things as they are"
+  ],
+  "旧吉": [
+   "g",
+   "carry on as before"
+  ],
+  "祈保吉": [
+   "g",
+   "pray for safety and all is well"
+  ],
+  "东方": [
+   "g",
+   "look to the east"
+  ],
+  "西方": [
+   "g",
+   "to the west"
+  ],
+  "南方": [
+   "g",
+   "look to the south"
+  ],
+  "北方": [
+   "g",
+   "look to the north"
+  ],
+  "东北": [
+   "g",
+   "look to the northeast"
+  ],
+  "东南": [
+   "g",
+   "look to the southeast"
+  ],
+  "西北": [
+   "g",
+   "look to the northwest"
+  ],
+  "西": [
+   "g",
+   "to the west"
+  ],
+  "南": [
+   "g",
+   "look to the south"
+  ],
+  "东西": [
+   "g",
+   "look both east and west"
+  ],
+  "利西": [
+   "g",
+   "the west is in your favor"
+  ],
+  "南利": [
+   "g",
+   "the south is in your favor"
+  ],
+  "东西吉": [
+   "g",
+   "east–west is favorable"
+  ],
+  "东西向吉": [
+   "g",
+   "east–west is favorable"
+  ],
+  "西向": [
+   "g",
+   "facing west"
+  ],
+  "秋熟": [
+   "g",
+   "harvest in autumn"
+  ],
+  "大吉利": [
+   "g",
+   "very favorable"
+  ],
+  "不阻": [
+   "g",
+   "nothing in the way"
+  ],
+  "平": [
+   "m",
+   "even"
+  ],
+  "平平": [
+   "m",
+   "so-so"
+  ],
+  "平常": [
+   "m",
+   "ordinary"
+  ],
+  "中平": [
+   "m",
+   "neither good nor bad"
+  ],
+  "平稳": [
+   "m",
+   "steady"
+  ],
+  "稳": [
+   "m",
+   "stable"
+  ],
+  "半吉": [
+   "m",
+   "half favorable"
+  ],
+  "五分": [
+   "m",
+   "about half"
+  ],
+  "七分": [
+   "m",
+   "about 70%"
+  ],
+  "八分": [
+   "m",
+   "about 80%"
+  ],
+  "半熟": [
+   "m",
+   "half a harvest"
+  ],
+  "半收": [
+   "m",
+   "half a harvest"
+  ],
+  "暂安": [
+   "m",
+   "settled for now"
+  ],
+  "旧安": [
+   "m",
+   "steady as before"
+  ],
+  "微微": [
+   "m",
+   "a little"
+  ],
+  "尾利": [
+   "m",
+   "favorable toward the end"
+  ],
+  "迟滞": [
+   "m",
+   "slow going"
+  ],
+  "迟": [
+   "m",
+   "a bit late"
+  ],
+  "迟见": [
+   "m",
+   "found later"
+  ],
+  "迟至": [
+   "m",
+   "arrives late"
+  ],
+  "迟成": [
+   "m",
+   "comes together later"
+  ],
+  "迟合": [
+   "m",
+   "comes together later"
+  ],
+  "晚成": [
+   "m",
+   "comes together later"
+  ],
+  "晚收": [
+   "m",
+   "pays off later"
+  ],
+  "晚丰": [
+   "m",
+   "a good harvest later"
+  ],
+  "晚胜": [
+   "m",
+   "better later on"
+  ],
+  "晚": [
+   "m",
+   "on the late side"
+  ],
+  "留连": [
+   "m",
+   "held up, slow to return"
+  ],
+  "宜迟": [
+   "m",
+   "slower is better"
+  ],
+  "待时": [
+   "m",
+   "wait for the right time"
+  ],
+  "守待": [
+   "m",
+   "hold steady and wait"
+  ],
+  "守": [
+   "m",
+   "keep things as they are"
+  ],
+  "守旧": [
+   "m",
+   "keep things as they are"
+  ],
+  "旧": [
+   "m",
+   "as before"
+  ],
+  "宜旧": [
+   "m",
+   "better as before"
+  ],
+  "勿改": [
+   "m",
+   "don't change it"
+  ],
+  "守份": [
+   "m",
+   "stick to your part"
+  ],
+  "守慎": [
+   "m",
+   "hold steady and be careful"
+  ],
+  "谨守": [
+   "m",
+   "hold steady"
+  ],
+  "谨慎": [
+   "m",
+   "caution first"
+  ],
+  "慎重": [
+   "m",
+   "think it through"
+  ],
+  "慎吉": [
+   "m",
+   "fine if you are careful"
+  ],
+  "慎出": [
+   "m",
+   "go out less, take fewer risks"
+  ],
+  "谨防": [
+   "m",
+   "stay alert"
+  ],
+  "提防": [
+   "m",
+   "stay alert"
+  ],
+  "防": [
+   "m",
+   "stay alert"
+  ],
+  "防惊": [
+   "m",
+   "watch for a scare"
+  ],
+  "劳力": [
+   "m",
+   "takes more effort"
+  ],
+  "劳心": [
+   "m",
+   "takes more thought"
+  ],
+  "著力": [
+   "m",
+   "put in real effort"
+  ],
+  "劳": [
+   "m",
+   "expect a few trips"
+  ],
+  "勤": [
+   "m",
+   "keep looking"
+  ],
+  "勤理": [
+   "m",
+   "tend to it often"
+  ],
+  "带": [
+   "m",
+   "check what you carry"
+  ],
+  "祈福": [
+   "m",
+   "do some good and find peace of mind"
+  ],
+  "作福": [
+   "m",
+   "do some good"
+  ],
+  "祈保": [
+   "m",
+   "ask for safety"
+  ],
+  "求福": [
+   "m",
+   "ask for safety"
+  ],
+  "许愿": [
+   "m",
+   "make a wish"
+  ],
+  "还愿": [
+   "m",
+   "keep the promises you made"
+  ],
+  "还旧愿": [
+   "m",
+   "keep the promises you made"
+  ],
+  "许经": [
+   "m",
+   "quiet your mind"
+  ],
+  "拜送": [
+   "m",
+   "the old custom was a ritual offering; today, take good care of yourself"
+  ],
+  "设送": [
+   "m",
+   "the old custom was a ritual to send trouble off; today, rest well and see a doctor when you need to"
+  ],
+  "即设送": [
+   "m",
+   "the old custom was a quick ritual; today, don't put it off — see a doctor early"
+  ],
+  "禳星": [
+   "m",
+   "the old custom was praying to the stars; today, keep regular hours"
+  ],
+  "祭虎": [
+   "m",
+   "the old custom was an offering to the White Tiger; today, avoid clashes and rest more"
+  ],
+  "求神保佑": [
+   "m",
+   "find peace of mind, and look after yourself too"
+  ],
+  "急求神": [
+   "m",
+   "don't put it off — deal with it early"
+  ],
+  "欠利": [
+   "m",
+   "slightly short"
+  ],
+  "欠吉": [
+   "m",
+   "slightly short"
+  ],
+  "欠安": [
+   "m",
+   "a little unsettled"
+  ],
+  "宜改": [
+   "m",
+   "good time to adjust"
+  ],
+  "改": [
+   "m",
+   "needs adjusting"
+  ],
+  "择地": [
+   "m",
+   "choose the place carefully"
+  ],
+  "宜修": [
+   "m",
+   "good time to fix things up"
+  ],
+  "可养": [
+   "m",
+   "you can raise it"
+  ],
+  "宜早种": [
+   "m",
+   "start early"
+  ],
+  "早种": [
+   "m",
+   "start early"
+  ],
+  "早生": [
+   "m",
+   "early is better"
+  ],
+  "动": [
+   "m",
+   "there will be movement"
+  ],
+  "春实秋虚": [
+   "m",
+   "solid in spring, thin in autumn"
+  ],
+  "先虚后实": [
+   "m",
+   "thin at first, solid later"
+  ],
+  "虚惊": [
+   "m",
+   "a false alarm"
+  ],
+  "有惊": [
+   "m",
+   "a bit of a scare"
+  ],
+  "惊": [
+   "m",
+   "a scare"
+  ],
+  "延": [
+   "m",
+   "delayed"
+  ],
+  "搁": [
+   "m",
+   "on hold for now"
+  ],
+  "未遇": [
+   "m",
+   "not met yet"
+  ],
+  "未回": [
+   "m",
+   "not back yet"
+  ],
+  "未至": [
+   "m",
+   "not here yet"
+  ],
+  "远": [
+   "m",
+   "far away"
+  ],
+  "少": [
+   "m",
+   "on the low side"
+  ],
+  "虚女": [
+   "m",
+   "thin"
+  ],
+  "生男": [
+   "m",
+   ""
+  ],
+  "生女": [
+   "m",
+   ""
+  ],
+  "男": [
+   "m",
+   ""
+  ],
+  "女": [
+   "m",
+   ""
+  ],
+  "阻": [
+   "b",
+   "blocked"
+  ],
+  "有阻": [
+   "b",
+   "blocked"
+  ],
+  "阻滞": [
+   "b",
+   "stuck"
+  ],
+  "阻隔": [
+   "b",
+   "cut off"
+  ],
+  "滞": [
+   "b",
+   "stalled"
+  ],
+  "困滞": [
+   "b",
+   "boxed in"
+  ],
+  "困": [
+   "b",
+   "boxed in"
+  ],
+  "隔": [
+   "b",
+   "a gap between you"
+  ],
+  "险阻": [
+   "b",
+   "blocked"
+  ],
+  "难": [
+   "b",
+   "hard"
+  ],
+  "难成": [
+   "b",
+   "hard to pull off"
+  ],
+  "难合": [
+   "b",
+   "hard to come together"
+  ],
+  "难顺": [
+   "b",
+   "hard to go smoothly"
+  ],
+  "难见": [
+   "b",
+   "hard to find"
+  ],
+  "难寻": [
+   "b",
+   "hard to find"
+  ],
+  "难养": [
+   "b",
+   "hard to raise"
+  ],
+  "难痊": [
+   "b",
+   "slow to heal"
+  ],
+  "不成": [
+   "b",
+   "won't come together"
+  ],
+  "未成": [
+   "b",
+   "not there yet"
+  ],
+  "不就": [
+   "b",
+   "won't come together"
+  ],
+  "未就": [
+   "b",
+   "not there yet"
+  ],
+  "未合": [
+   "b",
+   "not together yet"
+  ],
+  "未许": [
+   "b",
+   "not settled yet"
+  ],
+  "未有": [
+   "b",
+   "nothing yet"
+  ],
+  "不利": [
+   "b",
+   "not in your favor"
+  ],
+  "不吉": [
+   "b",
+   "unfavorable"
+  ],
+  "不安": [
+   "b",
+   "unsettled"
+  ],
+  "不合": [
+   "b",
+   "not a good match"
+  ],
+  "不长": [
+   "b",
+   "hard to last"
+  ],
+  "不见": [
+   "b",
+   "not found"
+  ],
+  "不收": [
+   "b",
+   "no harvest"
+  ],
+  "杳": [
+   "b",
+   "no news"
+  ],
+  "无踪": [
+   "b",
+   "no trace"
+  ],
+  "空": [
+   "b",
+   "comes to nothing"
+  ],
+  "虚": [
+   "b",
+   "thin"
+  ],
+  "虚花": [
+   "b",
+   "thin"
+  ],
+  "有虚": [
+   "b",
+   "some of it is hollow"
+  ],
+  "虚险": [
+   "b",
+   "a false alarm"
+  ],
+  "险": [
+   "b",
+   "risky"
+  ],
+  "有险": [
+   "b",
+   "risky"
+  ],
+  "有危": [
+   "b",
+   "risky"
+  ],
+  "危险": [
+   "b",
+   "risky"
+  ],
+  "有灾": [
+   "b",
+   "trouble ahead"
+  ],
+  "有灾险": [
+   "b",
+   "risky"
+  ],
+  "多灾": [
+   "b",
+   "many ups and downs"
+  ],
+  "灾耗": [
+   "b",
+   "some losses"
+  ],
+  "亏": [
+   "b",
+   "you may lose out"
+  ],
+  "损": [
+   "b",
+   "some loss"
+  ],
+  "损失": [
+   "b",
+   "some loss"
+  ],
+  "破": [
+   "b",
+   "money may slip away"
+  ],
+  "破耗": [
+   "b",
+   "money may slip away"
+  ],
+  "破失": [
+   "b",
+   "some loss"
+  ],
+  "败": [
+   "b",
+   "likely to fail"
+  ],
+  "衰": [
+   "b",
+   "weak"
+  ],
+  "缺": [
+   "b",
+   "something missing"
+  ],
+  "凶": [
+   "b",
+   "not smooth"
+  ],
+  "祸": [
+   "b",
+   "trouble"
+  ],
+  "绝": [
+   "b",
+   "cut off"
+  ],
+  "莫动": [
+   "b",
+   "don't move"
+  ],
+  "勿动": [
+   "b",
+   "don't move"
+  ],
+  "莫兴": [
+   "b",
+   "don't stir it up"
+  ],
+  "莫养": [
+   "b",
+   "don't raise it"
+  ],
+  "口舌": [
+   "b",
+   "arguments"
+  ],
+  "是非": [
+   "b",
+   "gossip and drama"
+  ],
+  "招非": [
+   "b",
+   "invites drama"
+  ],
+  "小人": [
+   "b",
+   "watch out for bad actors"
+  ],
+  "反覆": [
+   "b",
+   "back and forth"
+  ],
+  "乱": [
+   "b",
+   "messy"
+  ],
+  "忧疑": [
+   "b",
+   "worry"
+  ],
+  "忧危": [
+   "b",
+   "take extra care"
+  ],
+  "延滞": [
+   "b",
+   "drags on"
+  ],
+  "延缠": [
+   "b",
+   "lingers"
+  ],
+  "犯阴": [
+   "b",
+   "the old texts say a bad influence; today, look after yourself"
+  ],
+  "犯罗网": [
+   "b",
+   "the old texts say caught in a net; today, take extra care"
+  ],
+  "刑伤": [
+   "b",
+   "hurt"
+  ],
+  "刑劫": [
+   "b",
+   "loss"
+  ],
+  "刑克": [
+   "b",
+   "clashing"
+  ],
+  "刑损": [
+   "b",
+   "damage"
+  ],
+  "瘟": [
+   "b",
+   "sickness"
+  ]
+ }
+}

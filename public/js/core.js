@@ -1,6 +1,7 @@
 // 公共工具：选择器、转义、接口请求、提示、底部弹层、点击分发、埋点。
-import { EN, LANG, t } from './i18n.js';
-export { EN, LANG, t };
+import { EN, LANG, t as tAll, tm } from './i18n.js';
+export { EN, LANG, tAll as t };
+const t = tm('common');
 export const $ = (s, r) => (r || document).querySelector(s);
 export const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 export function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -13,6 +14,30 @@ export const isDesk = () => matchMedia('(min-width: 960px)').matches;
 export const currentPath = () => (location.hash.replace(/^#/, '') || '/').split('?')[0];
 // 英文月份缩写；日期格式按语言出
 export const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export const MONTH_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+// 星期（0 = 周日）：Mon / 周一；月日：Nov 26 / 11月26日
+export const wkText = (i) => (EN ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i] : '周' + '日一二三四五六'[i]);
+export const mdOf = (m, d) => (EN ? MON[m - 1] + ' ' + d : `${m}月${d}日`);
+// 农历：英文写 Lunar 10/18（闰月 Lunar leap 6/3）
+// 只有中文月名、日名时（黄历数据）从中文认出数字：正月=1、冬月=11、腊月=12；初一、十五、廿三、三十
+const LM = '正二三四五六七八九十冬腊', LD = { 初: 0, 十: 10, 廿: 20, 三: 30 }, CN = '一二三四五六七八九十';
+function lunarNums(l) {
+  if (l.month != null && l.day != null) return [l.month < 0, Math.abs(l.month), l.day];
+  const mc = String(l.monthCn || ''), dc = String(l.dayCn || '');
+  const leap = mc.startsWith('闰'), mm = mc.replace('闰', '').replace('月', '');
+  const m = mm === '十一' ? 11 : mm === '十二' ? 12 : LM.indexOf(mm) + 1;
+  const d = dc === '初十' ? 10 : dc === '二十' ? 20 : dc === '三十' ? 30 : (LD[dc[0]] ?? 0) + CN.indexOf(dc[1]) + 1;
+  return [leap, m, d];
+}
+export const lunarText = (l) => {
+  if (!EN) return `农历${l.monthCn}月${l.dayCn}`;
+  const [leap, m, d] = lunarNums(l);
+  return `Lunar ${leap ? 'leap ' : ''}${m}/${d}`;
+};
+// 干支：英文写拼音（辛亥 → Xin Hai），中文原样
+const GPY = { 甲: 'Jia', 乙: 'Yi', 丙: 'Bing', 丁: 'Ding', 戊: 'Wu', 己: 'Ji', 庚: 'Geng', 辛: 'Xin', 壬: 'Ren', 癸: 'Gui' };
+const ZPY = { 子: 'Zi', 丑: 'Chou', 寅: 'Yin', 卯: 'Mao', 辰: 'Chen', 巳: 'Si', 午: 'Wu', 未: 'Wei', 申: 'Shen', 酉: 'You', 戌: 'Xu', 亥: 'Hai' };
+export const gzText = (gz) => (EN && gz ? `${GPY[gz[0]] || gz[0]} ${ZPY[gz[1]] || gz[1]}` : gz);
 export const mdText = (iso) => { const d = new Date(iso); return EN ? MON[d.getMonth()] + ' ' + d.getDate() : (d.getMonth() + 1) + '月' + d.getDate() + '日'; };
 export const ymdText = (iso) => { const d = new Date(iso); return EN ? MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() : d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'; };
 export const dtText = (iso) => { const d = new Date(iso); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
@@ -55,7 +80,7 @@ export const ENV_NAME = (IN_APP === '这个应用' ? (IS_IOS ? 'inapp-ios' : IS_
 
 // 复制：剪贴板不可用（部分 App 内置浏览器）时弹出文字让人手动复制
 export function copyText(text, ok) {
-  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast(ok), () => prompt('复制这段文字：', text));
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => toast(ok), () => prompt(t('复制这段文字：'), text));
 }
 
 export function api(method, path, body) {
@@ -63,12 +88,12 @@ export function api(method, path, body) {
     method, credentials: 'same-origin',
     headers: Object.assign({ 'X-Lang': LANG }, body === undefined ? {} : { 'Content-Type': 'application/json' }),
     body: body === undefined ? undefined : JSON.stringify(body),
-  }).then((r) => r.text().then((t) => {
-    let data; try { data = t ? JSON.parse(t) : {}; } catch { data = { message: '服务器返回异常' }; }
-    if (!r.ok) { const e = new Error(data.message || '出错了，请稍后再试'); e.status = r.status; e.data = data; throw e; }
+  }).then((r) => r.text().then((txt) => {
+    let data; try { data = txt ? JSON.parse(txt) : {}; } catch { data = { message: t('服务器返回异常') }; }
+    if (!r.ok) { const e = new Error(data.message || t('出错了，请稍后再试')); e.status = r.status; e.data = data; throw e; }
     if (r.headers.get('X-From-Cache') === '1') data.__offline = true;
     return data;
-  }), () => { const e = new Error('网络连接失败，请检查网络后重试'); e.status = 0; throw e; });
+  }), () => { const e = new Error(t('网络连接失败，请检查网络后重试')); e.status = 0; throw e; });
 }
 
 let toastTimer;
@@ -82,8 +107,9 @@ export function toast(msg) {
 // 访客点了要先测能量卡才能用的功能：说一句，再给一个去测（或去保存已经测好的卡）的按钮，不只闪一下提示
 export function guestAsk(what) {
   const tested = !!readLocal('pending');
-  openSheet(tested ? '保存你的能量卡' : '先测测你的能量卡', `<div class="guestask"><p>${tested ? '你的能量卡已经测好了。保存' : '测测你的能量卡并注册'}后，就能${esc(what)}。${tested ? '' : '不用先注册，测完再决定要不要保存。'}</p>`
-    + `<a class="btn primary block" href="#/${tested ? 'card' : 'start'}" data-close-sheet>${tested ? '保存我的能量卡' : '测测我的能量卡'}</a></div>`);
+  // what 是调用方已经 t() 过的动作短语（英文写成小写动词短语，接在 "to" 后面）
+  openSheet(tested ? t('保存你的能量卡') : t('先测测你的能量卡'), `<div class="guestask"><p>${tested ? t('你的能量卡已经测好了。保存后，就能{what}。', { what: esc(what) }) : t('测测你的能量卡并注册后，就能{what}。不用先注册，测完再决定要不要保存。', { what: esc(what) })}</p>`
+    + `<a class="btn primary block" href="#/${tested ? 'card' : 'start'}" data-close-sheet>${tested ? t('保存我的能量卡') : t('测测我的能量卡')}</a></div>`);
 }
 
 // 本地记一笔，用于“只提示一次”“今天关过了”这类状态
@@ -132,7 +158,7 @@ export function openSheet(title, html, opts = {}) {
   removeSheet(true);
   const el = document.createElement('div');
   el.className = 'sheet-bg' + (opts.cls ? ' ' + opts.cls : ''); el.id = 'sheet';
-  el.innerHTML = `<div class="sheet${opts.dark ? ' dark' : ''}${opts.wide ? ' wide' : ''}${opts.cls ? ' ' + opts.cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><div class="sh"><b>${esc(title)}</b><button type="button" class="close" data-close-sheet aria-label="关闭">✕</button></div><div class="sbody">${html}</div></div>`;
+  el.innerHTML = `<div class="sheet${opts.dark ? ' dark' : ''}${opts.wide ? ' wide' : ''}${opts.cls ? ' ' + opts.cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="grab" aria-hidden="true"></div><div class="sh"><b>${esc(title)}</b><button type="button" class="close" data-close-sheet aria-label="${t('关闭')}">✕</button></div><div class="sbody">${html}</div></div>`;
   el.addEventListener('click', (e) => { if (e.target === el) dismissSheet(); });
   $('#layer').appendChild(el);
   enableDrag(el);

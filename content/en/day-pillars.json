@@ -1,0 +1,425 @@
+{
+ "_note": "English day pillars. name and intro come from the US edition; tag is 'Sits on {Ten God} · {life stage}'; strong / weak is the line for a strong or weak chart. art is not repeated here (the Chinese file's art is kept).",
+ "pillars": {
+  "甲子": {
+   "name": "Oak by Winter Water",
+   "tag": "Sits on Support · Bathing",
+   "intro": "Bookish and easy to like. Every new thing you learn makes you surer of yourself.",
+   "strong": "A love of learning and real knowledge. You suit education, culture and research, and the more you build up, the more respect you earn.",
+   "weak": "People like you, and when things get hard an elder often lends a hand. Accept the help graciously."
+  },
+  "乙丑": {
+   "name": "Plum Blossom in Snow",
+   "tag": "Sits on Opportunity · Easing",
+   "intro": "Tough, patient and practical. You bloom in the cold, when everyone else has gone quiet.",
+   "strong": "A sharp, practical eye. You find value where others look past it — and you can earn it and keep it.",
+   "weak": "You can wait things out. Keep building quietly, and when it counts, you'll be seen."
+  },
+  "丙寅": {
+   "name": "Sunrise in the Spring Woods",
+   "tag": "Sits on Insight · Birth",
+   "intro": "Curious, upbeat and full of energy. You bring the morning with you wherever you go.",
+   "strong": "A quick learner full of ideas. You suit teaching and creative work, and mentors are glad to bring you along.",
+   "weak": "Upbeat and curious. Ask those ahead of you for advice; showing a little softness now and then makes the road smoother."
+  },
+  "丁卯": {
+   "name": "Lantern on a Flowering Branch",
+   "tag": "Sits on Insight · Illness",
+   "intro": "Imaginative, with a look all your own. Even when you're quiet, you give off light.",
+   "strong": "Full of ideas and imagination — design and art suit you. When inspiration strikes, remember to make it real.",
+   "weak": "Loyal and trustworthy, you easily win the regard and help of elders and mentors."
+  },
+  "戊辰": {
+   "name": "Mountain with a Hidden Spring",
+   "tag": "Sits on Allies · Coming of Age · Wealth Vault",
+   "intro": "Steady and generous. You can hold a lot — problems, secrets, people — and keep it all safe.",
+   "strong": "You can carry weight and gather resources. You suit long-term, large-scale work, and people trust you with what they have.",
+   "weak": "You're great at teaming up and pulling resources together. Your good relationships are your firmest footing."
+  },
+  "己巳": {
+   "name": "Sunny Fields in Early Summer",
+   "tag": "Sits on Support · Peak",
+   "intro": "Warm, lively and resourceful. You meet things head-on and usually find a way.",
+   "strong": "Plenty of energy and plenty of ways forward. You get back up fast, and others often lean on you.",
+   "weak": "Elders, teachers and mentors all want to help you, and your open, cheerful nature makes you easy to like."
+  },
+  "庚午": {
+   "name": "Sword Tempered in Summer Fire",
+   "tag": "Sits on Structure · Bathing",
+   "intro": "Polished and principled. You keep your standards, and pressure only makes you sharper.",
+   "strong": "Steady and respected. You suit carrying responsibility and setting direction in a team; people trust how you work.",
+   "weak": "Self-discipline is your strength. Focus on honing your craft — just don't be too hard on yourself."
+  },
+  "辛未": {
+   "name": "Gem in the Sand",
+   "tag": "Sits on Insight · Easing · Wealth Vault",
+   "intro": "Calm and seasoned on the outside, finely tuned on the inside. You notice everything.",
+   "strong": "Careful and measured, you hold on to what you have. Speak up and make moves, and your stage gets much bigger.",
+   "weak": "Share your ideas more and spend time with people who accept you. Your shine will come through bit by bit."
+  },
+  "壬申": {
+   "name": "River Rushing from Autumn Hills",
+   "tag": "Sits on Insight · Birth",
+   "intro": "Quick-minded with real staying power. You learn fast, and your world keeps getting wider.",
+   "strong": "A strong learner and thinker, great at research and planning. People are glad to give you a boost.",
+   "weak": "There's often someone looking out for you and moving you forward. Accept that kindness and take it one step at a time."
+  },
+  "癸酉": {
+   "name": "Dew on an Autumn Morning",
+   "tag": "Sits on Insight · Illness",
+   "intro": "Clear-headed with sharp instincts. You get things done cleanly, without fuss.",
+   "strong": "Rigorous logic and long-range vision. You suit going deep in fields like medicine, law or tech.",
+   "weak": "You have a skill no one else has. Your instincts save you detours, and people often help you behind the scenes."
+  },
+  "甲戌": {
+   "name": "Tree on an Autumn Ridge",
+   "tag": "Sits on Opportunity · Nurture",
+   "intro": "Down-to-earth and low-key, with deep reserves. People feel safe around you.",
+   "strong": "Trustworthy and steady, good at managing money and the household. You're the one everyone feels safe with.",
+   "weak": "You have your own views and stick to them. Independent and clear-sighted, you live richly inside, and life only gets more solid."
+  },
+  "乙亥": {
+   "name": "Blossoms on a Winter Lake",
+   "tag": "Sits on Support · Stillness",
+   "intro": "Kind, intuitive and calm inside. You never push, and you still carry weight.",
+   "strong": "Wise and never pushy. Teaching, scholarship and helping others suit you, and your reputation takes care of itself.",
+   "weak": "You love freedom and have friends everywhere. The care of elders and friends is what keeps you steady."
+  },
+  "丙子": {
+   "name": "Sunrise over a Frozen Lake",
+   "tag": "Sits on Structure · Conception",
+   "intro": "Upright and gracious. You play fair — and you can warm up the coldest room.",
+   "strong": "Upright and principled. You suit climbing step by step on a big platform, and bosses notice you.",
+   "weak": "Thoughtful and measured. Give yourself more credit and take bolder steps — it gets easier."
+  },
+  "丁丑": {
+   "name": "Lamplight in a Snowy Window",
+   "tag": "Sits on Ease · Storage · Wealth Vault",
+   "intro": "Unflashy, with a plan you keep to yourself. Your life runs on quiet good judgment.",
+   "strong": "Good with money and patient at building up. You leave nothing to chance and suit long-term investing.",
+   "weak": "Rich inside and never grasping. Focus on doing your own work well, and your reputation will speak for you."
+  },
+  "戊寅": {
+   "name": "Mountain in the Spring Forest",
+   "tag": "Sits on Pressure · Birth",
+   "intro": "A commanding presence, born to lead. When it counts, you make the call.",
+   "strong": "Decisive and willing to make the call. You suit leading teams and the big picture — add a little warmth to the authority.",
+   "weak": "Pressure only makes you tougher. Climb one step at a time and the road keeps widening."
+  },
+  "己卯": {
+   "name": "Field of Spring Sprouts",
+   "tag": "Sits on Pressure · Illness",
+   "intro": "Busy on the surface, calm underneath. The more there is to do, the more organized you get.",
+   "strong": "You don't say much, but it counts. You handle the thorny problems and hold things together when it matters.",
+   "weak": "Pressure actually sharpens you. You find a way through hard places, and every experience makes you wiser."
+  },
+  "庚辰": {
+   "name": "Sword Rising from a Spring Lake",
+   "tag": "Sits on Insight · Nurture",
+   "intro": "Strong presence, a mind of your own. The harder it gets, the more you want to win.",
+   "strong": "A natural at carrying big loads, with a method for managing people and work. When you move fast, still listen to those around you.",
+   "weak": "Your mind is your strength. Learn more, think more, and use finesse — small effort, big results."
+  },
+  "辛巳": {
+   "name": "Gem on a Sun-Warmed Stone",
+   "tag": "Sits on Structure · Stillness",
+   "intro": "Gracious and easy to like. You weigh things carefully — sometimes twice, sometimes ten times.",
+   "strong": "You know what to say and how far to go. Big platforms and outward-facing roles suit you — just don't bottle everything up.",
+   "weak": "With a reliable platform and people you trust behind you, you'll relax into yourself and shine brighter."
+  },
+  "壬午": {
+   "name": "Lake Holding the Summer Sky",
+   "tag": "Sits on Earnings · Conception",
+   "intro": "Bright and easygoing. You know how to build a good life, and everyone around you feels it.",
+   "strong": "You can earn and you can deliver, and you take care of both work and life. Your days are steady and pleasant.",
+   "weak": "You sense opportunities, understand the rules and read people well. Life is comfortable and easy."
+  },
+  "癸未": {
+   "name": "Rain on Dry Ground",
+   "tag": "Sits on Pressure · Storage",
+   "intro": "Big-hearted and giving. When you help, you help exactly where it matters.",
+   "strong": "You're not afraid of hard things. The tougher the place, the more you achieve — you're the one people rely on.",
+   "weak": "You don't fight head-on. Patience and wisdom dissolve problems, and your optimism keeps true friends close."
+  },
+  "甲申": {
+   "name": "Tree on a Windy Cliff",
+   "tag": "Sits on Pressure · Ending",
+   "intro": "Disciplined and decisive. Pressure makes you better — you stand tall and hold your ground.",
+   "strong": "You take responsibility and make the call. You suit leading teams and big things; your words and actions carry weight.",
+   "weak": "You grow fastest under pressure. Learn to meet hardness with softness and let wisdom settle the problem."
+  },
+  "乙酉": {
+   "name": "Osmanthus under the Autumn Moon",
+   "tag": "Sits on Pressure · Ending",
+   "intro": "Precise and composed. Your craft shows in the details.",
+   "strong": "Rigorous and decisive. You suit professional fields that demand precision and rules.",
+   "weak": "Quick to react and good at drawing on others. Work alongside a trusted mentor, and even setbacks become chances."
+  },
+  "丙戌": {
+   "name": "Sun Setting into Autumn Hills",
+   "tag": "Sits on Ease · Storage",
+   "intro": "Grounded and deep. Your warmth shows up in what you do, not in what you say.",
+   "strong": "You finish what you start and you're good at preserving and building. Long-term fields suit you — say your ideas out loud too.",
+   "weak": "Grounded and devoted to home; once you commit, you stick with it. Say what's on your mind, and your effort gets seen."
+  },
+  "丁亥": {
+   "name": "Lantern on a Winter River",
+   "tag": "Sits on Structure · Conception",
+   "intro": "Honest and reserved. You're quiet, and people trust you anyway — instantly.",
+   "strong": "Steady and respected, you easily earn your bosses' trust. Climbing step by step on a big platform suits you.",
+   "weak": "You don't say much, but every word lands. Elders dote on you — just keep being the clear-headed one."
+  },
+  "戊子": {
+   "name": "Mountain on a Snowy Night",
+   "tag": "Sits on Earnings · Conception",
+   "intro": "Practical, steady, smart with money. The higher the stakes, the more reliable you get.",
+   "strong": "You can earn money and manage it, and you work with method. You suit running things for the long haul and building real savings.",
+   "weak": "Quick-minded and well-liked, people trust you. Your good name is your path to prosperity."
+  },
+  "己丑": {
+   "name": "Field Resting in Winter",
+   "tag": "Sits on Allies · Storage",
+   "intro": "Humble and practical, a natural at living well. You know what's worth keeping.",
+   "strong": "Calm and organized, you can earn and you can keep. When something comes up, people want your call.",
+   "weak": "You don't like the spotlight. Go deep in one field and you'll become an expert — slow, steady building suits you best."
+  },
+  "庚寅": {
+   "name": "Sword in Stone, Spring Woods",
+   "tag": "Sits on Opportunity · Ending",
+   "intro": "A sharp eye for opportunity. Once you see it, you move.",
+   "strong": "A sharp eye and fast hands. You're great at pulling resources together to get things done — when you push hard, mind other people's feelings.",
+   "weak": "You're good at drawing on others and have lots of friends. You understand money, and things go smoother when you work with people."
+  },
+  "辛卯": {
+   "name": "Jade Hairpin among Flowers",
+   "tag": "Sits on Opportunity · Ending",
+   "intro": "Elegant and nimble-minded. You're always first to spot an opening.",
+   "strong": "A keen business sense, a sharp eye and quick action. Remember to give the long game some patience.",
+   "weak": "Team up with reliable partners, turn income into savings, and focus on going deep — you'll only get steadier."
+  },
+  "壬辰": {
+   "name": "Ocean at Spring Tide",
+   "tag": "Sits on Pressure · Storage",
+   "intro": "Big presence, big ambitions. Rough water just gets you going.",
+   "strong": "You have a leader's bearing and a wide view, made for steering big projects. Listen to those around you too.",
+   "weak": "Low-key and resilient. The connections and reserves you build up quietly will come through when it matters."
+  },
+  "癸巳": {
+   "name": "Sunshower in Early Summer",
+   "tag": "Sits on Earnings · Conception",
+   "intro": "Gentle and thoughtful. People are drawn to you, and you're easy to be around.",
+   "strong": "Gentle and resourceful, you find your way into good circles, and opportunities often come looking for you.",
+   "weak": "Lots of friends and lots of paths. You know how to lean on others and work together, and someone is always willing to help."
+  },
+  "甲午": {
+   "name": "Tree on a Summer Plain",
+   "tag": "Sits on Expression · Stillness",
+   "intro": "Clever and magnetic. People notice you, and your ideas are usually a step ahead.",
+   "strong": "Ahead of the curve and a strong communicator — you belong on a stage. When you're burning bright, remember to take a breath.",
+   "weak": "You focus well. Go deep into a small niche and earn respect through skill and insight."
+  },
+  "乙未": {
+   "name": "Vine on Late-Summer Earth",
+   "tag": "Sits on Opportunity · Nurture",
+   "intro": "Grounded and results-minded. You can put down roots anywhere.",
+   "strong": "You can get things done and build up savings. Steady, patient building — even owning lasting property — suits you.",
+   "weak": "Master one skill and you'll only grow more valued. Content with what you have, your days are full of flavor."
+  },
+  "丙申": {
+   "name": "Sun on an Autumn Evening",
+   "tag": "Sits on Opportunity · Illness",
+   "intro": "Quick and perceptive. You read the room, and you're funny without overstepping.",
+   "strong": "A feel for numbers and business. You suit trade and outward partnerships — just don't chase too many things at once.",
+   "weak": "Well-liked and good at making friends. Work with your network and resources, and the road keeps widening."
+  },
+  "丁酉": {
+   "name": "Candle in an Autumn Window",
+   "tag": "Sits on Opportunity · Birth",
+   "intro": "Refined taste and a nose for opportunity. You know how to live.",
+   "strong": "Business-minded and good with money. You spot chances in complicated places, and you live with taste.",
+   "weak": "A good eye and a gift for friendship. Someone is usually ready to help, and life keeps getting more refined."
+  },
+  "戊戌": {
+   "name": "Mountain in Late Autumn",
+   "tag": "Sits on Allies · Storage",
+   "intro": "Solid and quiet. You keep your word — you're the one everyone counts on.",
+   "strong": "Principled and able to carry a lot. You suit real industry and the long game — now and then, listen to other views.",
+   "weak": "Plain on the outside, full of ideas inside. Dig into a field or a craft and you'll see more clearly with every year."
+  },
+  "己亥": {
+   "name": "Field by Early Winter Water",
+   "tag": "Sits on Earnings · Conception",
+   "intro": "Steady and fair, with a fine sense of proportion. You can adapt to almost anything.",
+   "strong": "Thorough in everything, you earn money and people's trust alike. You suit growing on a stable platform.",
+   "weak": "Well-liked and adaptable. You don't need to be first to land in a good circle; life is steady and pleasant."
+  },
+  "庚子": {
+   "name": "Sword in a Cold Spring",
+   "tag": "Sits on Expression · Stillness",
+   "intro": "Bright and lively. There's a spark in how you talk and work, and new ideas keep coming.",
+   "strong": "A way with words and fresh ideas. You suit stages that need creativity — when your words get sharp, add some warmth.",
+   "weak": "Great at ideas and behind-the-scenes strategy, with a good eye. Your cleverness alone can give you a comfortable life."
+  },
+  "辛丑": {
+   "name": "Uncut Jade in Winter Earth",
+   "tag": "Sits on Insight · Nurture",
+   "intro": "You don't say much, but you see deep — into people, and into things.",
+   "strong": "Patient and far-sighted, you're good at planning. Remember to say your ideas out loud.",
+   "weak": "Go out and earn, show up, speak up — and the talent you keep hidden will be seen."
+  },
+  "壬寅": {
+   "name": "River through the Spring Woods",
+   "tag": "Sits on Ease · Illness",
+   "intro": "Talented and fun-loving. You know how to enjoy life, and the ideas never stop.",
+   "strong": "Full of ideas and a way with words. You can turn talent into income, and doing what you love pays off.",
+   "weak": "Quick and articulate; your good relationships are your strength. Make more friends and opportunities follow."
+  },
+  "癸卯": {
+   "name": "Spring Dew",
+   "tag": "Sits on Ease · Birth",
+   "intro": "Fresh and quick-witted. Your talent hides in the details, and you always know where the line is.",
+   "strong": "A gift for creating. Writing, design and research all come naturally, and people speak well of your work.",
+   "weak": "Gentle and easy to be around — the listener in your circle of friends. Taking things slow and steady is its own blessing."
+  },
+  "甲辰": {
+   "name": "Oak on a Rainy Riverbank",
+   "tag": "Sits on Opportunity · Easing",
+   "intro": "You think big and give freely. Every year, you stand on firmer ground.",
+   "strong": "You can earn and you can keep, and you work steadily. You suit the long game and building real savings.",
+   "weak": "Your surroundings nourish you. Easygoing and never pushy, work with others and opportunities will slowly find you."
+  },
+  "乙巳": {
+   "name": "Flower Climbing the Rocks",
+   "tag": "Sits on Expression · Bathing",
+   "intro": "Bright and expressive. Walk into a room, and you're seen.",
+   "strong": "Articulate, full of ideas and hands-on — you belong in front. When you shine very bright, leave others some room.",
+   "weak": "You win with cleverness, not force. Planning, advising, solving people's problems — that's where your value lies."
+  },
+  "丙午": {
+   "name": "Midsummer Noon Sun",
+   "tag": "Sits on Competition · Peak",
+   "intro": "Warm, bold and quick to act. Your energy fills the place.",
+   "strong": "Bold, driven and great at execution. You suit starting and building things — when your temper flares, pause first.",
+   "weak": "Generous and loyal is who you are. Charge ahead with reliable partners and your energy goes where it counts."
+  },
+  "丁未": {
+   "name": "Lamp on a Country Path",
+   "tag": "Sits on Ease · Coming of Age",
+   "intro": "Reliable and steady. If you say it, you'll do it.",
+   "strong": "Solid and true to your word — people trust you with things, and you lift up those around you.",
+   "weak": "One well-honed craft is all the footing you need. You'll want for nothing, and you know how to enjoy life."
+  },
+  "戊申": {
+   "name": "Autumn Hill with a Clear Spring",
+   "tag": "Sits on Ease · Illness",
+   "intro": "Witty and playful, with a real gift for enjoying life.",
+   "strong": "Full of ideas and a way with words. You make a living with your mind and your taste, and life feels clear and free.",
+   "weak": "Master one craft and you'll have solid footing. Gentle and good at reading people, others are glad to help you."
+  },
+  "己酉": {
+   "name": "Fields at Harvest",
+   "tag": "Sits on Ease · Birth",
+   "intro": "You know good things when you see them. Your life has real flavor.",
+   "strong": "Creativity and a way with words are enough to get results. Turn your hobbies and taste into real skill.",
+   "weak": "Skilled hands and a careful mind. You stand on talent in art, design or performance, and things get easier with time."
+  },
+  "庚戌": {
+   "name": "Old Sword in the Autumn Hills",
+   "tag": "Sits on Insight · Easing",
+   "intro": "Plain-spoken and quiet, with principles you won't bend. People rely on you.",
+   "strong": "Reliable and true to your word, you keep people calm in chaos — the backbone of the team.",
+   "weak": "Dig into one craft or field. The deeper you go, the more respect comes naturally."
+  },
+  "辛亥": {
+   "name": "Pearl in a Winter Lake",
+   "tag": "Sits on Expression · Bathing",
+   "intro": "Graceful and perceptive, with a real creative streak.",
+   "strong": "Talent and taste in equal measure — you're good at expressing and creating. Be a little more patient with the people around you.",
+   "weak": "With gentle, patient people beside you and quiet time to work, you'll open up more and more."
+  },
+  "壬子": {
+   "name": "Ocean Rising on a Winter Night",
+   "tag": "Sits on Competition · Peak",
+   "intro": "Bold and fearless, and loyal to the core.",
+   "strong": "Bold and able to lead a team. You suit breaking new ground — when you charge ahead, leave yourself some margin.",
+   "weak": "The harder it gets, the tougher you are. Hold your ground and keep going; you often turn things around."
+  },
+  "癸丑": {
+   "name": "Drizzle on Winter Fields",
+   "tag": "Sits on Pressure · Coming of Age",
+   "intro": "Quiet and low-key, with a mind firmly your own. You carry weight without making noise.",
+   "strong": "You rarely show your hand, but when you move, it counts. You suit managing people and money from behind the scenes.",
+   "weak": "Hard places forge your skills. Keep at it quietly and the road will open up."
+  },
+  "甲寅": {
+   "name": "Great Tree in the Early Spring Forest",
+   "tag": "Sits on Allies · Coming into Power",
+   "intro": "Confident and sure of yourself. You were made to grow upward.",
+   "strong": "A strong presence and willing to take charge. Once you set a goal you go all out — just listen to other voices too.",
+   "weak": "Deep roots are your strength. You can ride out a bad stretch, and the harder it gets, the stronger you grow."
+  },
+  "乙卯": {
+   "name": "Orchid after Spring Rain",
+   "tag": "Sits on Allies · Coming into Power",
+   "intro": "Fresh, lovely and easy to be around. People are simply drawn to you.",
+   "strong": "You have your own style. You never try to please, yet people like you, and opportunities find you.",
+   "weak": "Gentle but tough. Go deep in one field over time and you'll become irreplaceable."
+  },
+  "丙辰": {
+   "name": "Sun Breaking through Rain Clouds",
+   "tag": "Sits on Ease · Coming of Age",
+   "intro": "Gentle and cultured, with a head full of wonderful ideas.",
+   "strong": "Lots of talent and lots of ideas — design, tech and consulting suit you. After long stretches, remember to recharge.",
+   "weak": "Gentle and caring, with a taste for life's small joys. Avoid head-on clashes and go at your own pace."
+  },
+  "丁巳": {
+   "name": "Kiln Fire in Early Summer",
+   "tag": "Sits on Competition · Peak",
+   "intro": "You don't give up, and your drive is contagious.",
+   "strong": "You can lead the charge and rally people. Once you set a goal you go all out — plan your way back before you leap.",
+   "weak": "Your friends are your good fortune. Find the right partners and you'll go further together than alone."
+  },
+  "戊午": {
+   "name": "High Mountain under Blazing Sun",
+   "tag": "Sits on Support · Peak",
+   "intro": "Passionate and strong under pressure. You stand out wherever you go.",
+   "strong": "High energy and loyal; competition fires you up. Remember to leave yourself time to rest.",
+   "weak": "Elders and mentors want to help you. Learning, culture and education suit you — keep building and you'll shine."
+  },
+  "己未": {
+   "name": "Golden Wheat in Late Summer",
+   "tag": "Sits on Allies · Coming of Age",
+   "intro": "Hardworking and never one to quit. Step by step, you build a full life.",
+   "strong": "You rely on yourself, and even starting from nothing you build something steady. When you're tired, don't carry it all alone.",
+   "weak": "One skill or craft is enough to put down roots. You keep a good attitude and handle stress well; life feels solid."
+  },
+  "庚申": {
+   "name": "Sword on an Autumn Cliff",
+   "tag": "Sits on Allies · Coming into Power",
+   "intro": "Direct, unbreakable, and fiercely loyal.",
+   "strong": "The harder the task, the more willing you are. You break new ground and have lots of friends — when it's head-on, try another angle.",
+   "weak": "Refusing to give up is your strength. Don't rush a bad stretch — keep going and things will turn."
+  },
+  "辛酉": {
+   "name": "Diamond under the Autumn Moon",
+   "tag": "Sits on Allies · Coming into Power",
+   "intro": "Exacting, with high standards — and fiercely loyal to your people.",
+   "strong": "Sharp judgment and words that hit the mark — professional work suits you. Keep your edge sheathed and you'll earn more respect.",
+   "weak": "Pour your high standards into polishing your work. With people who appreciate you and a place to show it, you'll shine."
+  },
+  "壬戌": {
+   "name": "Lake Ringed by Autumn Hills",
+   "tag": "Sits on Pressure · Coming of Age · Wealth Vault",
+   "intro": "Kind-hearted, intuitive, and very good with money.",
+   "strong": "You can earn and save, and you have a knack for money; your instincts help you dodge risks. When you can, you love to give back.",
+   "weak": "You value inner life over things, with a feel for philosophy and life — friends often come to you for direction."
+  },
+  "癸亥": {
+   "name": "Fine Rain on a Winter Lake",
+   "tag": "Sits on Competition · Peak",
+   "intro": "Calm on the surface, with real depth of heart and vision.",
+   "strong": "Far-sighted and patient. You don't talk much, but when you do, you set the direction — you suit seeing the whole picture.",
+   "weak": "Soft on the outside, strong within. You can endure and adapt, and after hard times you gather your strength again."
+  }
+ }
+}

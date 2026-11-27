@@ -2,11 +2,13 @@
 // 商品：月度会员（默认）、特别款御守（问事已含在会员里，不单卖）。会员另有海外付款：去 Gumroad 用外币卡或 PayPal 付（按月/按年自动续费）。
 import { $, esc, api, toast, openSheet, dismissSheet, onClick, ymdText, price, pad, IS_WECHAT, IS_MOBILE, track } from './core.js';
 import { S } from './state.js';
+import { tm } from './i18n.js';
+const t = tm('common'); // 先查 i18n/en/common.json
 
 let timers = [], order = null, intl = null, checking = false, onPaid = null, paidPending = false, opts = {};
-const TITLE = { member: '开通月度会员', amulet: '特别款御守' };
-const LINE = { member: (o) => `月度会员 · ${o.days} 天 · 不自动续费`, amulet: () => '特别款御守 1 枚 · 买了不过期' };
-function stop() { timers.forEach((t) => clearInterval(t)); timers = []; document.removeEventListener('visibilitychange', onVisible); }
+const TITLE = { member: t('开通月度会员'), amulet: t('特别款御守') };
+const LINE = { member: (o) => t('月度会员 · {n} 天 · 不自动续费', { n: o.days }), amulet: () => t('特别款御守 1 枚 · 买了不过期') };
+function stop() { timers.forEach((x) => clearInterval(x)); timers = []; document.removeEventListener('visibilitychange', onVisible); }
 function onVisible() { if (document.visibilityState === 'visible' && order) check(true); }
 
 export function openPay(after, options) {
@@ -15,13 +17,13 @@ export function openPay(after, options) {
   opts = options || {};
   const product = opts.product || 'member';
   track('pay_open', { product });
-  const body = openSheet(TITLE[product], '<div class="pay"><div class="sk" style="width:208px;height:208px"></div><p class="tip">正在生成订单…</p></div>', { onClose: () => { stop(); order = null; if (paidPending) { paidPending = false; if (onPaid) onPaid(); } } });
+  const body = openSheet(TITLE[product], '<div class="pay"><div class="sk" style="width:208px;height:208px"></div><p class="tip">' + t('正在生成订单…') + '</p></div>', { onClose: () => { stop(); order = null; if (paidPending) { paidPending = false; if (onPaid) onPaid(); } } });
   api('POST', 'pay/orders', { product }).then((d) => {
     order = d.order;
     intl = d.intl || null;
     render(body);
     watch(body);
-  }, (e) => { body.innerHTML = `<div class="pay"><p class="tip">${esc(e.message)}</p><button type="button" class="btn ghost" data-pay-retry>重试</button></div>`; });
+  }, (e) => { body.innerHTML = `<div class="pay"><p class="tip">${esc(e.message)}</p><button type="button" class="btn ghost" data-pay-retry>${t('重试')}</button></div>`; });
 }
 
 function watch(body) {
@@ -34,7 +36,7 @@ function watch(body) {
 // 海外付款入口：两个按钮，点了新开 Gumroad 结账页
 function intlHtml() {
   if (!intl) return '';
-  return `<div class="intl"><p class="tip">在海外？用外币卡或 PayPal 付（美元，自动续费，随时可取消）</p><div class="row"><button type="button" class="btn ghost" data-intl="monthly">$${price(intl.monthly)} / 月</button><button type="button" class="btn ghost" data-intl="yearly">$${price(intl.yearly)} / 年</button></div></div>`;
+  return `<div class="intl"><p class="tip">${t('在海外？用外币卡或 PayPal 付（美元，自动续费，随时可取消）')}</p><div class="row"><button type="button" class="btn ghost" data-intl="monthly">${t('${p} / 月', { p: price(intl.monthly) })}</button><button type="button" class="btn ghost" data-intl="yearly">${t('${p} / 年', { p: price(intl.yearly) })}</button></div></div>`;
 }
 
 function render(body) {
@@ -42,30 +44,30 @@ function render(body) {
   if (!o) { body.innerHTML = `<div class="pay">${intlHtml()}</div>`; return; }
   let h = `<div class="pay"><div class="amt"><small>¥</small>${price(o.amountCents)}</div><p class="tip">${LINE[o.product || 'member'](o)}</p>`;
   if (IS_WECHAT) {
-    h += `<ol class="steps"><li>微信里无法直接打开支付宝。</li><li>点右上角「···」，选择「在浏览器打开」。</li><li>在浏览器里重新点「${TITLE[o.product || 'member']}」完成付款。</li></ol><button type="button" class="btn ghost block" id="copyLink">复制页面链接</button>`;
+    h += `<ol class="steps"><li>${t('微信里无法直接打开支付宝。')}</li><li>${t('点右上角「···」，选择「在浏览器打开」。')}</li><li>${t('在浏览器里重新点「{x}」完成付款。', { x: TITLE[o.product || 'member'] })}</li></ol><button type="button" class="btn ghost block" id="copyLink">${t('复制页面链接')}</button>`;
   } else if (IS_MOBILE) {
     const scheme = 'alipays://platformapi/startapp?saId=10000007&qrcode=' + encodeURIComponent(o.qr);
-    h += `<a class="btn alipay block" href="${esc(scheme)}" id="openAlipay">打开支付宝付款</a><button type="button" class="btn ghost block" data-paycheck>我已付款</button>`
-      + `<p class="tip">付完回到这里，会自动开通。没有跳转？<a href="${esc(o.qr)}">点这里</a></p>`
-      + `<details style="width:100%"><summary class="tip" style="text-align:center">用另一部手机扫码</summary><div class="qr" style="margin:10px auto 0">${o.qrSvg}</div></details>`;
+    h += `<a class="btn alipay block" href="${esc(scheme)}" id="openAlipay">${t('打开支付宝付款')}</a><button type="button" class="btn ghost block" data-paycheck>${t('我已付款')}</button>`
+      + `<p class="tip">${t('付完回到这里，会自动开通。没有跳转？')}<a href="${esc(o.qr)}">${t('点这里')}</a></p>`
+      + `<details style="width:100%"><summary class="tip" style="text-align:center">${t('用另一部手机扫码')}</summary><div class="qr" style="margin:10px auto 0">${o.qrSvg}</div></details>`;
   } else {
-    h += `<div class="qr" aria-label="支付宝付款二维码">${o.qrSvg}</div><p class="tip">打开手机支付宝，扫一扫付款</p>`;
+    h += `<div class="qr" aria-label="${t('支付宝付款二维码')}">${o.qrSvg}</div><p class="tip">${t('打开手机支付宝，扫一扫付款')}</p>`;
   }
   body.innerHTML = h + '<div class="cd" id="payCd"></div>' + intlHtml() + '</div>';
   tick(body);
 }
 function renderIntl(body, url) {
   const yearly = order.days > 31;
-  const t = $('#sheet .sh b'); if (t) t.textContent = yearly ? '开通年度会员' : '开通月度会员';
-  body.innerHTML = `<div class="pay"><div class="amt"><small>$</small>${price(order.amountCents)}</div><p class="tip">${yearly ? '年度' : '月度'}会员 · 自动续费 · 随时可取消</p>`
-    + `<p class="tip">已在新页面打开 Gumroad 结账，付完回到这里会自动开通。</p><a class="btn primary block" href="${esc(url)}" target="_blank" rel="noopener">没打开？点这里去付款</a>`
-    + '<button type="button" class="btn ghost block" data-paycheck>我已付款</button><p class="tip">取消续费：用 Gumroad 收据邮件里的「Manage membership」。</p></div>';
+  const tt = $('#sheet .sh b'); if (tt) tt.textContent = yearly ? t('开通年度会员') : t('开通月度会员');
+  body.innerHTML = `<div class="pay"><div class="amt"><small>$</small>${price(order.amountCents)}</div><p class="tip">${yearly ? t('年度会员 · 自动续费 · 随时可取消') : t('月度会员 · 自动续费 · 随时可取消')}</p>`
+    + `<p class="tip">${t('已在新页面打开 Gumroad 结账，付完回到这里会自动开通。')}</p><a class="btn primary block" href="${esc(url)}" target="_blank" rel="noopener">${t('没打开？点这里去付款')}</a>`
+    + `<button type="button" class="btn ghost block" data-paycheck>${t('我已付款')}</button><p class="tip">${t('取消续费：用 Gumroad 收据邮件里的「Manage membership」。')}</p></div>`;
 }
 function tick(body) {
   if (!order || order.provider === 'gumroad') return;
   const left = Math.max(0, Math.floor((new Date(order.expiresAt) - Date.now()) / 1000));
   const el = $('#payCd', body);
-  if (el) el.textContent = left > 0 ? `二维码 ${Math.floor(left / 60)}:${pad(left % 60)} 后失效` : '';
+  if (el) el.textContent = left > 0 ? t('二维码 {t} 后失效', { t: Math.floor(left / 60) + ':' + pad(left % 60) }) : '';
   if (left <= 0 && order.status === 'pending') check(true);
 }
 function check(force, manual) {
@@ -82,15 +84,15 @@ function check(force, manual) {
       if (product === 'member') { S.today = null; S.todayLocked = null; S.cal = null; S.calLocked = null; }
       track('pay_success', { product });
       const done = product === 'member'
-        ? `<div class="amt" style="font-size:22px">开通成功</div><p class="tip">会员有效期至 ${ymdText(d.access.memberUntil)}</p><button type="button" class="btn primary block" data-close-sheet>开始使用</button>`
-        : `<div class="amt" style="font-size:22px">已到账</div><p class="tip">马上为你织这枚特别款御守</p><button type="button" class="btn primary block" data-close-sheet>好的</button>`;
+        ? `<div class="amt" style="font-size:22px">${t('开通成功')}</div><p class="tip">${t('会员有效期至 {d}', { d: ymdText(d.access.memberUntil) })}</p><button type="button" class="btn primary block" data-close-sheet>${t('开始使用')}</button>`
+        : `<div class="amt" style="font-size:22px">${t('已到账')}</div><p class="tip">${t('马上为你织这枚特别款御守')}</p><button type="button" class="btn primary block" data-close-sheet>${t('好的')}</button>`;
       if (body) body.innerHTML = `<div class="pay"><div class="ok">✓</div>${done}</div>`;
       setTimeout(() => { if ($('#sheet .pay .ok')) dismissSheet(); }, 3000);
       paidPending = true;
     } else if (d.order.status === 'closed') {
       stop(); order = null;
-      if (body) body.innerHTML = '<div class="pay"><p class="tip">二维码已过期</p><button type="button" class="btn primary block" data-pay-retry>重新生成</button></div>';
-    } else if (manual) toast('还没收到付款结果，付完稍等几秒');
+      if (body) body.innerHTML = `<div class="pay"><p class="tip">${t('二维码已过期')}</p><button type="button" class="btn primary block" data-pay-retry>${t('重新生成')}</button></div>`;
+    } else if (manual) toast(t('还没收到付款结果，付完稍等几秒'));
   }, (e) => { checking = false; if (manual) toast(e.message); });
 }
 
@@ -109,5 +111,5 @@ onClick('[data-intl]', (el) => {
 onClick('[data-pay-retry]', () => openPay(onPaid, opts));
 onClick('#copyLink', () => {
   const u = location.href;
-  (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast('已复制，去浏览器打开吧'), () => prompt('复制这个链接，到浏览器打开：', u));
+  (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast(t('已复制，去浏览器打开吧')), () => prompt(t('复制这个链接，到浏览器打开：'), u));
 });

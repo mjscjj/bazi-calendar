@@ -1,0 +1,196 @@
+{
+ "_note": "English pair paintings (names from the US edition) and the six relationship kinds. {me} is your image (e.g. Oak), {you} is theirs.",
+ "kinds": {
+  "合": {
+   "tag": "Made to Match",
+   "text": "You are the {me}, they are the {you}. Your signs combine — together, you both feel more like yourselves."
+  },
+  "同": {
+   "tag": "Side by Side",
+   "text": "You are both the {me}. Same instincts, same rhythm — the kind of pair that goes the distance."
+  },
+  "我生": {
+   "tag": "You Lift Them",
+   "text": "You are the {me}, they are the {you}. You hold them up, and they give your care somewhere to go."
+  },
+  "生我": {
+   "tag": "They Lift You",
+   "text": "You are the {me}, they are the {you}. They hold you up — around them, you stand a little taller."
+  },
+  "我克": {
+   "tag": "You Push Them",
+   "text": "You are the {me}, they are the {you}. You push them forward. When it grinds, give them room."
+  },
+  "克我": {
+   "tag": "They Push You",
+   "text": "You are the {me}, they are the {you}. They push you forward. Get through the friction, and no one will know you better."
+  }
+ },
+ "pairs": {
+  "甲甲": {
+   "name": "Twin Oaks"
+  },
+  "甲乙": {
+   "name": "Vine around the Oak"
+  },
+  "甲丙": {
+   "name": "Oak toward the Sun"
+  },
+  "甲丁": {
+   "name": "Lantern beneath the Oak"
+  },
+  "甲戊": {
+   "name": "Pine on the Mountain"
+  },
+  "甲己": {
+   "name": "Oak by the Field"
+  },
+  "甲庚": {
+   "name": "Sword against the Oak"
+  },
+  "甲辛": {
+   "name": "Jade on a Branch"
+  },
+  "甲壬": {
+   "name": "Oak by the River"
+  },
+  "甲癸": {
+   "name": "Oak in the Rain"
+  },
+  "乙乙": {
+   "name": "Twined Vines"
+  },
+  "乙丙": {
+   "name": "Flower Facing the Sun"
+  },
+  "乙丁": {
+   "name": "Lantern among Flowers"
+  },
+  "乙戊": {
+   "name": "Flowers on the Hillside"
+  },
+  "乙己": {
+   "name": "Flowers in the Garden"
+  },
+  "乙庚": {
+   "name": "Sword Wrapped in Blossoms"
+  },
+  "乙辛": {
+   "name": "Petals and Jade"
+  },
+  "乙壬": {
+   "name": "Lotus on the River"
+  },
+  "乙癸": {
+   "name": "Flower with Dew"
+  },
+  "丙丙": {
+   "name": "Sun and Its Reflection"
+  },
+  "丙丁": {
+   "name": "Sunset, Lamps Lit"
+  },
+  "丙戊": {
+   "name": "Sunrise over the Peaks"
+  },
+  "丙己": {
+   "name": "Grain Drying in the Sun"
+  },
+  "丙庚": {
+   "name": "Sunlight on a Blade"
+  },
+  "丙辛": {
+   "name": "Gem in the Sunlight"
+  },
+  "丙壬": {
+   "name": "Sunrise over the Sea"
+  },
+  "丙癸": {
+   "name": "Rainbow after Rain"
+  },
+  "丁丁": {
+   "name": "A Pair of Lanterns"
+  },
+  "丁戊": {
+   "name": "Lamp in the Mountains"
+  },
+  "丁己": {
+   "name": "Farmhouse Lamp"
+  },
+  "丁庚": {
+   "name": "Forge and Sword"
+  },
+  "丁辛": {
+   "name": "Jewels by Candlelight"
+  },
+  "丁壬": {
+   "name": "Lantern Boat on the River"
+  },
+  "丁癸": {
+   "name": "Lamp on a Rainy Night"
+  },
+  "戊戊": {
+   "name": "Twin Peaks"
+  },
+  "戊己": {
+   "name": "Fields below the Mountain"
+  },
+  "戊庚": {
+   "name": "Sword Hidden in the Mountain"
+  },
+  "戊辛": {
+   "name": "Jade in the Mountain"
+  },
+  "戊壬": {
+   "name": "Mountain Facing the Sea"
+  },
+  "戊癸": {
+   "name": "Green Hills after Rain"
+  },
+  "己己": {
+   "name": "Terraced Fields"
+  },
+  "己庚": {
+   "name": "Gold in the Field"
+  },
+  "己辛": {
+   "name": "Pearl in the Earth"
+  },
+  "己壬": {
+   "name": "River through the Fields"
+  },
+  "己癸": {
+   "name": "Spring Rain on the Fields"
+  },
+  "庚庚": {
+   "name": "Crossed Swords"
+  },
+  "庚辛": {
+   "name": "Jade-Set Sword"
+  },
+  "庚壬": {
+   "name": "Sword by the River"
+  },
+  "庚癸": {
+   "name": "Sword in the Rain"
+  },
+  "辛辛": {
+   "name": "A Pair of Pearls"
+  },
+  "辛壬": {
+   "name": "Pearl in the Sea"
+  },
+  "辛癸": {
+   "name": "Gem in the Rain"
+  },
+  "壬壬": {
+   "name": "Rivers Meeting"
+  },
+  "壬癸": {
+   "name": "Rain into the Sea"
+  },
+  "癸癸": {
+   "name": "Twin Streams in Drizzle"
+  }
+ }
+}
