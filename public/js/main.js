@@ -172,10 +172,11 @@ function boot() {
     document.querySelector('meta[name=description]')?.setAttribute('content', 'flowday reads your birth details and tells you what each day is good for, the best hours to do it, and what to wear.');
     $('#tabbar')?.setAttribute('aria-label', t('主导航'));
   }
-  const from = new URLSearchParams(location.search).get('from');
+  const qs = new URLSearchParams(location.search), from = qs.get('from');
   if (from) track('landing', { from });
-  // 每次打开记一次（转化漏斗的第一步）
-  try { if (!sessionStorage.getItem('lrl:visit')) { sessionStorage.setItem('lrl:visit', '1'); track('visit', { standalone: matchMedia('(display-mode: standalone)').matches, env: ENV_NAME }); } } catch { /* 无痕模式 */ }
+  // 每次打开记一次（转化漏斗的第一步）；带 utm 的外部链接（如 Pinterest）记下来源，后台按来源统计
+  const src = qs.get('utm_source') ? { src: qs.get('utm_source').slice(0, 40), utm: (qs.get('utm_content') || '').slice(0, 60) } : {};
+  try { if (!sessionStorage.getItem('lrl:visit')) { sessionStorage.setItem('lrl:visit', '1'); track('visit', { standalone: matchMedia('(display-mode: standalone)').matches, env: ENV_NAME, ...src }); } } catch { /* 无痕模式 */ }
   return api('GET', 'me').then((d) => {
     S.me = d.user; S.access = d.access || null; S.unread = d.unread || 0;
     if (syncAccountLang(S.me, (lang) => api('PUT', 'me/settings', { lang }).catch(() => {}))) return;

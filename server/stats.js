@@ -70,5 +70,13 @@ export function adminStats(db, now = Date.now()) {
     weeks.push({ week: a, n: rows.length, match: rows.length ? rows.filter((r) => band(r.score) === band(r.sys_level)).length / rows.length : null });
   }
 
-  return { funnel7: funnel(7), funnel30: funnel(30), cohorts, northStar: { members: members.length, median }, features, share, ratings: weeks };
+  // 外部来源（链接带 utm_source）：近 30 天按来源看访客数和其中注册的人数（同一设备先打开、后注册）
+  const from30Iso = dayStart(addDays(today, -29));
+  const sources = db.all(`SELECT json_extract(v.props, '$.src') src, COUNT(DISTINCT v.anon_id) visitors,
+      (SELECT COUNT(DISTINCT r.user_id) FROM events r WHERE r.name = 'register' AND r.anon_id IN
+        (SELECT anon_id FROM events WHERE name = 'visit' AND json_extract(props, '$.src') = json_extract(v.props, '$.src') AND created_at >= ?)) signups
+    FROM events v WHERE v.name = 'visit' AND v.created_at >= ? AND json_extract(v.props, '$.src') IS NOT NULL
+    GROUP BY src ORDER BY visitors DESC`, from30Iso, from30Iso);
+
+  return { funnel7: funnel(7), funnel30: funnel(30), cohorts, sources, northStar: { members: members.length, median }, features, share, ratings: weeks };
 }

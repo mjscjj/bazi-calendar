@@ -99,6 +99,8 @@ function statsHtml(st) {
     + kpi('近 7 天生成分享图', st.share.makers + ' 人', '带来打开 ' + st.share.opens + ' 次') + kpi('近 7 天邀请注册', st.share.invitedSignups, '已生效 ' + st.share.invitesDone) + kpi('日历订阅在用', (st.features.filter(function (f) { return f.key === 'ics_fetch'; })[0] || {}).users || 0, '近 7 天同步过') + '</div>'
     + '<div class="grp">转化漏斗</div><div class="charts">' + funnelHtml('近 7 天', st.funnel7) + funnelHtml('近 30 天', st.funnel30) + '</div>'
     + '<p class="sub2" style="margin:0">「打开」「测能量卡」按设备计（「打开」从这次更新上线起记录），其余按注册账号计，所以比例可能超过 100%；「第 2 天再来」= 注册后至少用过两个不同的日子。</p>'
+    + ((st.sources || []).length ? '<div class="grp">外部来源（近 30 天）</div><div class="tbl"><table><tr><th>来源</th><th class="num">访客</th><th class="num">注册</th></tr>'
+      + st.sources.map(function (s) { return '<tr><td>' + esc(s.src) + '</td><td class="num">' + s.visitors + '</td><td class="num">' + s.signups + '</td></tr>'; }).join('') + '</table></div>' : '')
     + '<div class="grp">留存（按注册日）</div><div class="tbl"><table><tr><th>注册日</th><th class="num">人数</th><th class="num">第 1 天</th><th class="num">第 3 天</th><th class="num">第 7 天</th><th class="num">第 14 天</th></tr>'
     + (st.cohorts.some(function (c) { return c.size; }) ? '' : '<tr><td colspan="6" class="sub2" style="text-align:center;padding:20px">近 14 天没有新注册</td></tr>')
     + st.cohorts.slice().reverse().filter(function (c) { return c.size; }).map(function (c) { return '<tr><td>' + c.day.slice(5) + '</td><td class="num">' + c.size + '</td><td class="num">' + pct(c.d1) + '</td><td class="num">' + pct(c.d3) + '</td><td class="num">' + pct(c.d7) + '</td><td class="num">' + pct(c.d14) + '</td></tr>'; }).join('') + '</table></div>'
