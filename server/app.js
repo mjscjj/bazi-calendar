@@ -1976,6 +1976,17 @@ export function createApp({ db, alipay, gumroad = null, env = process.env, log =
         return;
       }
       if ((req.method === 'GET' || req.method === 'HEAD') && serveStatic(req, res, p)) return;
+      // 协议和隐私政策的独立网页（第三方平台审核要一个能直接打开的链接），?lang=en 出英文
+      if ((req.method === 'GET' || req.method === 'HEAD') && (p === '/privacy' || p === '/terms')) {
+        const k = p.slice(1), L = isEn() && LEGAL_EN ? LEGAL_EN : settings.all();
+        const title = isEn() ? (k === 'privacy' ? 'Privacy Policy' : 'Terms of Service') + ' · flowday' : (k === 'privacy' ? '隐私政策' : '用户协议') + ' · flowday';
+        const h = (x) => String(x || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+        res.end(req.method === 'HEAD' ? undefined : `<!doctype html><html lang="${isEn() ? 'en' : 'zh-CN'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${h(title)}</title>`
+          + '<style>body{max-width:720px;margin:40px auto;padding:0 20px;font:16px/1.7 system-ui,sans-serif;color:#2b2434}h1{font-size:24px}p{white-space:pre-wrap}</style></head>'
+          + `<body><h1>${h(title)}</h1><p>${h(L[k])}</p><p><a href="${BASE}/">flowday</a></p></body></html>`);
+        return;
+      }
       if (p === '/admin/') { res.writeHead(301, { Location: `${BASE}/admin` }); res.end(); return; }
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('Not Found');
