@@ -8,7 +8,7 @@ import { recordHtml, onMoodChange, cellStickers } from './mood.js';
 import { cardArt, cardTitle } from './onboard.js';
 import { shouldTear, showTear } from './tear.js';
 import { openRite } from './rite.js';
-import { tm } from './i18n.js';
+import { tm, CUTE } from './i18n.js';
 const T = tm('today'); // 先查 i18n/en/today.json
 
 export function loadToday() {
@@ -145,7 +145,7 @@ function yjHtml(yi, ji) {
 
 function comparisonHtml(t, dos, donts) {
   const a = t.almanac;
-  const generic = a ? `<section class="day-public"><div class="day-yj-head"><h2>${T('公共黄历')}</h2><button type="button" data-almanac aria-label="${T('查看公共黄历详情')}">${T('详情')} <span aria-hidden="true">›</span></button></div>`
+  const generic = a && !CUTE ? `<section class="day-public"><div class="day-yj-head"><h2>${T('公共黄历')}</h2><button type="button" data-almanac aria-label="${T('查看公共黄历详情')}">${T('详情')} <span aria-hidden="true">›</span></button></div>`
     + yjHtml(a.yi.slice(0, 2), a.ji.slice(0, 2)) + '</section>' : '';
   const showStart = t.demo && !readLocal('pending') && !readLocal('invite')?.name;
   return `<div class="day-compare">${generic}<section class="day-personal"><div class="day-yj-head"><h2>${T('我的日历')}</h2>`
@@ -182,17 +182,41 @@ function youHtml(t) {
   const art = t.arts?.[x.gz];
   const theme = THEME[x.ssG][0], action = actOf(x);
   return `<section class="tcard k${x.level.k}${lk ? ' luck' : ''}"${lk ? ` style="${lk}"` : ''} aria-label="${isToday ? T('你的今天') : dname}">`
-    + (art ? `<img class="today-art-bg" src="${esc(pillarArtSrc(art.art))}" alt="" width="600" height="600" decoding="async" draggable="false">` : '')
+    + (art && !CUTE ? `<img class="today-art-bg" src="${esc(pillarArtSrc(art.art))}" alt="" width="600" height="600" decoding="async" draggable="false">` : '')
     + `<div class="th"><div class="today-date"><time datetime="${t.date}">${dname}</time>${context ? `<span>${context}</span>` : ''}${art ? dayArtButtonHtml(t, art, isToday) : ''}</div><span class="thr">${isToday ? `<button type="button" class="ic" data-share="today" aria-label="${T('分享你的今天')}">${T('分享')}</button>` : `<button type="button" class="ic" data-day-go="today">${T('回到今天')}</button>`}${nav}</span></div>`
+    + (CUTE ? mascotHtml(t, fix) : '')
     + `<div class="hero3"><div class="day-theme"><h1 tabindex="-1">${W(theme)}</h1>${EN || theme === action + '日' ? '' : `<small>${T('宜{a}', { a: action })}</small>`}</div>`
     + `<button type="button" class="ring" style="--p:${x.score}" data-day-why aria-label="${T('能量 {n}，{lv}，看为什么', { n: x.score, lv: W(x.level.p) })}"><b>${x.score}</b><small>${W(x.level.p)}</small></button></div>`
-    + `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`
+    + (CUTE ? `<p class="line">${esc(fix(t.line.why))}</p>` : `<p class="line"><b>${esc(fix(t.line.head))}</b>${esc(fix(t.line.why))}</p>`)
     + comparisonHtml(t, dos, donts)
     + timelineHtml(x, isToday)
     + (isToday ? planHtml(t) : '')
     + luckyHtml(t, isToday)
     + '</section>';
 }
+
+// ---------- 可爱版（预览）：你的本命小精灵，跟着当天的档位换表情；戳一戳会蹦、加好运、换一句话 ----------
+const SPRITE = { 甲: 'jia', 乙: 'yi', 丙: 'bing', 丁: 'ding', 戊: 'wu', 己: 'ji', 庚: 'geng', 辛: 'xin', 壬: 'ren', 癸: 'gui' };
+function mascotHtml(t, fix) {
+  const k = SPRITE[t.chart && t.chart.dm] || 'jia', mood = t.day.level.k >= 3 ? 'happy' : 'sleepy';
+  return `<div class="mascot"><button type="button" class="mbody" data-mascot aria-label="${T('戳一戳')}"><img src="art/sprites/${k}-${mood}.webp" alt="" width="140" height="140" draggable="false"></button>`
+    + `<div class="mbubble" aria-live="polite">${esc(fix(t.line.head))}</div></div>`;
+}
+let patI = 0;
+onClick('[data-mascot]', (el) => {
+  const v = dayView(), box = el.closest('.mascot');
+  if (!v || !box) return;
+  el.classList.remove('boing'); void el.offsetWidth; el.classList.add('boing');
+  const key = 'lrl:pat-' + localToday();
+  let n = 0;
+  try { n = (+localStorage.getItem(key) || 0) + 1; localStorage.setItem(key, String(n)); } catch { n = 1; }
+  const { dos } = dosDonts(v.day, false), top = bestHours(v.day).top[0], colors = (v.outfit?.colors || []).map((c) => W(c.name)).join(EN ? ' & ' : '、');
+  const lines = [v.line.head, top && T('最好的时光：{h}', { h: hhShort(top.i) }), colors && T('今天的幸运色：{c}', { c: colors }), dos[0] && T('今天适合：{d}', { d: dos[0] })].filter(Boolean);
+  patI = (patI + 1) % lines.length;
+  box.querySelector('.mbubble').textContent = n === 10 ? T('今天的好运攒满啦！') : lines[patI];
+  const f = document.createElement('span'); f.className = 'mplus'; f.textContent = T('好运 +1'); box.appendChild(f); setTimeout(() => f.remove(), 900);
+  track('mascot_pat', { n });
+});
 
 // 今日计划跟着建议显示，明天的计划放在明天寄语里。
 function planHtml(t) {

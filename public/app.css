@@ -2317,3 +2317,46 @@ html[lang=en] .hero3 h1{font-size:clamp(1.6rem,7vw,1.9rem)}
 html[lang=en] .crow{grid-template-columns:auto 1fr auto auto}
 html[lang=en] .crow .ck{white-space:nowrap}
 html[lang=en] .cell .ss{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}
+
+/* ==================== 可爱版（预览，?style=cute 打开）：奶油底 + 马卡龙 + 圆角 + 小精灵 ==================== */
+html[data-style=cute]{--f-display:ui-rounded,"SF Pro Rounded","Yuanti SC","Hiragino Maru Gothic ProN","Arial Rounded MT Bold","PingFang SC","Microsoft YaHei",sans-serif}
+html[data-style=cute]:not([data-theme=dark]){
+  --bg:#FFF6F1; --surface:#FFFFFF; --sunk:#FFEFF1; --line:rgba(150,80,90,.10);
+  --fg:#3B2C36; --muted:#94808B; --accent:#FF6F91; --cinnabar:#FF6F91; --glow:#FFB36B; --glow-ink:#F07A4A;
+  --ring:0 0 0 1px rgba(255,111,145,.14), 0 8px 24px rgba(255,111,145,.10);
+  --cardfg:#3B2C36; --cardmuted:#8E7B86;
+  color-scheme:only light;
+}
+html[data-style=cute] body{letter-spacing:.01em}
+html[data-style=cute] .wstrip,html[data-style=cute] .moodbox,html[data-style=cute] .tmrw,html[data-style=cute] .minis,
+html[data-style=cute] .fdbar,html[data-style=cute] .notice,html[data-style=cute] .card,html[data-style=cute] .lsec{border-radius:26px}
+html[data-style=cute] .btn{border-radius:999px}
+html[data-style=cute] .btn.primary{background:var(--accent);color:#fff;box-shadow:0 6px 16px rgba(255,111,145,.35)}
+html[data-style=cute] .tabbar a.on,html[data-style=cute] .topnav a.on{color:var(--accent)}
+html[data-style=cute] .fdbar b,html[data-style=cute] .fdtag{color:var(--accent)}
+
+/* 今天卡：粉嫩渐变底，跟着幸运色带一点颜色 */
+html[data-style=cute] .tcard{border-radius:30px;background:linear-gradient(165deg,color-mix(in srgb,var(--lk,#FFC8D6) 30%,#FFFFFF) 0%,#FFFFFF 62%);box-shadow:var(--ring)}
+html[data-style=cute] .hero3 h1{font-size:1.55rem;font-weight:800;letter-spacing:0}
+html[data-style=cute] .day-theme small{font-weight:600}
+html[data-style=cute] .ring::before{background:conic-gradient(var(--accent) calc(var(--p) * 1%), rgba(255,111,145,.15) 0)}
+html[data-style=cute] .tcard.k1 .ring::before,html[data-style=cute] .tcard.k2 .ring::before{background:conic-gradient(#9DB4F5 calc(var(--p) * 1%), rgba(157,180,245,.2) 0)}
+html[data-style=cute] .day-personal{border-radius:22px;background:color-mix(in srgb,var(--accent) 7%,#FFFFFF);border-color:transparent}
+html[data-style=cute] .yj2 dt{color:var(--accent);font-weight:800}
+html[data-style=cute] .day-art-link .seal{border-radius:999px;border:0;background:var(--accent);color:#fff;transform:none}
+
+/* 小精灵 + 对话气泡 */
+.mascot{position:relative;display:flex;align-items:center;gap:10px;margin:4px 0 2px}
+.mascot .mbody{flex:none;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:mfloat 3.2s ease-in-out infinite}
+.mascot .mbody img{width:128px;height:128px;display:block;filter:drop-shadow(0 8px 14px rgba(255,111,145,.22))}
+.mascot .mbody.boing{animation:mboing .55s cubic-bezier(.3,1.6,.5,1)}
+.mbubble{position:relative;flex:1;min-width:0;background:#FFFFFF;border-radius:20px;padding:12px 14px;font-size:15px;font-weight:700;line-height:1.5;color:var(--fg);box-shadow:0 6px 18px rgba(150,80,90,.10)}
+.mbubble::before{content:"";position:absolute;left:-7px;top:50%;width:14px;height:14px;margin-top:-7px;background:#FFFFFF;transform:rotate(45deg);border-radius:3px}
+.mplus{position:absolute;left:52px;top:4px;font-size:13px;font-weight:800;color:var(--accent);pointer-events:none;animation:mplus .9s ease-out forwards}
+@keyframes mfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes mboing{0%{transform:scale(1)}30%{transform:scale(1.18,.86)}55%{transform:scale(.92,1.1)}100%{transform:scale(1)}}
+@keyframes mplus{0%{opacity:0;transform:translateY(6px)}20%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+@media (prefers-reduced-motion:reduce){.mascot .mbody,.mascot .mbody.boing,.mplus{animation:none}}
+@media (min-width:960px){.mascot .mbody img{width:150px;height:150px}.mbubble{font-size:17px}}
+html[data-style=cute]:not([data-theme=dark]) .today-hours{--hour-good:#FF8FAB;--hour-steady:#F3E6EA;--hour-caution:repeating-linear-gradient(135deg,#C9C3F5 0 4px,#E6E2FB 4px 8px)}
+html[data-style=cute] .hour-seg::before{border-radius:999px}

@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#111114" media="(prefers-color-scheme: dark)">
 <!-- 告诉浏览器本站自己支持白色和深色：安卓 Chrome、三星、微信等的“强制深色”就不会再把页面涂黑；选了白色时改成只用浅色 -->
 <meta name="color-scheme" content="light dark">
+<script>try{var st=new URLSearchParams(location.search).get('style');if(st==='cute'||st==='classic')localStorage.setItem('lrl:style',st);if(localStorage.getItem('lrl:style')==='cute')document.documentElement.dataset.style='cute';}catch(e){}</script>
 <script>try{var t=JSON.parse(localStorage.getItem('lrl:theme')||'null');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;document.querySelector('meta[name=color-scheme]').content=t==='light'?'only light':'dark';}}catch(e){}</script>
 <meta name="description" content="flowday：按你的出生信息，告诉你每天适合做什么、几点做、穿什么。">
 <meta name="apple-mobile-web-app-capable" content="yes">

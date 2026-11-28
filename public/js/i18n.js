@@ -36,13 +36,18 @@ if (EN) {
   FILES.forEach((f, i) => { PER[f] = parts[i]; });
   DICT = Object.assign({}, ...parts);
 }
+// 可爱版（预览）：?style=cute 打开。说法换得更轻松，叠在两种语言上面，键仍是中文原文
+export const CUTE = BROWSER && document.documentElement.dataset.style === 'cute';
+let CUTE_DICT = {};
+if (CUTE) CUTE_DICT = await Promise.race([fetch(`i18n/cute/${LANG}.json`).then((r) => (r.ok ? r.json() : {})), new Promise((ok) => setTimeout(() => ok({}), 6000))]).catch(() => ({}));
 // 开发时看还有哪些没翻：控制台里看 window.__i18nMissing
 const missing = new Set();
 if (EN && BROWSER) window.__i18nMissing = missing;
 
 function lookup(own, zh, vars) {
   let s = zh;
-  if (EN) { const v = own && own[zh] != null ? own[zh] : DICT[zh]; if (v != null) s = v; else missing.add(zh); }
+  if (CUTE && CUTE_DICT[zh] != null) s = CUTE_DICT[zh];
+  else if (EN) { const v = own && own[zh] != null ? own[zh] : DICT[zh]; if (v != null) s = v; else missing.add(zh); }
   return vars ? s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m)) : s;
 }
 export const t = (zh, vars) => lookup(null, zh, vars);

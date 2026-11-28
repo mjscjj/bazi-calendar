@@ -486,5 +486,11 @@
  "添加": "Add",
  "未完成的待办": "Open to-dos",
  "{d} · 待办历史": "{d} · To-do history",
- "删除这条待办？": "Delete this to-do?"
+ "删除这条待办？": "Delete this to-do?",
+ "戳一戳": "Give it a poke",
+ "最好的时光：{h}": "Best time: {h}",
+ "今天的幸运色：{c}": "Lucky colors today: {c}",
+ "今天适合：{d}": "Good for today: {d}",
+ "今天的好运攒满啦！": "Your luck jar is full today!",
+ "好运 +1": "Luck +1"
 }
